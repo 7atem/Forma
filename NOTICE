@@ -1,0 +1,9 @@
+Forma includes code adapted from the Apache-2.0-licensed Nemory project.
+The original license is retained in LICENSE.
+
+Nemory source checkpoint: c4e9f15c85bc49f4f9dc6dee76be4bcf6204718b
+Adapted file: core/security/src/main/java/com/vaultbrain/core/security/KeystoreManager.kt
+Destination: core/data/src/main/kotlin/com/formacoach/data/security/KeystoreManager.kt
+
+The Gradle wrapper was copied unchanged. Gradle components retain their upstream licenses.
+Detailed provenance, hashes and changes are recorded in docs/NEMORY_REUSE_AUDIT.md.
