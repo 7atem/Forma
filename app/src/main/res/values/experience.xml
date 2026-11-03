@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_library">Exercises</string>
+    <string name="training_intro">Your programs, movement guides and progress.</string>
+    <string name="session_focus">One exercise. One set at a time.</string>
+    <string name="my_programs">My programs</string>
+    <string name="training_history">History</string>
+    <string name="starter_programs">Starter programs</string>
+    <string name="program_exercise_count">%1$s exercises</string>
+    <string name="session_status">%1$s sets logged · %2$s</string>
+    <string name="view_form">See how to move</string>
+    <string name="technique">Movement</string>
+    <string name="exercise_visual_description">3D example: %1$s. Start on the left, movement on the right.</string>
+    <string name="enlarge_image">Enlarge illustration</string>
+    <string name="both_phases">Both</string>
+    <string name="viewer_note">AI-generated example. Read the full movement cues in the guide.</string>
+    <string name="phase_start">1 · Start</string>
+    <string name="phase_movement">2 · Movement</string>
+    <string name="guide_scope">AI-generated examples of the named variation. Match your equipment, move within a comfortable range and have a qualified trainer check your form.</string>
+    <string name="exercise_reference">Read the technique reference</string>
+    <string name="search_exercises">Search exercise or muscle</string>
+    <string name="no_matching_exercises">No matching exercises</string>
+    <string name="exercise_search_hint">Try another exercise name or muscle group.</string>
+    <string name="view_exercise">View movement &amp; muscles</string>
+    <string name="effort_toggle">Effort · optional</string>
+    <string name="logged_sets">Your sets</string>
+    <string name="show_less">Show less</string>
+    <string name="history_empty_hint">Completed workouts will appear here. Start with a program in My programs.</string>
+    <string name="view_session_details">View and edit details</string>
+    <string name="resume_session">Continue workout</string>
+    <string name="calories_logged">kcal logged</string>
+    <string name="protein_logged">g protein logged</string>
+</resources>

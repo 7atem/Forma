@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guide_squat_variant">سكوات بوزن الجسم</string>
+    <string name="guide_squat_0">ثبّت القدمين مع توجيه الأصابع قليلًا للخارج.</string>
+    <string name="guide_squat_1">حرّك الحوض للخلف ولأسفل والركبتين في اتجاه الأصابع.</string>
+    <string name="guide_squat_2">أبقِ الكعبين ثابتين وارجع بتحكّم.</string>
+    <string name="guide_leg_press_variant">دفع الرجلين على الجهاز المائل</string>
+    <string name="guide_leg_press_0">اسند ظهرك وثبّت القدمين بالكامل على المنصة.</string>
+    <string name="guide_leg_press_1">ادفع بسلاسة من غير قفل الركبتين.</string>
+    <string name="guide_leg_press_2">انزل بتحكّم مع بقاء الحوض على المقعد.</string>
+    <string name="guide_chest_press_variant">ضغط الصدر جالسًا على الجهاز</string>
+    <string name="guide_chest_press_0">اضبط المقابض عند منتصف الصدر واسند ظهرك.</string>
+    <string name="guide_chest_press_1">ادفع للأمام والرسغان مستقيمان والكتفان مستقران.</string>
+    <string name="guide_chest_press_2">ارجع ببطء من غير سحب المقابض خلف مستوى الصدر.</string>
+    <string name="guide_row_variant">سحب أفقي بالكابل جالسًا</string>
+    <string name="guide_row_0">ثبّت القدمين واجلس مستقيمًا مع ثني بسيط للركبتين.</string>
+    <string name="guide_row_1">اسحب المقبض للبطن والمرفقان قريبان من الجسم.</string>
+    <string name="guide_row_2">مدّ الذراعين بتحكّم مع ثبات الجذع.</string>
+    <string name="guide_lat_pulldown_variant">سحب علوي أمام الصدر</string>
+    <string name="guide_lat_pulldown_0">ثبّت الفخذين تحت الوسادة والقدمين على الأرض.</string>
+    <string name="guide_lat_pulldown_1">وجّه المرفقين لأسفل والبار يقترب من أعلى الصدر.</string>
+    <string name="guide_lat_pulldown_2">ارجع ببطء وأبقِ البار أمام الرأس.</string>
+    <string name="guide_hip_hinge_variant">رفعة رومانية بالدمبل</string>
+    <string name="guide_hip_hinge_0">قف والدمبل قريب من الجسم مع ثني بسيط للركبتين.</string>
+    <string name="guide_hip_hinge_1">ادفع الحوض للخلف مع بقاء الظهر محايدًا وممتدًا.</string>
+    <string name="guide_hip_hinge_2">أبقِ الأوزان قريبة وارجع بدفع الحوض للأمام.</string>
+    <string name="guide_shoulder_press_variant">ضغط الكتف جالسًا على الجهاز</string>
+    <string name="guide_shoulder_press_0">اسند ظهرك وابدأ بالمقابض قرب مستوى الكتفين.</string>
+    <string name="guide_shoulder_press_1">ادفع لأعلى والرسغان في امتداد المرفقين.</string>
+    <string name="guide_shoulder_press_2">انزل ببطء من غير زيادة تقوّس الظهر.</string>
+    <string name="guide_split_squat_variant">سكوات بلغاري بوزن الجسم</string>
+    <string name="guide_split_squat_0">اسند القدم الخلفية على مقعد ثابت وثبّت القدم الأمامية.</string>
+    <string name="guide_split_squat_1">انزل بتحكّم والركبة الأمامية في اتجاه الأصابع.</string>
+    <string name="guide_split_squat_2">ادفع بالقدم الأمامية وكرّر للجانب الآخر.</string>
+</resources>

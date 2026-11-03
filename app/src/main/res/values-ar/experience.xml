@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="exercise_library">التمارين</string>
+    <string name="training_intro">برامجك وشرح الحركة ومتابعة تقدّمك.</string>
+    <string name="session_focus">تمرينة واحدة، ومجموعة في كل مرة.</string>
+    <string name="my_programs">برامجي</string>
+    <string name="training_history">السجل</string>
+    <string name="starter_programs">برامج البداية</string>
+    <string name="program_exercise_count">%1$s تمارين</string>
+    <string name="session_status">%1$s مجموعة مسجلة · %2$s</string>
+    <string name="view_form">شوف طريقة الحركة</string>
+    <string name="technique">الحركة</string>
+    <string name="exercise_visual_description">مثال ثلاثي الأبعاد: %1$s. البداية على اليسار والحركة على اليمين.</string>
+    <string name="enlarge_image">تكبير الصورة التوضيحية</string>
+    <string name="both_phases">الاثنان</string>
+    <string name="viewer_note">مثال مولّد بالذكاء الاصطناعي. راجع شرح الحركة الكامل في الدليل.</string>
+    <string name="phase_start">١ · البداية</string>
+    <string name="phase_movement">٢ · الحركة</string>
+    <string name="guide_scope">أمثلة مولّدة بالذكاء الاصطناعي للنسخة المذكورة من التمرين. طابق جهازك، واستخدم مدى حركة مريحًا، واستعن بمدرب مؤهل لمراجعة أدائك.</string>
+    <string name="exercise_reference">اقرأ مرجع طريقة الأداء</string>
+    <string name="search_exercises">ابحث باسم التمرين أو العضلة</string>
+    <string name="no_matching_exercises">لا توجد تمارين مطابقة</string>
+    <string name="exercise_search_hint">جرّب اسم تمرين آخر أو مجموعة عضلية.</string>
+    <string name="view_exercise">شوف الحركة والعضلات</string>
+    <string name="effort_toggle">المجهود · اختياري</string>
+    <string name="logged_sets">مجموعاتك</string>
+    <string name="show_less">عرض أقل</string>
+    <string name="history_empty_hint">الجلسات المكتملة هتظهر هنا. ابدأ ببرنامج من «برامجي».</string>
+    <string name="view_session_details">عرض التفاصيل وتعديلها</string>
+    <string name="resume_session">كمّل التمرين</string>
+    <string name="calories_logged">سعرة مسجلة</string>
+    <string name="protein_logged">جم بروتين مسجل</string>
+</resources>

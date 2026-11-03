@@ -59,3 +59,9 @@ See [alpha02 details](DAILY_WORKFLOW_IMPLEMENTATION.md) for the archive format, 
 Original front/back paths, bilingual labels and role mappings generate Android/Swift outputs from `catalog/exercise-muscles.json`. Both roles have text labels; no EMG percentage or recovery estimate is inferred. Working-load history excludes warm-ups. Weekly counts use completed sessions in seven local dates, separating primary/supporting associations.
 
 Android's watch dialog uses SAF and a readable workout-only contract capped at 1 MiB. Imports require preview/confirmation and a single Room transaction; identical records deduplicate, changed records or set ID collisions roll back the batch. Profile/food/program records are not imported. Sensor energy never modifies food targets. Apple storage uses atomic OS-protected files, not SQLCipher. Watch results stay queued until a phone disk-success ACK. Android↔phone transport is an explicit manual file bridge. Details and unverified native gates are in `APPLE_WATCH.md`.
+
+## Alpha04 demonstration assets and UI
+
+`catalog/exercise-guides.json` generates bilingual Android/Swift guide labels and source-linked cues. Eight original PNGs live once under `assets/exercises/res/drawable-nodpi`, referenced by Android resources and XcodeGen. No runtime image API/network permission. Android samples/caches small thumbnails on IO and loads full resolution only in an opened guide/viewer. The phase viewer crops the render at display time; original files stay unchanged. Canonical hashes and prompt specifications are committed.
+
+The app shell keeps navigation/header separate from page scroll and selects a rail at 840 dp. Training uses a saveable state holder per section, retains active input, and resets scroll on explicit section/session changes. Manual saves keep entered reps/load without recommending progression. Details and instructional review boundaries are in `EXERCISE_DEMOS_AND_UX.md`.

@@ -24,8 +24,17 @@ internal fun EatContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
     var quantity by rememberSaveable {mutableStateOf("")}
     val food=state.snapshot.foods.firstOrNull {it.id==foodId}
     val portion=runCatching {food?.portion(requireNotNull(NumericInput.decimal(quantity)),date)}.getOrNull()
-    Text(stringResource(R.string.eat_title),style=MaterialTheme.typography.headlineLarge)
+    PageHeading(R.string.eat_title)
     DateChoice(date,today,{day=it.toEpochDay()},"food_date")
+    val logged=state.snapshot.meals.filter {it.date==date}
+    InfoCard {
+        Text(stringResource(R.string.food_for_date,dateLabel(date)),style=MaterialTheme.typography.titleMedium)
+        Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+            MetricTile(number(logged.sumOf {it.calories},0),stringResource(R.string.calories_logged),Modifier.weight(1f))
+            MetricTile(number(logged.sumOf {it.protein}),stringResource(R.string.protein_logged),Modifier.weight(1f))
+        }
+        Text(stringResource(R.string.logged_only),style=MaterialTheme.typography.bodySmall)
+    }
     OutlinedButton(onClick={library=!library},modifier=Modifier.fillMaxWidth().testTag("food_library")) {Text(stringResource(if(library) R.string.close_library else R.string.food_library))}
     if(library) FoodLibrary(state,vm)
     if(state.snapshot.foods.isNotEmpty()) InfoCard {
@@ -88,10 +97,8 @@ private fun MealFields(initial:Meal?,date:LocalDate,busy:Boolean,onSave:(Meal,()
         if(initial!=null) DateChoice(LocalDate.ofEpochDay(editedDay),LocalDate.now(),{editedDay=it.toEpochDay()},"edit_meal_date")
         Text(stringResource(R.string.portion_note))
         Input(R.string.meal_name,name,{name=it},"meal_name",numeric=false)
-        Input(R.string.calories,calories,{calories=it},"meal_calories")
-        Input(R.string.protein,protein,{protein=it},"meal_protein")
-        Input(R.string.carbs,carbs,{carbs=it},"meal_carbs")
-        Input(R.string.fat,fat,{fat=it},"meal_fat")
+        FormFieldPair(first={Input(R.string.calories,calories,{calories=it},"meal_calories")},second={Input(R.string.protein,protein,{protein=it},"meal_protein")})
+        FormFieldPair(first={Input(R.string.carbs,carbs,{carbs=it},"meal_carbs")},second={Input(R.string.fat,fat,{fat=it},"meal_fat")})
         Input(R.string.source_optional,source,{source=it},"meal_source",numeric=false)
         if(initial!=null) Text(stringResource(R.string.manual_correction_note),style=MaterialTheme.typography.bodySmall)
         Button(onClick={meal?.let {onSave(it){if(initial==null){name="";calories="";protein="";carbs="";fat="";source=""}}}},enabled=meal!=null&&!busy,modifier=Modifier.fillMaxWidth().testTag("save_meal")) {Text(stringResource(R.string.save_meal))}

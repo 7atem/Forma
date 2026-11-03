@@ -12,8 +12,8 @@ android {
         applicationId = "com.formacoach.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.3.0-alpha03"
+        versionCode = 4
+        versionName = "0.4.0-alpha04"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
@@ -28,6 +28,7 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),"proguard-rules.pro")
         }
     }
+    sourceSets.getByName("main").res.srcDir("$rootDir/assets/exercises/res")
     sourceSets.getByName("androidTest").assets.srcDir("$rootDir/core/data/schemas")
     lint {
         disable += setOf("GradleDependency", "AndroidGradlePluginVersion", "OldTargetApi")

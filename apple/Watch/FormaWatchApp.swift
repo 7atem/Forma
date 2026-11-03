@@ -59,7 +59,7 @@ import FormaCore
         List {
             Text(draft.program.name).font(.headline)
             Picker("exercise",selection:$exercise) {ForEach((draft.program.exercises+Exercise.allCases).reduce(into:[Exercise]()) {if !$0.contains($1) {$0.append($1)}},id:\.self) {Text($0.label(arabic:arabic)).tag($0)}}
-            NavigationLink("muscles_working") {ScrollView {MuscleDiagram(exercise:exercise).padding(8)}}
+            NavigationLink("exercise_library") {ExerciseDetail(exercise:exercise)}
             Button("add_set") {adding=true}.disabled(draft.sets.count>=300)
             if let deadline=draft.restUntil {
                 TimelineView(.periodic(from:.now,by:1)) {context in

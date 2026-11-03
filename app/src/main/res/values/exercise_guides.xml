@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guide_squat_variant">Bodyweight squat</string>
+    <string name="guide_squat_0">Plant both feet, with toes slightly outward.</string>
+    <string name="guide_squat_1">Move hips back and down; keep knees tracking toes.</string>
+    <string name="guide_squat_2">Keep heels down and return with control.</string>
+    <string name="guide_leg_press_variant">45° sled leg press</string>
+    <string name="guide_leg_press_0">Support your back and place feet flat on the plate.</string>
+    <string name="guide_leg_press_1">Press smoothly without locking the knees.</string>
+    <string name="guide_leg_press_2">Lower with control; keep your hips on the seat.</string>
+    <string name="guide_chest_press_variant">Seated machine chest press</string>
+    <string name="guide_chest_press_0">Adjust handles to mid-chest; support your back.</string>
+    <string name="guide_chest_press_1">Press forward with straight wrists and relaxed shoulders.</string>
+    <string name="guide_chest_press_2">Return slowly without letting the handles pull behind your chest.</string>
+    <string name="guide_row_variant">Seated low cable row</string>
+    <string name="guide_row_0">Brace your feet and sit tall with soft knees.</string>
+    <string name="guide_row_1">Pull the handle toward your abdomen, elbows close.</string>
+    <string name="guide_row_2">Reach forward with control; keep your torso still.</string>
+    <string name="guide_lat_pulldown_variant">Front lat pulldown</string>
+    <string name="guide_lat_pulldown_0">Secure thighs under the pad and plant your feet.</string>
+    <string name="guide_lat_pulldown_1">Bring elbows down as the bar approaches your upper chest.</string>
+    <string name="guide_lat_pulldown_2">Return slowly; keep the bar in front of your head.</string>
+    <string name="guide_hip_hinge_variant">Dumbbell Romanian deadlift</string>
+    <string name="guide_hip_hinge_0">Stand tall with dumbbells close and knees slightly bent.</string>
+    <string name="guide_hip_hinge_1">Push hips back, keeping a long, neutral spine.</string>
+    <string name="guide_hip_hinge_2">Keep weights close; stand by bringing hips forward.</string>
+    <string name="guide_shoulder_press_variant">Seated machine shoulder press</string>
+    <string name="guide_shoulder_press_0">Support your back; start with handles near shoulder height.</string>
+    <string name="guide_shoulder_press_1">Press overhead with wrists aligned above elbows.</string>
+    <string name="guide_shoulder_press_2">Lower slowly without arching your back.</string>
+    <string name="guide_split_squat_variant">Bodyweight Bulgarian split squat</string>
+    <string name="guide_split_squat_0">Rest the rear foot on a stable bench; plant the front foot.</string>
+    <string name="guide_split_squat_1">Lower with control, keeping the front knee tracking your toes.</string>
+    <string name="guide_split_squat_2">Press through the front foot; repeat on the other side.</string>
+</resources>

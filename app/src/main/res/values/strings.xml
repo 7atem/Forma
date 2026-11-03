@@ -33,8 +33,6 @@
     <string name="completed_sessions">Completed · compared with your weekly plan</string>
     <string name="open_training">Open training</string>
     <string name="food_today">Food logged today</string>
-    <string name="kcal_value">%1$s kcal</string>
-    <string name="protein_value">Protein · %1$s g</string>
     <string name="user_calorie_target">Your chosen target · %1$s kcal</string>
     <string name="user_protein_target">Your chosen protein target · %1$s g</string>
     <string name="logged_only">Includes only entries you logged. Missing entries are unknown, and a logged day may be incomplete.</string>
@@ -124,7 +122,6 @@
     <string name="search_history">Search sessions by name, exercise or ISO date</string>
     <string name="show_more">Show more</string>
     <string name="previous_set">Previously logged · %1$s reps × %2$s kg</string>
-    <string name="exercise_record_note">Record the external load using the same equipment and convention each time. This log does not provide technique or injury guidance.</string>
     <string name="rest_countdown">Rest timer · %1$s seconds left / %2$s seconds</string>
     <string name="timer_note">Starts after saving a set. Elapsed time is preserved while you leave the screen; there is no background alarm.</string>
     <string name="restart_timer">Restart timer</string>

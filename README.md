@@ -2,9 +2,9 @@
 
 Independent fitness and nutrition project with an Android app and native iPhone/Apple Watch companion source. Working name; no public brand or store listing has been selected. Nemory remains unchanged at `D:\Vault Brain`; see [its preservation record](docs/NEMORY_PRESERVATION.md).
 
-## Current version: 0.3.0-alpha03
+## Current version: 0.4.0-alpha04
 
-Offline bilingual logging with front/back muscle highlighting, weekly muscle counts, warm-up/RPE sets, previous-value copy, best recorded working loads, and encrypted Room storage, editable saved training programs, set corrections and date backfill, a rest timer, session search/load history, sourced food/recipe portions, meal corrections, measurements and charts, evidence-based weekly reviews, explicit check-ins/schedule proposals, and portable password-encrypted backup/restore.
+Offline bilingual logging with eight original two-phase 3D exercise illustrations, named variation guides, an enlarged phase viewer, searchable exercise library, muscle highlighting, warm-up/RPE sets, recorded loads, and encrypted Room storage, editable saved training programs, set corrections and date backfill, a rest timer, session search/load history, sourced food/recipe portions, meal corrections, measurements and charts, evidence-based weekly reviews, explicit check-ins/schedule proposals, and portable password-encrypted backup/restore.
 
 Optional Gemini Nano on compatible AICore devices can select existing report highlights. No raw model claims, automatic diet/exercise prescriptions, cloud LLM or application INTERNET permission. Logging and reviews work without a model. Actual inference still needs supported physical-device verification.
 
@@ -27,3 +27,5 @@ Generated APKs, manifests and screenshots are under ignored `artifacts/`. This i
 The Android watch icon exports selected programs and previews/imports completed workout files. Native companion source supports offline watch logging, muscle diagrams and queued WatchConnectivity results. **Apple source has not been built here: Xcode/macOS and paired-device tests are required.** Apple Watch needs a paired iPhone; Android↔iPhone uses an explicit file bridge. No HealthKit recording or live Android sync is claimed. See [Apple workflow](docs/APPLE_WATCH.md), [feature research](docs/COMPETITOR_FEATURE_RESEARCH.md) and [muscle catalog](docs/EXERCISE_MUSCLES.md).
 
 Current checks and installable APK paths are in [validation](docs/VALIDATION.md). Public adaptive coaching and Apple distribution remain pending their documented gates.
+
+Alpha04 improves the sticky header, adaptive phone/tablet navigation, Today progress, compact session logging, draft-preserving training sections and responsive food/measurement forms. [Illustrations, prompt provenance and UX details](docs/EXERCISE_DEMOS_AND_UX.md). Images are generated examples; qualified exercise review remains pending before public release.

@@ -33,8 +33,6 @@
     <string name="completed_sessions">تمارين مكتملة · مقارنة بخطتك الأسبوعية</string>
     <string name="open_training">افتح التمرين</string>
     <string name="food_today">الأكل المسجل النهارده</string>
-    <string name="kcal_value">%1$s كيلوكالوري</string>
-    <string name="protein_value">البروتين · %1$s جم</string>
     <string name="user_calorie_target">الهدف اللي اخترته · %1$s كيلوكالوري</string>
     <string name="user_protein_target">هدف البروتين اللي اخترته · %1$s جم</string>
     <string name="logged_only">الحساب بيشمل المدخلات اللي سجلتها فقط. المدخلات الناقصة غير معروفة، واليوم المسجل ممكن يكون غير مكتمل.</string>
@@ -124,7 +122,6 @@
     <string name="search_history">دور باسم الجلسة أو التمرين أو تاريخ بصيغة سنة-شهر-يوم</string>
     <string name="show_more">اعرض أكتر</string>
     <string name="previous_set">مجموعة مسجلة قبل كده · %1$s تكرارات × %2$s كجم</string>
-    <string name="exercise_record_note">سجل الوزن الخارجي بنفس المعدات وطريقة الحساب كل مرة. السجل مش بيقدم إرشادات أداء أو إصابات.</string>
     <string name="rest_countdown">مؤقت الراحة · باقي %1$s ثانية / %2$s ثانية</string>
     <string name="timer_note">بيبدأ بعد حفظ المجموعة. الوقت بيكمل لو سبت الشاشة؛ مفيش منبه في الخلفية.</string>
     <string name="restart_timer">ابدأ المؤقت تاني</string>

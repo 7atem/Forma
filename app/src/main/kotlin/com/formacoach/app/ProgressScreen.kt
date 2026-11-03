@@ -20,13 +20,12 @@ internal fun ProgressContent(state:AppState,today:LocalDate,vm:FitnessViewModel)
     var waist by rememberSaveable(day,existing?.waistCm) {mutableStateOf(existing?.waistCm?.toString().orEmpty())}
     val measure=runCatching {Measurement(date,if(weight.isBlank()) null else requireNotNull(NumericInput.decimal(weight)),if(waist.isBlank()) null else requireNotNull(NumericInput.decimal(waist)))}.getOrNull()
     var limit by rememberSaveable {mutableIntStateOf(14)}
-    Text(stringResource(R.string.progress_title),style=MaterialTheme.typography.headlineLarge)
+    PageHeading(R.string.progress_title)
     DateChoice(date,today,{day=it.toEpochDay()},"measurement_date")
     InfoCard {
         Text(stringResource(R.string.measure_for_date,dateLabel(date)),style=MaterialTheme.typography.titleLarge)
         Text(stringResource(R.string.measure_note),style=MaterialTheme.typography.bodySmall)
-        Input(R.string.body_weight,weight,{weight=it},"body_weight")
-        Input(R.string.waist,waist,{waist=it},"waist")
+        FormFieldPair(first={Input(R.string.body_weight,weight,{weight=it},"body_weight")},second={Input(R.string.waist,waist,{waist=it},"waist")})
         Button(onClick={measure?.let {vm.measure(it){}}},enabled=measure!=null&&!state.busy,modifier=Modifier.fillMaxWidth().testTag("save_measurement")) {Text(stringResource(R.string.save_measurement))}
     }
     InfoCard {

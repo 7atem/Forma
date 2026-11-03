@@ -27,3 +27,5 @@ No store upload, public repository push, recruitment, billing setup or external 
 - [ ] Define and review a HealthKit lifecycle/privacy implementation before recording sensors or writing Apple Health. Current source is a manual logger.
 - [ ] Obtain qualified review of the eight simplified muscle mappings and representative exercise variants. No measured activation/recovery claim.
 - [ ] Prepare original Apple icons/store assets, choose owner signing credentials and review final platform disclosures before distribution.
+
+- [ ] Review every generated demonstration pose, named equipment variant and translated cue with qualified reviewers; verify beginners understand the two still phases and can obtain individual form feedback. These are not motion capture or personal technique assessments.

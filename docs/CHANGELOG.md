@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0-alpha04 — 4 November 2026
+
+Adds eight original offline 3D two-phase illustrations, named exercise variants, bilingual source-linked movement cues, a searchable visual library and enlarged phase viewer. Sticky chrome, adaptive tablet navigation, Today progress, compact set entry, retained user values, expandable history and responsive food/measurement fields improve the daily flows. Active drafts survive section switches. Room stays at v3; historical IDs, goals and saved records are unchanged.
+
+Shared SwiftUI source consumes the same art/guides but is not yet compiled on a Mac. Generated demonstrations are visually checked examples; expert technique review remains a release gate. See `EXERCISE_DEMOS_AND_UX.md` and `VALIDATION.md`.
+
 ## 0.3.0-alpha03 — 3 November 2026
 
 Adds original front/back highlights for all eight current exercises, bilingual primary/supporting muscle labels and seven-day working-set associations. Sets support warm-up and optional subjective RPE; warm-ups are excluded from load history and recorded best loads. Previous set values can be copied before explicit save.

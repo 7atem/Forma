@@ -53,7 +53,12 @@ struct TransferDocument: FileDocument {
                 }
                 Section("exercise_library") {
                     ForEach(Exercise.allCases,id:\.self) {exercise in
-                        NavigationLink(exercise.label(arabic:locale.language.languageCode?.identifier=="ar")) {ScrollView {MuscleDiagram(exercise:exercise).padding()}.navigationTitle(exercise.label(arabic:locale.language.languageCode?.identifier=="ar"))}
+                        NavigationLink {ExerciseDetail(exercise:exercise)} label: {
+                            HStack {
+                                Image(ExerciseGuides.of(exercise,arabic:false).asset).resizable().scaledToFit().frame(width:96).clipShape(RoundedRectangle(cornerRadius:12))
+                                Text(exercise.label(arabic:locale.language.languageCode?.identifier=="ar"))
+                            }
+                        }
                     }
                 }
             }.navigationTitle("Forma")}

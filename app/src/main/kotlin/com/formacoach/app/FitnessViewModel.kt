@@ -65,7 +65,7 @@ class FitnessViewModel @Inject constructor(private val repository: FitnessReposi
     fun addSet(session: String, exercise: Exercise, reps: Int, kg: Double, kind:SetKind=SetKind.WORKING,rpe:Double?=null,done: () -> Unit) = write(done) {
         repository.addSet(TrainingSet(sessionId=session, exercise=exercise, reps=reps, weightKg=kg,kind=kind,rpe=rpe))
     }
-    fun finish(id: String) = write { repository.finishSession(id) }
+    fun finish(id: String,done:()->Unit={}) = write(done) { repository.finishSession(id) }
     fun removeSet(id: String) = write { repository.removeSet(id) }
     fun addMeal(meal: Meal, done: () -> Unit) = write(done) { repository.addMeal(meal) }
     fun repeatMeal(meal: Meal) = write { repository.addMeal(meal.copy(id=UUID.randomUUID().toString(), date=LocalDate.now())) }

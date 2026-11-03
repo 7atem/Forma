@@ -46,6 +46,7 @@ class MainActivity : ComponentActivity() {
 
 private val FormaColors = darkColorScheme(
     primary=Color(0xFFC5EE89), onPrimary=Color(0xFF18311B),
+    primaryContainer=Color(0xFF2D452A), onPrimaryContainer=Color(0xFFE0F6CC),
     secondary=Color(0xFFFFBD8A), secondaryContainer=Color(0xFF36583B), onSecondaryContainer=Color(0xFFE5F7DE), background=Color(0xFF10231D),
     surface=Color(0xFF19332A), surfaceVariant=Color(0xFF254237),
     onBackground=Color(0xFFF2F6EC), onSurface=Color(0xFFF2F6EC),
@@ -67,7 +68,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
         while (true) { today=LocalDate.now(); kotlinx.coroutines.delay(30_000) }
     }
     LaunchedEffect(today) {vm.onDayChanged()}
-    MaterialTheme(colorScheme=FormaColors, shapes=Shapes(medium=RoundedCornerShape(20.dp), large=RoundedCornerShape(28.dp))) {
+    MaterialTheme(colorScheme=FormaColors, shapes=Shapes(medium=RoundedCornerShape(16.dp), large=RoundedCornerShape(24.dp))) {
         Surface(Modifier.fillMaxSize(), color=MaterialTheme.colorScheme.background) {
             if (state.loading) {
                 Box(Modifier.fillMaxSize(), contentAlignment=Alignment.Center) { CircularProgressIndicator() }
@@ -83,44 +84,24 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                         onBackup={showBackup=true})
                 }
             } else {
-                val titles=listOf(R.string.today, R.string.train, R.string.eat, R.string.progress, R.string.coach)
-                val icons=listOf(Icons.Default.Home,Icons.Default.FitnessCenter,Icons.Default.Restaurant,Icons.AutoMirrored.Filled.ShowChart,Icons.Default.Forum)
-                Scaffold(
-                    containerColor=MaterialTheme.colorScheme.background,
-                    bottomBar={
-                        NavigationBar(containerColor=MaterialTheme.colorScheme.background) {
-                            titles.forEachIndexed { index, title ->
-                                NavigationBarItem(selected=tab==index, onClick={tab=index},
-                                    icon={Icon(icons[index],contentDescription=null)},
-                                    label={Text(stringResource(title))}, modifier=Modifier.testTag("tab_$index"))
-                            }
-                        }
-                    },
-                ) { padding ->
-                    Box(Modifier.fillMaxSize().padding(padding).imePadding(), contentAlignment=Alignment.TopCenter) {
+                FormaScaffold(tab,{tab=it},today,onProfile={editingProfile=true},onWatch={showWatch=true},onBackup={showBackup=true}) {padding ->
+                    Box(Modifier.fillMaxSize().padding(padding).imePadding(),contentAlignment=Alignment.TopCenter) {
                         pageState.SaveableStateProvider(tab) {
-                        Column(Modifier.widthIn(max=760.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(24.dp), verticalArrangement=Arrangement.spacedBy(18.dp)) {
-                            Row(Modifier.fillMaxWidth(), verticalAlignment=Alignment.CenterVertically) {
-                                Column(Modifier.weight(1f)) {
-                                    Text(stringResource(R.string.app_name), style=MaterialTheme.typography.titleLarge, fontWeight=FontWeight.Bold)
-                                    Text(dateLabel(today), style=MaterialTheme.typography.labelMedium, color=MaterialTheme.colorScheme.onSurfaceVariant)
+                            val scrollState=rememberScrollState()
+                            Column(Modifier.widthIn(max=880.dp).fillMaxWidth().verticalScroll(scrollState).padding(horizontal=20.dp,vertical=20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
+                                if(state.error) InfoCard {
+                                    Text(stringResource(R.string.save_failed))
+                                    TextButton(onClick=vm::clearError) {Text(stringResource(R.string.dismiss))}
                                 }
-                                IconButton(onClick={showWatch=true},modifier=Modifier.testTag("watch_settings")) {Icon(Icons.Default.Watch,contentDescription=stringResource(R.string.apple_watch))}
-                                IconButton(onClick={editingProfile=true}) {Icon(Icons.Default.AccountCircle,contentDescription=stringResource(R.string.profile))}
-                                IconButton(onClick={showBackup=true},modifier=Modifier.testTag("backup_settings")) {Icon(Icons.Default.SaveAlt,contentDescription=stringResource(R.string.backup))}
+                                when(tab) {
+                                    0 -> TodayContent(state.snapshot,today,vm,onTrain={tab=1},onEat={tab=2})
+                                    1 -> TrainContent(state,today,vm,scrollState)
+                                    2 -> EatContent(state,today,vm)
+                                    3 -> ProgressContent(state,today,vm)
+                                    4 -> CoachContent(state,today,vm)
+                                }
+                                Spacer(Modifier.height(12.dp))
                             }
-                            if(state.error) {
-                                InfoCard { Text(stringResource(R.string.save_failed)); TextButton(onClick=vm::clearError) { Text(stringResource(R.string.dismiss)) } }
-                            }
-                            when(tab) {
-                                0 -> TodayContent(state.snapshot, today, vm, onTrain={tab=1}, onEat={tab=2})
-                                1 -> TrainContent(state, today, vm)
-                                2 -> EatContent(state, today, vm)
-                                3 -> ProgressContent(state, today, vm)
-                                4 -> CoachContent(state,today,vm)
-                            }
-                            Spacer(Modifier.height(12.dp))
-                        }
                         }
                     }
                 }
@@ -176,26 +157,33 @@ private fun TodayContent(snapshot: FitnessSnapshot, today: LocalDate, vm: Fitnes
     val profile=checkNotNull(snapshot.profile)
     val meals=snapshot.meals.filter { it.date==today }
     val review=vm.reviewEngine.review(snapshot,today)
-    Text(stringResource(R.string.greeting,profile.name),style=MaterialTheme.typography.headlineLarge,fontWeight=FontWeight.Bold)
-    Text(stringResource(R.string.today_subtitle),color=MaterialTheme.colorScheme.onSurfaceVariant)
-    InfoCard {
-        Text(stringResource(R.string.your_week),style=MaterialTheme.typography.titleMedium)
-        Text(stringResource(R.string.workout_count,number(review.completedSessions.toDouble(),0),number(profile.sessionsPerWeek.toDouble(),0)),style=MaterialTheme.typography.headlineMedium)
-        Text(stringResource(R.string.completed_sessions))
-        Button(onClick=onTrain,modifier=Modifier.fillMaxWidth()) { Text(stringResource(R.string.open_training)) }
+    Text(stringResource(R.string.greeting,profile.name),style=MaterialTheme.typography.headlineMedium,fontWeight=FontWeight.Bold)
+    Text(stringResource(R.string.today_subtitle),style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
+    Surface(color=MaterialTheme.colorScheme.primaryContainer,shape=RoundedCornerShape(24.dp),modifier=Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(22.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
+            Text(stringResource(R.string.your_week),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
+            Text(stringResource(R.string.workout_count,number(review.completedSessions.toDouble(),0),number(profile.sessionsPerWeek.toDouble(),0)),style=MaterialTheme.typography.headlineLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
+            LinearProgressIndicator(progress={(review.completedSessions.toFloat()/profile.sessionsPerWeek).coerceIn(0f,1f)},modifier=Modifier.fillMaxWidth(),trackColor=MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha=0.15f),drawStopIndicator={})
+            Text(stringResource(R.string.completed_sessions),style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onPrimaryContainer)
+            Button(onClick=onTrain,modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) {
+                Text(stringResource(if(snapshot.sessions.any {it.completedAt==null}) R.string.resume_session else R.string.open_training))
+            }
+        }
     }
     InfoCard {
-        Text(stringResource(R.string.food_today),style=MaterialTheme.typography.titleMedium)
-        Text(stringResource(R.string.kcal_value,number(meals.sumOf {it.calories},0)),style=MaterialTheme.typography.headlineMedium)
-        Text(stringResource(R.string.protein_value,number(meals.sumOf {it.protein})))
-        profile.caloriesTarget?.let { Text(stringResource(R.string.user_calorie_target,number(it.toDouble(),0))) }
-        profile.proteinTarget?.let { Text(stringResource(R.string.user_protein_target,number(it))) }
-        Text(stringResource(R.string.logged_only),style=MaterialTheme.typography.bodySmall)
-        OutlinedButton(onClick=onEat,modifier=Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_meal)) }
+        Text(stringResource(R.string.food_today),style=MaterialTheme.typography.titleLarge)
+        Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+            MetricTile(number(meals.sumOf {it.calories},0),stringResource(R.string.calories_logged),Modifier.weight(1f))
+            MetricTile(number(meals.sumOf {it.protein}),stringResource(R.string.protein_logged),Modifier.weight(1f))
+        }
+        profile.caloriesTarget?.let {Text(stringResource(R.string.user_calorie_target,number(it.toDouble(),0)),style=MaterialTheme.typography.bodySmall)}
+        profile.proteinTarget?.let {Text(stringResource(R.string.user_protein_target,number(it)),style=MaterialTheme.typography.bodySmall)}
+        Text(stringResource(R.string.logged_only),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+        OutlinedButton(onClick=onEat,modifier=Modifier.fillMaxWidth().heightIn(min=48.dp)) {Text(stringResource(R.string.add_meal))}
     }
     InfoCard {
         Text(stringResource(R.string.next_step),style=MaterialTheme.typography.titleMedium)
-        Text(stringResource(actionLabel(review.nextAction)))
+        Text(stringResource(actionLabel(review.nextAction)),style=MaterialTheme.typography.bodyLarge)
     }
     Text(stringResource(R.string.alpha_note),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
 }
@@ -203,13 +191,13 @@ private fun TodayContent(snapshot: FitnessSnapshot, today: LocalDate, vm: Fitnes
 @Composable
 internal fun InfoCard(content:@Composable ColumnScope.()->Unit) {
     Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface),shape=RoundedCornerShape(24.dp)) {
-        Column(Modifier.fillMaxWidth().padding(22.dp),verticalArrangement=Arrangement.spacedBy(12.dp),content=content)
+        Column(Modifier.fillMaxWidth().padding(18.dp),verticalArrangement=Arrangement.spacedBy(12.dp),content=content)
     }
 }
 
 @Composable
-internal fun Input(label: Int, value: String, onChange:(String)->Unit, tag: String, numeric: Boolean=true) {
-    OutlinedTextField(value=value,onValueChange=onChange,label={Text(stringResource(label))},singleLine=true,
+internal fun Input(label: Int, value: String, onChange:(String)->Unit, tag: String, numeric: Boolean=true,error:Boolean=false) {
+    OutlinedTextField(value=value,onValueChange=onChange,label={Text(stringResource(label))},singleLine=true,isError=error,
         keyboardOptions=KeyboardOptions(keyboardType=if(numeric) KeyboardType.Decimal else KeyboardType.Text,imeAction=ImeAction.Done),
         modifier=Modifier.fillMaxWidth().testTag(tag))
 }

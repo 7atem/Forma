@@ -21,7 +21,7 @@ internal fun CoachContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
     var available by rememberSaveable {mutableIntStateOf(state.snapshot.profile?.sessionsPerWeek?:3)}
     var complete by rememberSaveable {mutableStateOf(false)}
     var notes by rememberSaveable {mutableStateOf("")}
-    Text(stringResource(R.string.coach_title),style=MaterialTheme.typography.headlineLarge)
+    PageHeading(R.string.coach_title)
     Text(stringResource(R.string.coach_scope),style=MaterialTheme.typography.bodyMedium)
     LocalAiPanel(state,today,vm)
     InfoCard {

@@ -24,3 +24,7 @@ Independent Android project, working name Forma / فورمة. Nemory is a separa
 - Apple transfer files are bounded readable workout-only JSON, separate from encrypted backup. Preview/confirm on Android; merge transactionally, deduplicate matches and reject ID conflicts without partial writes. Never silently overwrite edited history.
 - WatchConnectivity requires a paired iPhone. Android uses a manual file bridge. Preserve watch outbox until phone disk-success ACK. Current Apple source does not record sensors/HealthKit or guarantee background timers.
 - Apple build commands and physical gates: `docs/APPLE_WATCH.md`. Portable checks are not substitutes for Swift/Xcode/device tests.
+
+- Exercise demonstration PNGs are original two-phase AI-generated stills, not videos or validated personal coaching. Canonical files live once in `assets/exercises/res/drawable-nodpi`. Do not mirror their left/right phase order in RTL.
+- Guide variants/cues/references come from `catalog/exercise-guides.json`; run `generate_exercise_guides.py --check` and `check_exercise_art.py`. Never rename historical exercise IDs to match an illustration. Qualified pose/cue review remains a release gate.
+- Keep library thumbnails sampled/cached off the UI thread; reserve full resolution for the selected guide. Preserve draft input when switching training sections and keep explicit save/confirm semantics.

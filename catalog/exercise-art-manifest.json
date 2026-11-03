@@ -1,0 +1,50 @@
+[
+  {
+    "id": "squat",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_squat.png",
+    "sha256": "5924e9d052131a94b11feeb18b385deb16425318543281aad4f3cb344ef26aea",
+    "bytes": 1679865
+  },
+  {
+    "id": "leg_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_leg_press.png",
+    "sha256": "48dc360199682caa5d587c64c8850b9f8fcb7cc857c9efc6cbe2dca9deae7b82",
+    "bytes": 1809515
+  },
+  {
+    "id": "chest_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_chest_press.png",
+    "sha256": "b713e33323f1a5c2b88929c1f74b84bd048744a9b02435466ed1b47215424023",
+    "bytes": 1835009
+  },
+  {
+    "id": "row",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_row.png",
+    "sha256": "6525c6887684f52aef2dd4117745bea412950cc72fde48848a4587e0ce3661b0",
+    "bytes": 1778960
+  },
+  {
+    "id": "lat_pulldown",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_lat_pulldown.png",
+    "sha256": "4d79ece3f6a628e79d2e82fa0afb0e636b0941b9e4e04139b8a8fffd53406fbf",
+    "bytes": 1721547
+  },
+  {
+    "id": "hip_hinge",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hip_hinge.png",
+    "sha256": "d579d03bb5331641fcd262679a2517f94883c7c2c52595a7bd7500c186044770",
+    "bytes": 1699505
+  },
+  {
+    "id": "shoulder_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_shoulder_press.png",
+    "sha256": "f7789957e676ddd877e1de19e25ac4b10137888eb5d968d90c48579dad186d62",
+    "bytes": 1812007
+  },
+  {
+    "id": "split_squat",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_split_squat.png",
+    "sha256": "7a9fe36383fde62ebdbb28852eca29b27292643698fbf50d7a2917c7a0075104",
+    "bytes": 1705537
+  }
+]

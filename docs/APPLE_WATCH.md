@@ -1,4 +1,4 @@
-# Apple Watch companion — alpha03 source
+# Apple Watch companion — alpha04 source
 
 Native SwiftUI iPhone and watchOS application source now lives in `apple/`. It is **not yet a compiled, installed or device-validated Apple release**. This Windows machine has neither Swift nor Xcode; portable catalog/fixture/localization checks do not establish that the native applications build. A macOS workflow is prepared but has not run remotely.
 
@@ -51,3 +51,6 @@ xcodebuild -project FormaApple.xcodeproj -scheme FormaWatch -destination 'generi
 Open the generated project on a Mac, select an owner-controlled development team and paired devices. No team ID, signing key, certificate or provisioning profile is included. App icons, distribution metadata and signing/store review are pending. No paid service was introduced; App Store distribution itself is an owner release decision.
 
 Physical acceptance gates: first pairing/install, EN/AR layout and VoiceOver, all muscle maps, offline log/relaunch, explicit finish/discard, edits and fractional loads, denied/unavailable transfer, delayed/repeated/reordered delivery, phone storage failures, missing/corrupt files, durable ACK/outbox retry, background/foreground timers, capacity handling, program update during a draft, conflict rollback and a full watch→iPhone→Android round trip. Add sensor recording only through a separately reviewed HealthKit lifecycle/privacy implementation.
+
+
+Alpha04 adds shared original 3D still assets, generated named variations/cues and an exercise detail view to the native source. Android and XcodeGen reference the same PNG directory; no duplicated image files or cloud image fetch. These Apple UI additions remain uncompiled/device-unverified on this Windows host. Full-screen individual-phase viewing is currently Android only. See `EXERCISE_DEMOS_AND_UX.md` for generation provenance and qualified-review boundaries.

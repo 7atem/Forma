@@ -1,6 +1,6 @@
 # Delivery plan
 
-Current development version: **0.3.0-alpha03**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
+Current development version: **0.4.0-alpha04**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
 
 ## Completed foundation and daily workflow
 
@@ -58,3 +58,12 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [ ] Verify VoiceOver/RTL, interruptions/recovery, capacity, stale program delivery, background timers and file errors on Apple hardware.
 - [ ] Add reviewed HealthKit lifecycle/sensors as a separate permission/product change. Current watch app is a manual logger.
 - [ ] Add equipment-specific exercise variants and qualified review; evaluate supersets/custom exercises and fast-entry improvements against the study.
+
+## Alpha04 demonstrations and usability
+
+- [x] Original two-phase 3D assets for every current exercise, named variants and bilingual source-linked cues.
+- [x] Searchable exercise library, separate Movement/Muscles details and Android enlarged phase selection.
+- [x] Sticky toolbar, adaptive tablet navigation, Today metrics, retained-input training sections and responsive logging fields.
+- [x] Sampled cached thumbnails and one shared asset source for Android/Apple.
+- [ ] Qualified review of every generated pose/cue before public release; run the actual beginner/form-comprehension study.
+- [ ] Complete physical-device, TalkBack/VoiceOver, larger histories, minimum API and Apple native build/device acceptance.

@@ -26,12 +26,21 @@ class FitnessFlowTest {
         rule.onNodeWithTag("tab_1").performClick()
         rule.onNodeWithTag("start_A").performScrollTo().performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("set_reps").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("session_form_guide").performScrollTo().performClick()
+        rule.onNodeWithTag("exercise_art_SQUAT",useUnmergedTree=true).performScrollTo().assertExists()
+        rule.onNodeWithTag("guide_tab_muscles").performClick()
         rule.onNodeWithTag("muscle_map_SQUAT").performScrollTo().assertExists()
+        rule.onNodeWithTag("guide_close").performClick()
+        rule.onNodeWithTag("toggle_rpe").performScrollTo().performClick()
         rule.onNodeWithTag("warmup_set").performScrollTo().performClick()
         rule.onNodeWithTag("set_rpe").performScrollTo().performTextInput("٧٫٥")
         rule.onNodeWithTag("set_reps").performScrollTo().performTextInput("٨")
         rule.onNodeWithTag("set_weight").performScrollTo().performTextInput("٢٠٫٥")
         rule.onNodeWithTag("set_weight").performImeAction()
+        rule.onNodeWithTag("training_section_1").performScrollTo().performClick()
+        rule.onNodeWithTag("training_section_0").performClick()
+        rule.onNodeWithTag("set_reps").performScrollTo().assertTextContains("٨")
+        rule.onNodeWithTag("set_weight").assertTextContains("٢٠٫٥")
         rule.onNodeWithTag("add_set").performScrollTo().performClick()
         rule.waitUntil(10_000) {!rule.onNodeWithTag("finish_session").fetchSemanticsNode().config.contains(androidx.compose.ui.semantics.SemanticsProperties.Disabled)}
         rule.onNodeWithTag("finish_session").performScrollTo().assertIsEnabled().performClick()
@@ -84,7 +93,7 @@ class FitnessFlowTest {
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("accept_proposal").fetchSemanticsNodes().isNotEmpty()}
         rule.onNodeWithTag("accept_proposal").performScrollTo().performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("accept_proposal").fetchSemanticsNodes().isEmpty()}
-        rule.onNodeWithContentDescription(rule.activity.getString(R.string.profile)).performScrollTo().performClick()
+        rule.onNodeWithContentDescription(rule.activity.getString(R.string.profile)).performClick()
         rule.onNodeWithTag("target_sessions_$target").performScrollTo().assertIsSelected()
     }
 
@@ -124,14 +133,33 @@ class FitnessFlowTest {
     @Test fun muscleMapsCoverEveryExerciseAndWatchTransferIsAccessible() {
         ensureProfile()
         rule.onNodeWithTag("tab_1").performClick()
-        rule.onNodeWithText(rule.activity.getString(R.string.load_history)).performScrollTo()
+        rule.onNodeWithTag("training_section_1").performClick()
         for(exercise in com.formacoach.model.Exercise.entries) {
-            rule.onAllNodesWithTag("exercise_picker").onLast().performScrollTo().performClick()
-            rule.onNodeWithTag("exercise_${exercise.name}").performScrollTo().performClick()
-            rule.onAllNodesWithTag("muscle_map_${exercise.name}").onLast().performScrollTo().assertExists()
+            rule.onNodeWithTag("library_${exercise.name}").performScrollTo().performClick()
+            rule.onNodeWithTag("exercise_art_${exercise.name}",useUnmergedTree=true).performScrollTo().assertExists()
+            rule.onNodeWithTag("guide_tab_muscles").performClick()
+            rule.onNodeWithTag("muscle_map_${exercise.name}").performScrollTo().assertExists()
+            rule.onNodeWithTag("guide_close").performClick()
         }
-        rule.onNodeWithTag("watch_settings").performScrollTo().performClick()
+        rule.onNodeWithTag("watch_settings").performClick()
         rule.onNodeWithTag("watch_export").performScrollTo().assertIsNotEnabled()
         rule.onNodeWithTag("watch_open_import").performScrollTo().assertIsEnabled()
+    }
+
+    @Test fun exerciseSearchAndEnlargedPhasesSurviveRecreation() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_1").performClick()
+        rule.onNodeWithTag("training_section_1").performClick()
+        rule.onNodeWithTag("exercise_search").performScrollTo().performTextInput("Romanian")
+        rule.onNodeWithTag("exercise_search").performImeAction()
+        rule.onNodeWithTag("library_HIP_HINGE").performScrollTo().performClick()
+        rule.onNodeWithTag("open_illustration").performScrollTo().performClick()
+        rule.onNodeWithTag("image_phase_2").performClick().assertIsSelected()
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("image_viewer").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("image_phase_2").assertIsSelected()
+        rule.onNodeWithTag("image_viewer_close").performClick()
+        rule.onNodeWithTag("guide_close").performClick()
+        rule.onNodeWithTag("exercise_search").performScrollTo().assertTextContains("Romanian")
     }
 }
