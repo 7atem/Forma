@@ -1,63 +1,59 @@
-# Validation record — alpha02
+# Validation record — alpha03
 
-Date: 3 November 2026. Application `com.formacoach.app`, version `0.2.0-alpha02`, Room schema 2. This is a development alpha, not a clinical or public-release approval.
-
-## Final results
+3 November 2026. App `com.formacoach.app`, version `0.3.0-alpha03`, encrypted Room schema 3. Development alpha; not a clinical or public-release approval.
 
 | Check | Result |
 |---|---|
-| JVM review/history/input/clock/local-model contracts | 19/19 passed |
-| JVM portable archive/validation/tamper contracts | 6/6 passed |
-| Android 15 / API 35 x86_64 emulator suite | 13/13 passed (8 storage/migration/backup/proposal/history cases + 5 UI cases) |
-| Unique automated cases | **38 passed, 0 failed** |
-| English/Arabic resources | **227 keys and format placeholders match** |
-| Android debug build | Passed |
-| Android lint | **0 errors, 1 warning**: pre-existing obsolete empty `mipmap-anydpi-v26` directory |
-| Minified release / R8 / resource shrinking | Passed; unsigned production-variant artifact generated |
-| Packaged manifest checks | Application INTERNET permission absent from debug and release; emulator package-manager assertion also passed |
-| Nemory preservation | Original commit `c4e9f15` on `main` remains clean; independent source/history backup retained |
+| JVM review/history/muscle/input/model contracts | 21/21 passed |
+| JVM portable backup and alpha02 default compatibility | 7/7 passed |
+| JVM watch wire fixture/bounds/invalid-value contracts | 3/3 passed |
+| Android 15 / API 35 x86_64 emulator | 16/16 passed: 10 encrypted storage/migration/merge cases, 6 UI cases |
+| Unique executed automated cases | **47 passed, 0 failed** |
+| Android localization | **274 EN/AR keys and placeholders match** |
+| Shared exercise generation | 8 exercises / 14 muscle groups; Kotlin, Swift and resources synchronized; path subset/coordinate checks pass |
+| Apple portable source consistency | Identical cross-platform fixture, companion IDs and **44 EN/AR keys** match |
+| Apple Swift tests | 4 cases written; **NOT RUN** on this Windows host; excluded from the 47-case count |
+| iPhone/watchOS compilation and paired delivery | **NOT VERIFIED**; Swift/Xcode/macOS unavailable here |
+| Android debug and minified release/R8/resource shrinking | Passed |
+| Android lint | **0 errors, 1 existing empty-directory warning** (`mipmap-anydpi-v26`) |
+| Actual minified APK | Cold startup and native SAF workout import/export checks passed, details below |
+| Nemory preservation | Original `main` at `c4e9f15` remains clean; independent preservation archive unchanged |
 
-Final full regression command: `.\gradlew.bat :core:coach:test :core:backup:test :app:assembleDebug :app:lintDebug :app:connectedDebugAndroidTest :app:assembleRelease --max-workers=1 --no-build-cache`, with `ANDROID_SERIAL=emulator-5582`. After the password fields were marked as password keyboard inputs, debug/lint/minified release packaging was rerun and the actual minified SAF flow was checked as described below.
+Commands were run sequentially with JDK 21 and `--max-workers=1 --no-build-cache`: JVM suites for `core:coach`, `core:backup`, `core:wearables`; `:app:assembleDebug`, `:app:assembleDebugAndroidTest`, `:app:connectedDebugAndroidTest`, `:app:lintDebug` and `:app:assembleRelease`. Emulator target: `emulator-5582`, stable Android 15. No preview-API Espresso assumptions. Final packaging after the checkpoint commit only refreshes build metadata; it does not change the tested application source.
 
-Coverage includes: missing logs versus zero, window boundaries, drafts/future records, logged-day denominators, source evidence, sufficient weight coverage, Arabic/Persian numeric input, invalid/nonfinite values, immutable nutrition/recipe calculations, sparse history, timer expiry/reboot, live device timezone changes, strict fact-ID verification, unsupported/background model behavior and cancellation.
+The first alpha03 UI run caught mojibake in the test's Arabic numeric literals and an ambiguous map selector; both test issues were corrected and the full 16-case suite passed. The 47-case total counts the passing final cases once, not retries or native smoke steps.
 
-The Android suite verifies: encrypted persistence/reopen, corrupt or missing key fail-closed behavior, encrypted schema 1→2 migration with retained records/starter order, backup preview without writes, wrong-password rejection, restore without key replacement, rollback after a failing replacement, stale proposal rejection, explicit proposal confirmation, unchanged historical meals/program snapshots, and the daily/program/food UI journeys. The model check on this emulator tested graceful availability/error handling, **not actual Nano inference**.
+## Coverage added
 
-## Actual minified application / system file-picker QA
+Encrypted migration chains 1→2→3 and 2→3 preserve original profile/session/set records, program order/rest preferences and working/local defaults. Watch merge is idempotent; a later conflict rolls back an earlier insert in the same transaction. Sensor metadata, warm-up and RPE survive encrypted backup/restore. Alpha02 serialized records lacking the new fields retain their defaults.
 
-The release variant was additionally signed with the ordinary local **development certificate**, matching the debug APK, for emulator-only QA. No production release-signing identity or Nemory release credential was used. The source release build remains unsigned.
+Muscle tests require every exercise's mapping, visible regions and disjoint roles. Seven-day counts exclude warm-ups, drafts, future dates and out-of-window sessions. Load history and highest recorded working loads exclude warm-ups. Wire tests cover the shared fixture, round trip, unsupported exercise/version/unit/field, duplicates, nonfinite values, RPE bounds, maximum bytes and nesting.
 
-Using clearly labelled synthetic records in a disposable read-only emulator:
+UI coverage includes all eight muscle maps, Arabic numeric warm-up/RPE entry, the watch entry point and disabled empty export selection, plus the existing daily logging, saved program, sourced food, check-in confirmation and unsupported-model fallback journeys. The emulator does **not** verify actual Gemini Nano inference.
 
-- Installed and cold-launched the minified APK successfully.
-- Selected a synthetic password-encrypted archive through Android DocumentsUI / Downloads.
-- Confirmed an incorrect password is rejected without replacing records.
-- Unlocked a valid archive, canceled the preview and verified the empty onboarding log remained.
-- Confirmed restore and rendered the restored profile, sessions, sourced foods, recipe ingredients, measurements and pending proposal.
-- Exported again through ACTION_CREATE_DOCUMENT to Downloads.
-- Independently decrypted the result using Python/OpenSSL-backed AES-GCM/PBKDF2 and compared every typed record against the input. All records matched, including immutable recipe sources and proposal state.
-- Verified a fractional 20.25 kg recorded load renders accurately and a scheduling change applies only after confirmation.
+## Native minified / system picker QA
 
-Results: `artifacts/qa-native/native-roundtrip-result.json`. The scripts and encrypted fixtures in that directory are QA-only and never seed the application automatically. Their records/nutrition values are synthetic, not a food catalog or real personal data. These checks are additional native smoke/round-trip checks, not extra unique JUnit cases added to the 38-case count.
+The production build variant was signed separately with the ordinary local Android **development** certificate for testing. Source release output remains unsigned; no Nemory or production signing credential was used.
 
-## Visual QA
+Using only `contracts/apple-watch/transfer-v1.json` and a deliberately conflicting synthetic copy:
 
-Reviewed English Today/Coach on the tablet viewport and Arabic RTL Progress on a simulated phone viewport (`1080×2340`, density 420) with 1.8 font scale, including scrolling to the chart. Display overrides were restored. Screenshots are under `artifacts/alpha02-screenshots`. This is limited visual QA; full TalkBack, physical-device, orientation and large-font coverage remains open.
+- Cold-launched the minified app, created an explicitly labelled synthetic profile and opened the watch dialog.
+- Opened a completed-workout file through Android DocumentsUI/Downloads, reviewed the preview and explicitly imported it.
+- Reopened the identical file and confirmed successful deduplicated handling; conflicting set content was explicitly rejected.
+- Exported a selected starter program through ACTION_CREATE_DOCUMENT and independently parsed the output: v1/KG, expected exercise order, one selected program, no workouts/profile/food/key fields.
+- This provider appended `.json` to the proposed `.formaworkouts` filename. Both iPhone and Android importers support JSON/content parsing; the extension does not determine trust or validation.
+- Reviewed the real minified muscle diagram and labels in English and Arabic RTL at a simulated 1080×2340 phone viewport, density 420, default font scale. Row primary/supporting colors and text, front/back order, recorded load and Arabic numbers rendered correctly. All eight map changes are also covered by the UI suite.
 
-## Artifacts
+Evidence: ignored `artifacts/qa-native/alpha03-result.json`, screenshots in `artifacts/alpha03-screenshots`. These are smoke/visual checks, not additional JUnit cases. No actual watch data, physical pairing or sensor reading was used. Display and locale overrides are restored after QA.
 
-- `forma-0.2.0-alpha02-debug.apk`: 77,300,627 bytes; SHA-256 `5f80313210d1210f31bab0ceac0a84b71634e418c87062cb2d8fc5d32030b2cd`.
-- `forma-0.2.0-alpha02-release-unsigned.apk`: 11,651,570 bytes; SHA-256 `ae1edd8867fd7fef3c171ec4eb843a7c393bc4aa727669cd673f89d5017c3390`.
-- `forma-0.2.0-alpha02-minified-qa.apk`: 11,683,445 bytes; SHA-256 `4fdc1628f618dab8855738fbe3b13266f9b734b89cf7605ede9593f3728142be`.
+## Artifacts and recovery
 
-`-minified-qa.apk` is a development-signed installation/testing build, not a Play release. The `-release-unsigned.apk` cannot be installed until signed. The debug APK remains available for debugging. Generated files, logs, encrypted QA fixtures and screenshots are ignored by Git.
+Install `artifacts/forma-0.3.0-alpha03-minified-qa.apk` for the compact development-signed test app, or `forma-0.3.0-alpha03-debug.apk` for debugging. `forma-0.3.0-alpha03-release-unsigned.apk` needs owner signing before installation. Final byte counts, SHA-256, certificate and checkpoint commit are in ignored `artifacts/build-manifest-alpha03.json`.
 
-## Limits and remaining gates
+The final source is committed on `codex/muscles-apple-watch`, tagged `checkpoint/forma-alpha03`. A verified all-refs source bundle, APK copies and checksums are retained separately under `D:\Archives\Forma\alpha03-2026-11-03`. The alpha02 checkpoint/archive remains available. Historical baseline evidence: [alpha02 validation](VALIDATION_ALPHA02.md).
 
-- Actual local-model download/inference on supported physical hardware, including memory, thermal, quota and foreground-preemption checks. No Qwen CPU vision or model weights are included.
-- Physical Android devices, minimum API, 16 KB page-size cases, long histories, reboot and process termination during restore.
-- More document-provider failures, canceled/interrupted exports, cross-physical-device restore and forgotten-password usability.
-- Qualified review of exercise descriptions/adaptive prescriptions and nutrition sources before automated coaching rules or a curated catalog.
-- TalkBack, broader large-text/screen-size testing, the 10–15-person study, beta retention/payment validation and store/privacy/signing review.
+## Remaining gates
 
-AGP legacy-DSL/external-Kotlin deprecation messages remain. The one empty-directory lint warning was already present; automatic review rejected its removal in the earlier alpha01 session, so no new deletion attempt or blanket lint suppression was made. CI is configured but has not run on GitHub. Nothing was published, and no external messages or recruitment were performed.
+Apple build/paired-device acceptance is explicitly pending: [workflow and limitations](APPLE_WATCH.md). Current Apple source is an offline manual workout logger; no HealthKit sensors, Apple Health writes, background timer guarantee or automatic Android live sync. Source consistency is not native runtime validation.
+
+Physical Android/minimum-API/long-history/16 KB-page and interruption/provider-failure checks, actual Nano hardware inference, TalkBack/VoiceOver, broader font/orientation coverage, qualified exercise/nutrition review, the user study, beta outcomes and owner signing/store review remain open. There is no public catalog or automated calorie/load prescription. CI is configured but has not run remotely; nothing was published or sent to external users.

@@ -8,7 +8,7 @@ data class HistoryPoint(val date: LocalDate, val value: Double)
 object TrainingHistory {
     fun loads(data: FitnessSnapshot, exercise: Exercise, asOf: LocalDate): List<HistoryPoint> {
         val sessions=data.sessions.filter {it.completedAt!=null && it.date<=asOf}.associateBy {it.id}
-        return data.sets.filter {it.exercise==exercise && it.sessionId in sessions}
+        return data.sets.filter {it.exercise==exercise && it.kind==SetKind.WORKING && it.sessionId in sessions}
             .groupBy {sessions.getValue(it.sessionId).date}.map {(date,sets) -> HistoryPoint(date,sets.maxOf {it.weightKg})}
             .sortedBy {it.date}
     }

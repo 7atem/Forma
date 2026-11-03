@@ -57,6 +57,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var editingProfile by rememberSaveable { mutableStateOf(false) }
+    var showWatch by rememberSaveable {mutableStateOf(false)}
     var showBackup by rememberSaveable {mutableStateOf(false)}
     var generation by rememberSaveable {mutableIntStateOf(0)}
     val pageState=key(generation) {rememberSaveableStateHolder()}
@@ -104,6 +105,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                     Text(stringResource(R.string.app_name), style=MaterialTheme.typography.titleLarge, fontWeight=FontWeight.Bold)
                                     Text(dateLabel(today), style=MaterialTheme.typography.labelMedium, color=MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
+                                IconButton(onClick={showWatch=true},modifier=Modifier.testTag("watch_settings")) {Icon(Icons.Default.Watch,contentDescription=stringResource(R.string.apple_watch))}
                                 IconButton(onClick={editingProfile=true}) {Icon(Icons.Default.AccountCircle,contentDescription=stringResource(R.string.profile))}
                                 IconButton(onClick={showBackup=true},modifier=Modifier.testTag("backup_settings")) {Icon(Icons.Default.SaveAlt,contentDescription=stringResource(R.string.backup))}
                             }
@@ -123,6 +125,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                     }
                 }
             }
+            if(showWatch) WatchTransferDialog(vm,state) {showWatch=false}
             if(showBackup) BackupDialog(vm,state,onDismiss={showBackup=false},onRestored={showBackup=false;editingProfile=false;tab=0;generation++})
         }
     }

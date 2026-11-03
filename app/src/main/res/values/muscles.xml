@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="muscle_chest">Chest</string>
+    <string name="muscle_front_delts">Front and side shoulders</string>
+    <string name="muscle_rear_delts">Rear shoulders</string>
+    <string name="muscle_lats">Lats</string>
+    <string name="muscle_upper_back">Upper and mid back</string>
+    <string name="muscle_biceps">Biceps</string>
+    <string name="muscle_triceps">Triceps</string>
+    <string name="muscle_core">Abdominal and trunk stabilizers</string>
+    <string name="muscle_glutes">Glutes</string>
+    <string name="muscle_quadriceps">Quadriceps</string>
+    <string name="muscle_hamstrings">Hamstrings</string>
+    <string name="muscle_calves">Calves</string>
+    <string name="muscle_erectors">Spinal erectors</string>
+    <string name="muscle_adductors">Hip adductors</string>
+</resources>

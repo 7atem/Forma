@@ -19,9 +19,9 @@ The fitness data model, repository, deterministic reports and Compose screens ar
 | Nemory area | Decision | Conditions before transfer |
 |---|---|---|
 | Compose/UI patterns and bilingual resources | Reuse patterns; new fitness UI | Check RTL, accessibility, phone/tablet layouts; no vault taxonomy in UI |
-| Room + SQLCipher | Reuse approach, new schema v1 | Own keys/DB; schema export and migration tests; no destructive migration |
+| Room + SQLCipher | Reuse approach, new typed schema (now v3) | Own keys/DB; schema export and migration tests; no destructive migration |
 | Hilt/WorkManager/reminders | Hilt used; scheduling deferred | Product-specific payloads, private notifications, timezone/permission/idempotency tests |
-| Portable encrypted backup | High-value follow-up; not copied yet | New archive namespace; adapt FK/schema/media rules; round-trip, rollback, corruption and wrong-passphrase tests |
+| Portable encrypted backup | Independent archive implementation completed in alpha02; no Nemory archive code copied | New archive namespace; adapt FK/schema/media rules; round-trip, rollback, corruption and wrong-passphrase tests |
 | LlmClient, ReasoningBudget, Qwen/native model selection | Deferred optional extraction | Audit runtime/JNI/device capability, providers/model licenses, cancellation and foreground preemption; keep logging independent |
 | RAG, LocalAgent and ClaimVerifier | Adapt principles; domain-bound code not copied | Replace VaultItem/ExternalRecord tools with typed fitness tools; verified record IDs and explicit proposal confirmation; no LLM arithmetic |
 | Embeddings/ObjectBox | Deferred until justified | Separate fitness index; disclose any unencrypted embeddings; do not claim SQLCipher protects the vector store |

@@ -1,0 +1,264 @@
+{
+  "version": 1,
+  "artLicense": "Original Forma schematic geometry, Apache-2.0; no third-party anatomy art copied.",
+  "outline": "M 50 2 C 37 2 37 23 50 23 C 63 23 63 2 50 2 Z M 43 25 L 35 28 C 29 29 25 33 23 41 L 15 73 L 11 86 L 14 91 L 19 88 L 24 73 L 31 51 L 34 79 L 32 98 L 31 119 L 33 153 L 33 185 L 29 204 L 30 208 L 43 208 L 45 186 L 47 154 L 50 122 L 53 154 L 55 186 L 57 208 L 70 208 L 71 204 L 67 185 L 67 153 L 69 119 L 68 98 L 66 79 L 69 51 L 76 73 L 81 88 L 86 91 L 89 86 L 85 73 L 77 41 C 75 33 71 29 65 28 L 57 25 Z",
+  "muscles": [
+    {
+      "id": "CHEST",
+      "en": "Chest",
+      "ar": "الصدر"
+    },
+    {
+      "id": "FRONT_DELTS",
+      "en": "Front and side shoulders",
+      "ar": "الكتف الأمامي والجانبي"
+    },
+    {
+      "id": "REAR_DELTS",
+      "en": "Rear shoulders",
+      "ar": "الكتف الخلفي"
+    },
+    {
+      "id": "LATS",
+      "en": "Lats",
+      "ar": "العضلات الظهرية العريضة"
+    },
+    {
+      "id": "UPPER_BACK",
+      "en": "Upper and mid back",
+      "ar": "أعلى ووسط الظهر"
+    },
+    {
+      "id": "BICEPS",
+      "en": "Biceps",
+      "ar": "العضلة ذات الرأسين"
+    },
+    {
+      "id": "TRICEPS",
+      "en": "Triceps",
+      "ar": "العضلة ثلاثية الرؤوس"
+    },
+    {
+      "id": "CORE",
+      "en": "Abdominal and trunk stabilizers",
+      "ar": "البطن وعضلات تثبيت الجذع"
+    },
+    {
+      "id": "GLUTES",
+      "en": "Glutes",
+      "ar": "عضلات الأرداف"
+    },
+    {
+      "id": "QUADRICEPS",
+      "en": "Quadriceps",
+      "ar": "عضلات الفخذ الأمامية"
+    },
+    {
+      "id": "HAMSTRINGS",
+      "en": "Hamstrings",
+      "ar": "عضلات الفخذ الخلفية"
+    },
+    {
+      "id": "CALVES",
+      "en": "Calves",
+      "ar": "عضلات الساق الخلفية"
+    },
+    {
+      "id": "ERECTORS",
+      "en": "Spinal erectors",
+      "ar": "العضلات الناصبة للعمود الفقري"
+    },
+    {
+      "id": "ADDUCTORS",
+      "en": "Hip adductors",
+      "ar": "عضلات الفخذ الداخلية"
+    }
+  ],
+  "regions": [
+    {
+      "muscle": "CHEST",
+      "view": "front",
+      "path": "M 35 39 C 39 35 45 36 49 38 L 49 56 C 42 59 35 55 34 49 Z M 65 39 C 61 35 55 36 51 38 L 51 56 C 58 59 65 55 66 49 Z"
+    },
+    {
+      "muscle": "FRONT_DELTS",
+      "view": "front",
+      "path": "M 34 31 C 28 33 25 38 25 44 L 32 47 L 36 37 Z M 66 31 C 72 33 75 38 75 44 L 68 47 L 64 37 Z"
+    },
+    {
+      "muscle": "REAR_DELTS",
+      "view": "back",
+      "path": "M 34 31 C 28 33 25 38 25 44 L 32 47 L 36 37 Z M 66 31 C 72 33 75 38 75 44 L 68 47 L 64 37 Z"
+    },
+    {
+      "muscle": "BICEPS",
+      "view": "front",
+      "path": "M 25 47 L 31 50 L 27 68 L 22 69 L 21 64 Z M 75 47 L 69 50 L 73 68 L 78 69 L 79 64 Z"
+    },
+    {
+      "muscle": "TRICEPS",
+      "view": "back",
+      "path": "M 25 47 L 31 50 L 27 68 L 22 69 L 21 64 Z M 75 47 L 69 50 L 73 68 L 78 69 L 79 64 Z"
+    },
+    {
+      "muscle": "CORE",
+      "view": "front",
+      "path": "M 40 62 L 49 61 L 49 94 L 42 97 L 37 78 Z M 60 62 L 51 61 L 51 94 L 58 97 L 63 78 Z"
+    },
+    {
+      "muscle": "QUADRICEPS",
+      "view": "front",
+      "path": "M 34 107 L 44 111 L 44 135 L 41 153 L 35 150 L 33 127 Z M 66 107 L 56 111 L 56 135 L 59 153 L 65 150 L 67 127 Z"
+    },
+    {
+      "muscle": "ADDUCTORS",
+      "view": "front",
+      "path": "M 45 108 L 49 115 L 46 140 L 43 135 Z M 55 108 L 51 115 L 54 140 L 57 135 Z"
+    },
+    {
+      "muscle": "CALVES",
+      "view": "front",
+      "path": "M 35 159 L 42 159 L 41 183 L 36 189 L 34 178 Z M 65 159 L 58 159 L 59 183 L 64 189 L 66 178 Z"
+    },
+    {
+      "muscle": "UPPER_BACK",
+      "view": "back",
+      "path": "M 43 27 L 49 28 L 49 55 L 37 48 L 34 37 Z M 57 27 L 51 28 L 51 55 L 63 48 L 66 37 Z"
+    },
+    {
+      "muscle": "LATS",
+      "view": "back",
+      "path": "M 34 51 L 44 58 L 44 85 L 37 77 Z M 66 51 L 56 58 L 56 85 L 63 77 Z"
+    },
+    {
+      "muscle": "ERECTORS",
+      "view": "back",
+      "path": "M 46 57 L 49 59 L 49 92 L 45 94 Z M 54 57 L 51 59 L 51 92 L 55 94 Z"
+    },
+    {
+      "muscle": "GLUTES",
+      "view": "back",
+      "path": "M 34 94 C 39 91 45 93 49 98 L 49 112 C 42 117 35 114 33 107 Z M 66 94 C 61 91 55 93 51 98 L 51 112 C 58 117 65 114 67 107 Z"
+    },
+    {
+      "muscle": "HAMSTRINGS",
+      "view": "back",
+      "path": "M 34 117 L 46 118 L 43 151 L 35 153 L 33 133 Z M 66 117 L 54 118 L 57 151 L 65 153 L 67 133 Z"
+    },
+    {
+      "muscle": "CALVES",
+      "view": "back",
+      "path": "M 35 159 L 43 158 L 43 176 L 39 188 L 35 182 Z M 65 159 L 57 158 L 57 176 L 61 188 L 65 182 Z"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "SQUAT",
+      "en": "Squat",
+      "ar": "سكوات",
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "ADDUCTORS",
+        "CORE"
+      ],
+      "reference": "https://www.nasm.org/workout-exercise-guidance"
+    },
+    {
+      "id": "LEG_PRESS",
+      "en": "Leg press",
+      "ar": "دفع الرجلين",
+      "primary": [
+        "QUADRICEPS"
+      ],
+      "secondary": [
+        "GLUTES",
+        "ADDUCTORS"
+      ],
+      "reference": "https://www.nasm.org/resource-center/exercise-library/leg-press"
+    },
+    {
+      "id": "CHEST_PRESS",
+      "en": "Chest press",
+      "ar": "ضغط الصدر",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS",
+        "TRICEPS"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/"
+    },
+    {
+      "id": "ROW",
+      "en": "Row",
+      "ar": "سحب أفقي",
+      "primary": [
+        "LATS",
+        "UPPER_BACK"
+      ],
+      "secondary": [
+        "BICEPS",
+        "REAR_DELTS"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/"
+    },
+    {
+      "id": "LAT_PULLDOWN",
+      "en": "Lat pulldown",
+      "ar": "سحب علوي",
+      "primary": [
+        "LATS"
+      ],
+      "secondary": [
+        "BICEPS",
+        "UPPER_BACK"
+      ],
+      "reference": "https://www.acefitness.org/resources/pros/expert-articles/8944/a-back-to-school-program-an-evidence-based-approach-to-training-the-back/"
+    },
+    {
+      "id": "HIP_HINGE",
+      "en": "Hip hinge",
+      "ar": "ثني مفصل الورك",
+      "primary": [
+        "GLUTES",
+        "HAMSTRINGS"
+      ],
+      "secondary": [
+        "ERECTORS",
+        "CORE"
+      ],
+      "reference": "https://www.nasm.org/workout-exercise-guidance"
+    },
+    {
+      "id": "SHOULDER_PRESS",
+      "en": "Shoulder press",
+      "ar": "ضغط الكتف",
+      "primary": [
+        "FRONT_DELTS"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "UPPER_BACK"
+      ],
+      "reference": "https://www.nasm.org/workout-exercise-guidance"
+    },
+    {
+      "id": "SPLIT_SQUAT",
+      "en": "Split squat",
+      "ar": "سبليت سكوات",
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "ADDUCTORS",
+        "CORE"
+      ],
+      "reference": "https://www.nasm.org/workout-exercise-guidance"
+    }
+  ]
+}

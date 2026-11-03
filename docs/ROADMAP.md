@@ -1,6 +1,6 @@
 # Delivery plan
 
-Current development version: **0.2.0-alpha02**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
+Current development version: **0.3.0-alpha03**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
 
 ## Completed foundation and daily workflow
 
@@ -14,7 +14,7 @@ Current development version: **0.2.0-alpha02**. Nemory remains an independent pr
 - [x] Deterministic weekly reports with coverage, evidence and local record questions.
 - [x] Weekly check-ins and explicit confirm/cancel scheduling proposals with stale-target protection.
 - [x] Optional Gemini Nano adapter for bounded selection of existing facts, manual availability/download controls and independent deterministic fallback.
-- [x] 25 JVM cases and 13 stable-emulator cases passed; 227 bilingual resource keys match.
+- [x] Alpha02 baseline: 25 JVM and 13 emulator cases passed. Current results are in `VALIDATION.md`.
 - [x] English tablet and Arabic phone-viewport / large-text visual review; detailed scope in validation.
 
 ## M1 external validation and remaining usability work
@@ -45,4 +45,16 @@ Current development version: **0.2.0-alpha02**. Nemory remains an independent pr
 
 ## Release and payment
 
-A minified unsigned release build is part of local engineering verification. Final brand/store identity, owner-controlled signing credentials, privacy/dependency review, physical validation and beta outcomes are still required. No store publication, cloud sync, payment setup, trainer dashboard or iOS implementation is claimed. Prices and revenue remain hypotheses. See `RELEASE_CHECKLIST.md`.
+A minified unsigned release build is part of local engineering verification. Final brand/store identity, owner-controlled signing credentials, privacy/dependency review, physical validation and beta outcomes are still required. No store publication, cloud sync, payment setup or trainer dashboard is claimed. Native phone/watch source is not yet built or device-validated. Prices and revenue remain hypotheses. See `RELEASE_CHECKLIST.md`.
+
+## Alpha03 anatomy and Apple companion
+
+- [x] Primary/supporting muscle highlights for all eight current exercises, original front/back geometry, shared generated Kotlin/Swift catalog and bilingual labels.
+- [x] Working/warm-up sets, optional RPE, previous-value copy, best recorded working load and seven-day muscle associations.
+- [x] Encrypted schema 2→3 migration and bounded transactional Android workout merge with preview/deduplication.
+- [x] Primary-source feature research in `COMPETITOR_FEATURE_RESEARCH.md`.
+- [x] Native phone/watch source: offline logging/editing, muscles, rest countdown, persisted drafts/outbox and explicit Android file bridge.
+- [ ] Compile/test native apps on macOS and validate paired WatchConnectivity on physical devices.
+- [ ] Verify VoiceOver/RTL, interruptions/recovery, capacity, stale program delivery, background timers and file errors on Apple hardware.
+- [ ] Add reviewed HealthKit lifecycle/sensors as a separate permission/product change. Current watch app is a manual logger.
+- [ ] Add equipment-specific exercise variants and qualified review; evaluate supersets/custom exercises and fast-entry improvements against the study.

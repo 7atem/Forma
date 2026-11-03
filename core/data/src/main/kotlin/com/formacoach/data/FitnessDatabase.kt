@@ -19,9 +19,12 @@ data class ProfileRow(@PrimaryKey val id:Int=1,val name:String,val goal:String,v
 data class SessionRow(@PrimaryKey val id:String,val day:Long,val templateId:String,val completedAt:Long?,
     @ColumnInfo(defaultValue="''") val label:String="",
     @ColumnInfo(defaultValue="'[]'") val exerciseOrder:String="[]",
-    @ColumnInfo(defaultValue="90") val restSeconds:Int=90)
+    @ColumnInfo(defaultValue="90") val restSeconds:Int=90,
+    @ColumnInfo(defaultValue="'LOCAL'") val source:String="LOCAL",
+    val averageHeartRateBpm:Double?=null,val activeEnergyKcal:Double?=null,val healthKitWorkoutId:String?=null)
 @Entity(tableName="training_sets",foreignKeys=[ForeignKey(entity=SessionRow::class,parentColumns=["id"],childColumns=["sessionId"],onDelete=ForeignKey.CASCADE)],indices=[Index("sessionId")])
-data class SetRow(@PrimaryKey val id:String,val sessionId:String,val exercise:String,val reps:Int,val weightKg:Double)
+data class SetRow(@PrimaryKey val id:String,val sessionId:String,val exercise:String,val reps:Int,val weightKg:Double,
+    @ColumnInfo(defaultValue="'WORKING'") val kind:String="WORKING",val rpe:Double?=null)
 @Entity(tableName="meals",indices=[Index("day")])
 data class MealRow(@PrimaryKey val id:String,val day:Long,val name:String,val calories:Double,val protein:Double,val carbs:Double,val fat:Double,
     val foodId:String?=null,val quantity:Double?=null,val unit:String?=null,@ColumnInfo(defaultValue="''") val source:String="")
@@ -55,8 +58,8 @@ interface FitnessDao {
     @Transaction
     suspend fun readSnapshot():FitnessSnapshot=FitnessSnapshot(
         readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget)},
-        allSessions().map {Session(it.id,LocalDate.ofEpochDay(it.day),it.templateId,it.completedAt,it.label,Json.decodeFromString(it.exerciseOrder),it.restSeconds)},
-        allSets().map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg)},
+        allSessions().map {Session(it.id,LocalDate.ofEpochDay(it.day),it.templateId,it.completedAt,it.label,Json.decodeFromString(it.exerciseOrder),it.restSeconds,SessionSource.valueOf(it.source),it.averageHeartRateBpm,it.activeEnergyKcal,it.healthKitWorkoutId)},
+        allSets().map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg,SetKind.valueOf(it.kind),it.rpe)},
         allMeals().map {Meal(it.id,LocalDate.ofEpochDay(it.day),it.name,it.calories,it.protein,it.carbs,it.fat,it.foodId,it.quantity,it.unit?.let(NutritionUnit::valueOf),it.source)},
         allMeasurements().map {Measurement(LocalDate.ofEpochDay(it.day),it.weightKg,it.waistCm)},
         allPrograms().map {TrainingProgram(it.id,it.name,Json.decodeFromString(it.exercises),it.restSeconds)},
@@ -72,6 +75,21 @@ interface FitnessDao {
     @Transaction suspend fun startSession(row:SessionRow) {check(draftCount()==0);insertSession(row)}
     @Query("SELECT * FROM sessions WHERE id=:id") suspend fun session(id:String):SessionRow?
     @Insert suspend fun insertSet(row:SetRow)
+    @Query("SELECT * FROM training_sets WHERE sessionId=:id") suspend fun sessionSets(id:String):List<SetRow>
+    /** Entire batch rolls back on conflicting IDs. Re-import of identical records is a no-op. */
+    @Transaction suspend fun mergeWatch(workouts:List<com.formacoach.wearables.WatchWorkout>) {
+        workouts.forEach {workout ->
+            val incoming=workout.session().row()
+            val sets=workout.trainingSets().map {it.row()}
+            val existing=session(incoming.id)
+            if(existing!=null) {
+                check(existing==incoming && sessionSets(incoming.id).sortedBy {it.id}==sets.sortedBy {it.id})
+            } else {
+                check(sets.none {set(it.id)!=null})
+                insertSession(incoming);sets.forEach {insertSet(it)}
+            }
+        }
+    }
     @Transaction suspend fun addSet(row:SetRow) {check(checkNotNull(session(row.sessionId)).completedAt==null);insertSet(row)}
     @Query("SELECT * FROM training_sets WHERE id=:id") suspend fun set(id:String):SetRow?
     @Query("SELECT COUNT(*) FROM training_sets WHERE sessionId=:id") suspend fun setCount(id:String):Int
@@ -135,18 +153,28 @@ interface FitnessDao {
 }
 
 internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget)
-internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds)
-internal fun TrainingSet.row()=SetRow(id,sessionId,exercise.name,reps,weightKg)
+internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds,source.name,averageHeartRateBpm,activeEnergyKcal,healthKitWorkoutId)
+internal fun TrainingSet.row()=SetRow(id,sessionId,exercise.name,reps,weightKg,kind.name,rpe)
 internal fun Meal.row()=MealRow(id,date.toEpochDay(),name,calories,protein,carbs,fat,foodId,quantity,unit?.name,source)
 internal fun TrainingProgram.row()=ProgramRow(id,name,Json.encodeToString(exercises),restSeconds)
 internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
 internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
 internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
-@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class],version=2,exportSchema=true)
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class],version=3,exportSchema=true)
 abstract class FitnessDatabase:RoomDatabase() {
     abstract fun dao():FitnessDao
     companion object {
+        val MIGRATION_2_3=object:Migration(2,3) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE sessions ADD COLUMN source TEXT NOT NULL DEFAULT 'LOCAL'")
+                db.execSQL("ALTER TABLE sessions ADD COLUMN averageHeartRateBpm REAL")
+                db.execSQL("ALTER TABLE sessions ADD COLUMN activeEnergyKcal REAL")
+                db.execSQL("ALTER TABLE sessions ADD COLUMN healthKitWorkoutId TEXT")
+                db.execSQL("ALTER TABLE training_sets ADD COLUMN kind TEXT NOT NULL DEFAULT 'WORKING'")
+                db.execSQL("ALTER TABLE training_sets ADD COLUMN rpe REAL")
+            }
+        }
         val MIGRATION_1_2=object:Migration(1,2) {
             override fun migrate(db:SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE sessions ADD COLUMN label TEXT NOT NULL DEFAULT ''")
@@ -169,7 +197,7 @@ abstract class FitnessDatabase:RoomDatabase() {
             System.loadLibrary("sqlcipher")
             val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
             return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2).build()
+                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3).build()
         }
     }
 }

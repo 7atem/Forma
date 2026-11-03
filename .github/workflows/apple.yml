@@ -1,0 +1,19 @@
+name: Apple source validation
+on:
+  push:
+    paths: ['apple/**', 'catalog/**', 'contracts/**', 'scripts/**', '.github/workflows/apple.yml']
+  pull_request:
+    paths: ['apple/**', 'catalog/**', 'contracts/**', 'scripts/**', '.github/workflows/apple.yml']
+jobs:
+  apple:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/generate_exercise_catalog.py --check
+      - run: python3 scripts/check_apple_sources.py
+      - run: swift test --package-path apple
+      - run: brew install xcodegen
+      - run: xcodegen generate
+        working-directory: apple
+      - run: xcodebuild -project apple/FormaApple.xcodeproj -scheme FormaPhone -destination 'generic/platform=iOS Simulator' -derivedDataPath apple/DerivedData CODE_SIGNING_ALLOWED=NO build
+      - run: xcodebuild -project apple/FormaApple.xcodeproj -scheme FormaWatch -destination 'generic/platform=watchOS Simulator' -derivedDataPath apple/DerivedData CODE_SIGNING_ALLOWED=NO build

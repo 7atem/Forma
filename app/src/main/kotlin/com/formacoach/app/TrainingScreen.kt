@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.formacoach.coach.RestTimer
 import com.formacoach.coach.TrainingHistory
+import com.formacoach.coach.MuscleTraining
 import com.formacoach.model.*
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -52,9 +53,20 @@ internal fun TrainContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
     InfoCard {
         Text(stringResource(R.string.load_history),style=MaterialTheme.typography.titleLarge)
         ExercisePicker(historyExercise,{historyExercise=it})
+        MuscleMap(historyExercise)
+        MuscleTraining.best(state.snapshot,historyExercise,today)?.let {
+            Text(stringResource(R.string.best_recorded_load,number(it.weightKg),number(it.repsAtWeight.toDouble(),0),dateLabel(it.date)))
+        }
         val points=TrainingHistory.loads(state.snapshot,historyExercise,today).takeLast(30)
         HistoryChart(points,stringResource(R.string.kg))
         Text(stringResource(R.string.external_load_note),style=MaterialTheme.typography.bodySmall)
+    }
+    InfoCard {
+        Text(stringResource(R.string.weekly_muscles),style=MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.weekly_muscles_note),style=MaterialTheme.typography.bodySmall)
+        val counts=MuscleTraining.weekly(state.snapshot,today).filter {it.primarySets+it.secondarySets>0}
+        if(counts.isEmpty()) Text(stringResource(R.string.no_sessions))
+        counts.forEach {Text(stringResource(R.string.muscle_set_count,stringResource(muscleLabel(it.muscle)),number(it.primarySets.toDouble(),0),number(it.secondarySets.toDouble(),0)))}
     }
     Text(stringResource(R.string.recent_sessions),style=MaterialTheme.typography.titleLarge)
     Input(R.string.search_history,search,{search=it;limit=10},"session_search",numeric=false)
@@ -72,24 +84,33 @@ private fun SessionForm(session:Session,state:AppState,vm:FitnessViewModel) {
     var exercise by rememberSaveable(session.id) {mutableStateOf(choices.first())}
     var reps by rememberSaveable(session.id) {mutableStateOf("")}
     var weight by rememberSaveable(session.id) {mutableStateOf("")}
+    var warmup by rememberSaveable(session.id) {mutableStateOf(false)}
+    var rpe by rememberSaveable(session.id) {mutableStateOf("")}
     var deadline by rememberSaveable(session.id) {mutableLongStateOf(0)}
     var elapsed by remember {mutableLongStateOf(SystemClock.elapsedRealtime())}
     LaunchedEffect(deadline) {while(deadline>SystemClock.elapsedRealtime()) {elapsed=SystemClock.elapsedRealtime();delay(1000)};elapsed=SystemClock.elapsedRealtime()}
     val remaining=RestTimer.remainingSeconds(deadline,elapsed,session.restSeconds)
     val sets=state.snapshot.sets.filter {it.sessionId==session.id}
-    val candidate=runCatching {TrainingSet(sessionId=session.id,exercise=exercise,reps=requireNotNull(NumericInput.integer(reps)),weightKg=requireNotNull(NumericInput.decimal(weight)))}.getOrNull()
+    val candidate=runCatching {TrainingSet(sessionId=session.id,exercise=exercise,reps=requireNotNull(NumericInput.integer(reps)),weightKg=requireNotNull(NumericInput.decimal(weight)),kind=if(warmup) SetKind.WARM_UP else SetKind.WORKING,rpe=if(rpe.isBlank()) null else requireNotNull(NumericInput.decimal(rpe)))}.getOrNull()
     InfoCard {
         Text(if(session.label.isBlank()) stringResource(R.string.active_session,session.templateId) else session.label,style=MaterialTheme.typography.titleLarge)
         Text(dateLabel(session.date))
         ExercisePicker(exercise,{exercise=it},choices)
+        MuscleMap(exercise)
         val previous=state.snapshot.sets.lastOrNull {set -> set.exercise==exercise && state.snapshot.sessions.any {it.id==set.sessionId && it.completedAt!=null && it.date<=session.date}}
-        previous?.let {Text(stringResource(R.string.previous_set,number(it.reps.toDouble(),0),number(it.weightKg)))}
+        previous?.let {last ->
+            Text(stringResource(R.string.previous_set,number(last.reps.toDouble(),0),number(last.weightKg)))
+            TextButton(onClick={reps=last.reps.toString();weight=last.weightKg.toString();warmup=last.kind==SetKind.WARM_UP;rpe=last.rpe?.toString().orEmpty()}) {Text(stringResource(R.string.copy_previous_set))}
+        }
         Text(stringResource(R.string.exercise_record_note),style=MaterialTheme.typography.bodySmall)
         Input(R.string.reps,reps,{reps=it},"set_reps")
         Input(R.string.weight_kg,weight,{weight=it},"set_weight")
+        FilterChip(selected=warmup,onClick={warmup=!warmup},label={Text(stringResource(R.string.warmup_set))},modifier=Modifier.testTag("warmup_set"))
+        Input(R.string.rpe_optional,rpe,{rpe=it},"set_rpe")
+        Text(stringResource(R.string.rpe_note),style=MaterialTheme.typography.bodySmall)
         Text(stringResource(R.string.zero_external_load),style=MaterialTheme.typography.bodySmall)
-        Button(onClick={candidate?.let {vm.addSet(session.id,it.exercise,it.reps,it.weightKg) {
-            reps="";weight="";elapsed=SystemClock.elapsedRealtime();deadline=elapsed+session.restSeconds*1000L
+        Button(onClick={candidate?.let {vm.addSet(session.id,it.exercise,it.reps,it.weightKg,it.kind,it.rpe) {
+            reps="";weight="";rpe="";elapsed=SystemClock.elapsedRealtime();deadline=elapsed+session.restSeconds*1000L
         }}},enabled=candidate!=null&&!state.busy,modifier=Modifier.fillMaxWidth().testTag("add_set")) {Text(stringResource(R.string.add_set))}
         Text(stringResource(R.string.rest_countdown,number(remaining.toDouble(),0),number(session.restSeconds.toDouble(),0)),style=MaterialTheme.typography.titleMedium)
         Text(stringResource(R.string.timer_note),style=MaterialTheme.typography.bodySmall)
@@ -108,6 +129,11 @@ private fun SessionHistoryCard(session:Session,state:AppState,vm:FitnessViewMode
     val sets=state.snapshot.sets.filter {it.sessionId==session.id}
     InfoCard {
         Text(if(session.label.isNotBlank()) session.label else stringResource(R.string.session_summary,session.templateId,number(sets.size.toDouble(),0)),style=MaterialTheme.typography.titleMedium)
+        if(session.source==SessionSource.APPLE_WATCH_IMPORT) {
+            Text(stringResource(R.string.watch_record_source))
+            session.averageHeartRateBpm?.let {Text(stringResource(R.string.watch_heart_rate,number(it,0)))}
+            session.activeEnergyKcal?.let {Text(stringResource(R.string.watch_energy,number(it,0)))}
+        }
         DateChoice(session.date,today,{vm.moveSession(session.id,it)},"session_date_${session.id}")
         sets.forEach {SetCard(it,state.busy,canRemove=sets.size>1,vm=vm)}
         if(sets.size==1) Text(stringResource(R.string.last_set_note),style=MaterialTheme.typography.bodySmall)
@@ -120,6 +146,8 @@ private fun SetCard(set:TrainingSet,busy:Boolean,canRemove:Boolean,vm:FitnessVie
     var editing by remember {mutableStateOf(false)}
     Column {
         Text(stringResource(R.string.set_summary,stringResource(exerciseLabel(set.exercise)),number(set.reps.toDouble(),0),number(set.weightKg)))
+        Text(stringResource(if(set.kind==SetKind.WARM_UP) R.string.warmup_set else R.string.working_set))
+        set.rpe?.let {Text(stringResource(R.string.rpe_value,number(it,1)))}
         Row {
             TextButton(onClick={editing=true},enabled=!busy,modifier=Modifier.testTag("edit_set")) {Text(stringResource(R.string.edit))}
             ConfirmButton(R.string.remove,stringResource(R.string.delete_set_note),!busy&&canRemove) {vm.removeSet(set.id)}
@@ -133,8 +161,12 @@ private fun SetDialog(set:TrainingSet,busy:Boolean,onDismiss:()->Unit,onSave:(Tr
     var exercise by remember {mutableStateOf(set.exercise)}
     var reps by remember {mutableStateOf(set.reps.toString())}
     var weight by remember {mutableStateOf(set.weightKg.toString())}
-    val value=runCatching {set.copy(exercise=exercise,reps=requireNotNull(NumericInput.integer(reps)),weightKg=requireNotNull(NumericInput.decimal(weight)))}.getOrNull()
+    var warmup by remember {mutableStateOf(set.kind==SetKind.WARM_UP)}
+    var rpe by remember {mutableStateOf(set.rpe?.toString().orEmpty())}
+    val value=runCatching {set.copy(exercise=exercise,reps=requireNotNull(NumericInput.integer(reps)),weightKg=requireNotNull(NumericInput.decimal(weight)),kind=if(warmup) SetKind.WARM_UP else SetKind.WORKING,rpe=if(rpe.isBlank()) null else requireNotNull(NumericInput.decimal(rpe)))}.getOrNull()
     AlertDialog(onDismissRequest=onDismiss,title={Text(stringResource(R.string.edit_set))},text={Column(verticalArrangement=Arrangement.spacedBy(12.dp)) {
+        FilterChip(selected=warmup,onClick={warmup=!warmup},label={Text(stringResource(R.string.warmup_set))})
+        Input(R.string.rpe_optional,rpe,{rpe=it},"edit_rpe")
         ExercisePicker(exercise,{exercise=it});Input(R.string.reps,reps,{reps=it},"edit_reps");Input(R.string.weight_kg,weight,{weight=it},"edit_weight")
     }},confirmButton={TextButton(onClick={value?.let(onSave)},enabled=value!=null&&!busy,modifier=Modifier.testTag("save_set_correction")) {Text(stringResource(R.string.save))}},dismissButton={TextButton(onClick=onDismiss) {Text(stringResource(R.string.cancel))}})
 }

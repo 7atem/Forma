@@ -16,5 +16,9 @@ jobs:
         run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
       - name: Check translations
         run: python3 scripts/check_localization.py
+      - name: Check shared exercise and Apple contracts
+        run: |
+          python3 scripts/generate_exercise_catalog.py --check
+          python3 scripts/check_apple_sources.py
       - name: Test, build and lint
-        run: bash ./gradlew :core:coach:test :core:backup:test :app:assembleDebug :app:lintDebug :app:assembleRelease --max-workers=1
+        run: bash ./gradlew :core:coach:test :core:wearables:test :core:backup:test :app:assembleDebug :app:lintDebug :app:assembleRelease --max-workers=1

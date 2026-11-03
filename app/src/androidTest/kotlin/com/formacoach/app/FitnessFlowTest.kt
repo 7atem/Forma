@@ -26,6 +26,9 @@ class FitnessFlowTest {
         rule.onNodeWithTag("tab_1").performClick()
         rule.onNodeWithTag("start_A").performScrollTo().performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("set_reps").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("muscle_map_SQUAT").performScrollTo().assertExists()
+        rule.onNodeWithTag("warmup_set").performScrollTo().performClick()
+        rule.onNodeWithTag("set_rpe").performScrollTo().performTextInput("٧٫٥")
         rule.onNodeWithTag("set_reps").performScrollTo().performTextInput("٨")
         rule.onNodeWithTag("set_weight").performScrollTo().performTextInput("٢٠٫٥")
         rule.onNodeWithTag("set_weight").performImeAction()
@@ -116,5 +119,19 @@ class FitnessFlowTest {
         rule.onNodeWithText(rule.activity.getString(R.string.weekly_review)).performScrollTo().assertExists()
         val permissions=rule.activity.packageManager.getPackageInfo(rule.activity.packageName,android.content.pm.PackageManager.GET_PERMISSIONS).requestedPermissions.orEmpty()
         org.junit.Assert.assertFalse(permissions.contains(android.Manifest.permission.INTERNET))
+    }
+
+    @Test fun muscleMapsCoverEveryExerciseAndWatchTransferIsAccessible() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_1").performClick()
+        rule.onNodeWithText(rule.activity.getString(R.string.load_history)).performScrollTo()
+        for(exercise in com.formacoach.model.Exercise.entries) {
+            rule.onAllNodesWithTag("exercise_picker").onLast().performScrollTo().performClick()
+            rule.onNodeWithTag("exercise_${exercise.name}").performScrollTo().performClick()
+            rule.onAllNodesWithTag("muscle_map_${exercise.name}").onLast().performScrollTo().assertExists()
+        }
+        rule.onNodeWithTag("watch_settings").performScrollTo().performClick()
+        rule.onNodeWithTag("watch_export").performScrollTo().assertIsNotEnabled()
+        rule.onNodeWithTag("watch_open_import").performScrollTo().assertIsEnabled()
     }
 }

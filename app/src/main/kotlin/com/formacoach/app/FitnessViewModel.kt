@@ -62,8 +62,8 @@ class FitnessViewModel @Inject constructor(private val repository: FitnessReposi
 
     fun saveProfile(profile: Profile, done: () -> Unit) = write(done) { repository.saveProfile(profile) }
     fun start(template: String, date: LocalDate = LocalDate.now()) = write { repository.startSession(template,date) }
-    fun addSet(session: String, exercise: Exercise, reps: Int, kg: Double, done: () -> Unit) = write(done) {
-        repository.addSet(TrainingSet(sessionId=session, exercise=exercise, reps=reps, weightKg=kg))
+    fun addSet(session: String, exercise: Exercise, reps: Int, kg: Double, kind:SetKind=SetKind.WORKING,rpe:Double?=null,done: () -> Unit) = write(done) {
+        repository.addSet(TrainingSet(sessionId=session, exercise=exercise, reps=reps, weightKg=kg,kind=kind,rpe=rpe))
     }
     fun finish(id: String) = write { repository.finishSession(id) }
     fun removeSet(id: String) = write { repository.removeSet(id) }
@@ -82,6 +82,7 @@ class FitnessViewModel @Inject constructor(private val repository: FitnessReposi
     fun checkIn(value: WeeklyCheckIn,done: () -> Unit) = write(done) {repository.recordCheckIn(value)}
     fun acceptProposal(id: String) = write {repository.acceptProposal(id)}
     fun dismissProposal(id: String) = write {repository.dismissProposal(id)}
+    fun importWatch(transfer:com.formacoach.wearables.WatchTransfer,done:()->Unit)=write(done) {repository.importWatch(transfer)}
     suspend fun export(password: CharArray): ByteArray = repository.export(password)
     suspend fun previewRestore(bytes: ByteArray,password: CharArray): FitnessSnapshot = repository.previewRestore(bytes,password)
     fun restore(data: FitnessSnapshot,done: () -> Unit) = write(done) {

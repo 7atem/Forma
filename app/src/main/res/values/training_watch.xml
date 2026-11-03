@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="muscles_working">Muscles working</string>
+    <string name="body_front">Front</string>
+    <string name="body_back">Back</string>
+    <string name="muscle_primary">Primary • %1$s</string>
+    <string name="muscle_secondary">Supporting • %1$s</string>
+    <string name="muscle_accessibility">%1$s. Primary: %2$s. Supporting: %3$s.</string>
+    <string name="muscle_note">Simplified major muscle groups, not measured activation. Equipment and technique change involvement. Hip hinge represents a Romanian-deadlift-style movement.</string>
+    <string name="weekly_muscles">Muscles • last 7 days</string>
+    <string name="weekly_muscles_note">Completed working sets only. Primary and supporting counts are separate associations, not recovery scores or additive effective volume.</string>
+    <string name="muscle_set_count">%1$s • %2$s primary / %3$s supporting</string>
+    <string name="best_recorded_load">Best recorded working load: %1$s kg × %2$s reps · %3$s</string>
+    <string name="copy_previous_set">Copy previous values</string>
+    <string name="warmup_set">Warm-up set</string>
+    <string name="working_set">Working set</string>
+    <string name="rpe_optional">Effort (RPE 0–10, optional)</string>
+    <string name="rpe_note">Your reported effort: 0 = no effort, 10 = maximum. No load is prescribed from this entry.</string>
+    <string name="rpe_value">RPE %1$s</string>
+    <string name="apple_watch">Apple Watch</string>
+    <string name="watch_bridge_note">Apple Watch requires a paired iPhone. Export programs here, open the file in the Forma iPhone companion, then send to the watch. Export finished workouts from iPhone and import them here. Apple source needs Mac and device validation before installation.</string>
+    <string name="watch_plaintext_note">Transfer files contain readable workout names and results. Choose a private destination. They exclude your profile, food logs and keys; use encrypted backup for a full archive.</string>
+    <string name="watch_exported">Program file saved. Open it in the iPhone companion.</string>
+    <string name="watch_imported">Workouts merged. Identical existing workouts were kept once.</string>
+    <string name="watch_failed">Unable to read or save this transfer. Check its format, size and supported exercises.</string>
+    <string name="watch_preview">%1$s completed workouts · %2$s sets</string>
+    <string name="watch_import_note">Only completed workouts are merged. Existing profile, meals and programs are retained. File origin is not authenticated. Heart rate and energy are optional device estimates; calories are never added to food targets.</string>
+    <string name="watch_import">Confirm workout import</string>
+    <string name="watch_conflict">Import rejected. Check dates and conflicting workout or set IDs. No partial batch was saved.</string>
+    <string name="watch_select_programs">Select up to 20 programs to send</string>
+    <string name="watch_export">Export selected programs</string>
+    <string name="watch_open">Open completed workouts file</string>
+    <string name="watch_record_source">Imported Apple Watch file • editable local copy</string>
+    <string name="watch_heart_rate">Average heart rate: %1$s bpm</string>
+    <string name="watch_energy">Estimated active energy: %1$s kcal</string>
+</resources>

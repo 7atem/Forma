@@ -14,3 +14,9 @@ models/
 captures/
 __pycache__/
 artifacts/
+
+apple/.build/
+apple/.swiftpm/
+apple/Generated/
+apple/*.xcodeproj/
+apple/DerivedData/

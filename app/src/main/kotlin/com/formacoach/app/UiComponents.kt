@@ -48,7 +48,7 @@ internal fun ExercisePicker(selected:Exercise,onChange:(Exercise)->Unit,choices:
     Box {
         OutlinedButton(onClick={expanded=true},modifier=Modifier.fillMaxWidth().testTag("exercise_picker")) {Text(stringResource(exerciseLabel(selected)))}
         DropdownMenu(expanded=expanded,onDismissRequest={expanded=false}) {
-            choices.forEach {value -> DropdownMenuItem(text={Text(stringResource(exerciseLabel(value)))},onClick={onChange(value);expanded=false})}
+            choices.forEach {value -> DropdownMenuItem(text={Text(stringResource(exerciseLabel(value)))},onClick={onChange(value);expanded=false},modifier=Modifier.testTag("exercise_${value.name}"))}
         }
     }
 }

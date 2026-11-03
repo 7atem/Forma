@@ -1,5 +1,7 @@
 # Daily workflow implementation — alpha02
 
+Historical alpha02 scope; schema is now v3. See `ARCHITECTURE.md`, `EXERCISE_MUSCLES.md` and `APPLE_WATCH.md` for alpha03 additions.
+
 Date: 3 November 2026. Base: alpha01 commit `645b030`; branch `codex/forma-daily-workflow`. Nemory remains separate and unchanged. The alpha01 source/history checkpoint is `checkpoint/forma-alpha01`, with a verified local bundle in `D:\Archives\Forma\before-daily-workflow-2026-11-03`.
 
 ## Implemented behavior

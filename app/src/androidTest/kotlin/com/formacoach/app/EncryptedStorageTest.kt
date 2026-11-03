@@ -170,23 +170,7 @@ class EncryptedStorageTest {
     }
 
     @Test fun encryptedSchemaOneMigratesWithoutLosingExistingRecords()=runBlocking {
-        System.loadLibrary("sqlcipher")
-        val schema=JSONObject(InstrumentationRegistry.getInstrumentation().context.assets.open("com.formacoach.data.FitnessDatabase/1.json").bufferedReader().use {it.readText()}).getJSONObject("database")
-        val key=KeystoreManager(context).getOrCreateDatabasePassphrase()
-        val helper=SupportOpenHelperFactory(key).create(SupportSQLiteOpenHelper.Configuration.builder(context).name("forma.db").callback(object:SupportSQLiteOpenHelper.Callback(1) {
-            override fun onCreate(db:SupportSQLiteDatabase) {
-                val entities=schema.getJSONArray("entities")
-                for(i in 0 until entities.length()) {
-                    val entity=entities.getJSONObject(i)
-                    db.execSQL(entity.getString("createSql").replace("${'$'}{TABLE_NAME}",entity.getString("tableName")))
-                    val indices=entity.optJSONArray("indices")?:JSONArray()
-                    for(j in 0 until indices.length()) db.execSQL(indices.getJSONObject(j).getString("createSql").replace("${'$'}{TABLE_NAME}",entity.getString("tableName")))
-                }
-                val setup=schema.getJSONArray("setupQueries")
-                for(i in 0 until setup.length()) db.execSQL(setup.getString(i))
-            }
-            override fun onUpgrade(db:SupportSQLiteDatabase,oldVersion:Int,newVersion:Int)=Unit
-        }).build())
+        val helper=createLegacy(1)
         helper.writableDatabase.execSQL("INSERT INTO profile VALUES(1,'Upgrade test','FAT_LOSS',3,2200,130.0)")
         helper.writableDatabase.execSQL("INSERT INTO meals VALUES('old-meal',20759,'Old meal',500.0,30.0,50.0,20.0)")
         helper.writableDatabase.execSQL("INSERT INTO sessions VALUES('old-session',20759,'B',1)")
@@ -200,5 +184,66 @@ class EncryptedStorageTest {
         assertEquals(listOf(Exercise.LEG_PRESS,Exercise.LAT_PULLDOWN,Exercise.HIP_HINGE),data.sessions.single().plannedExercises)
         assertTrue(data.foods.isEmpty())
         assertTrue(data.programs.isEmpty())
+    }
+
+    private fun createLegacy(version:Int):SupportSQLiteOpenHelper {
+        System.loadLibrary("sqlcipher")
+        val schema=JSONObject(InstrumentationRegistry.getInstrumentation().context.assets.open("com.formacoach.data.FitnessDatabase/${version}.json").bufferedReader().use {it.readText()}).getJSONObject("database")
+        val key=KeystoreManager(context).getOrCreateDatabasePassphrase()
+        val helper=SupportOpenHelperFactory(key).create(SupportSQLiteOpenHelper.Configuration.builder(context).name("forma.db").callback(object:SupportSQLiteOpenHelper.Callback(version) {
+            override fun onCreate(db:SupportSQLiteDatabase) {
+                val entities=schema.getJSONArray("entities")
+                for(i in 0 until entities.length()) {
+                    val entity=entities.getJSONObject(i)
+                    db.execSQL(entity.getString("createSql").replace("${'$'}{TABLE_NAME}",entity.getString("tableName")))
+                    val indices=entity.optJSONArray("indices")?:JSONArray()
+                    for(j in 0 until indices.length()) db.execSQL(indices.getJSONObject(j).getString("createSql").replace("${'$'}{TABLE_NAME}",entity.getString("tableName")))
+                }
+                val setup=schema.getJSONArray("setupQueries")
+                for(i in 0 until setup.length()) db.execSQL(setup.getString(i))
+            }
+            override fun onUpgrade(db:SupportSQLiteDatabase,oldVersion:Int,newVersion:Int)=Unit
+        }).build())
+        return helper
+    }
+
+    @Test fun encryptedSchemaTwoRetainsAllHistoryAndAddsWorkingDefaults()=runBlocking {
+        val helper=createLegacy(2)
+        helper.writableDatabase.execSQL("INSERT INTO sessions VALUES('v2',20759,'A',1,'Saved name','[\"SQUAT\"]',45)")
+        helper.writableDatabase.execSQL("INSERT INTO training_sets VALUES('v2-set','v2','SQUAT',8,40.5)")
+        helper.close()
+        database=FitnessDatabase.open(context)
+        val data=database!!.dao().readSnapshot()
+        assertEquals("Saved name",data.sessions.single().label)
+        assertEquals(45,data.sessions.single().restSeconds)
+        assertEquals(SessionSource.LOCAL,data.sessions.single().source)
+        assertEquals(SetKind.WORKING,data.sets.single().kind)
+        assertNull(data.sets.single().rpe)
+    }
+
+    @Test fun watchImportIsIdempotentConflictsRollbackAndNewFieldsSurviveBackup()=runBlocking {
+        val repo=repository()
+        repo.saveProfile(Profile("Keep profile",Goal.BUILD_HABIT,3))
+        val workout=com.formacoach.wearables.WatchWorkout("watch-1",LocalDate.of(2026,11,2),"starter-A","Watch A",listOf(Exercise.SQUAT),90,1793613600000,
+            listOf(com.formacoach.wearables.WatchSet("watch-set-1",Exercise.SQUAT,8,20.5,SetKind.WARM_UP,4.5)),120.0,100.0,"health-id")
+        val transfer=com.formacoach.wearables.WatchTransfer(workouts=listOf(workout))
+        repo.importWatch(transfer);repo.importWatch(transfer)
+        assertEquals(1,database!!.dao().allSessions().size)
+        assertEquals(1,database!!.dao().allSets().size)
+        val second=workout.copy(id="watch-2",sets=listOf(workout.sets.single().copy(id="watch-set-2")))
+        var rejected=false
+        try {repo.importWatch(transfer.copy(workouts=listOf(second,workout.copy(programName="Conflicting name"))))} catch(_:Exception) {rejected=true}
+        assertTrue(rejected)
+        assertEquals(1,database!!.dao().allSessions().size)
+        assertNull(database!!.dao().session("watch-2"))
+        assertEquals("Keep profile",database!!.dao().readProfile()!!.name)
+        val archive=repo.export("watch backup test password".toCharArray())
+        val data=repo.previewRestore(archive,"watch backup test password".toCharArray())
+        assertEquals(SetKind.WARM_UP,data.sets.single().kind)
+        assertEquals(4.5,data.sets.single().rpe!!,0.0)
+        assertEquals(120.0,data.sessions.single().averageHeartRateBpm!!,0.0)
+        assertEquals(SessionSource.APPLE_WATCH_IMPORT,data.sessions.single().source)
+        repo.restore(data)
+        assertEquals(data,database!!.dao().readSnapshot())
     }
 }

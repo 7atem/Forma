@@ -25,6 +25,8 @@ data class Profile(
 }
 
 enum class Exercise { SQUAT, LEG_PRESS, CHEST_PRESS, ROW, LAT_PULLDOWN, HIP_HINGE, SHOULDER_PRESS, SPLIT_SQUAT }
+enum class SetKind { WORKING, WARM_UP }
+enum class SessionSource { LOCAL, APPLE_WATCH_IMPORT }
 
 data class TrainingTemplate(val id: String, val exercises: List<Exercise>)
 
@@ -44,6 +46,10 @@ data class Session(
     val label: String = "",
     val plannedExercises: List<Exercise> = emptyList(),
     val restSeconds: Int = 90,
+    val source: SessionSource = SessionSource.LOCAL,
+    val averageHeartRateBpm: Double? = null,
+    val activeEnergyKcal: Double? = null,
+    val healthKitWorkoutId: String? = null,
 ) {
     init {
         require(id.isNotBlank() && id.length <= 80)
@@ -51,6 +57,9 @@ data class Session(
         require(label.length <= 120)
         require(plannedExercises.size <= 20 && plannedExercises.distinct().size == plannedExercises.size)
         require(restSeconds in 15..600)
+        require(averageHeartRateBpm == null || averageHeartRateBpm.isFinite() && averageHeartRateBpm in 1.0..300.0)
+        require(activeEnergyKcal == null || activeEnergyKcal.isFinite() && activeEnergyKcal in 0.0..100000.0)
+        require(healthKitWorkoutId == null || healthKitWorkoutId.isNotBlank() && healthKitWorkoutId.length <= 80)
     }
 }
 
@@ -61,11 +70,14 @@ data class TrainingSet(
     val exercise: Exercise,
     val reps: Int,
     val weightKg: Double,
+    val kind: SetKind = SetKind.WORKING,
+    val rpe: Double? = null,
 ) {
     init {
         require(id.isNotBlank() && id.length <= 80 && sessionId.isNotBlank() && sessionId.length <= 80)
         require(reps in 1..1000)
         require(weightKg.isFinite() && weightKg in 0.0..1000.0)
+        require(rpe == null || rpe.isFinite() && rpe in 0.0..10.0)
     }
 }
 

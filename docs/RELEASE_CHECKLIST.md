@@ -18,3 +18,12 @@ This is a development alpha. A built APK or a passing emulator suite is not a pu
 - [ ] Run a 30–50-person beta and examine actual repeat usage before payment experiments.
 
 No store upload, public repository push, recruitment, billing setup or external messages are performed by the development checks.
+
+## Apple companion and anatomy
+
+- [ ] Run native Swift package tests and compile both Xcode simulator targets on macOS. CI configuration alone is not a result.
+- [ ] Validate actual paired iPhone/watch delivery, durable ACK/retry, delayed/stale libraries, duplicates/conflicts, capacity, relaunch and file-provider failures.
+- [ ] Review OS-protected Apple storage, backup/recovery, export/deletion, VoiceOver/Arabic layout and foreground timer limitations.
+- [ ] Define and review a HealthKit lifecycle/privacy implementation before recording sensors or writing Apple Health. Current source is a manual logger.
+- [ ] Obtain qualified review of the eight simplified muscle mappings and representative exercise variants. No measured activation/recovery claim.
+- [ ] Prepare original Apple icons/store assets, choose owner signing credentials and review final platform disclosures before distribution.

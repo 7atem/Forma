@@ -44,4 +44,14 @@ class PortableBackupTest {
     @Test fun `stream reader enforces a strict size limit`() {
         assertThrows(IllegalArgumentException::class.java) {PortableBackup.readBounded(ByteArrayInputStream(ByteArray(PortableBackup.MAX_PLAINTEXT_BYTES+100)))}
     }
+
+    @org.junit.Test fun alpha02RecordsWithoutNewFieldsKeepWorkingAndLocalDefaults() {
+        val raw="""{"sessions":[{"id":"legacy-session","date":"2026-11-02","templateId":"A","completedAt":1}],"sets":[{"id":"legacy-set","sessionId":"legacy-session","exercise":"SQUAT","reps":8,"weightKg":20.5}]}"""
+        val data=kotlinx.serialization.json.Json.decodeFromString<com.formacoach.model.FitnessSnapshot>(raw)
+        org.junit.Assert.assertEquals(com.formacoach.model.SetKind.WORKING,data.sets.single().kind)
+        org.junit.Assert.assertNull(data.sets.single().rpe)
+        org.junit.Assert.assertEquals(com.formacoach.model.SessionSource.LOCAL,data.sessions.single().source)
+        val bytes=PortableBackup.encrypt(data,"legacy backup test password".toCharArray(),1)
+        org.junit.Assert.assertEquals(data,PortableBackup.decrypt(bytes,"legacy backup test password".toCharArray()).data)
+    }
 }

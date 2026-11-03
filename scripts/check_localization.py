@@ -5,7 +5,13 @@ import xml.etree.ElementTree as ET
 
 root = Path(__file__).resolve().parents[1] / 'app/src/main/res'
 def load(folder):
-    return {node.attrib['name']: ''.join(node.itertext()) for node in ET.parse(root / folder / 'strings.xml').getroot()}
+    result = {}
+    for file in (root / folder).glob('*.xml'):
+        for node in ET.parse(file).getroot():
+            if node.tag != 'string': continue
+            assert node.attrib['name'] not in result, node.attrib['name']
+            result[node.attrib['name']] = ''.join(node.itertext())
+    return result
 
 en, ar = load('values'), load('values-ar')
 assert en.keys() == ar.keys(), f'Missing translations: {en.keys() ^ ar.keys()}'

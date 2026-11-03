@@ -46,6 +46,11 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     }
     suspend fun acceptProposal(id:String)=dao.acceptProposal(id)
     suspend fun dismissProposal(id:String)=dao.dismissProposal(id)
+    suspend fun importWatch(transfer:com.formacoach.wearables.WatchTransfer)=withContext(Dispatchers.IO) {
+        require(transfer.workouts.isNotEmpty())
+        transfer.workouts.forEach {checkDate(it.date);require(it.completedAtMillis<=clock.millis()+300_000)}
+        dao.mergeWatch(transfer.workouts)
+    }
     suspend fun export(password:CharArray):ByteArray=withContext(Dispatchers.IO) {
         try {PortableBackup.encrypt(dao.readSnapshot(),password,clock.millis())} finally {password.fill('\u0000')}
     }

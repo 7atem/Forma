@@ -20,4 +20,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Forma"
-include(":app", ":core:model", ":core:coach", ":core:data", ":core:backup")
+include(":app", ":core:model", ":core:coach", ":core:data", ":core:backup", ":core:wearables")
