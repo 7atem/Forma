@@ -1,6 +1,7 @@
 package com.formacoach.coach
 
 import com.formacoach.model.FitnessSnapshot
+import com.formacoach.model.DeviceClock
 import java.time.Clock
 import java.time.LocalDate
 
@@ -26,9 +27,8 @@ data class WeeklyReview(
 )
 
 /** Descriptive reporting only. No inferred compliance, causes, prescriptions or silent writes. */
-class WeeklyReviewEngine(private val clock: Clock = Clock.systemDefaultZone()) {
-    fun review(snapshot: FitnessSnapshot): WeeklyReview {
-        val today = LocalDate.now(clock)
+class WeeklyReviewEngine(private val clock: Clock = DeviceClock) {
+    fun review(snapshot: FitnessSnapshot, today: LocalDate = LocalDate.now(clock)): WeeklyReview {
         val start = today.minusDays(6)
         val previousStart = start.minusDays(7)
         val sessions = snapshot.sessions.filter { it.completedAt != null && it.date in start..today }

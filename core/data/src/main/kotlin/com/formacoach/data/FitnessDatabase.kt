@@ -2,63 +2,174 @@ package com.formacoach.data
 
 import android.content.Context
 import androidx.room.*
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.formacoach.data.security.KeystoreManager
+import com.formacoach.model.*
 import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
+import java.time.LocalDate
 
-@Entity(tableName = "profile")
-data class ProfileRow(@PrimaryKey val id: Int = 1, val name: String, val goal: String, val sessionsPerWeek: Int, val caloriesTarget: Int?, val proteinTarget: Double?)
-
-@Entity(tableName = "sessions", indices = [Index("day")])
-data class SessionRow(@PrimaryKey val id: String, val day: Long, val templateId: String, val completedAt: Long?)
-
-@Entity(tableName = "training_sets", foreignKeys = [ForeignKey(entity = SessionRow::class, parentColumns = ["id"], childColumns = ["sessionId"], onDelete = ForeignKey.CASCADE)], indices = [Index("sessionId")])
-data class SetRow(@PrimaryKey val id: String, val sessionId: String, val exercise: String, val reps: Int, val weightKg: Double)
-
-@Entity(tableName = "meals", indices = [Index("day")])
-data class MealRow(@PrimaryKey val id: String, val day: Long, val name: String, val calories: Double, val protein: Double, val carbs: Double, val fat: Double)
-
-@Entity(tableName = "measurements")
-data class MeasurementRow(@PrimaryKey val day: Long, val weightKg: Double?, val waistCm: Double?)
+@Entity(tableName="profile")
+data class ProfileRow(@PrimaryKey val id:Int=1,val name:String,val goal:String,val sessionsPerWeek:Int,val caloriesTarget:Int?,val proteinTarget:Double?)
+@Entity(tableName="sessions",indices=[Index("day")])
+data class SessionRow(@PrimaryKey val id:String,val day:Long,val templateId:String,val completedAt:Long?,
+    @ColumnInfo(defaultValue="''") val label:String="",
+    @ColumnInfo(defaultValue="'[]'") val exerciseOrder:String="[]",
+    @ColumnInfo(defaultValue="90") val restSeconds:Int=90)
+@Entity(tableName="training_sets",foreignKeys=[ForeignKey(entity=SessionRow::class,parentColumns=["id"],childColumns=["sessionId"],onDelete=ForeignKey.CASCADE)],indices=[Index("sessionId")])
+data class SetRow(@PrimaryKey val id:String,val sessionId:String,val exercise:String,val reps:Int,val weightKg:Double)
+@Entity(tableName="meals",indices=[Index("day")])
+data class MealRow(@PrimaryKey val id:String,val day:Long,val name:String,val calories:Double,val protein:Double,val carbs:Double,val fat:Double,
+    val foodId:String?=null,val quantity:Double?=null,val unit:String?=null,@ColumnInfo(defaultValue="''") val source:String="")
+@Entity(tableName="measurements")
+data class MeasurementRow(@PrimaryKey val day:Long,val weightKg:Double?,val waistCm:Double?)
+@Entity(tableName="programs")
+data class ProgramRow(@PrimaryKey val id:String,val name:String,val exercises:String,val restSeconds:Int)
+@Entity(tableName="foods")
+data class FoodRow(@PrimaryKey val id:String,val name:String,val payload:String)
+@Entity(tableName="check_ins",indices=[Index("day")])
+data class CheckInRow(@PrimaryKey val id:String,val day:Long,val availableSessions:Int,val foodLogComplete:Boolean,val notes:String)
+@Entity(tableName="plan_proposals",foreignKeys=[ForeignKey(entity=CheckInRow::class,parentColumns=["id"],childColumns=["checkInId"],onDelete=ForeignKey.CASCADE)],indices=[Index("checkInId")])
+data class ProposalRow(@PrimaryKey val id:String,val checkInId:String,val baseSessions:Int,val proposedSessions:Int,val evidence:String,val status:String)
 
 @Dao
 interface FitnessDao {
-    @Query("SELECT * FROM profile WHERE id = 1") fun profile(): Flow<ProfileRow?>
-    @Query("SELECT * FROM sessions ORDER BY day DESC, id") fun sessions(): Flow<List<SessionRow>>
-    @Query("SELECT * FROM training_sets ORDER BY rowid") fun sets(): Flow<List<SetRow>>
-    @Query("SELECT * FROM meals ORDER BY day DESC, rowid DESC") fun meals(): Flow<List<MealRow>>
-    @Query("SELECT * FROM measurements ORDER BY day DESC") fun measurements(): Flow<List<MeasurementRow>>
-    @Upsert suspend fun saveProfile(row: ProfileRow)
-    @Insert suspend fun startSession(row: SessionRow)
-    @Insert suspend fun insertSet(row: SetRow)
-    @Query("SELECT * FROM sessions WHERE id = :id") suspend fun session(id: String): SessionRow?
+    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class])
+    fun changes(query:SupportSQLiteQuery):Flow<Int>
+    @Query("SELECT * FROM profile WHERE id=1") fun profile():Flow<ProfileRow?>
+    @Query("SELECT * FROM meals ORDER BY day DESC,rowid DESC") fun meals():Flow<List<MealRow>>
+    @Query("SELECT * FROM measurements ORDER BY day DESC") fun measurements():Flow<List<MeasurementRow>>
+    @Query("SELECT * FROM profile WHERE id=1") suspend fun readProfile():ProfileRow?
+    @Query("SELECT * FROM sessions ORDER BY day DESC,rowid DESC") suspend fun allSessions():List<SessionRow>
+    @Query("SELECT * FROM training_sets ORDER BY rowid") suspend fun allSets():List<SetRow>
+    @Query("SELECT * FROM meals ORDER BY day DESC,rowid DESC") suspend fun allMeals():List<MealRow>
+    @Query("SELECT * FROM measurements ORDER BY day DESC") suspend fun allMeasurements():List<MeasurementRow>
+    @Query("SELECT * FROM programs ORDER BY name") suspend fun allPrograms():List<ProgramRow>
+    @Query("SELECT * FROM foods ORDER BY name") suspend fun allFoods():List<FoodRow>
+    @Query("SELECT * FROM check_ins ORDER BY day DESC,rowid DESC") suspend fun allCheckIns():List<CheckInRow>
+    @Query("SELECT * FROM plan_proposals ORDER BY rowid DESC") suspend fun allProposals():List<ProposalRow>
     @Transaction
-    suspend fun addSet(row: SetRow) {
-        val parent = checkNotNull(session(row.sessionId))
-        check(parent.completedAt == null) { "Completed sessions cannot accept additional sets" }
-        insertSet(row)
+    suspend fun readSnapshot():FitnessSnapshot=FitnessSnapshot(
+        readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget)},
+        allSessions().map {Session(it.id,LocalDate.ofEpochDay(it.day),it.templateId,it.completedAt,it.label,Json.decodeFromString(it.exerciseOrder),it.restSeconds)},
+        allSets().map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg)},
+        allMeals().map {Meal(it.id,LocalDate.ofEpochDay(it.day),it.name,it.calories,it.protein,it.carbs,it.fat,it.foodId,it.quantity,it.unit?.let(NutritionUnit::valueOf),it.source)},
+        allMeasurements().map {Measurement(LocalDate.ofEpochDay(it.day),it.weightKg,it.waistCm)},
+        allPrograms().map {TrainingProgram(it.id,it.name,Json.decodeFromString(it.exercises),it.restSeconds)},
+        allFoods().map {Json.decodeFromString<Food>(it.payload).also {food -> check(food.id==it.id && food.name==it.name)}},
+        allCheckIns().map {WeeklyCheckIn(it.id,LocalDate.ofEpochDay(it.day),it.availableSessions,it.foodLogComplete,it.notes)},
+        allProposals().map {PlanProposal(it.id,it.checkInId,it.baseSessions,it.proposedSessions,Json.decodeFromString(it.evidence),ProposalStatus.valueOf(it.status))},
+    )
+    @Upsert suspend fun insertProfile(row:ProfileRow)
+    @Transaction suspend fun saveProfile(row:ProfileRow) {insertProfile(row);supersedeMismatched(row.sessionsPerWeek)}
+    @Query("UPDATE plan_proposals SET status='SUPERSEDED' WHERE status='PENDING' AND baseSessions != :target") suspend fun supersedeMismatched(target:Int)
+    @Insert suspend fun insertSession(row:SessionRow)
+    @Query("SELECT COUNT(*) FROM sessions WHERE completedAt IS NULL") suspend fun draftCount():Int
+    @Transaction suspend fun startSession(row:SessionRow) {check(draftCount()==0);insertSession(row)}
+    @Query("SELECT * FROM sessions WHERE id=:id") suspend fun session(id:String):SessionRow?
+    @Insert suspend fun insertSet(row:SetRow)
+    @Transaction suspend fun addSet(row:SetRow) {check(checkNotNull(session(row.sessionId)).completedAt==null);insertSet(row)}
+    @Query("SELECT * FROM training_sets WHERE id=:id") suspend fun set(id:String):SetRow?
+    @Query("SELECT COUNT(*) FROM training_sets WHERE sessionId=:id") suspend fun setCount(id:String):Int
+    @Update suspend fun updateSet(row:SetRow)
+    @Transaction suspend fun correctSet(row:SetRow) {check(checkNotNull(set(row.id)).sessionId==row.sessionId);updateSet(row)}
+    @Query("DELETE FROM training_sets WHERE id=:id") suspend fun deleteSet(id:String)
+    @Transaction suspend fun removeSet(id:String) {
+        val row=checkNotNull(set(id))
+        check(session(row.sessionId)?.completedAt==null || setCount(row.sessionId)>1)
+        deleteSet(id)
     }
-    @Query("UPDATE sessions SET completedAt = :now WHERE id = :id AND completedAt IS NULL AND EXISTS (SELECT 1 FROM training_sets WHERE sessionId = :id)")
-    suspend fun finishSession(id: String, now: Long): Int
-    @Query("DELETE FROM training_sets WHERE id = :id AND sessionId IN (SELECT id FROM sessions WHERE completedAt IS NULL)")
-    suspend fun removeSet(id: String)
-    @Insert suspend fun addMeal(row: MealRow)
-    @Query("DELETE FROM meals WHERE id = :id") suspend fun removeMeal(id: String)
-    @Upsert suspend fun saveMeasurement(row: MeasurementRow)
-    @Query("DELETE FROM measurements WHERE day = :day") suspend fun removeMeasurement(day: Long)
+    @Query("UPDATE sessions SET completedAt=:now WHERE id=:id AND completedAt IS NULL AND EXISTS (SELECT 1 FROM training_sets WHERE sessionId=:id)") suspend fun finishSession(id:String,now:Long):Int
+    @Query("UPDATE sessions SET day=:day WHERE id=:id") suspend fun moveSession(id:String,day:Long)
+    @Query("DELETE FROM sessions WHERE id=:id") suspend fun deleteSession(id:String)
+    @Upsert suspend fun addMeal(row:MealRow)
+    @Query("DELETE FROM meals WHERE id=:id") suspend fun removeMeal(id:String)
+    @Upsert suspend fun saveMeasurement(row:MeasurementRow)
+    @Query("DELETE FROM measurements WHERE day=:day") suspend fun removeMeasurement(day:Long)
+    @Upsert suspend fun saveProgram(row:ProgramRow)
+    @Query("SELECT * FROM programs WHERE id=:id") suspend fun program(id:String):ProgramRow?
+    @Query("DELETE FROM programs WHERE id=:id") suspend fun deleteProgram(id:String)
+    @Upsert suspend fun saveFood(row:FoodRow)
+    @Query("DELETE FROM foods WHERE id=:id") suspend fun deleteFood(id:String)
+    @Insert suspend fun insertCheckIn(row:CheckInRow)
+    @Insert suspend fun insertProposal(row:ProposalRow)
+    @Query("UPDATE plan_proposals SET status='SUPERSEDED' WHERE status='PENDING'") suspend fun supersedePending()
+    @Transaction suspend fun recordCheckIn(row:CheckInRow,evidence:List<String>) {
+        val profile=checkNotNull(readProfile())
+        insertCheckIn(row);supersedePending()
+        if(row.availableSessions!=profile.sessionsPerWeek) {
+            insertProposal(PlanProposal(checkInId=row.id,baseSessions=profile.sessionsPerWeek,proposedSessions=row.availableSessions,sessionEvidence=evidence.take(100)).row())
+        }
+    }
+    @Query("SELECT * FROM plan_proposals WHERE id=:id") suspend fun proposal(id:String):ProposalRow?
+    @Query("UPDATE plan_proposals SET status=:status WHERE id=:id") suspend fun resolveProposal(id:String,status:String)
+    @Transaction suspend fun acceptProposal(id:String) {
+        val proposal=checkNotNull(proposal(id));val profile=checkNotNull(readProfile())
+        check(proposal.status=="PENDING" && proposal.baseSessions==profile.sessionsPerWeek)
+        insertProfile(profile.copy(sessionsPerWeek=proposal.proposedSessions));resolveProposal(id,"ACCEPTED")
+    }
+    @Transaction suspend fun dismissProposal(id:String) {check(proposal(id)?.status=="PENDING");resolveProposal(id,"DISMISSED")}
+    @Query("DELETE FROM plan_proposals") suspend fun clearProposals()
+    @Query("DELETE FROM check_ins") suspend fun clearCheckIns()
+    @Query("DELETE FROM training_sets") suspend fun clearSets()
+    @Query("DELETE FROM sessions") suspend fun clearSessions()
+    @Query("DELETE FROM profile") suspend fun clearProfile()
+    @Query("DELETE FROM meals") suspend fun clearMeals()
+    @Query("DELETE FROM measurements") suspend fun clearMeasurements()
+    @Query("DELETE FROM programs") suspend fun clearPrograms()
+    @Query("DELETE FROM foods") suspend fun clearFoods()
+    @Insert suspend fun insertMeasurementRows(rows:List<MeasurementRow>)
+    @Transaction suspend fun replaceSnapshot(data:FitnessSnapshot) {
+        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods()
+        data.profile?.let {insertProfile(it.row())}
+        data.programs.forEach {saveProgram(it.row())};data.foods.forEach {saveFood(it.row())}
+        data.sessions.forEach {insertSession(it.row())};data.sets.forEach {insertSet(it.row())}
+        data.meals.forEach {addMeal(it.row())}
+        insertMeasurementRows(data.measurements.map {MeasurementRow(it.date.toEpochDay(),it.weightKg,it.waistCm)})
+        data.checkIns.forEach {insertCheckIn(it.row())};data.proposals.forEach {insertProposal(it.row())}
+    }
 }
 
-@Database(entities = [ProfileRow::class, SessionRow::class, SetRow::class, MealRow::class, MeasurementRow::class], version = 1, exportSchema = true)
-abstract class FitnessDatabase : RoomDatabase() {
-    abstract fun dao(): FitnessDao
+internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget)
+internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds)
+internal fun TrainingSet.row()=SetRow(id,sessionId,exercise.name,reps,weightKg)
+internal fun Meal.row()=MealRow(id,date.toEpochDay(),name,calories,protein,carbs,fat,foodId,quantity,unit?.name,source)
+internal fun TrainingProgram.row()=ProgramRow(id,name,Json.encodeToString(exercises),restSeconds)
+internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
+internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
+internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class],version=2,exportSchema=true)
+abstract class FitnessDatabase:RoomDatabase() {
+    abstract fun dao():FitnessDao
     companion object {
-        fun open(context: Context): FitnessDatabase {
+        val MIGRATION_1_2=object:Migration(1,2) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE sessions ADD COLUMN label TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE sessions ADD COLUMN exerciseOrder TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE sessions ADD COLUMN restSeconds INTEGER NOT NULL DEFAULT 90")
+                db.execSQL("UPDATE sessions SET exerciseOrder = CASE templateId WHEN 'A' THEN '[\"SQUAT\",\"CHEST_PRESS\",\"ROW\"]' WHEN 'B' THEN '[\"LEG_PRESS\",\"LAT_PULLDOWN\",\"HIP_HINGE\"]' ELSE '[]' END")
+                db.execSQL("ALTER TABLE meals ADD COLUMN foodId TEXT")
+                db.execSQL("ALTER TABLE meals ADD COLUMN quantity REAL")
+                db.execSQL("ALTER TABLE meals ADD COLUMN unit TEXT")
+                db.execSQL("ALTER TABLE meals ADD COLUMN source TEXT NOT NULL DEFAULT ''")
+                db.execSQL("CREATE TABLE IF NOT EXISTS programs (id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, exercises TEXT NOT NULL, restSeconds INTEGER NOT NULL)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS foods (id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, payload TEXT NOT NULL)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS check_ins (id TEXT NOT NULL PRIMARY KEY, day INTEGER NOT NULL, availableSessions INTEGER NOT NULL, foodLogComplete INTEGER NOT NULL, notes TEXT NOT NULL)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_check_ins_day ON check_ins(day)")
+                db.execSQL("CREATE TABLE IF NOT EXISTS plan_proposals (id TEXT NOT NULL PRIMARY KEY, checkInId TEXT NOT NULL, baseSessions INTEGER NOT NULL, proposedSessions INTEGER NOT NULL, evidence TEXT NOT NULL, status TEXT NOT NULL, FOREIGN KEY(checkInId) REFERENCES check_ins(id) ON UPDATE NO ACTION ON DELETE CASCADE)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_plan_proposals_checkInId ON plan_proposals(checkInId)")
+            }
+        }
+        fun open(context:Context):FitnessDatabase {
             System.loadLibrary("sqlcipher")
-            val key = KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
-            return Room.databaseBuilder(context.applicationContext, FitnessDatabase::class.java, "forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key))
-                .build()
+            val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
+            return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
+                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2).build()
         }
     }
 }

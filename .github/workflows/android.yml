@@ -17,4 +17,4 @@ jobs:
       - name: Check translations
         run: python3 scripts/check_localization.py
       - name: Test, build and lint
-        run: bash ./gradlew :core:coach:test :app:assembleDebug :app:lintDebug --max-workers=1
+        run: bash ./gradlew :core:coach:test :core:backup:test :app:assembleDebug :app:lintDebug :app:assembleRelease --max-workers=1

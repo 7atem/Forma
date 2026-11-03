@@ -12,8 +12,8 @@ android {
         applicationId = "com.formacoach.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0-alpha01"
+        versionCode = 2
+        versionName = "0.2.0-alpha02"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
@@ -21,6 +21,14 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures { compose = true }
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"),"proguard-rules.pro")
+        }
+    }
+    sourceSets.getByName("androidTest").assets.srcDir("$rootDir/core/data/schemas")
     lint {
         disable += setOf("GradleDependency", "AndroidGradlePluginVersion", "OldTargetApi")
     }
@@ -30,6 +38,10 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:coach"))
     implementation(project(":core:data"))
+    implementation(project(":core:backup"))
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("com.google.mlkit:genai-prompt:1.0.0-beta4")
+    implementation("androidx.compose.material:material-icons-extended:1.7.6")
     implementation("androidx.activity:activity-compose:1.9.3")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
@@ -42,6 +54,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.room:room-runtime:2.8.4")
+    androidTestImplementation("net.zetetic:sqlcipher-android:4.17.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.6")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.7.6")
 }

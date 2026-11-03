@@ -7,3 +7,8 @@ Destination: core/data/src/main/kotlin/com/formacoach/data/security/KeystoreMana
 
 The Gradle wrapper was copied unchanged. Gradle components retain their upstream licenses.
 Detailed provenance, hashes and changes are recorded in docs/NEMORY_REUSE_AUDIT.md.
+
+Alpha02 also adapts the text/status/download pattern from:
+core/ai/llm/src/main/java/com/vaultbrain/core/ai/llm/MlKitNanoRuntime.kt
+Destination: app/src/main/kotlin/com/formacoach/app/LocalNanoModel.kt
+Original checkpoint and license remain as listed above. No model weights are included.

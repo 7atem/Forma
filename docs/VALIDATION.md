@@ -1,50 +1,63 @@
-# Validation record
+# Validation record — alpha02
 
-Date: 3 November 2026. This document is updated after the checks finish; unchecked release gates are not completed features.
+Date: 3 November 2026. Application `com.formacoach.app`, version `0.2.0-alpha02`, Room schema 2. This is a development alpha, not a clinical or public-release approval.
 
-## Scope
-
-Local debug alpha. Validation includes deterministic JVM cases, English/Arabic resource parity, an Android debug build, lint, isolated encrypted-storage tests and a fresh-data UI journey on a disposable read-only emulator. Generated logs and screenshots remain ignored local artifacts.
-
-## Results
+## Final results
 
 | Check | Result |
 |---|---|
-| Deterministic JVM cases | 8/8 passed: empty history, seven-day boundaries, drafts/future records, logged-day calorie denominator, evidence, comparison coverage, timezone, Arabic/Persian input, invalid values |
-| English/Arabic resources | 103/103 keys and format placeholders match |
-| Debug APK | Built successfully, `0.1.0-alpha01`, ID `com.formacoach.app`; 34,551,660 bytes |
-| Android lint | 0 errors, 1 warning: obsolete **empty** `mipmap-anydpi-v26` directory left after moving the icon to `mipmap-anydpi` |
-| Stable emulator | 4/4 passed on Android 15 / API 35, x86_64, Medium_Tablet, disposable read-only session |
-| Encrypted persistence | Save/reopen profile, meal and measurements; non-plaintext DB header; reject empty-session completion, duplicate completion and appending to completed sessions |
-| Key failure behavior | Missing key with existing DB and corrupt existing key both fail closed without replacement |
-| UI journey | Profile → Arabic-digit set entry → session completion → meal entry → Arabic-digit measurements → Activity recreation → profile and weekly-review UI |
-| Visual QA | English and Arabic onboarding inspected on the tablet emulator; RTL text and layout render correctly. Full multi-device/large-font QA remains open |
-| Nemory preservation | Original HEAD unchanged and working tree clean; bundle checksum matches manifest; archive verifies from the independent Forma repository |
+| JVM review/history/input/clock/local-model contracts | 19/19 passed |
+| JVM portable archive/validation/tamper contracts | 6/6 passed |
+| Android 15 / API 35 x86_64 emulator suite | 13/13 passed (8 storage/migration/backup/proposal/history cases + 5 UI cases) |
+| Unique automated cases | **38 passed, 0 failed** |
+| English/Arabic resources | **227 keys and format placeholders match** |
+| Android debug build | Passed |
+| Android lint | **0 errors, 1 warning**: pre-existing obsolete empty `mipmap-anydpi-v26` directory |
+| Minified release / R8 / resource shrinking | Passed; unsigned production-variant artifact generated |
+| Packaged manifest checks | Application INTERNET permission absent from debug and release; emulator package-manager assertion also passed |
+| Nemory preservation | Original commit `c4e9f15` on `main` remains clean; independent source/history backup retained |
 
-JVM command: `.\gradlew.bat :core:coach:test --max-workers=1`.
+Final full regression command: `.\gradlew.bat :core:coach:test :core:backup:test :app:assembleDebug :app:lintDebug :app:connectedDebugAndroidTest :app:assembleRelease --max-workers=1 --no-build-cache`, with `ANDROID_SERIAL=emulator-5582`. After the password fields were marked as password keyboard inputs, debug/lint/minified release packaging was rerun and the actual minified SAF flow was checked as described below.
 
-Final Android command used after a Windows resource-cache issue: `.\gradlew.bat :app:assembleDebug :app:lintDebug :app:connectedDebugAndroidTest --rerun-tasks --no-build-cache --no-daemon --max-workers=1`, with `ANDROID_SERIAL=emulator-5582`.
+Coverage includes: missing logs versus zero, window boundaries, drafts/future records, logged-day denominators, source evidence, sufficient weight coverage, Arabic/Persian numeric input, invalid/nonfinite values, immutable nutrition/recipe calculations, sparse history, timer expiry/reboot, live device timezone changes, strict fact-ID verification, unsupported/background model behavior and cancellation.
 
-Earlier attempts exposed AGP/Kotlin DSL compatibility requirements, Windows lint-jar locks and a stale resource-move cache. The final source compiled and all checks above completed successfully after serial regeneration without the build cache. Avoid cleaning a checkout while a Gradle/lint process still owns its files. VFS watching is disabled for this Windows baseline.
+The Android suite verifies: encrypted persistence/reopen, corrupt or missing key fail-closed behavior, encrypted schema 1→2 migration with retained records/starter order, backup preview without writes, wrong-password rejection, restore without key replacement, rollback after a failing replacement, stale proposal rejection, explicit proposal confirmation, unchanged historical meals/program snapshots, and the daily/program/food UI journeys. The model check on this emulator tested graceful availability/error handling, **not actual Nano inference**.
 
-An Android 17 / API 37 preview emulator passed the 3 storage tests but could not run the Compose UI test because the selected Espresso version calls a removed InputManager method. That preview is **not** a validated target; the 4/4 UI/storage result is from stable API 35. Emulator-console authentication messages did not prevent the stable test run.
+## Actual minified application / system file-picker QA
 
-Automatic approval review rejected removal of the empty obsolete resource directory with only `blocked by policy` and no detailed reason. It remains in place, so the one harmless lint warning is reported rather than suppressed. No permission or deletion is needed to build or run the app.
+The release variant was additionally signed with the ordinary local **development certificate**, matching the debug APK, for emulator-only QA. No production release-signing identity or Nemory release credential was used. The source release build remains unsigned.
 
-Local deliverables: `artifacts/forma-0.1.0-alpha01-debug.apk`, `artifacts/build-manifest.json`, and `artifacts/screenshots/en.png` / `ar.png`. These generated files are ignored by Git. APK SHA-256: `cacf01133ccc90795d70cf185a4033d3382f283ee1599f80908c18c66aebc46e`.
+Using clearly labelled synthetic records in a disposable read-only emulator:
 
-AGP legacy-DSL / external-Kotlin deprecation messages remain, as documented in architecture. This build is a development alpha without AI chat, automatic coaching prescriptions, a nutrition catalog or portable backups.
+- Installed and cold-launched the minified APK successfully.
+- Selected a synthetic password-encrypted archive through Android DocumentsUI / Downloads.
+- Confirmed an incorrect password is rejected without replacing records.
+- Unlocked a valid archive, canceled the preview and verified the empty onboarding log remained.
+- Confirmed restore and rendered the restored profile, sessions, sourced foods, recipe ingredients, measurements and pending proposal.
+- Exported again through ACTION_CREATE_DOCUMENT to Downloads.
+- Independently decrypted the result using Python/OpenSSL-backed AES-GCM/PBKDF2 and compared every typed record against the input. All records matched, including immutable recipe sources and proposal state.
+- Verified a fractional 20.25 kg recorded load renders accurately and a scheduling change applies only after confirmation.
 
-## Release gates still required
+Results: `artifacts/qa-native/native-roundtrip-result.json`. The scripts and encrypted fixtures in that directory are QA-only and never seed the application automatically. Their records/nutrition values are synthetic, not a food catalog or real personal data. These checks are additional native smoke/round-trip checks, not extra unique JUnit cases added to the 38-case count.
 
-- Physical Android device testing, including minimum-supported API/device capabilities and 16 KB page-size compatibility where applicable.
-- Reviewed exercise content and program/progression rules before prescribing or adapting training.
-- Reviewed nutrition sources, quantities, data provenance and proposed coaching behavior before adaptive nutrition.
-- Portable export/restore, migrations from v1, data recovery and rollback testing.
-- TalkBack, large text, contrast and touch targets; portrait/landscape and phone/tablet visual QA.
-- Background/process-death, reboot, midnight/timezone changes and long-history performance.
-- Usability/retention study with consenting users and an agreed feedback/privacy approach.
-- Release identity, original signing key, dependency/license audit, privacy policy and store disclosures.
-- Optional LLM runtime/model licensing, device memory/battery/cancellation and evidence evaluation before enabling AI.
+## Visual QA
 
-An emulator result is not physical-device or clinical validation. CI configuration is supplied but has not run on GitHub; no repository or app has been published.
+Reviewed English Today/Coach on the tablet viewport and Arabic RTL Progress on a simulated phone viewport (`1080×2340`, density 420) with 1.8 font scale, including scrolling to the chart. Display overrides were restored. Screenshots are under `artifacts/alpha02-screenshots`. This is limited visual QA; full TalkBack, physical-device, orientation and large-font coverage remains open.
+
+## Artifacts
+
+- `forma-0.2.0-alpha02-debug.apk`: 77,300,627 bytes; SHA-256 `5f80313210d1210f31bab0ceac0a84b71634e418c87062cb2d8fc5d32030b2cd`.
+- `forma-0.2.0-alpha02-release-unsigned.apk`: 11,651,570 bytes; SHA-256 `ae1edd8867fd7fef3c171ec4eb843a7c393bc4aa727669cd673f89d5017c3390`.
+- `forma-0.2.0-alpha02-minified-qa.apk`: 11,683,445 bytes; SHA-256 `4fdc1628f618dab8855738fbe3b13266f9b734b89cf7605ede9593f3728142be`.
+
+`-minified-qa.apk` is a development-signed installation/testing build, not a Play release. The `-release-unsigned.apk` cannot be installed until signed. The debug APK remains available for debugging. Generated files, logs, encrypted QA fixtures and screenshots are ignored by Git.
+
+## Limits and remaining gates
+
+- Actual local-model download/inference on supported physical hardware, including memory, thermal, quota and foreground-preemption checks. No Qwen CPU vision or model weights are included.
+- Physical Android devices, minimum API, 16 KB page-size cases, long histories, reboot and process termination during restore.
+- More document-provider failures, canceled/interrupted exports, cross-physical-device restore and forgotten-password usability.
+- Qualified review of exercise descriptions/adaptive prescriptions and nutrition sources before automated coaching rules or a curated catalog.
+- TalkBack, broader large-text/screen-size testing, the 10–15-person study, beta retention/payment validation and store/privacy/signing review.
+
+AGP legacy-DSL/external-Kotlin deprecation messages remain. The one empty-directory lint warning was already present; automatic review rejected its removal in the earlier alpha01 session, so no new deletion attempt or blanket lint suppression was made. CI is configured but has not run on GitHub. Nothing was published, and no external messages or recruitment were performed.

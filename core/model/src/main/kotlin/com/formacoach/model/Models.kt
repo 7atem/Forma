@@ -1,10 +1,14 @@
+@file:kotlinx.serialization.UseSerializers(com.formacoach.model.LocalDateSerializer::class)
+
 package com.formacoach.model
 
 import java.time.LocalDate
 import java.util.UUID
+import kotlinx.serialization.Serializable
 
 enum class Goal { FAT_LOSS, BUILD_STRENGTH, BUILD_HABIT }
 
+@Serializable
 data class Profile(
     val name: String,
     val goal: Goal,
@@ -31,15 +35,26 @@ object StarterTemplates {
     )
 }
 
+@Serializable
 data class Session(
     val id: String = UUID.randomUUID().toString(),
     val date: LocalDate,
     val templateId: String,
     val completedAt: Long? = null,
+    val label: String = "",
+    val plannedExercises: List<Exercise> = emptyList(),
+    val restSeconds: Int = 90,
 ) {
-    init { require(templateId in StarterTemplates.all.map { it.id }) }
+    init {
+        require(id.isNotBlank() && id.length <= 80)
+        require(templateId.isNotBlank() && templateId.length <= 80)
+        require(label.length <= 120)
+        require(plannedExercises.size <= 20 && plannedExercises.distinct().size == plannedExercises.size)
+        require(restSeconds in 15..600)
+    }
 }
 
+@Serializable
 data class TrainingSet(
     val id: String = UUID.randomUUID().toString(),
     val sessionId: String,
@@ -48,12 +63,14 @@ data class TrainingSet(
     val weightKg: Double,
 ) {
     init {
+        require(id.isNotBlank() && id.length <= 80 && sessionId.isNotBlank() && sessionId.length <= 80)
         require(reps in 1..1000)
         require(weightKg.isFinite() && weightKg in 0.0..1000.0)
     }
 }
 
 /** All nutrient numbers describe the whole logged portion, explicitly supplied by the user. */
+@Serializable
 data class Meal(
     val id: String = UUID.randomUUID().toString(),
     val date: LocalDate,
@@ -62,15 +79,25 @@ data class Meal(
     val protein: Double,
     val carbs: Double,
     val fat: Double,
+    val foodId: String? = null,
+    val quantity: Double? = null,
+    val unit: NutritionUnit? = null,
+    val source: String = "",
 ) {
     init {
+        require(id.isNotBlank() && id.length <= 80)
         require(name.isNotBlank() && name.length <= 120)
         require(calories.isFinite() && calories in 0.0..20000.0)
         require(listOf(protein, carbs, fat).all { it.isFinite() && it in 0.0..2000.0 })
+        require(source.length <= 4000)
+        require(quantity == null || quantity.isFinite() && quantity > 0 && quantity <= 100000)
+        require((quantity == null) == (unit == null))
+        require(foodId == null || foodId.isNotBlank() && foodId.length <= 80)
     }
 }
 
 /** One observation per local calendar date; unknown values remain null. */
+@Serializable
 data class Measurement(val date: LocalDate, val weightKg: Double?, val waistCm: Double?) {
     init {
         require(weightKg != null || waistCm != null)
@@ -79,12 +106,17 @@ data class Measurement(val date: LocalDate, val weightKg: Double?, val waistCm: 
     }
 }
 
+@Serializable
 data class FitnessSnapshot(
     val profile: Profile? = null,
     val sessions: List<Session> = emptyList(),
     val sets: List<TrainingSet> = emptyList(),
     val meals: List<Meal> = emptyList(),
     val measurements: List<Measurement> = emptyList(),
+    val programs: List<TrainingProgram> = emptyList(),
+    val foods: List<Food> = emptyList(),
+    val checkIns: List<WeeklyCheckIn> = emptyList(),
+    val proposals: List<PlanProposal> = emptyList(),
 )
 
 /** Accept Latin, Arabic-Indic and Persian digits, with Arabic decimal separator. */

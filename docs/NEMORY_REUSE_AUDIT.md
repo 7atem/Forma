@@ -10,6 +10,8 @@ Audited checkpoint: `c4e9f15c85bc49f4f9dc6dee76be4bcf6204718b` on `main`, 3 Nove
 | LICENSE | Original Apache-2.0 text retained; NOTICE records adaptations. |
 | KeystoreManager database-key path | Adapted into `core:data`. New package, key basename, Keystore alias and DB name. Removed Hilt annotations, media-key/restore methods and Nemory-only legacy `.tmp` recovery. Retained CSPRNG, size validation, stable staging basename, verified round trip, AtomicFile recovery/install, missing-existing-key fail-closed guard. Forma's encrypted-storage device tests are separate from Nemory's tests. |
 
+Alpha02 additionally adapts the ML Kit text/status/download pattern from `MlKitNanoRuntime.kt` into `app/LocalNanoModel.kt`. It omits images, streaming, Hilt runtime coupling, cloud, native code and vault dependencies; it adds a 64-token request cap and strict app-level known-fact-ID verification, explicit download and foreground cancellation. SDK beta4 is pinned. Actual supported-device inference remains unverified.
+
 The fitness data model, repository, deterministic reports and Compose screens are newly implemented. They are not represented as direct ports of the vault app. No release signing material, private vault data, model downloads, `.git` directory or local secrets were copied into Forma. Existing credentials are preserved only in the private local Nemory backup.
 
 ## Next extraction map
@@ -20,7 +22,7 @@ The fitness data model, repository, deterministic reports and Compose screens ar
 | Room + SQLCipher | Reuse approach, new schema v1 | Own keys/DB; schema export and migration tests; no destructive migration |
 | Hilt/WorkManager/reminders | Hilt used; scheduling deferred | Product-specific payloads, private notifications, timezone/permission/idempotency tests |
 | Portable encrypted backup | High-value follow-up; not copied yet | New archive namespace; adapt FK/schema/media rules; round-trip, rollback, corruption and wrong-passphrase tests |
-| LlmClient, ReasoningBudget and local model selection | Deferred optional extraction | Audit runtime/JNI/device capability, providers/model licenses, cancellation and foreground preemption; keep logging independent |
+| LlmClient, ReasoningBudget, Qwen/native model selection | Deferred optional extraction | Audit runtime/JNI/device capability, providers/model licenses, cancellation and foreground preemption; keep logging independent |
 | RAG, LocalAgent and ClaimVerifier | Adapt principles; domain-bound code not copied | Replace VaultItem/ExternalRecord tools with typed fitness tools; verified record IDs and explicit proposal confirmation; no LLM arithmetic |
 | Embeddings/ObjectBox | Deferred until justified | Separate fitness index; disclose any unencrypted embeddings; do not claim SQLCipher protects the vector store |
 | OCR/barcodes | Deferred capture aids | Separate label parser, units/serving validation and user confirmation; Latin ML Kit cannot establish Arabic OCR support |
@@ -47,3 +49,7 @@ Hashes identify the exact upstream bytes before adaptation. The source checkpoin
 | `gradle/wrapper/gradle-wrapper.jar` | `498495120a03b9a6ab5d155f5de3c8f0d986a449153702fb80fc80e134484f17` |
 | `gradle/wrapper/gradle-wrapper.properties` | `257d14aa05eba1c0eb260ccb99a0b40d97960529e5f5841b63a4b6c87dab55d1` |
 | `LICENSE` | `40932c5e8b9127b30823e800a5bdfa3dc0eec2c96effd38e1ec0f120fbefa107` |
+
+## Alpha02 additional upstream source
+
+`core/ai/llm/src/main/java/com/vaultbrain/core/ai/llm/MlKitNanoRuntime.kt` at the same checkpoint: SHA-256 `2eed630b6da9f64d315c05d724ea9ef04f22e51cd0a33f9863b9d05671168a30`. The new local adapter is a narrow adaptation, not a wholesale import of Nemory runtime behavior. SDK/model terms and device suitability need pre-release review; no model weights are redistributed.

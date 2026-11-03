@@ -1,43 +1,48 @@
 # Delivery plan
 
-The first implementation is a foundation alpha, not the complete adaptive coach. Status must follow source and verification.
+Current development version: **0.2.0-alpha02**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
 
-## Foundation alpha — current scope
+## Completed foundation and daily workflow
 
-- [x] Preserve Nemory with recoverable history and local configuration.
-- [x] Independent Android repository, ID, data model and encrypted database.
-- [x] Bilingual profile and optional manual targets.
-- [x] Two simple logging templates, exercise/set logging, session completion/history.
-- [x] Whole-portion meal entry and repetition from recent history.
-- [x] Daily weight/waist records and deterministic seven-day review.
-- [x] Evidence references, coverage gates, injected review clock, Arabic numeric parsing.
-- [x] Foundation validation recorded in `VALIDATION.md`: 8 JVM and 4 emulator cases pass; bilingual resources match; debug APK built; lint has 0 errors and one empty-directory warning.
+- [x] Independent repository/application ID, encrypted database, Nemory preservation and alpha01 checkpoint.
+- [x] English/Arabic profile, manual goals and Today dashboard.
+- [x] Editable ordered saved programs, a user-selected rest timer, set logging and corrections, safe completion and history.
+- [x] Past-date entry/correction, session/meal search, body-weight and exercise-load charts.
+- [x] Typed foods, source attribution, grams/servings portions and immutable recipe/meal snapshots.
+- [x] Portable encrypted backup with a preview, explicit restore and transactional rollback; password/size/tamper validation.
+- [x] Encrypted Room 1→2 migration preserving alpha01 records.
+- [x] Deterministic weekly reports with coverage, evidence and local record questions.
+- [x] Weekly check-ins and explicit confirm/cancel scheduling proposals with stale-target protection.
+- [x] Optional Gemini Nano adapter for bounded selection of existing facts, manual availability/download controls and independent deterministic fallback.
+- [x] 25 JVM cases and 13 stable-emulator cases passed; 227 bilingual resource keys match.
+- [x] English tablet and Arabic phone-viewport / large-text visual review; detailed scope in validation.
 
-## M1 — make the daily workflow dependable
+## M1 external validation and remaining usability work
 
-1. Run 10–15-person usability study; simplify set and food entry based on observed friction.
-2. Add reviewed exercise descriptions, editable saved programs, progression history and timer.
-3. Add date selection/backfill, correction of completed workouts, history/search and charts.
-4. Add typed food/recipe/portion records with units, source attribution, uncertainty and a curated Arabic/Egyptian-food pilot. Validate coverage and licenses before choosing a keyless catalog. Never seed invented nutrient values.
-5. Port portable encrypted backup/restore with a new format namespace, independent credentials, rollback and device tests. Do not reuse the Nemory archive/database schema.
-6. Complete accessibility, screen-size, RTL, process-death and physical-device tests.
+- [ ] Run the 10–15-person study in `USABILITY_STUDY.md`; apply observed fixes. Nobody has been recruited by this implementation.
+- [ ] Review exercise descriptions with qualified reviewers. Current exercise names/logging notes are not technique coaching.
+- [ ] Build a verified Arabic/Egyptian food pilot after data licensing and coverage review. Current foods are user supplied; no invented catalog.
+- [ ] Test backup/provider interruptions and recovery across physical devices, process death and reboot.
+- [ ] Complete TalkBack, minimum-supported Android, physical phone/tablet and long-history/battery testing.
 
-## M2 — reviewed adaptive-coaching MVP
+## M2 adaptive-coaching release
 
-1. Define program and nutrition rules with qualified review; make exclusions and data requirements explicit.
-2. Separate observation, interpretation and proposed change. Require enough history and an explicit weekly check-in; allow corrections and rejection.
-3. Add deterministic regression scenarios for missing/inconsistent data, interrupted training, weight fluctuations, timezone changes and misleading correlations.
-4. Add structured weekly proposals and confirm/cancel UI. Never write through an answer stream.
-5. Measure usefulness and weekly return with 30–50 consenting beta users. No monetization claim before evidence.
+- [x] Separate observation, user context and an explicitly requested scheduling proposal.
+- [x] Confirm/cancel, stale-state guards, source windows and deterministic regression tests.
+- [ ] Define and approve actual training/nutrition adaptation rules, exclusion criteria and sufficient-history requirements with qualified review.
+- [ ] Add reviewed proposals for those rules only after their boundaries and regression cases exist. No automatic calorie/load prescriptions are currently shipped.
+- [ ] Run a consenting 30–50-person beta and examine actual repeat usage and review comprehension.
 
-## M3 — optional local intelligence
+## M3 optional intelligence and integrations
 
-1. Extract LLM contracts/runtime only after dependency, license, cancellation, memory, battery and device-capability audit.
-2. Add grounded chat over typed fitness history, with evidence and clear missing-data answers. Keep all numeric calculations in deterministic tools.
-3. Reuse optional OCR for food labels with review. Latin OCR does not establish Arabic OCR support.
-4. Evaluate text/voice input, reminders and explicit scheduled permissions when needed. Health Connect requires new product and privacy review; Nemory's disabled integration is not a shipped feature.
-5. Keep full CPU vision out of normal production paths. Validate a suitable encoder and model licenses before any photo-based feature.
+- [x] Audit/adapt the narrow ML Kit local text/status/download path and verify fail-closed model output/cancellation behavior.
+- [x] Keep the record tools usable without a model and remove application INTERNET permission.
+- [ ] Verify actual Nano download/inference on supported physical hardware; inspect SDK/service metadata and privacy disclosures before advertising support.
+- [ ] Evaluate a licensed downloadable text fallback for non-AICore devices with measured memory, latency and battery limits.
+- [ ] Add reviewed OCR/barcode or voice entry only when it reduces validated logging friction. Latin OCR does not imply Arabic OCR support.
+- [ ] Add user-chosen reminders and Health Connect through explicit permission/privacy flows when product scope calls for them.
+- [ ] Keep full CPU vision out of normal production paths. A compatible licensed encoder needs its own audit and validation.
 
-## Release and payment experiment
+## Release and payment
 
-Usability/retention results, reviewed rule behavior, data export/restore, migrations, privacy disclosures, accessibility, device/battery testing and release-signing setup precede public release. A paid tier and price are later experiments. Trainer dashboards and iOS are separate roadmap decisions. No paid/key-required external API dependency.
+A minified unsigned release build is part of local engineering verification. Final brand/store identity, owner-controlled signing credentials, privacy/dependency review, physical validation and beta outcomes are still required. No store publication, cloud sync, payment setup, trainer dashboard or iOS implementation is claimed. Prices and revenue remain hypotheses. See `RELEASE_CHECKLIST.md`.

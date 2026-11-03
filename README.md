@@ -1,23 +1,27 @@
 # Forma / فورمة
 
-Independent Android fitness and nutrition project. Working name; no public brand or store listing has been selected.
+Independent Android fitness and nutrition project. Working name; no public brand or store listing has been selected. Nemory remains unchanged at `D:\Vault Brain`; see [its preservation record](docs/NEMORY_PRESERVATION.md).
 
-Built from the engineering lessons of Nemory, with a new application ID and domain model. Nemory remains at `D:\Vault Brain`; see [the preservation record](docs/NEMORY_PRESERVATION.md).
+## Current version: 0.2.0-alpha02
 
-## First milestone
+Offline bilingual logging with encrypted Room storage, editable saved training programs, set corrections and date backfill, a rest timer, session search/load history, sourced food/recipe portions, meal corrections, measurements and charts, evidence-based weekly reviews, explicit check-ins/schedule proposals, and portable password-encrypted backup/restore.
 
-An offline, bilingual personal log: profile and manually chosen goals, training templates and set logging, manually entered meal totals, body measurements, and a deterministic weekly review. AI explanations, food databases, OCR, reminders, portable backups and subscriptions are subsequent milestones. No network service or model download is required for this first slice.
+Optional Gemini Nano on compatible AICore devices can select existing report highlights. No raw model claims, automatic diet/exercise prescriptions, cloud LLM or application INTERNET permission. Logging and reviews work without a model. Actual inference still needs supported physical-device verification.
+
+The current library contains user-entered foods and sources; no nutrition catalog is preloaded. Public release still requires the reviews, device tests and user study in [the roadmap](docs/ROADMAP.md).
 
 ## Build
 
-Use JDK 21 and an Android SDK with platform 36. Set `sdk.dir` in ignored `local.properties` or configure `ANDROID_HOME`.
+JDK 21 and Android SDK platform 36. Configure ignored `local.properties` or `ANDROID_HOME`.
 
 ```powershell
-.\gradlew.bat :core:coach:test :app:assembleDebug :app:lintDebug --max-workers=1
+.\gradlew.bat :core:coach:test :core:backup:test :app:assembleDebug :app:lintDebug :app:assembleRelease --max-workers=1
 ```
 
-Run Gradle sequentially on Windows. See [product scope](docs/PRODUCT_BRIEF.md), [architecture](docs/ARCHITECTURE.md), [reuse audit](docs/NEMORY_REUSE_AUDIT.md), and [delivery plan](docs/ROADMAP.md).
+Run Gradle sequentially on Windows. Use `:app:connectedDebugAndroidTest` on a disposable stable emulator. Do not clean while a Gradle/lint process still owns files. The release APK is unsigned; no Nemory signing material is used.
 
-This is an early development build. Status and validation limitations are recorded in `docs/VALIDATION.md`.
+See [implementation and backup format](docs/DAILY_WORKFLOW_IMPLEMENTATION.md), [architecture](docs/ARCHITECTURE.md), [reuse provenance](docs/NEMORY_REUSE_AUDIT.md), [validation](docs/VALIDATION.md), [study protocol](docs/USABILITY_STUDY.md) and [release gates](docs/RELEASE_CHECKLIST.md).
 
-The local tested APK is `artifacts/forma-0.1.0-alpha01-debug.apk` (generated, ignored by Git). The foundation passed 8 JVM cases and 4 Android 15 emulator tests; 103 bilingual strings match. Lint reports 0 errors and one obsolete empty-directory warning. AI coaching and portable backups are not implemented yet.
+Generated APKs, manifests and screenshots are under ignored `artifacts/`. This is a development alpha, not a complete adaptive-coaching release.
+
+Validated locally: 38 automated cases pass, 227 bilingual strings match, debug and minified release builds pass. Lint has 0 errors and one pre-existing empty-directory warning. The system-picker backup round trip also passed on the minified QA app with synthetic data. Install `artifacts/forma-0.2.0-alpha02-minified-qa.apk` for the compact development-signed test build, or use the debug APK.

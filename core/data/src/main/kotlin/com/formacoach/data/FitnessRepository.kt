@@ -1,45 +1,56 @@
 package com.formacoach.data
 
 import android.content.Context
+import androidx.sqlite.db.SimpleSQLiteQuery
+import com.formacoach.backup.PortableBackup
 import com.formacoach.model.*
 import java.time.Clock
 import java.time.LocalDate
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 
-class FitnessRepository(daoProvider: () -> FitnessDao, private val clock: Clock = Clock.systemDefaultZone()) {
-    companion object {
-        fun open(context: Context): FitnessRepository = FitnessRepository({ FitnessDatabase.open(context).dao() })
-    }
+class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=DeviceClock) {
+    companion object {fun open(context:Context)=FitnessRepository({FitnessDatabase.open(context).dao()})}
     private val dao by lazy(daoProvider)
-    val snapshot = flow {
-        emitAll(combine(dao.profile(), dao.sessions(), dao.sets(), dao.meals(), dao.measurements()) { profile, sessions, sets, meals, measurements ->
-        FitnessSnapshot(
-            profile?.let { Profile(it.name, Goal.valueOf(it.goal), it.sessionsPerWeek, it.caloriesTarget, it.proteinTarget) },
-            sessions.map { Session(it.id, LocalDate.ofEpochDay(it.day), it.templateId, it.completedAt) },
-            sets.map { TrainingSet(it.id, it.sessionId, Exercise.valueOf(it.exercise), it.reps, it.weightKg) },
-            meals.map { Meal(it.id, LocalDate.ofEpochDay(it.day), it.name, it.calories, it.protein, it.carbs, it.fat) },
-            measurements.map { Measurement(LocalDate.ofEpochDay(it.day), it.weightKg, it.waistCm) },
-        )
-        })
-    }.flowOn(Dispatchers.IO)
-
-    suspend fun saveProfile(profile: Profile) = dao.saveProfile(ProfileRow(name=profile.name, goal=profile.goal.name, sessionsPerWeek=profile.sessionsPerWeek, caloriesTarget=profile.caloriesTarget, proteinTarget=profile.proteinTarget))
-
-    suspend fun startSession(templateId: String): String {
-        val session = Session(date=LocalDate.now(clock), templateId=templateId)
-        dao.startSession(SessionRow(session.id, session.date.toEpochDay(), session.templateId, null))
-        return session.id
+    val snapshot=flow {emitAll(dao.changes(SimpleSQLiteQuery("SELECT 1")).map {dao.readSnapshot()})}.flowOn(Dispatchers.IO)
+    private fun checkDate(date:LocalDate) {require(date in LocalDate.of(1970,1,1)..LocalDate.now(clock))}
+    suspend fun saveProfile(profile:Profile)=dao.saveProfile(profile.row())
+    suspend fun startSession(templateId:String,date:LocalDate=LocalDate.now(clock)):String {
+        checkDate(date)
+        val starter=StarterTemplates.all.firstOrNull {it.id==templateId}
+        val program=if(starter==null) checkNotNull(dao.program(templateId)) else null
+        val session=Session(date=date,templateId=templateId,label=program?.name.orEmpty(),
+            plannedExercises=starter?.exercises?:kotlinx.serialization.json.Json.decodeFromString(program!!.exercises),restSeconds=program?.restSeconds?:90)
+        dao.startSession(session.row());return session.id
     }
-
-    suspend fun addSet(set: TrainingSet) = dao.addSet(SetRow(set.id, set.sessionId, set.exercise.name, set.reps, set.weightKg))
-    suspend fun finishSession(id: String) { check(dao.finishSession(id, clock.millis()) == 1) }
-    suspend fun removeSet(id: String) = dao.removeSet(id)
-    suspend fun addMeal(meal: Meal) = dao.addMeal(MealRow(meal.id, meal.date.toEpochDay(), meal.name, meal.calories, meal.protein, meal.carbs, meal.fat))
-    suspend fun removeMeal(id: String) = dao.removeMeal(id)
-    suspend fun saveMeasurement(value: Measurement) = dao.saveMeasurement(MeasurementRow(value.date.toEpochDay(), value.weightKg, value.waistCm))
-    suspend fun removeMeasurement(date: LocalDate) = dao.removeMeasurement(date.toEpochDay())
+    suspend fun addSet(set:TrainingSet)=dao.addSet(set.row())
+    suspend fun correctSet(set:TrainingSet)=dao.correctSet(set.row())
+    suspend fun finishSession(id:String) {check(dao.finishSession(id,clock.millis())==1)}
+    suspend fun removeSet(id:String)=dao.removeSet(id)
+    suspend fun moveSession(id:String,date:LocalDate) {checkDate(date);dao.moveSession(id,date.toEpochDay())}
+    suspend fun deleteSession(id:String)=dao.deleteSession(id)
+    suspend fun addMeal(meal:Meal) {checkDate(meal.date);dao.addMeal(meal.row())}
+    suspend fun removeMeal(id:String)=dao.removeMeal(id)
+    suspend fun saveMeasurement(value:Measurement) {checkDate(value.date);dao.saveMeasurement(MeasurementRow(value.date.toEpochDay(),value.weightKg,value.waistCm))}
+    suspend fun removeMeasurement(date:LocalDate)=dao.removeMeasurement(date.toEpochDay())
+    suspend fun saveProgram(program:TrainingProgram)=dao.saveProgram(program.row())
+    suspend fun deleteProgram(id:String)=dao.deleteProgram(id)
+    suspend fun saveFood(food:Food)=dao.saveFood(food.row())
+    suspend fun deleteFood(id:String)=dao.deleteFood(id)
+    suspend fun recordCheckIn(checkIn:WeeklyCheckIn) {
+        checkDate(checkIn.date)
+        val data=dao.readSnapshot()
+        val evidence=data.sessions.filter {it.completedAt!=null && it.date in checkIn.date.minusDays(6)..checkIn.date}.map {it.id}
+        dao.recordCheckIn(checkIn.row(),evidence)
+    }
+    suspend fun acceptProposal(id:String)=dao.acceptProposal(id)
+    suspend fun dismissProposal(id:String)=dao.dismissProposal(id)
+    suspend fun export(password:CharArray):ByteArray=withContext(Dispatchers.IO) {
+        try {PortableBackup.encrypt(dao.readSnapshot(),password,clock.millis())} finally {password.fill('\u0000')}
+    }
+    suspend fun previewRestore(bytes:ByteArray,password:CharArray):FitnessSnapshot=withContext(Dispatchers.IO) {
+        try {PortableBackup.decrypt(bytes,password).data} finally {password.fill('\u0000');bytes.fill(0)}
+    }
+    suspend fun restore(data:FitnessSnapshot)=withContext(Dispatchers.IO) {PortableBackup.validate(data);dao.replaceSnapshot(data)}
 }

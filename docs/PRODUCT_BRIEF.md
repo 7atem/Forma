@@ -16,7 +16,7 @@ Value proposition: an easy daily log and an understandable weekly review grounde
 4. Record body weight and/or waist for the local calendar date.
 5. See completed sessions, food logging coverage, recorded averages and the evidence window. Comparisons require adequate coverage in both windows.
 
-The first alpha implements this logging journey. It does **not** deliver the full adaptive-coaching MVP. Templates are starting points for logging, not an individualized training program. Food records are user-entered whole-portion totals; there is no verified food catalog yet.
+Alpha01 implemented this logging journey. Alpha02 adds editable saved programs, date correction, history/charts, a sourced user food/recipe library, portable encrypted backups, weekly availability proposals and optional local fact highlighting. It does **not** deliver the full adaptive-coaching MVP. Templates are starting points for logging, not an individualized training program. Food records are user-entered whole-portion totals; there is no verified food catalog yet.
 
 ## Next product milestone
 
