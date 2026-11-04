@@ -10,6 +10,17 @@ import org.junit.runner.RunWith
 /** Run on a disposable emulator with fresh Forma application data. */
 @RunWith(AndroidJUnit4::class)
 class FitnessFlowTest {
+    @Test fun plateToolAcceptsArabicDigitsAndShowsBalancedResult() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_1").performClick()
+        rule.onNodeWithTag("plate_calculator").performScrollTo().performClick()
+        rule.onNodeWithTag("plate_target").performTextReplacement("٨٠")
+        rule.onNodeWithTag("plate_target").performImeAction()
+        rule.onNodeWithTag("calculate_plates").performClick()
+        // Several two-plate combinations can be equally optimal; do not pin a tie choice.
+        rule.onNodeWithTag("plate_result").performScrollTo().assertExists()
+        rule.onNodeWithText(rule.activity.getString(R.string.close)).performClick()
+    }
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
     private fun ensureProfile() {
@@ -135,6 +146,8 @@ class FitnessFlowTest {
         rule.onNodeWithTag("tab_1").performClick()
         rule.onNodeWithTag("training_section_1").performClick()
         for(exercise in com.formacoach.model.Exercise.entries) {
+            rule.onNodeWithTag("exercise_search").performScrollTo().performTextReplacement(rule.activity.getString(exerciseLabel(exercise)))
+            rule.onNodeWithTag("exercise_search").performImeAction()
             rule.onNodeWithTag("library_${exercise.name}").performScrollTo().performClick()
             rule.onNodeWithTag("exercise_art_${exercise.name}",useUnmergedTree=true).performScrollTo().assertExists()
             rule.onNodeWithTag("guide_tab_muscles").performClick()
@@ -144,6 +157,34 @@ class FitnessFlowTest {
         rule.onNodeWithTag("watch_settings").performClick()
         rule.onNodeWithTag("watch_export").performScrollTo().assertIsNotEnabled()
         rule.onNodeWithTag("watch_open_import").performScrollTo().assertIsEnabled()
+    }
+
+    @Test fun equipmentFavoritesAndPersonalNotesPersistAfterRecreation() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_1").performClick()
+        rule.onNodeWithTag("training_section_1").performClick()
+        rule.onNodeWithTag("exercise_search").performTextInput("Goblet")
+        rule.onNodeWithTag("exercise_search").performImeAction()
+        rule.onNodeWithTag("equipment_filter").performScrollTo().performClick()
+        rule.onNodeWithTag("filter_equipment_DUMBBELLS").performClick()
+        rule.onNodeWithTag("favorite_GOBLET_SQUAT").performScrollTo().performClick()
+        rule.onNodeWithTag("favorites_filter").performScrollTo().performClick()
+        rule.onNodeWithTag("library_GOBLET_SQUAT").performScrollTo().performClick()
+        rule.onNodeWithTag("exercise_notes").performScrollTo().performClick()
+        rule.onNodeWithTag("exercise_notes_input").performTextInput("My machine setup")
+        rule.onNodeWithTag("save_exercise_notes").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("exercise_notes_input").fetchSemanticsNodes().isEmpty()}
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("guide_close").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithText("My machine setup").performScrollTo().assertExists()
+        rule.onNodeWithTag("guide_close").performClick()
+        rule.onNodeWithTag("favorites_filter").assertIsSelected()
+        rule.onNodeWithTag("library_GOBLET_SQUAT").performScrollTo().assertExists()
+        rule.onNodeWithTag("muscle_filter").performScrollTo().performClick()
+        rule.onNodeWithTag("filter_muscle_CHEST").performClick()
+        rule.onNodeWithText(rule.activity.getString(R.string.no_matching_exercises)).assertExists()
+        rule.onNodeWithTag("clear_exercise_filters").performScrollTo().performClick()
+        rule.onNodeWithTag("library_SQUAT").performScrollTo().assertExists()
     }
 
     @Test fun exerciseSearchAndEnlargedPhasesSurviveRecreation() {

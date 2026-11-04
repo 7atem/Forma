@@ -5,6 +5,7 @@ import android.util.LruCache
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -45,12 +47,12 @@ private val thumbnailCache=LruCache<Int,ImageBitmap>(8)
 internal fun ExerciseThumbnail(exercise:Exercise,modifier:Modifier=Modifier) {
     val id=guideResources(exercise).image
     val resources=LocalContext.current.resources
-    val bitmap by produceState(thumbnailCache.get(id),id) {
-        if(value==null) value=withContext(Dispatchers.IO) {
+    val bitmap by produceState(thumbnailCache.get(id)?.let {id to it},id) {
+        value=(thumbnailCache.get(id)?:withContext(Dispatchers.IO) {
             BitmapFactory.decodeResource(resources,id,BitmapFactory.Options().apply {inSampleSize=2}).asImageBitmap().also {thumbnailCache.put(id,it)}
-        }
+        }).let {id to it}
     }
-    val image=bitmap
+    val image=bitmap?.takeIf {it.first==id}?.second
     if(image!=null) Image(image,contentDescription=null,contentScale=ContentScale.Fit,modifier=modifier.aspectRatio(1.5f))
     else Surface(modifier.aspectRatio(1.5f),color=MaterialTheme.colorScheme.background,shape=RoundedCornerShape(14.dp)) {}
 }
@@ -68,13 +70,15 @@ internal fun ExerciseIllustration(exercise:Exercise,onOpen:(()->Unit)?=null) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ExerciseGuideSheet(exercise:Exercise,onDismiss:()->Unit) {
+internal fun ExerciseGuideSheet(exercise:Exercise,tools:@Composable ()->Unit={},onDismiss:()->Unit) {
     var tab by rememberSaveable(exercise) {mutableIntStateOf(0)}
     var enlarged by rememberSaveable(exercise) {mutableStateOf(false)}
     val guide=guideResources(exercise)
     val uri=LocalUriHandler.current
+    val guideScroll=rememberScrollState()
+    LaunchedEffect(exercise) {guideScroll.scrollTo(0)}
     ModalBottomSheet(onDismissRequest=onDismiss,sheetState=rememberModalBottomSheetState(skipPartiallyExpanded=true),containerColor=MaterialTheme.colorScheme.background) {
-        Column(Modifier.fillMaxWidth().heightIn(max=850.dp).verticalScroll(rememberScrollState()).padding(horizontal=20.dp).navigationBarsPadding().padding(bottom=24.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
+        Column(Modifier.fillMaxWidth().heightIn(max=850.dp).verticalScroll(guideScroll).padding(horizontal=20.dp).navigationBarsPadding().padding(bottom=24.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
             Row(verticalAlignment=Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(exerciseLabel(exercise)),style=MaterialTheme.typography.headlineSmall)
@@ -97,6 +101,7 @@ internal fun ExerciseGuideSheet(exercise:Exercise,onDismiss:()->Unit) {
                 Text(stringResource(R.string.guide_scope),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
                 TextButton(onClick={runCatching {uri.openUri(guide.reference)}}) {Text(stringResource(R.string.exercise_reference))}
             } else MuscleMap(exercise)
+            tools()
         }
     }
     if(enlarged) ExerciseImageViewer(exercise){enlarged=false}
@@ -145,25 +150,89 @@ private fun ExerciseImageViewer(exercise:Exercise,onDismiss:()->Unit) {
 }
 
 @Composable
-internal fun ExerciseLibrary() {
+internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel) {
+    val columns=if(LocalConfiguration.current.screenWidthDp>=840) 3 else 2
     var search by rememberSaveable {mutableStateOf("")}
     var opened by rememberSaveable {mutableStateOf<Exercise?>(null)}
+    var equipment by rememberSaveable {mutableStateOf<Equipment?>(null)}
+    var muscle by rememberSaveable {mutableStateOf<Muscle?>(null)}
+    var favoritesOnly by rememberSaveable {mutableStateOf(false)}
+    var recentOnly by rememberSaveable {mutableStateOf(false)}
+    var limit by rememberSaveable {mutableIntStateOf(12)}
+    LaunchedEffect(search,equipment,muscle,favoritesOnly,recentOnly) {limit=12}
     Input(R.string.search_exercises,search,{search=it},"exercise_search",numeric=false)
-    val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {muscle ->stringResource(muscleLabel(muscle))}.joinToString()}
-    val matches=Exercise.entries.filter {search.isBlank() || names.getValue(it).contains(search,true)}
+    Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        Box(Modifier.weight(1f)) {
+            var expanded by remember {mutableStateOf(false)}
+            OutlinedButton(onClick={expanded=true},modifier=Modifier.fillMaxWidth().testTag("equipment_filter")) {Text(stringResource(equipment?.let(::equipmentLabel)?:R.string.all_equipment))}
+            DropdownMenu(expanded,onDismissRequest={expanded=false}) {
+                DropdownMenuItem(text={Text(stringResource(R.string.all_equipment))},onClick={equipment=null;expanded=false})
+                Equipment.entries.forEach {value ->DropdownMenuItem(text={Text(stringResource(equipmentLabel(value)))},onClick={equipment=value;expanded=false},modifier=Modifier.testTag("filter_equipment_${value.name}"))}
+            }
+        }
+        Box(Modifier.weight(1f)) {
+            var expanded by remember {mutableStateOf(false)}
+            OutlinedButton(onClick={expanded=true},modifier=Modifier.fillMaxWidth().testTag("muscle_filter")) {Text(stringResource(muscle?.let(::muscleLabel)?:R.string.all_muscles))}
+            DropdownMenu(expanded,onDismissRequest={expanded=false}) {
+                DropdownMenuItem(text={Text(stringResource(R.string.all_muscles))},onClick={muscle=null;expanded=false})
+                Muscle.entries.forEach {value ->DropdownMenuItem(text={Text(stringResource(muscleLabel(value)))},onClick={muscle=value;expanded=false},modifier=Modifier.testTag("filter_muscle_${value.name}"))}
+            }
+        }
+    }
+    Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        FilterChip(favoritesOnly,{favoritesOnly=!favoritesOnly},label={Text(stringResource(R.string.favorites))},modifier=Modifier.testTag("favorites_filter"))
+        FilterChip(recentOnly,{recentOnly=!recentOnly},label={Text(stringResource(R.string.recent_exercises))},modifier=Modifier.testTag("recent_filter"))
+        if(search.isNotBlank()||equipment!=null||muscle!=null||favoritesOnly||recentOnly) TextButton(onClick={search="";equipment=null;muscle=null;favoritesOnly=false;recentOnly=false},modifier=Modifier.testTag("clear_exercise_filters")) {Text(stringResource(R.string.clear_filters))}
+    }
+    val favorites=state.snapshot.exercisePreferences.filter {it.favorite}.map {it.exercise}.toSet()
+    val completed=state.snapshot.sessions.filter {it.completedAt!=null}.map {it.id}.toSet()
+    val recent=state.snapshot.sets.filter {it.sessionId in completed}.map {it.exercise}.toSet()
+    val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
+    val matches=Exercise.entries.filter {(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&(search.isBlank() || names.getValue(it).contains(search,true))}
+    Text(stringResource(R.string.exercise_results,number(matches.size.toDouble(),0),number(Exercise.entries.size.toDouble(),0)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
     if(matches.isEmpty()) EmptyState(R.string.no_matching_exercises,R.string.exercise_search_hint)
-    matches.chunked(2).forEach {row -> Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
+    matches.take(limit).chunked(columns).forEach {row -> Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
         row.forEach {exercise ->
             Card(onClick={opened=exercise},modifier=Modifier.weight(1f).testTag("library_${exercise.name}"),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface),shape=RoundedCornerShape(20.dp)) {
                 ExerciseThumbnail(exercise,Modifier.fillMaxWidth())
                 Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
                     Text(stringResource(exerciseLabel(exercise)),style=MaterialTheme.typography.titleMedium)
                     Text(stringResource(muscleLabel(ExerciseMuscles.of(exercise).primary.first())),style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.primary)
+                    Text(ExerciseCatalog.of(exercise).equipment.map {stringResource(equipmentLabel(it))}.joinToString(" · "),style=MaterialTheme.typography.bodySmall)
+                    TextButton(onClick={vm.favorite(exercise,exercise !in favorites)},enabled=!state.busy,modifier=Modifier.testTag("favorite_${exercise.name}")) {Text(stringResource(if(exercise in favorites) R.string.remove_favorite else R.string.add_favorite))}
                     Text(stringResource(R.string.view_exercise),style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
-        if(row.size==1) Spacer(Modifier.weight(1f))
+        repeat(columns-row.size) {Spacer(Modifier.weight(1f))}
     }}
-    opened?.let {ExerciseGuideSheet(it){opened=null}}
+    if(matches.size>limit) TextButton(onClick={limit+=12},modifier=Modifier.testTag("more_exercises")) {Text(stringResource(R.string.show_more))}
+    opened?.let {exercise ->ExerciseGuideSheet(exercise,tools={ExerciseTools(exercise,state,vm,onSimilar={opened=it})},onDismiss={opened=null})}
+}
+
+@Composable
+@OptIn(ExperimentalLayoutApi::class)
+private fun ExerciseTools(exercise:Exercise,state:AppState,vm:FitnessViewModel,onSimilar:(Exercise)->Unit) {
+    val preference=state.snapshot.exercisePreferences.firstOrNull {it.exercise==exercise}
+    var editing by rememberSaveable(exercise) {mutableStateOf(false)}
+    var similar by rememberSaveable(exercise) {mutableStateOf(false)}
+    val details=ExerciseCatalog.of(exercise)
+    Text(details.equipment.map {stringResource(equipmentLabel(it))}.joinToString(" · "),style=MaterialTheme.typography.labelLarge)
+    if(details.perSide) Text(stringResource(R.string.per_side_note),style=MaterialTheme.typography.bodySmall)
+    if(!preference?.notes.isNullOrBlank()) Text(preference!!.notes,style=MaterialTheme.typography.bodyMedium)
+    FlowRow {
+        TextButton(onClick={vm.favorite(exercise,preference?.favorite!=true)},enabled=!state.busy) {Text(stringResource(if(preference?.favorite==true) R.string.remove_favorite else R.string.add_favorite))}
+        TextButton(onClick={editing=true},modifier=Modifier.testTag("exercise_notes")) {Text(stringResource(R.string.personal_notes))}
+    }
+    TextButton(onClick={similar=!similar},modifier=Modifier.testTag("similar_exercises")) {Text(stringResource(R.string.similar_focus))}
+    if(similar) {
+        Text(stringResource(R.string.similar_note),style=MaterialTheme.typography.bodySmall)
+        ExerciseCatalog.similar(exercise).forEach {other ->TextButton(onClick={onSimilar(other)}) {Text(stringResource(exerciseLabel(other)))}}
+    }
+    if(editing) {
+        var notes by remember(exercise) {mutableStateOf(preference?.notes.orEmpty())}
+        AlertDialog(onDismissRequest={editing=false},title={Text(stringResource(R.string.personal_notes))},text={
+            OutlinedTextField(notes,{if(it.length<=2000) notes=it},modifier=Modifier.fillMaxWidth().testTag("exercise_notes_input"),minLines=3,supportingText={Text(stringResource(R.string.notes_limit,number(notes.length.toDouble(),0)))})
+        },confirmButton={TextButton(onClick={vm.exerciseNotes(exercise,notes){editing=false}},enabled=!state.busy,modifier=Modifier.testTag("save_exercise_notes")) {Text(stringResource(R.string.save))}},dismissButton={TextButton(onClick={editing=false}) {Text(stringResource(R.string.cancel))}})
+    }
 }

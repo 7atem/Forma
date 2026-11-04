@@ -27,13 +27,15 @@ import kotlinx.coroutines.delay
 import java.time.LocalDate
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 internal fun TrainContent(state:AppState,today:LocalDate,vm:FitnessViewModel,scrollState:ScrollState) {
     var section by rememberSaveable {mutableIntStateOf(0)}
     var day by rememberSaveable {mutableLongStateOf(today.toEpochDay())}
     var editor by remember {mutableStateOf<TrainingProgram?>(null)}
     var creating by rememberSaveable {mutableStateOf(false)}
     val active=state.snapshot.sessions.firstOrNull {it.completedAt==null}
-    PageHeading(R.string.training_title,if(active==null) R.string.training_intro else R.string.session_focus)
+    if(section==0) PageHeading(R.string.training_title,if(active==null) R.string.training_intro else R.string.session_focus)
+    else Text(stringResource(if(section==1) R.string.exercise_library else R.string.training_history),style=MaterialTheme.typography.headlineSmall)
     val pages=rememberSaveableStateHolder()
     LaunchedEffect(active?.id) {if(active!=null) section=0}
     LaunchedEffect(section,active?.id) {scrollState.scrollTo(0)}
@@ -49,8 +51,9 @@ internal fun TrainContent(state:AppState,today:LocalDate,vm:FitnessViewModel,scr
                 DateChoice(date,today,{day=it.toEpochDay()},"training_date")
                 state.snapshot.programs.forEach {program ->
                     ProgramCard(program.name,program.exercises,"start_${program.id}",state.busy,{vm.start(program.id,date)}) {
-                        Row {
+                        FlowRow {
                             TextButton(onClick={editor=program}) {Text(stringResource(R.string.edit))}
+                            TextButton(onClick={editor=program.copy(id=java.util.UUID.randomUUID().toString())},enabled=!state.busy,modifier=Modifier.testTag("duplicate_${program.id}")) {Text(stringResource(R.string.duplicate_program))}
                             ConfirmButton(R.string.remove,stringResource(R.string.delete_program_note),!state.busy) {vm.deleteProgram(program.id)}
                         }
                     }
@@ -62,10 +65,11 @@ internal fun TrainContent(state:AppState,today:LocalDate,vm:FitnessViewModel,scr
                     ProgramCard(stringResource(if(template.id=="A") R.string.template_a else R.string.template_b),template.exercises,"start_${template.id}",state.busy,{vm.start(template.id,date)})
                 }
             }
-            1 -> ExerciseLibrary()
+            1 -> ExerciseLibrary(state,vm)
             2 -> TrainingHistoryContent(state,today,vm)
         }
     }
+    PlateCalculatorButton()
     if(creating||editor!=null) ProgramDialog(editor,state.busy,{creating=false;editor=null}) {vm.saveProgram(it){creating=false;editor=null}}
 }
 
@@ -124,6 +128,8 @@ private fun SessionForm(session:Session,state:AppState,vm:FitnessViewModel,onFin
         FormFieldPair(first={Input(R.string.reps,reps,{reps=it},"set_reps",error=reps.isNotBlank()&&NumericInput.integer(reps)?.let {it in 1..1000}!=true)},
             second={Input(R.string.weight_kg,weight,{weight=it},"set_weight",error=weight.isNotBlank()&&NumericInput.decimal(weight)?.let {it in 0.0..1000.0}!=true)})
         Text(stringResource(R.string.zero_external_load),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(if(Equipment.DUMBBELLS in ExerciseCatalog.of(exercise).equipment) R.string.dumbbell_load_note else R.string.load_convention_note),style=MaterialTheme.typography.bodySmall)
+        if(ExerciseCatalog.of(exercise).perSide) Text(stringResource(R.string.per_side_note),style=MaterialTheme.typography.bodySmall)
         Row(verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
             FilterChip(selected=warmup,onClick={warmup=!warmup},label={Text(stringResource(R.string.warmup_set))},modifier=Modifier.testTag("warmup_set"))
             TextButton(onClick={showRpe=!showRpe;if(!showRpe) rpe=""},modifier=Modifier.testTag("toggle_rpe")) {Text(stringResource(R.string.effort_toggle))}
@@ -164,6 +170,7 @@ private fun TrainingHistoryContent(state:AppState,today:LocalDate,vm:FitnessView
     var guide by rememberSaveable {mutableStateOf(false)}
     var search by rememberSaveable {mutableStateOf("")}
     var limit by rememberSaveable {mutableIntStateOf(10)}
+    TrainingExport(state,vm)
     InfoCard {
         Text(stringResource(R.string.load_history),style=MaterialTheme.typography.titleLarge)
         ExercisePicker(exercise,{exercise=it})
@@ -198,6 +205,10 @@ private fun SessionHistoryCard(session:Session,state:AppState,vm:FitnessViewMode
         Text(stringResource(R.string.session_status,number(sets.size.toDouble(),0),dateLabel(session.date)),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
         TextButton(onClick={expanded=!expanded},modifier=Modifier.testTag("history_expand_${session.id}")) {Text(stringResource(if(expanded) R.string.show_less else R.string.view_session_details))}
         if(expanded) {
+            Text(stringResource(R.string.repeat_session_note),style=MaterialTheme.typography.bodySmall)
+            val repeatFits=(session.plannedExercises+sets.map {it.exercise}).distinct().size in 1..20
+            if(!repeatFits) Text(stringResource(R.string.repeat_limit_note),style=MaterialTheme.typography.bodySmall)
+            OutlinedButton(onClick={vm.repeatSession(session.id)},enabled=repeatFits&&!state.busy&&state.snapshot.sessions.none {it.completedAt==null},modifier=Modifier.testTag("repeat_session_${session.id}")) {Text(stringResource(R.string.repeat_session))}
             if(session.source==SessionSource.APPLE_WATCH_IMPORT) {
                 Text(stringResource(R.string.watch_record_source))
                 session.averageHeartRateBpm?.let {Text(stringResource(R.string.watch_heart_rate,number(it,0)))}
@@ -247,18 +258,25 @@ private fun ProgramDialog(program:TrainingProgram?,busy:Boolean,onDismiss:()->Un
     var name by remember {mutableStateOf(program?.name.orEmpty())}
     var selected by remember {mutableStateOf(program?.exercises?:emptyList())}
     var rest by remember {mutableStateOf((program?.restSeconds?:90).toString())}
+    var search by remember {mutableStateOf("")}
+    var limit by remember {mutableIntStateOf(12)}
     val candidate=runCatching {TrainingProgram(id=program?.id?:java.util.UUID.randomUUID().toString(),name=name.trim(),exercises=selected,restSeconds=requireNotNull(NumericInput.integer(rest)))}.getOrNull()
     AlertDialog(onDismissRequest=onDismiss,title={Text(stringResource(R.string.saved_program))},text={Column(Modifier.heightIn(max=480.dp).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(8.dp)) {
         Input(R.string.program_name,name,{name=it},"program_name",numeric=false)
         Input(R.string.rest_seconds,rest,{rest=it},"program_rest")
         Text(stringResource(R.string.program_note))
-        Exercise.entries.forEach {exercise -> FilterChip(selected=exercise in selected,onClick={selected=if(exercise in selected) selected-exercise else selected+exercise},label={Text(stringResource(exerciseLabel(exercise)))},modifier=Modifier.testTag("program_exercise_${exercise.name}"))}
         selected.forEachIndexed {index,exercise ->
             Text(stringResource(exerciseLabel(exercise)))
             Row {
                 TextButton(onClick={selected=selected.toMutableList().apply {java.util.Collections.swap(this,index,index-1)}},enabled=index>0) {Text(stringResource(R.string.move_up))}
                 TextButton(onClick={selected=selected.toMutableList().apply {java.util.Collections.swap(this,index,index+1)}},enabled=index<selected.lastIndex) {Text(stringResource(R.string.move_down))}
+                TextButton(onClick={selected=selected-exercise}) {Text(stringResource(R.string.remove))}
             }
         }
+        Input(R.string.search_exercises,search,{search=it;limit=12},"program_exercise_search",numeric=false)
+        val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))}
+        val matches=Exercise.entries.filter {search.isBlank()||names.getValue(it).contains(search,true)}
+        matches.take(limit).forEach {exercise -> FilterChip(selected=exercise in selected,onClick={selected=if(exercise in selected) selected-exercise else selected+exercise},enabled=exercise in selected||selected.size<20,label={Text(stringResource(exerciseLabel(exercise)))},modifier=Modifier.testTag("program_exercise_${exercise.name}"))}
+        if(matches.size>limit) TextButton(onClick={limit+=12}) {Text(stringResource(R.string.show_more))}
     }},confirmButton={TextButton(onClick={candidate?.let(onSave)},enabled=candidate!=null&&!busy,modifier=Modifier.testTag("save_program")) {Text(stringResource(R.string.save))}},dismissButton={TextButton(onClick=onDismiss) {Text(stringResource(R.string.cancel))}})
 }

@@ -12,7 +12,7 @@ Android first: Kotlin + Compose + Hilt, using lessons from the existing project.
 |---|---|
 | `app` | Compose onboarding, Today, Train, Eat, Progress, Coach; saved programs, foods/recipes, SAF backup UI; Hilt wiring |
 | `core:model` | Typed fitness records, bounded numeric validation, Arabic/Persian digit parsing |
-| `core:data` | Room schema v3 with encrypted 1→2→3 migrations, transactional snapshots, SQLCipher/Keystore, repository |
+| `core:data` | Room schema v4 with encrypted 1→2→3→4 migrations, transactional snapshots, SQLCipher/Keystore, repository |
 | `core:coach` | JVM-only review/history/timer/coach tools, strict local-model fact-ID verification |
 
 | `core:wearables` | Bounded v1 workout transfer; validated wire records, no networking |
@@ -31,6 +31,7 @@ Feature modules can be split when actual size and independent ownership justify 
 - `foods`: typed nutrition/reference unit/source plus immutable recipe ingredient snapshots; old meals never recalculate from library edits.
 - `check_ins` / `plan_proposals`: explicit availability and confirmation state, with stale-target guards.
 - `measurements`: one record per local calendar date, optional weight/waist, at least one present. Saving replaces that day's record as stated in the form.
+- `exercise_preferences`: one encrypted favorite/notes row per stable exercise ID. Missing backup rows default empty. Both fields participate in confirmed snapshot replacement; favorites and notes edits preserve the other field.
 
 The first alpha has one local user; it does not pretend to support coach accounts. Add trainer/client ownership and consent through an explicit future migration. Do not add unused multi-tenancy now.
 
@@ -62,6 +63,6 @@ Android's watch dialog uses SAF and a readable workout-only contract capped at 1
 
 ## Alpha04 demonstration assets and UI
 
-`catalog/exercise-guides.json` generates bilingual Android/Swift guide labels and source-linked cues. Eight original PNGs live once under `assets/exercises/res/drawable-nodpi`, referenced by Android resources and XcodeGen. No runtime image API/network permission. Android samples/caches small thumbnails on IO and loads full resolution only in an opened guide/viewer. The phase viewer crops the render at display time; original files stay unchanged. Canonical hashes and prompt specifications are committed.
+`catalog/exercise-guides.json` generates bilingual Android/Swift guide labels and source-linked cues. 40 original PNGs live once under `assets/exercises/res/drawable-nodpi`, referenced by Android resources and XcodeGen. No runtime image API/network permission. Android samples/caches small thumbnails on IO and loads full resolution only in an opened guide/viewer. The phase viewer crops the render at display time; original files stay unchanged. Canonical hashes and prompt specifications are committed.
 
 The app shell keeps navigation/header separate from page scroll and selects a rail at 840 dp. Training uses a saveable state holder per section, retains active input, and resets scroll on explicit section/session changes. Manual saves keep entered reps/load without recommending progression. Details and instructional review boundaries are in `EXERCISE_DEMOS_AND_UX.md`.

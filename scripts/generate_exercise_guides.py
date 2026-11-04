@@ -34,4 +34,4 @@ for folder,lang in [('values','en'),('values-ar','ar')]:
 for path,content in outputs.items():
     if '--check' in sys.argv:assert path.read_text(encoding='utf-8')==content,str(path)
     else:path.parent.mkdir(parents=True,exist_ok=True);path.write_text(content,encoding='utf-8')
-print('8 bilingual exercise guides synchronized.')
+print(f'{len(data)} bilingual exercise guides synchronized.')

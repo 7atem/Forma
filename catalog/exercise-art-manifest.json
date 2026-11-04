@@ -46,5 +46,197 @@
     "file": "assets/exercises/res/drawable-nodpi/exercise_split_squat.png",
     "sha256": "7a9fe36383fde62ebdbb28852eca29b27292643698fbf50d7a2917c7a0075104",
     "bytes": 1705537
+  },
+  {
+    "id": "goblet_squat",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_goblet_squat.png",
+    "sha256": "e28ffa58dbe49eeb0069a2ad9c68807cd10c278f01874e1a44842d756a053cbc",
+    "bytes": 1742542
+  },
+  {
+    "id": "barbell_back_squat",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_back_squat.png",
+    "sha256": "d18568d88da83cf1d4fe2b963eb5b8a13be350ab2fa35a5568e9c6219c9302e9",
+    "bytes": 1798240
+  },
+  {
+    "id": "reverse_lunge",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_reverse_lunge.png",
+    "sha256": "8c441d33e4de9e14cdc2f532ed03cf7b4c03906d3f1063a4297de095b681cbb0",
+    "bytes": 1708532
+  },
+  {
+    "id": "step_up",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_step_up.png",
+    "sha256": "4f603c76307f540ea28ab861d091df900e101b333608b9369c0b41af0b1da138",
+    "bytes": 1660241
+  },
+  {
+    "id": "leg_extension",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_leg_extension.png",
+    "sha256": "5a5774d373c41e34456b417fa24cb7fddb6eb586bb7d1a000bc9103f973662f3",
+    "bytes": 1777433
+  },
+  {
+    "id": "seated_leg_curl",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_seated_leg_curl.png",
+    "sha256": "6434e8f8372dd6e61e6e1730962db2f097ef8feee8f311d1c5a23c34bd3f1597",
+    "bytes": 1835034
+  },
+  {
+    "id": "standing_calf_raise",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_standing_calf_raise.png",
+    "sha256": "730783e04378fb20fd47f4276036a575be8f700652071bcbfa8d88e83faee1cb",
+    "bytes": 1676028
+  },
+  {
+    "id": "seated_calf_raise",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_seated_calf_raise.png",
+    "sha256": "c7205b71407c1f8029f6a59514ea998f85db8de4a1279b34bc45c3cf48391873",
+    "bytes": 1771711
+  },
+  {
+    "id": "barbell_hip_thrust",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_hip_thrust.png",
+    "sha256": "19f018f745d7aa336db4ad893016c3f917f1a8a841eb85de391c0fbd0f6e1e68",
+    "bytes": 1718126
+  },
+  {
+    "id": "glute_bridge",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_glute_bridge.png",
+    "sha256": "b8737d71e9d1b7b3bcd288052652e0bd2fe0e01f2b37db7443bd7eec6b3b7519",
+    "bytes": 1681995
+  },
+  {
+    "id": "barbell_romanian_deadlift",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_romanian_deadlift.png",
+    "sha256": "36963d409aa24a4b6005fde90e6e369b350c15c45350d8c536575892debbc60a",
+    "bytes": 1723728
+  },
+  {
+    "id": "dumbbell_bench_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_bench_press.png",
+    "sha256": "a66f14995dcb3a1a0f665cf43e57368e822ee74c6847595d0c36bd85085c304c",
+    "bytes": 1735060
+  },
+  {
+    "id": "incline_dumbbell_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_dumbbell_press.png",
+    "sha256": "6d93a23de9796e4d2b92601cdf6013626b8ab511caa3356667d0e4db55fda15c",
+    "bytes": 1814047
+  },
+  {
+    "id": "push_up",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_push_up.png",
+    "sha256": "533c2d6015c75d51619d4bad2204d796d399739f6b253a1dec790d8d9bc6386c",
+    "bytes": 1641550
+  },
+  {
+    "id": "knee_push_up",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_knee_push_up.png",
+    "sha256": "a9f4737f7bf292b32267b5c9445d3b63f4ce3c91ddad4a57f3d6839ed07a79d8",
+    "bytes": 1681827
+  },
+  {
+    "id": "cable_chest_fly",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_chest_fly.png",
+    "sha256": "7ab7ff421088fd8a880ea41ed42f49cf1db1b7dc59feab1eca93dbe3a8360ec5",
+    "bytes": 1781069
+  },
+  {
+    "id": "single_arm_dumbbell_row",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_single_arm_dumbbell_row.png",
+    "sha256": "a0acec88c42b730cb0e9f743f45c286d3ae696e4aab9eac355f4016e281ca25d",
+    "bytes": 1702652
+  },
+  {
+    "id": "chest_supported_row",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_chest_supported_row.png",
+    "sha256": "019776f7c133e64e4e9c14e67cefa23488fd4300cce10796a85bdf47742458bb",
+    "bytes": 1824591
+  },
+  {
+    "id": "pull_up",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_pull_up.png",
+    "sha256": "8473664fab6119bec851f2d0a001719739fdd37b11fc10bf5c365ac8f7f70fd0",
+    "bytes": 1656543
+  },
+  {
+    "id": "face_pull",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_face_pull.png",
+    "sha256": "00fdce6be51b54f7a970f4cd01a34f868966c90b6efc84b76c9afc5658a79fc2",
+    "bytes": 1739992
+  },
+  {
+    "id": "dumbbell_shoulder_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_shoulder_press.png",
+    "sha256": "b125e1f4666adb14bf884742be7ef1b41015572a2087eaf483c6972d1ec168fc",
+    "bytes": 1820230
+  },
+  {
+    "id": "lateral_raise",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_lateral_raise.png",
+    "sha256": "ab4caf9f4ca1bcf2c9462658f2c8fe255b1e0e77a511aace000257b3eafadcc2",
+    "bytes": 1699470
+  },
+  {
+    "id": "rear_delt_fly",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_rear_delt_fly.png",
+    "sha256": "b55f8a741dbd04ab150ade2892aca162cde8e1cf48f32a415502877147686c0b",
+    "bytes": 1686788
+  },
+  {
+    "id": "dumbbell_shrug",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_shrug.png",
+    "sha256": "feef9ac344d618a7fa2e878002b460e4d91535b4d04a278e83db8af39f417e18",
+    "bytes": 1688223
+  },
+  {
+    "id": "dumbbell_curl",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_curl.png",
+    "sha256": "e06e171cdf7dfc9efcca213f142b8d740497562661305538d86e70375b22eff8",
+    "bytes": 1792762
+  },
+  {
+    "id": "hammer_curl",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hammer_curl.png",
+    "sha256": "1fcc164743d727293a1b78b625c1d21da5df75f25863e731c0216114ab24bbe4",
+    "bytes": 1718472
+  },
+  {
+    "id": "machine_preacher_curl",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_machine_preacher_curl.png",
+    "sha256": "97adcbdf8b6c82cb8260866f890605f480c327e6845410c38f6911509ded16ba",
+    "bytes": 1865211
+  },
+  {
+    "id": "triceps_pushdown",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_triceps_pushdown.png",
+    "sha256": "ba7b5d4cd82eba508d657c9d7d62862c1818fbb221b97bd5f8ec261fd041a04d",
+    "bytes": 1737346
+  },
+  {
+    "id": "overhead_triceps_extension",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_overhead_triceps_extension.png",
+    "sha256": "e53c43ad1c1c73a518a823871977490a5cdbf9fa91f1848f5d6d75c5c9edd81a",
+    "bytes": 1733331
+  },
+  {
+    "id": "dead_bug",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dead_bug.png",
+    "sha256": "5edfccb948bd56db5675de2289a0abb26cf47a0501fbabe3327c629758c0d125",
+    "bytes": 1856996
+  },
+  {
+    "id": "reverse_crunch",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_reverse_crunch.png",
+    "sha256": "4808dedee494cfd5ceb6d5866046bdef14e36db8c3137e6af7f4cecf84f4ecbc",
+    "bytes": 1643115
+  },
+  {
+    "id": "cable_crunch",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_crunch.png",
+    "sha256": "696a6e8f81afee81ac9b130d72109f826e0bf2845965e48a15ddbe80bca8feb2",
+    "bytes": 1762205
   }
 ]

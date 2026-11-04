@@ -1,12 +1,12 @@
-# Exercise demonstrations and experience — alpha04
+# Exercise demonstrations and experience — alpha05
 
-Eight original, generated 3D **still illustrations** show two distinct phases per current exercise. They are not interactive 3D models, motion capture, videos or a validated assessment of an individual user's form. They ship offline with the app. No exercise imagery or videos were copied from another product.
+40 original, generated 3D **still illustrations** show two distinct phases per current exercise. They are not interactive 3D models, motion capture, videos or a validated assessment of an individual user's form. They ship offline with the app. No exercise imagery or videos were copied from another product.
 
 ## Assets and editorial references
 
 Canonical assets: `assets/exercises/res/drawable-nodpi/exercise_*.png`. Each is an unchanged 1536×1024 generated PNG with two side-by-side panels. Start is physically left and movement physically right; the image and its phase labels are intentionally not mirrored in Arabic. The generated subjects are adult mannequins in neutral gym clothing. Equipment is representative and simplified.
 
-| Stable exercise ID | Illustrated variation | Technique reference |
+| Original stable exercise ID | Illustrated variation | Technique reference |
 |---|---|---|
 | SQUAT | Bodyweight squat | [ACE](https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/) |
 | LEG_PRESS | Inclined sled leg press | [NASM](https://www.nasm.org/resource-center/exercise-library/leg-press) |
@@ -21,7 +21,7 @@ Broad historical exercise IDs and saved sets are unchanged. Each guide explicitl
 
 `catalog/exercise-guides.json` holds original concise EN/AR editorial cues and their primary references. `generate_exercise_guides.py` creates Android resources and Swift values. These are short paraphrases, not copied exercise articles. The guide's source button opens the public page in the system browser only when the user chooses it.
 
-The built-in `image_gen` tool produced the assets. [Prompt set](../catalog/exercise-art-prompts.json) records the generation specifications; [manifest](../catalog/exercise-art-manifest.json) records exact byte counts and SHA-256. Files are included once and referenced by Android and XcodeGen. Source originals remain in the Codex generated-images directory as well. The eight assets total 14,041,945 bytes.
+The built-in `image_gen` tool produced the assets. [Prompt set](../catalog/exercise-art-prompts.json) records the generation specifications; [manifest](../catalog/exercise-art-manifest.json) records exact byte counts and SHA-256. Files are included once and referenced by Android and XcodeGen. Source originals remain in the Codex generated-images directory as well. The 40 assets total 69,717,035 bytes. Alpha04's original eight remain byte-identical; alpha05 adds 32.
 
 ## Review status and limits
 
@@ -52,3 +52,5 @@ python scripts/check_apple_sources.py
 ```
 
 These verify keys, catalog coverage, exact PNG integrity/dimensions, generated outputs and packaging references. They do not validate the movement scientifically. Current executed UI/build results and visual evidence are in [validation](VALIDATION.md).
+
+Alpha05 extends this foundation with 32 named variations, combined equipment/muscle/favorites/previously logged filters, personal exercise notes and a compact three-column tablet library (two columns on phones). See [expansion contract](ALPHA05_EXPANSION.md).

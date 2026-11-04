@@ -27,6 +27,7 @@ internal fun EatContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
     PageHeading(R.string.eat_title)
     DateChoice(date,today,{day=it.toEpochDay()},"food_date")
     val logged=state.snapshot.meals.filter {it.date==date}
+    CopyMealDay(state,date,today,vm)
     InfoCard {
         Text(stringResource(R.string.food_for_date,dateLabel(date)),style=MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {

@@ -47,3 +47,7 @@
 "phase_movement" = "2 · Movement";
 "guide_scope" = "AI-generated examples of the named variation. Match your equipment, use a comfortable range and have a qualified trainer check your form.";
 "exercise_reference" = "Read the technique reference";
+"search_exercises" = "Search exercises";
+"equipment_filter" = "Equipment";
+"all_equipment" = "All equipment";
+"per_side_note" = "Log repetitions per side.";

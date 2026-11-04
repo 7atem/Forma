@@ -10,7 +10,7 @@ manifest=json.loads((root/'catalog/exercise-art-manifest.json').read_text(encodi
 prompts=json.loads((root/'catalog/exercise-art-prompts.json').read_text(encoding='utf-8'))['prompts']
 ids={x['id'].lower() for x in catalog}
 assert {x['id'] for x in manifest}=={x['id'] for x in prompts}==ids
-assert len(manifest)==len(ids)==8
+assert len(manifest)==len(prompts)==len(ids)
 for item in manifest:
     file=root/item['file'];data=file.read_bytes()
     assert data[:8]==b'\x89PNG\r\n\x1a\n',file
@@ -21,4 +21,4 @@ for item in manifest:
     assert file.name==f"exercise_{item['id']}.png"
 assert 'assets/exercises/res' in (root/'app/build.gradle.kts').read_text(encoding='utf-8')
 assert '../assets/exercises/res/drawable-nodpi' in (root/'apple/project.yml').read_text(encoding='utf-8')
-print('8 original two-phase 3D PNGs: hashes, dimensions, prompts, coverage and packaging references match.')
+print(f'{len(ids)} original two-phase 3D PNGs: hashes, dimensions, prompts, coverage and packaging references match.')

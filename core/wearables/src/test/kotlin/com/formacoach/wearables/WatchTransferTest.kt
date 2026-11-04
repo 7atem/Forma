@@ -6,6 +6,14 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class WatchTransferTest {
+    @Test fun additiveExerciseNamesRoundTripWithoutBreakingLegacyPackets() {
+        val legacy=WatchTransferCodec.decode(fixture())
+        Exercise.entries.drop(8).forEach {exercise ->
+            val packet=legacy.copy(programs=legacy.programs.map {it.copy(exercises=listOf(exercise))},workouts=legacy.workouts.map {it.copy(exercises=listOf(exercise),sets=it.sets.map {s->s.copy(exercise=exercise)})})
+            assertEquals(packet,WatchTransferCodec.decode(WatchTransferCodec.encode(packet)))
+        }
+        assertEquals(legacy,WatchTransferCodec.decode(WatchTransferCodec.encode(legacy)))
+    }
     private fun fixture()=checkNotNull(javaClass.getResourceAsStream("/transfer-v1.json")).use {it.readBytes()}
     @Test fun fixtureRoundTripsAndPreservesSourceAndEffort() {
         val packet=WatchTransferCodec.decode(fixture())

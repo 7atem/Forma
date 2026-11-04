@@ -22,7 +22,7 @@ import com.formacoach.model.*
 internal fun MuscleMap(exercise:Exercise) {
     val activation=ExerciseMuscles.of(exercise)
     val primary=activation.primary.map {stringResource(muscleLabel(it))}.joinToString()
-    val secondary=activation.secondary.map {stringResource(muscleLabel(it))}.joinToString()
+    val secondary=activation.secondary.map {stringResource(muscleLabel(it))}.joinToString().ifBlank {stringResource(R.string.no_supporting_mapped)}
     val description=stringResource(R.string.muscle_accessibility,stringResource(exerciseLabel(exercise)),primary,secondary)
     val outline=remember {checkNotNull(PathParser.createPathFromPathData(ExerciseMuscles.outline)).asComposePath()}
     val regions=remember {ExerciseMuscles.regions.map {it to checkNotNull(PathParser.createPathFromPathData(it.path)).asComposePath()}}
@@ -49,7 +49,7 @@ internal fun MuscleMap(exercise:Exercise) {
             }}
         }
         Text(stringResource(R.string.muscle_primary,primary),color=main)
-        Text(stringResource(R.string.muscle_secondary,secondary),color=supporting)
+        if(activation.secondary.isNotEmpty()) Text(stringResource(R.string.muscle_secondary,secondary),color=supporting)
         Text(stringResource(R.string.muscle_note),style=MaterialTheme.typography.bodySmall)
     }
 }

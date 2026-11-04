@@ -32,10 +32,25 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     suspend fun deleteSession(id:String)=dao.deleteSession(id)
     suspend fun addMeal(meal:Meal) {checkDate(meal.date);dao.addMeal(meal.row())}
     suspend fun removeMeal(id:String)=dao.removeMeal(id)
+    suspend fun copyMealDay(expected:List<Meal>,target:LocalDate) {
+        checkDate(target);expected.forEach {checkDate(it.date)};dao.copyMealDay(expected.map {it.row()},target.toEpochDay())
+    }
     suspend fun saveMeasurement(value:Measurement) {checkDate(value.date);dao.saveMeasurement(MeasurementRow(value.date.toEpochDay(),value.weightKg,value.waistCm))}
     suspend fun removeMeasurement(date:LocalDate)=dao.removeMeasurement(date.toEpochDay())
     suspend fun saveProgram(program:TrainingProgram)=dao.saveProgram(program.row())
     suspend fun deleteProgram(id:String)=dao.deleteProgram(id)
+    suspend fun favorite(exercise:Exercise,value:Boolean)=dao.favorite(exercise.name,value)
+    suspend fun exerciseNotes(exercise:Exercise,value:String) {
+        require(value.length<=2000);dao.exerciseNotes(exercise.name,value)
+    }
+    /** Repeat the exercise order, never completed sets, sensor data or old IDs. */
+    suspend fun repeatSession(id:String,date:LocalDate=LocalDate.now(clock)) {
+        checkDate(date)
+        val old=checkNotNull(dao.session(id));check(old.completedAt!=null)
+        val order=(kotlinx.serialization.json.Json.decodeFromString<List<Exercise>>(old.exerciseOrder)+dao.sessionSets(id).map {Exercise.valueOf(it.exercise)}).distinct()
+        require(order.size in 1..20)
+        dao.startSession(Session(date=date,templateId="repeat",label=old.label,plannedExercises=order,restSeconds=old.restSeconds).row())
+    }
     suspend fun saveFood(food:Food)=dao.saveFood(food.row())
     suspend fun deleteFood(id:String)=dao.deleteFood(id)
     suspend fun recordCheckIn(checkIn:WeeklyCheckIn) {

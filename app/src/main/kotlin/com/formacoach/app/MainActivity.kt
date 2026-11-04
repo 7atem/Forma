@@ -216,16 +216,6 @@ internal fun goalLabel(goal: Goal): Int = when(goal) {
     Goal.BUILD_STRENGTH -> R.string.goal_strength
     Goal.BUILD_HABIT -> R.string.goal_habit
 }
-internal fun exerciseLabel(exercise: Exercise): Int = when(exercise) {
-    Exercise.SQUAT -> R.string.exercise_squat
-    Exercise.LEG_PRESS -> R.string.exercise_leg_press
-    Exercise.CHEST_PRESS -> R.string.exercise_chest_press
-    Exercise.ROW -> R.string.exercise_row
-    Exercise.LAT_PULLDOWN -> R.string.exercise_lat_pulldown
-    Exercise.HIP_HINGE -> R.string.exercise_hip_hinge
-    Exercise.SHOULDER_PRESS -> R.string.exercise_shoulder_press
-    Exercise.SPLIT_SQUAT -> R.string.exercise_split_squat
-}
 internal fun actionLabel(action: NextAction): Int = when(action) {
     NextAction.LOG_FIRST_SESSION -> R.string.action_first_session
     NextAction.KEEP_TRAINING_LOG -> R.string.action_keep_training

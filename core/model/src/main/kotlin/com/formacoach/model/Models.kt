@@ -24,7 +24,6 @@ data class Profile(
     }
 }
 
-enum class Exercise { SQUAT, LEG_PRESS, CHEST_PRESS, ROW, LAT_PULLDOWN, HIP_HINGE, SHOULDER_PRESS, SPLIT_SQUAT }
 enum class SetKind { WORKING, WARM_UP }
 enum class SessionSource { LOCAL, APPLE_WATCH_IMPORT }
 
@@ -129,7 +128,13 @@ data class FitnessSnapshot(
     val foods: List<Food> = emptyList(),
     val checkIns: List<WeeklyCheckIn> = emptyList(),
     val proposals: List<PlanProposal> = emptyList(),
+    val exercisePreferences: List<ExercisePreference> = emptyList(),
 )
+
+@Serializable
+data class ExercisePreference(val exercise:Exercise,val favorite:Boolean=false,val notes:String="") {
+    init {require(notes.length<=2000)}
+}
 
 /** Accept Latin, Arabic-Indic and Persian digits, with Arabic decimal separator. */
 object NumericInput {

@@ -24,6 +24,8 @@ struct TransferDocument: FileDocument {
     @State private var document:TransferDocument?
     @State private var exporting=false
     @State private var deleting:String?
+    @State private var exerciseSearch=""
+    @State private var equipment:Equipment?
     @Environment(\.locale) private var locale
     var body:some View {
         NavigationStack {
@@ -52,7 +54,14 @@ struct TransferDocument: FileDocument {
                     }
                 }
                 Section("exercise_library") {
-                    ForEach(Exercise.allCases,id:\.self) {exercise in
+                    TextField("search_exercises",text:$exerciseSearch)
+                    Picker("equipment_filter",selection:$equipment) {
+                        Text("all_equipment").tag(Optional<Equipment>.none)
+                        ForEach(Equipment.allCases,id:\.self) {Text($0.label(arabic:locale.language.languageCode?.identifier=="ar")).tag(Optional($0))}
+                    }
+                    ForEach(Exercise.allCases.filter {exercise in
+                        (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) && (exerciseSearch.isEmpty || exercise.label(arabic:locale.language.languageCode?.identifier=="ar").localizedCaseInsensitiveContains(exerciseSearch))
+                    },id:\.self) {exercise in
                         NavigationLink {ExerciseDetail(exercise:exercise)} label: {
                             HStack {
                                 Image(ExerciseGuides.of(exercise,arabic:false).asset).resizable().scaledToFit().frame(width:96).clipShape(RoundedRectangle(cornerRadius:12))

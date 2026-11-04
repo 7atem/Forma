@@ -1,6 +1,6 @@
 # Delivery plan
 
-Current development version: **0.4.0-alpha04**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
+Current development version: **0.5.0-alpha05**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
 
 ## Completed foundation and daily workflow
 
@@ -57,7 +57,8 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [ ] Compile/test native apps on macOS and validate paired WatchConnectivity on physical devices.
 - [ ] Verify VoiceOver/RTL, interruptions/recovery, capacity, stale program delivery, background timers and file errors on Apple hardware.
 - [ ] Add reviewed HealthKit lifecycle/sensors as a separate permission/product change. Current watch app is a manual logger.
-- [ ] Add equipment-specific exercise variants and qualified review; evaluate supersets/custom exercises and fast-entry improvements against the study.
+- [x] Add equipment-specific exercise variants and searchable selection in alpha05.
+- [ ] Qualified exercise review; evaluate supersets/custom exercises against actual study findings.
 
 ## Alpha04 demonstrations and usability
 
@@ -67,3 +68,16 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [x] Sampled cached thumbnails and one shared asset source for Android/Apple.
 - [ ] Qualified review of every generated pose/cue before public release; run the actual beginner/form-comprehension study.
 - [ ] Complete physical-device, TalkBack/VoiceOver, larger histories, minimum API and Apple native build/device acceptance.
+
+## Alpha05 expanded library and practical tools
+
+- [x] 40 original two-phase illustrations and bilingual guides, stable IDs, equipment metadata and 14 simplified muscle groups.
+- [x] Combined search/equipment/primary-muscle/favorites/previously logged filters and searchable exercise pickers.
+- [x] Encrypted favorites/personal notes, explicit schema 3→4 migration and backup compatibility.
+- [x] Similar-primary-muscle browsing, program duplication and guarded repeat-as-new workouts.
+- [x] Readable completed-set CSV through SAF with disclosure and safe spreadsheet quoting.
+- [x] Exact balanced plate calculator using user-selected target/bar/available pairs.
+- [x] Preview/confirm copy of a meal day, immutable portion/source snapshots and stale-source rollback.
+- [x] Official-source product review and explicit implementation/deferred-feature matrix in `COMPETITOR_REVIEW_2026_11_04.md`.
+- [ ] Superset/circuit scheduling, custom exercise record types and timed/cardio logging remain separate typed-model work.
+- [ ] Qualified pose/cue review, real usability study, physical-device acceptance and Mac/Apple tests remain open gates.

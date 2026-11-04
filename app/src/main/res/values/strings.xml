@@ -54,14 +54,6 @@
     <string name="add_set">Save set</string>
     <string name="set_summary">%1$s · %2$s reps × %3$s kg</string>
     <string name="finish_session">Finish session</string>
-    <string name="exercise_squat">Squat</string>
-    <string name="exercise_leg_press">Leg press</string>
-    <string name="exercise_chest_press">Chest press</string>
-    <string name="exercise_row">Row</string>
-    <string name="exercise_lat_pulldown">Lat pulldown</string>
-    <string name="exercise_hip_hinge">Hip hinge</string>
-    <string name="exercise_shoulder_press">Shoulder press</string>
-    <string name="exercise_split_squat">Split squat</string>
     <string name="eat_title">Keep food simple.</string>
     <string name="portion_note">Enter the totals for the whole portion you ate, using a label, recipe or another source you trust. All four values are required; enter 0 only when that value is known to be zero.</string>
     <string name="meal_name">Meal or portion description</string>

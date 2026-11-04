@@ -15,6 +15,8 @@ import java.time.LocalDate
 
 @Entity(tableName="profile")
 data class ProfileRow(@PrimaryKey val id:Int=1,val name:String,val goal:String,val sessionsPerWeek:Int,val caloriesTarget:Int?,val proteinTarget:Double?)
+@Entity(tableName="exercise_preferences")
+data class ExercisePreferenceRow(@PrimaryKey val exercise:String,val favorite:Boolean,val notes:String)
 @Entity(tableName="sessions",indices=[Index("day")])
 data class SessionRow(@PrimaryKey val id:String,val day:Long,val templateId:String,val completedAt:Long?,
     @ColumnInfo(defaultValue="''") val label:String="",
@@ -41,7 +43,7 @@ data class ProposalRow(@PrimaryKey val id:String,val checkInId:String,val baseSe
 
 @Dao
 interface FitnessDao {
-    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class])
+    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class])
     fun changes(query:SupportSQLiteQuery):Flow<Int>
     @Query("SELECT * FROM profile WHERE id=1") fun profile():Flow<ProfileRow?>
     @Query("SELECT * FROM meals ORDER BY day DESC,rowid DESC") fun meals():Flow<List<MealRow>>
@@ -55,6 +57,15 @@ interface FitnessDao {
     @Query("SELECT * FROM foods ORDER BY name") suspend fun allFoods():List<FoodRow>
     @Query("SELECT * FROM check_ins ORDER BY day DESC,rowid DESC") suspend fun allCheckIns():List<CheckInRow>
     @Query("SELECT * FROM plan_proposals ORDER BY rowid DESC") suspend fun allProposals():List<ProposalRow>
+    @Query("SELECT * FROM exercise_preferences ORDER BY exercise") suspend fun allExercisePreferences():List<ExercisePreferenceRow>
+    @Query("SELECT * FROM exercise_preferences WHERE exercise=:exercise") suspend fun exercisePreference(exercise:String):ExercisePreferenceRow?
+    @Upsert suspend fun saveExercisePreference(row:ExercisePreferenceRow)
+    @Transaction suspend fun favorite(exercise:String,value:Boolean) {
+        saveExercisePreference((exercisePreference(exercise)?:ExercisePreferenceRow(exercise,false,"")).copy(favorite=value))
+    }
+    @Transaction suspend fun exerciseNotes(exercise:String,value:String) {
+        saveExercisePreference((exercisePreference(exercise)?:ExercisePreferenceRow(exercise,false,"")).copy(notes=value))
+    }
     @Transaction
     suspend fun readSnapshot():FitnessSnapshot=FitnessSnapshot(
         readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget)},
@@ -66,6 +77,7 @@ interface FitnessDao {
         allFoods().map {Json.decodeFromString<Food>(it.payload).also {food -> check(food.id==it.id && food.name==it.name)}},
         allCheckIns().map {WeeklyCheckIn(it.id,LocalDate.ofEpochDay(it.day),it.availableSessions,it.foodLogComplete,it.notes)},
         allProposals().map {PlanProposal(it.id,it.checkInId,it.baseSessions,it.proposedSessions,Json.decodeFromString(it.evidence),ProposalStatus.valueOf(it.status))},
+        allExercisePreferences().map {ExercisePreference(Exercise.valueOf(it.exercise),it.favorite,it.notes)},
     )
     @Upsert suspend fun insertProfile(row:ProfileRow)
     @Transaction suspend fun saveProfile(row:ProfileRow) {insertProfile(row);supersedeMismatched(row.sessionsPerWeek)}
@@ -105,6 +117,12 @@ interface FitnessDao {
     @Query("UPDATE sessions SET day=:day WHERE id=:id") suspend fun moveSession(id:String,day:Long)
     @Query("DELETE FROM sessions WHERE id=:id") suspend fun deleteSession(id:String)
     @Upsert suspend fun addMeal(row:MealRow)
+    @Query("SELECT * FROM meals WHERE day=:day ORDER BY id") suspend fun mealsOnDay(day:Long):List<MealRow>
+    @Transaction suspend fun copyMealDay(expected:List<MealRow>,target:Long) {
+        require(expected.size in 1..200 && expected.all {it.day==expected.first().day} && expected.first().day!=target)
+        check(mealsOnDay(expected.first().day)==expected.sortedBy {it.id})
+        expected.forEach {addMeal(it.copy(id=java.util.UUID.randomUUID().toString(),day=target))}
+    }
     @Query("DELETE FROM meals WHERE id=:id") suspend fun removeMeal(id:String)
     @Upsert suspend fun saveMeasurement(row:MeasurementRow)
     @Query("DELETE FROM measurements WHERE day=:day") suspend fun removeMeasurement(day:Long)
@@ -140,15 +158,17 @@ interface FitnessDao {
     @Query("DELETE FROM measurements") suspend fun clearMeasurements()
     @Query("DELETE FROM programs") suspend fun clearPrograms()
     @Query("DELETE FROM foods") suspend fun clearFoods()
+    @Query("DELETE FROM exercise_preferences") suspend fun clearExercisePreferences()
     @Insert suspend fun insertMeasurementRows(rows:List<MeasurementRow>)
     @Transaction suspend fun replaceSnapshot(data:FitnessSnapshot) {
-        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods()
+        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods();clearExercisePreferences()
         data.profile?.let {insertProfile(it.row())}
         data.programs.forEach {saveProgram(it.row())};data.foods.forEach {saveFood(it.row())}
         data.sessions.forEach {insertSession(it.row())};data.sets.forEach {insertSet(it.row())}
         data.meals.forEach {addMeal(it.row())}
         insertMeasurementRows(data.measurements.map {MeasurementRow(it.date.toEpochDay(),it.weightKg,it.waistCm)})
         data.checkIns.forEach {insertCheckIn(it.row())};data.proposals.forEach {insertProposal(it.row())}
+        data.exercisePreferences.forEach {saveExercisePreference(ExercisePreferenceRow(it.exercise.name,it.favorite,it.notes))}
     }
 }
 
@@ -161,10 +181,15 @@ internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
 internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
 internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
-@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class],version=3,exportSchema=true)
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class],version=4,exportSchema=true)
 abstract class FitnessDatabase:RoomDatabase() {
     abstract fun dao():FitnessDao
     companion object {
+        val MIGRATION_3_4=object:Migration(3,4) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS exercise_preferences (exercise TEXT NOT NULL PRIMARY KEY, favorite INTEGER NOT NULL, notes TEXT NOT NULL)")
+            }
+        }
         val MIGRATION_2_3=object:Migration(2,3) {
             override fun migrate(db:SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE sessions ADD COLUMN source TEXT NOT NULL DEFAULT 'LOCAL'")
@@ -197,7 +222,7 @@ abstract class FitnessDatabase:RoomDatabase() {
             System.loadLibrary("sqlcipher")
             val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
             return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3).build()
+                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4).build()
         }
     }
 }

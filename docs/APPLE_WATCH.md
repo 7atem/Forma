@@ -1,4 +1,4 @@
-# Apple Watch companion — alpha04 source
+# Apple Watch companion — alpha05 source
 
 Native SwiftUI iPhone and watchOS application source now lives in `apple/`. It is **not yet a compiled, installed or device-validated Apple release**. This Windows machine has neither Swift nor Xcode; portable catalog/fixture/localization checks do not establish that the native applications build. A macOS workflow is prepared but has not run remotely.
 
@@ -16,7 +16,7 @@ Apple Watch uses a paired iPhone; it does not pair with Forma Android. See [Appl
 ## Implemented boundaries
 
 - iOS 17 / watchOS 10 minimum targets; local Foundation Swift package; XcodeGen target configuration, EN/AR strings and shared original schematic geometry.
-- All eight catalog exercises, kg external load, reps, optional subjective RPE 0–10 and warm-up/working types. A watch workout has at most 300 sets. The kg stepper increments by 0.5 kg, preserving imported/copied fractional values.
+- All 40 catalog exercises with shared equipment metadata and 3D guides, kg external load, reps, optional subjective RPE 0–10 and warm-up/working types. A watch workout has at most 300 sets. The kg stepper increments by 0.5 kg, preserving imported/copied fractional values. iPhone library source adds name search and equipment filtering.
 - Atomic native state file, OS file protection until first unlock, fail-closed unreadable state and explicit deletion. This is **not** Android SQLCipher encryption and is not a password-encrypted Apple backup. Device/OS backup policy and Apple recovery/export UX still need review.
 - Persist-before-ACK; matching workout IDs deduplicate, conflicting IDs reject. Up to 500 completed workouts are retained; capacity errors preserve the draft/outbox instead of silently deleting history. Phone exports one workout at a time.
 - Rest countdown uses a persisted deadline. Foreground haptic on expiry only; background notifications, workout-process runtime, reboot/clock-change timer guarantees and active HealthKit session recovery are not implemented.

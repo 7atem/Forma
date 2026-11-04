@@ -70,6 +70,7 @@ class FitnessViewModel @Inject constructor(private val repository: FitnessReposi
     fun addMeal(meal: Meal, done: () -> Unit) = write(done) { repository.addMeal(meal) }
     fun repeatMeal(meal: Meal) = write { repository.addMeal(meal.copy(id=UUID.randomUUID().toString(), date=LocalDate.now())) }
     fun removeMeal(id: String) = write { repository.removeMeal(id) }
+    fun copyMealDay(expected:List<Meal>,target:LocalDate,done:()->Unit)=write(done) {repository.copyMealDay(expected,target)}
     fun measure(value: Measurement, done: () -> Unit) = write(done) { repository.saveMeasurement(value) }
     fun removeMeasurement(date: LocalDate) = write { repository.removeMeasurement(date) }
     fun correctSet(set: TrainingSet, done: () -> Unit) = write(done) {repository.correctSet(set)}
@@ -77,6 +78,9 @@ class FitnessViewModel @Inject constructor(private val repository: FitnessReposi
     fun deleteSession(id: String) = write {repository.deleteSession(id)}
     fun saveProgram(program: TrainingProgram,done: () -> Unit) = write(done) {repository.saveProgram(program)}
     fun deleteProgram(id: String) = write {repository.deleteProgram(id)}
+    fun favorite(exercise:Exercise,value:Boolean)=write {repository.favorite(exercise,value)}
+    fun exerciseNotes(exercise:Exercise,value:String,done:()->Unit)=write(done) {repository.exerciseNotes(exercise,value)}
+    fun repeatSession(id:String)=write {repository.repeatSession(id)}
     fun saveFood(food: Food,done: () -> Unit) = write(done) {repository.saveFood(food)}
     fun deleteFood(id: String) = write {repository.deleteFood(id)}
     fun checkIn(value: WeeklyCheckIn,done: () -> Unit) = write(done) {repository.recordCheckIn(value)}

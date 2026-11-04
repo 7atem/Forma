@@ -10,6 +10,38 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
     case hip_hinge = "HIP_HINGE"
     case shoulder_press = "SHOULDER_PRESS"
     case split_squat = "SPLIT_SQUAT"
+    case goblet_squat = "GOBLET_SQUAT"
+    case barbell_back_squat = "BARBELL_BACK_SQUAT"
+    case reverse_lunge = "REVERSE_LUNGE"
+    case step_up = "STEP_UP"
+    case leg_extension = "LEG_EXTENSION"
+    case seated_leg_curl = "SEATED_LEG_CURL"
+    case standing_calf_raise = "STANDING_CALF_RAISE"
+    case seated_calf_raise = "SEATED_CALF_RAISE"
+    case barbell_hip_thrust = "BARBELL_HIP_THRUST"
+    case glute_bridge = "GLUTE_BRIDGE"
+    case barbell_romanian_deadlift = "BARBELL_ROMANIAN_DEADLIFT"
+    case dumbbell_bench_press = "DUMBBELL_BENCH_PRESS"
+    case incline_dumbbell_press = "INCLINE_DUMBBELL_PRESS"
+    case push_up = "PUSH_UP"
+    case knee_push_up = "KNEE_PUSH_UP"
+    case cable_chest_fly = "CABLE_CHEST_FLY"
+    case single_arm_dumbbell_row = "SINGLE_ARM_DUMBBELL_ROW"
+    case chest_supported_row = "CHEST_SUPPORTED_ROW"
+    case pull_up = "PULL_UP"
+    case face_pull = "FACE_PULL"
+    case dumbbell_shoulder_press = "DUMBBELL_SHOULDER_PRESS"
+    case lateral_raise = "LATERAL_RAISE"
+    case rear_delt_fly = "REAR_DELT_FLY"
+    case dumbbell_shrug = "DUMBBELL_SHRUG"
+    case dumbbell_curl = "DUMBBELL_CURL"
+    case hammer_curl = "HAMMER_CURL"
+    case machine_preacher_curl = "MACHINE_PREACHER_CURL"
+    case triceps_pushdown = "TRICEPS_PUSHDOWN"
+    case overhead_triceps_extension = "OVERHEAD_TRICEPS_EXTENSION"
+    case dead_bug = "DEAD_BUG"
+    case reverse_crunch = "REVERSE_CRUNCH"
+    case cable_crunch = "CABLE_CRUNCH"
     public func label(arabic: Bool) -> String {
         switch self {
         case .squat: return arabic ? "سكوات" : "Squat"
@@ -20,9 +52,104 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
         case .hip_hinge: return arabic ? "ثني مفصل الورك" : "Hip hinge"
         case .shoulder_press: return arabic ? "ضغط الكتف" : "Shoulder press"
         case .split_squat: return arabic ? "سبليت سكوات" : "Split squat"
+        case .goblet_squat: return arabic ? "سكوات بدمبل أمام الصدر" : "Goblet squat"
+        case .barbell_back_squat: return arabic ? "سكوات خلفي بالبار" : "Barbell back squat"
+        case .reverse_lunge: return arabic ? "اندفاع خلفي" : "Reverse lunge"
+        case .step_up: return arabic ? "صعود على صندوق" : "Step-up"
+        case .leg_extension: return arabic ? "فرد الرجل على الجهاز" : "Leg extension"
+        case .seated_leg_curl: return arabic ? "ثني الرجل جالسًا" : "Seated leg curl"
+        case .standing_calf_raise: return arabic ? "رفع السمانة واقفًا" : "Standing calf raise"
+        case .seated_calf_raise: return arabic ? "رفع السمانة جالسًا" : "Seated calf raise"
+        case .barbell_hip_thrust: return arabic ? "دفع الحوض بالبار" : "Barbell hip thrust"
+        case .glute_bridge: return arabic ? "جسر الحوض" : "Glute bridge"
+        case .barbell_romanian_deadlift: return arabic ? "ديدلفت روماني بالبار" : "Barbell Romanian deadlift"
+        case .dumbbell_bench_press: return arabic ? "ضغط صدر بالدمبل على مقعد" : "Dumbbell bench press"
+        case .incline_dumbbell_press: return arabic ? "ضغط صدر مائل بالدمبل" : "Incline dumbbell press"
+        case .push_up: return arabic ? "ضغط أرضي" : "Push-up"
+        case .knee_push_up: return arabic ? "ضغط أرضي على الركبتين" : "Knee push-up"
+        case .cable_chest_fly: return arabic ? "تفتيح صدر بالكابل" : "Cable chest fly"
+        case .single_arm_dumbbell_row: return arabic ? "تجديف بدمبل بذراع واحدة" : "Single-arm dumbbell row"
+        case .chest_supported_row: return arabic ? "تجديف دمبل مع إسناد الصدر" : "Chest-supported dumbbell row"
+        case .pull_up: return arabic ? "عقلة بقبضة علوية" : "Pull-up"
+        case .face_pull: return arabic ? "سحب الحبل نحو الوجه" : "Cable face pull"
+        case .dumbbell_shoulder_press: return arabic ? "ضغط كتف بالدمبل" : "Dumbbell shoulder press"
+        case .lateral_raise: return arabic ? "رفرفة جانبية بالدمبل" : "Dumbbell lateral raise"
+        case .rear_delt_fly: return arabic ? "رفرفة خلفية بالدمبل" : "Bent-over rear delt fly"
+        case .dumbbell_shrug: return arabic ? "رفع الكتفين بالدمبل" : "Dumbbell shrug"
+        case .dumbbell_curl: return arabic ? "بايسبس بالدمبل" : "Dumbbell curl"
+        case .hammer_curl: return arabic ? "بايسبس هامر" : "Hammer curl"
+        case .machine_preacher_curl: return arabic ? "بايسبس على جهاز بريتشر" : "Machine preacher curl"
+        case .triceps_pushdown: return arabic ? "ترايسبس دفع لأسفل بالكابل" : "Cable triceps pushdown"
+        case .overhead_triceps_extension: return arabic ? "ترايسبس خلف الرأس بدمبل" : "Overhead dumbbell extension"
+        case .dead_bug: return arabic ? "الحشرة الميتة" : "Dead bug"
+        case .reverse_crunch: return arabic ? "كرنش عكسي" : "Reverse crunch"
+        case .cable_crunch: return arabic ? "كرنش بالكابل من الركوع" : "Kneeling cable crunch"
         }
     }
 }
+public enum Equipment: String, Codable, CaseIterable, Sendable {
+    case bodyweight = "BODYWEIGHT"
+    case dumbbells = "DUMBBELLS"
+    case barbell = "BARBELL"
+    case cable = "CABLE"
+    case machine = "MACHINE"
+    case bench = "BENCH"
+    case box = "BOX"
+    case pull_up_bar = "PULL_UP_BAR"
+    public func label(arabic:Bool)->String {switch self {
+        case .bodyweight:return arabic ? "وزن الجسم" : "Bodyweight"
+        case .dumbbells:return arabic ? "دمبل" : "Dumbbells"
+        case .barbell:return arabic ? "بار" : "Barbell"
+        case .cable:return arabic ? "كابل" : "Cable"
+        case .machine:return arabic ? "جهاز" : "Machine"
+        case .bench:return arabic ? "مقعد" : "Bench"
+        case .box:return arabic ? "صندوق / درجة" : "Box / step"
+        case .pull_up_bar:return arabic ? "عارضة عقلة" : "Pull-up bar"
+    }}
+}
+public struct ExerciseDetails:Sendable {public let equipment:[Equipment];public let perSide:Bool}
+public enum ExerciseCatalog {public static func of(_ exercise:Exercise)->ExerciseDetails {switch exercise {
+    case .squat:return .init(equipment:[.bodyweight],perSide:false)
+    case .leg_press:return .init(equipment:[.machine],perSide:false)
+    case .chest_press:return .init(equipment:[.machine],perSide:false)
+    case .row:return .init(equipment:[.cable],perSide:false)
+    case .lat_pulldown:return .init(equipment:[.cable],perSide:false)
+    case .hip_hinge:return .init(equipment:[.dumbbells],perSide:false)
+    case .shoulder_press:return .init(equipment:[.machine],perSide:false)
+    case .split_squat:return .init(equipment:[.bodyweight],perSide:true)
+    case .goblet_squat:return .init(equipment:[.dumbbells],perSide:false)
+    case .barbell_back_squat:return .init(equipment:[.barbell],perSide:false)
+    case .reverse_lunge:return .init(equipment:[.bodyweight],perSide:true)
+    case .step_up:return .init(equipment:[.box],perSide:true)
+    case .leg_extension:return .init(equipment:[.machine],perSide:false)
+    case .seated_leg_curl:return .init(equipment:[.machine],perSide:false)
+    case .standing_calf_raise:return .init(equipment:[.bodyweight],perSide:false)
+    case .seated_calf_raise:return .init(equipment:[.machine],perSide:false)
+    case .barbell_hip_thrust:return .init(equipment:[.barbell,.bench],perSide:false)
+    case .glute_bridge:return .init(equipment:[.bodyweight],perSide:false)
+    case .barbell_romanian_deadlift:return .init(equipment:[.barbell],perSide:false)
+    case .dumbbell_bench_press:return .init(equipment:[.dumbbells,.bench],perSide:false)
+    case .incline_dumbbell_press:return .init(equipment:[.dumbbells,.bench],perSide:false)
+    case .push_up:return .init(equipment:[.bodyweight],perSide:false)
+    case .knee_push_up:return .init(equipment:[.bodyweight],perSide:false)
+    case .cable_chest_fly:return .init(equipment:[.cable],perSide:false)
+    case .single_arm_dumbbell_row:return .init(equipment:[.dumbbells,.bench],perSide:true)
+    case .chest_supported_row:return .init(equipment:[.dumbbells,.bench],perSide:false)
+    case .pull_up:return .init(equipment:[.pull_up_bar],perSide:false)
+    case .face_pull:return .init(equipment:[.cable],perSide:false)
+    case .dumbbell_shoulder_press:return .init(equipment:[.dumbbells,.bench],perSide:false)
+    case .lateral_raise:return .init(equipment:[.dumbbells],perSide:false)
+    case .rear_delt_fly:return .init(equipment:[.dumbbells],perSide:false)
+    case .dumbbell_shrug:return .init(equipment:[.dumbbells],perSide:false)
+    case .dumbbell_curl:return .init(equipment:[.dumbbells],perSide:false)
+    case .hammer_curl:return .init(equipment:[.dumbbells],perSide:false)
+    case .machine_preacher_curl:return .init(equipment:[.machine],perSide:false)
+    case .triceps_pushdown:return .init(equipment:[.cable],perSide:false)
+    case .overhead_triceps_extension:return .init(equipment:[.dumbbells,.bench],perSide:false)
+    case .dead_bug:return .init(equipment:[.bodyweight],perSide:true)
+    case .reverse_crunch:return .init(equipment:[.bodyweight],perSide:false)
+    case .cable_crunch:return .init(equipment:[.cable],perSide:false)
+}}}
 public enum Muscle: String, Codable, CaseIterable, Sendable {
     case chest = "CHEST"
     case front_delts = "FRONT_DELTS"
@@ -89,6 +216,38 @@ public enum ExerciseMuscles {
         case .hip_hinge: return .init(primary: [.glutes, .hamstrings], secondary: [.erectors, .core], reference: "https://www.nasm.org/workout-exercise-guidance")
         case .shoulder_press: return .init(primary: [.front_delts], secondary: [.triceps, .upper_back], reference: "https://www.nasm.org/workout-exercise-guidance")
         case .split_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .core], reference: "https://www.nasm.org/workout-exercise-guidance")
+        case .goblet_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/goblet-squat")
+        case .barbell_back_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .erectors, .adductors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .reverse_lunge: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .adductors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .step_up: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .calves], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .leg_extension: return .init(primary: [.quadriceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .seated_leg_curl: return .init(primary: [.hamstrings], secondary: [.calves], reference: "https://www.nasm.org/resource-center/exercise-library/seated-leg-curl")
+        case .standing_calf_raise: return .init(primary: [.calves], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .seated_calf_raise: return .init(primary: [.calves], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_hip_thrust: return .init(primary: [.glutes], secondary: [.hamstrings, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .glute_bridge: return .init(primary: [.glutes], secondary: [.hamstrings, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_romanian_deadlift: return .init(primary: [.hamstrings, .glutes], secondary: [.erectors, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_bench_press: return .init(primary: [.chest], secondary: [.triceps, .front_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .incline_dumbbell_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .push_up: return .init(primary: [.chest], secondary: [.triceps, .front_delts, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .knee_push_up: return .init(primary: [.chest], secondary: [.triceps, .front_delts, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .cable_chest_fly: return .init(primary: [.chest], secondary: [.front_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .single_arm_dumbbell_row: return .init(primary: [.lats, .upper_back], secondary: [.biceps, .rear_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .chest_supported_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .pull_up: return .init(primary: [.lats], secondary: [.biceps, .upper_back, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .face_pull: return .init(primary: [.rear_delts, .upper_back], secondary: [.biceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_shoulder_press: return .init(primary: [.front_delts], secondary: [.triceps, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .rear_delt_fly: return .init(primary: [.rear_delts], secondary: [.upper_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_shrug: return .init(primary: [.upper_back], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .hammer_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .machine_preacher_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .triceps_pushdown: return .init(primary: [.triceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .overhead_triceps_extension: return .init(primary: [.triceps], secondary: [.core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dead_bug: return .init(primary: [.core], secondary: [], reference: "https://hw.qld.gov.au/physical-activity/dead-bugs/")
+        case .reverse_crunch: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .cable_crunch: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         }
     }
 }

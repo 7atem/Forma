@@ -1,6 +1,6 @@
 # Exercise anatomy and schematic provenance
 
-The canonical catalog is `catalog/exercise-muscles.json`. `scripts/generate_exercise_catalog.py` generates Kotlin domain mappings, Android labels/resources and Swift mappings from that file. `--check` detects drift. All eight exercise enum values are covered; tests require primary groups, disjoint supporting groups and visible regions.
+The canonical catalog is `catalog/exercise-muscles.json`. `scripts/generate_exercise_catalog.py` generates Kotlin exercise IDs/domain mappings, equipment metadata, Android labels/resources and Swift mappings from that file. `--check` detects drift. All 40 exercise enum values are covered; tests require primary groups, disjoint supporting groups and visible regions. The table below describes the original eight generic IDs; the 32 named additions and their roles are in the canonical catalog and [alpha05 contract](ALPHA05_EXPANSION.md).
 
 The body outline and muscle-region path coordinates were drawn originally for Forma in a 100 × 220 coordinate space, licensed under this repository's Apache-2.0 license. No competitor graphic, logo, photograph or anatomical illustration was copied. The same original M/L/C/Z paths are rendered natively in Compose and SwiftUI. The drawing is schematic, not anatomically precise artwork.
 

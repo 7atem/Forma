@@ -65,6 +65,7 @@ internal fun BackupDialog(vm:FitnessViewModel,state:AppState,onDismiss:()->Unit,
                     Text(stringResource(R.string.restore_preview),style=MaterialTheme.typography.titleLarge)
                     Text(stringResource(R.string.restore_counts,number(restore.sessions.size.toDouble(),0),number(restore.meals.size.toDouble(),0),number(restore.measurements.size.toDouble(),0),number(restore.programs.size.toDouble(),0),number(restore.foods.size.toDouble(),0)))
                     Text(stringResource(R.string.restore_replace_note))
+                    Text(stringResource(R.string.restore_exercise_preferences,number(restore.exercisePreferences.size.toDouble(),0)))
                     Button(onClick={vm.restore(restore){preview=null;onRestored()}},enabled=!state.busy,modifier=Modifier.fillMaxWidth().testTag("confirm_restore")) {Text(stringResource(R.string.confirm_restore))}
                     if(state.error) Text(stringResource(R.string.restore_failed))
                     TextButton(onClick={preview=null;mode=0},enabled=!state.busy) {Text(stringResource(R.string.cancel))}

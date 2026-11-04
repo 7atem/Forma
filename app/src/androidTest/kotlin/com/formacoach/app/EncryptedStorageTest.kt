@@ -28,6 +28,58 @@ import org.json.JSONArray
 
 @RunWith(AndroidJUnit4::class)
 class EncryptedStorageTest {
+    @Test fun copyingMealDayPreservesPortionsAndSourcesAndRejectsStalePreviews()=runBlocking {
+        val repo=repository()
+        val old=Meal(date=LocalDate.of(2026,11,2),name="Label portion",calories=300.0,protein=20.0,carbs=30.0,fat=10.0,quantity=150.0,unit=NutritionUnit.GRAMS,source="Original label")
+        repo.addMeal(old)
+        repo.copyMealDay(listOf(old),LocalDate.of(2026,11,3))
+        val copied=database!!.dao().readSnapshot().meals.single {it.id!=old.id}
+        assertEquals(old.copy(id=copied.id,date=copied.date),copied)
+        repo.addMeal(old.copy(calories=350.0))
+        var rejected=false
+        try {repo.copyMealDay(listOf(old),LocalDate.of(2026,11,3))} catch(_:IllegalStateException) {rejected=true}
+        assertTrue(rejected)
+        assertEquals(2,database!!.dao().allMeals().size)
+    }
+    @Test fun schemaThreeUpgradeRetainsHistoryAndPreferencesSurviveReopenAndRestore()=runBlocking {
+        val helper=createLegacy(3)
+        helper.writableDatabase.execSQL("INSERT INTO sessions(id,day,templateId,completedAt,label,exerciseOrder,restSeconds,source) VALUES('v3',20759,'A',1,'Preserved','[\"SQUAT\"]',45,'LOCAL')")
+        helper.writableDatabase.execSQL("INSERT INTO training_sets(id,sessionId,exercise,reps,weightKg,kind) VALUES('v3-set','v3','SQUAT',8,40.5,'WORKING')")
+        helper.close()
+        database=FitnessDatabase.open(context)
+        val repo=FitnessRepository({database!!.dao()},Clock.fixed(Instant.parse("2026-11-04T10:00:00Z"),ZoneOffset.UTC))
+        assertTrue(database!!.dao().readSnapshot().exercisePreferences.isEmpty())
+        repo.favorite(Exercise.GOBLET_SQUAT,true)
+        repo.exerciseNotes(Exercise.GOBLET_SQUAT,"ملاحظة محفوظة")
+        repo.favorite(Exercise.GOBLET_SQUAT,false)
+        val before=database!!.dao().readSnapshot()
+        assertEquals("ملاحظة محفوظة",before.exercisePreferences.single().notes)
+        assertFalse(before.exercisePreferences.single().favorite)
+        database!!.close();database=FitnessDatabase.open(context)
+        assertEquals(before,database!!.dao().readSnapshot())
+        val reopened=FitnessRepository({database!!.dao()})
+        val archive=reopened.export("preferences round trip password".toCharArray())
+        reopened.favorite(Exercise.GOBLET_SQUAT,true)
+        reopened.restore(reopened.previewRestore(archive,"preferences round trip password".toCharArray()))
+        assertEquals(before,database!!.dao().readSnapshot())
+    }
+    @Test fun repeatHistoryStartsFreshDraftAndGuardsAgainstConcurrentDrafts()=runBlocking {
+        val repo=repository()
+        val id=repo.startSession("A")
+        repo.addSet(TrainingSet(sessionId=id,exercise=Exercise.PUSH_UP,reps=8,weightKg=0.0))
+        repo.finishSession(id)
+        repo.repeatSession(id)
+        val data=database!!.dao().readSnapshot()
+        val draft=data.sessions.single {it.completedAt==null}
+        assertNotEquals(id,draft.id)
+        assertEquals(listOf(Exercise.SQUAT,Exercise.CHEST_PRESS,Exercise.ROW,Exercise.PUSH_UP),draft.plannedExercises)
+        assertTrue(data.sets.none {it.sessionId==draft.id})
+        assertEquals(SessionSource.LOCAL,draft.source)
+        var rejected=false
+        try {repo.repeatSession(id)} catch(_:IllegalStateException) {rejected=true}
+        assertTrue(rejected)
+        assertEquals(2,database!!.dao().allSessions().size)
+    }
     private lateinit var context: Context
     private lateinit var directory: File
     private var database: FitnessDatabase? = null

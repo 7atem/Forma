@@ -164,7 +164,11 @@
         "ADDUCTORS",
         "CORE"
       ],
-      "reference": "https://www.nasm.org/workout-exercise-guidance"
+      "reference": "https://www.nasm.org/workout-exercise-guidance",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false
     },
     {
       "id": "LEG_PRESS",
@@ -177,7 +181,11 @@
         "GLUTES",
         "ADDUCTORS"
       ],
-      "reference": "https://www.nasm.org/resource-center/exercise-library/leg-press"
+      "reference": "https://www.nasm.org/resource-center/exercise-library/leg-press",
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false
     },
     {
       "id": "CHEST_PRESS",
@@ -190,7 +198,11 @@
         "FRONT_DELTS",
         "TRICEPS"
       ],
-      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/"
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/",
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false
     },
     {
       "id": "ROW",
@@ -204,7 +216,11 @@
         "BICEPS",
         "REAR_DELTS"
       ],
-      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/"
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/",
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false
     },
     {
       "id": "LAT_PULLDOWN",
@@ -217,7 +233,11 @@
         "BICEPS",
         "UPPER_BACK"
       ],
-      "reference": "https://www.acefitness.org/resources/pros/expert-articles/8944/a-back-to-school-program-an-evidence-based-approach-to-training-the-back/"
+      "reference": "https://www.acefitness.org/resources/pros/expert-articles/8944/a-back-to-school-program-an-evidence-based-approach-to-training-the-back/",
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false
     },
     {
       "id": "HIP_HINGE",
@@ -231,7 +251,11 @@
         "ERECTORS",
         "CORE"
       ],
-      "reference": "https://www.nasm.org/workout-exercise-guidance"
+      "reference": "https://www.nasm.org/workout-exercise-guidance",
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false
     },
     {
       "id": "SHOULDER_PRESS",
@@ -244,7 +268,11 @@
         "TRICEPS",
         "UPPER_BACK"
       ],
-      "reference": "https://www.nasm.org/workout-exercise-guidance"
+      "reference": "https://www.nasm.org/workout-exercise-guidance",
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false
     },
     {
       "id": "SPLIT_SQUAT",
@@ -258,7 +286,535 @@
         "ADDUCTORS",
         "CORE"
       ],
-      "reference": "https://www.nasm.org/workout-exercise-guidance"
+      "reference": "https://www.nasm.org/workout-exercise-guidance",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": true
+    },
+    {
+      "id": "GOBLET_SQUAT",
+      "en": "Goblet squat",
+      "ar": "سكوات بدمبل أمام الصدر",
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "CORE",
+        "ADDUCTORS"
+      ],
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false,
+      "reference": "https://www.nasm.org/resource-center/exercise-library/goblet-squat"
+    },
+    {
+      "id": "BARBELL_BACK_SQUAT",
+      "en": "Barbell back squat",
+      "ar": "سكوات خلفي بالبار",
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "CORE",
+        "ERECTORS",
+        "ADDUCTORS"
+      ],
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "REVERSE_LUNGE",
+      "en": "Reverse lunge",
+      "ar": "اندفاع خلفي",
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "CORE",
+        "ADDUCTORS"
+      ],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": true,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "STEP_UP",
+      "en": "Step-up",
+      "ar": "صعود على صندوق",
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "CORE",
+        "CALVES"
+      ],
+      "equipment": [
+        "BOX"
+      ],
+      "perSide": true,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "LEG_EXTENSION",
+      "en": "Leg extension",
+      "ar": "فرد الرجل على الجهاز",
+      "primary": [
+        "QUADRICEPS"
+      ],
+      "secondary": [],
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "SEATED_LEG_CURL",
+      "en": "Seated leg curl",
+      "ar": "ثني الرجل جالسًا",
+      "primary": [
+        "HAMSTRINGS"
+      ],
+      "secondary": [
+        "CALVES"
+      ],
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false,
+      "reference": "https://www.nasm.org/resource-center/exercise-library/seated-leg-curl"
+    },
+    {
+      "id": "STANDING_CALF_RAISE",
+      "en": "Standing calf raise",
+      "ar": "رفع السمانة واقفًا",
+      "primary": [
+        "CALVES"
+      ],
+      "secondary": [],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "SEATED_CALF_RAISE",
+      "en": "Seated calf raise",
+      "ar": "رفع السمانة جالسًا",
+      "primary": [
+        "CALVES"
+      ],
+      "secondary": [],
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "BARBELL_HIP_THRUST",
+      "en": "Barbell hip thrust",
+      "ar": "دفع الحوض بالبار",
+      "primary": [
+        "GLUTES"
+      ],
+      "secondary": [
+        "HAMSTRINGS",
+        "CORE"
+      ],
+      "equipment": [
+        "BARBELL",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "GLUTE_BRIDGE",
+      "en": "Glute bridge",
+      "ar": "جسر الحوض",
+      "primary": [
+        "GLUTES"
+      ],
+      "secondary": [
+        "HAMSTRINGS",
+        "CORE"
+      ],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "BARBELL_ROMANIAN_DEADLIFT",
+      "en": "Barbell Romanian deadlift",
+      "ar": "ديدلفت روماني بالبار",
+      "primary": [
+        "HAMSTRINGS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "ERECTORS",
+        "CORE"
+      ],
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "DUMBBELL_BENCH_PRESS",
+      "en": "Dumbbell bench press",
+      "ar": "ضغط صدر بالدمبل على مقعد",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "FRONT_DELTS"
+      ],
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "INCLINE_DUMBBELL_PRESS",
+      "en": "Incline dumbbell press",
+      "ar": "ضغط صدر مائل بالدمبل",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS",
+        "TRICEPS"
+      ],
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "PUSH_UP",
+      "en": "Push-up",
+      "ar": "ضغط أرضي",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "FRONT_DELTS",
+        "CORE"
+      ],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "KNEE_PUSH_UP",
+      "en": "Knee push-up",
+      "ar": "ضغط أرضي على الركبتين",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "FRONT_DELTS",
+        "CORE"
+      ],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "CABLE_CHEST_FLY",
+      "en": "Cable chest fly",
+      "ar": "تفتيح صدر بالكابل",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS"
+      ],
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "SINGLE_ARM_DUMBBELL_ROW",
+      "en": "Single-arm dumbbell row",
+      "ar": "تجديف بدمبل بذراع واحدة",
+      "primary": [
+        "LATS",
+        "UPPER_BACK"
+      ],
+      "secondary": [
+        "BICEPS",
+        "REAR_DELTS"
+      ],
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": true,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "CHEST_SUPPORTED_ROW",
+      "en": "Chest-supported dumbbell row",
+      "ar": "تجديف دمبل مع إسناد الصدر",
+      "primary": [
+        "UPPER_BACK",
+        "LATS"
+      ],
+      "secondary": [
+        "BICEPS",
+        "REAR_DELTS"
+      ],
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "PULL_UP",
+      "en": "Pull-up",
+      "ar": "عقلة بقبضة علوية",
+      "primary": [
+        "LATS"
+      ],
+      "secondary": [
+        "BICEPS",
+        "UPPER_BACK",
+        "CORE"
+      ],
+      "equipment": [
+        "PULL_UP_BAR"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "FACE_PULL",
+      "en": "Cable face pull",
+      "ar": "سحب الحبل نحو الوجه",
+      "primary": [
+        "REAR_DELTS",
+        "UPPER_BACK"
+      ],
+      "secondary": [
+        "BICEPS"
+      ],
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "DUMBBELL_SHOULDER_PRESS",
+      "en": "Dumbbell shoulder press",
+      "ar": "ضغط كتف بالدمبل",
+      "primary": [
+        "FRONT_DELTS"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "CORE"
+      ],
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "LATERAL_RAISE",
+      "en": "Dumbbell lateral raise",
+      "ar": "رفرفة جانبية بالدمبل",
+      "primary": [
+        "FRONT_DELTS"
+      ],
+      "secondary": [
+        "UPPER_BACK"
+      ],
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "REAR_DELT_FLY",
+      "en": "Bent-over rear delt fly",
+      "ar": "رفرفة خلفية بالدمبل",
+      "primary": [
+        "REAR_DELTS"
+      ],
+      "secondary": [
+        "UPPER_BACK"
+      ],
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "DUMBBELL_SHRUG",
+      "en": "Dumbbell shrug",
+      "ar": "رفع الكتفين بالدمبل",
+      "primary": [
+        "UPPER_BACK"
+      ],
+      "secondary": [],
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "DUMBBELL_CURL",
+      "en": "Dumbbell curl",
+      "ar": "بايسبس بالدمبل",
+      "primary": [
+        "BICEPS"
+      ],
+      "secondary": [],
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "HAMMER_CURL",
+      "en": "Hammer curl",
+      "ar": "بايسبس هامر",
+      "primary": [
+        "BICEPS"
+      ],
+      "secondary": [],
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "MACHINE_PREACHER_CURL",
+      "en": "Machine preacher curl",
+      "ar": "بايسبس على جهاز بريتشر",
+      "primary": [
+        "BICEPS"
+      ],
+      "secondary": [],
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "TRICEPS_PUSHDOWN",
+      "en": "Cable triceps pushdown",
+      "ar": "ترايسبس دفع لأسفل بالكابل",
+      "primary": [
+        "TRICEPS"
+      ],
+      "secondary": [],
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "OVERHEAD_TRICEPS_EXTENSION",
+      "en": "Overhead dumbbell extension",
+      "ar": "ترايسبس خلف الرأس بدمبل",
+      "primary": [
+        "TRICEPS"
+      ],
+      "secondary": [
+        "CORE"
+      ],
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "DEAD_BUG",
+      "en": "Dead bug",
+      "ar": "الحشرة الميتة",
+      "primary": [
+        "CORE"
+      ],
+      "secondary": [],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": true,
+      "reference": "https://hw.qld.gov.au/physical-activity/dead-bugs/"
+    },
+    {
+      "id": "REVERSE_CRUNCH",
+      "en": "Reverse crunch",
+      "ar": "كرنش عكسي",
+      "primary": [
+        "CORE"
+      ],
+      "secondary": [],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "CABLE_CRUNCH",
+      "en": "Kneeling cable crunch",
+      "ar": "كرنش بالكابل من الركوع",
+      "primary": [
+        "CORE"
+      ],
+      "secondary": [],
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
     }
   ]
 }

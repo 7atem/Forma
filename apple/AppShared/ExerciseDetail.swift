@@ -11,6 +11,8 @@ struct ExerciseDetail:View {
         ScrollView {
             VStack(alignment:.leading,spacing:16) {
                 Text(guide.variant).font(.headline)
+                Text(ExerciseCatalog.of(exercise).equipment.map {$0.label(arabic:arabic)}.joined(separator:" · ")).font(.caption)
+                if ExerciseCatalog.of(exercise).perSide {Text("per_side_note").font(.caption)}
                 HStack {
                     Button("technique") {muscles=false}.tint(muscles ? .gray : .green)
                     Button("muscles_working") {muscles=true}.tint(muscles ? .green : .gray)

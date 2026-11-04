@@ -54,14 +54,6 @@
     <string name="add_set">احفظ المجموعة</string>
     <string name="set_summary">%1$s · %2$s تكرارات × %3$s كجم</string>
     <string name="finish_session">إنهاء التمرين</string>
-    <string name="exercise_squat">سكوات</string>
-    <string name="exercise_leg_press">دفع الرجلين</string>
-    <string name="exercise_chest_press">ضغط الصدر</string>
-    <string name="exercise_row">سحب أفقي</string>
-    <string name="exercise_lat_pulldown">سحب علوي</string>
-    <string name="exercise_hip_hinge">ثني مفصل الورك</string>
-    <string name="exercise_shoulder_press">ضغط الكتف</string>
-    <string name="exercise_split_squat">سبليت سكوات</string>
     <string name="eat_title">خلي تسجيل الأكل بسيط.</string>
     <string name="portion_note">اكتب إجمالي الكمية اللي أكلتها من ملصق العبوة أو الوصفة أو مصدر تثق فيه. القيم الأربع مطلوبة؛ اكتب صفر فقط لو متأكد إن القيمة صفر.</string>
     <string name="meal_name">وصف الوجبة أو الكمية</string>

@@ -7,6 +7,13 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class PortableBackupTest {
+    @Test fun exerciseFavoritesAndArabicNotesRoundTripAndDuplicatesFail() {
+        val prefs=listOf(ExercisePreference(Exercise.DEAD_BUG,true,"ملاحظة شخصية"))
+        val data=FitnessSnapshot(exercisePreferences=prefs)
+        assertEquals(data,PortableBackup.decrypt(PortableBackup.encrypt(data,password,1),password).data)
+        assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(data.copy(exercisePreferences=prefs+prefs))}
+        assertTrue(kotlinx.serialization.json.Json.decodeFromString<FitnessSnapshot>("{}").exercisePreferences.isEmpty())
+    }
     private val password="a long test passphrase".toCharArray()
     private val date=LocalDate.of(2026,11,3)
     private fun sample()=FitnessSnapshot(profile=Profile("اختبار",Goal.FAT_LOSS,3),

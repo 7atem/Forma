@@ -1,6 +1,8 @@
 package com.formacoach.app
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -45,11 +47,20 @@ internal fun ConfirmButton(label:Int,description:String,enabled:Boolean=true,tag
 @Composable
 internal fun ExercisePicker(selected:Exercise,onChange:(Exercise)->Unit,choices:List<Exercise> = Exercise.entries) {
     var expanded by remember {mutableStateOf(false)}
-    Box {
-        OutlinedButton(onClick={expanded=true},modifier=Modifier.fillMaxWidth().testTag("exercise_picker")) {Text(stringResource(exerciseLabel(selected)))}
-        DropdownMenu(expanded=expanded,onDismissRequest={expanded=false}) {
-            choices.forEach {value -> DropdownMenuItem(text={Text(stringResource(exerciseLabel(value)))},onClick={onChange(value);expanded=false},modifier=Modifier.testTag("exercise_${value.name}"))}
-        }
+    OutlinedButton(onClick={expanded=true},modifier=Modifier.fillMaxWidth().testTag("exercise_picker")) {Text(stringResource(exerciseLabel(selected)))}
+    if(expanded) {
+        var search by remember {mutableStateOf("")}
+        val labels=choices.associateWith {stringResource(exerciseLabel(it))}
+        AlertDialog(onDismissRequest={expanded=false},title={Text(stringResource(R.string.exercise_library))},text={
+            Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                Input(R.string.search_exercises,search,{search=it},"picker_exercise_search",numeric=false)
+                Column(Modifier.heightIn(max=350.dp).verticalScroll(rememberScrollState())) {
+                    choices.filter {search.isBlank()||labels.getValue(it).contains(search,true)}.forEach {value ->
+                        TextButton(onClick={onChange(value);expanded=false},modifier=Modifier.fillMaxWidth().testTag("exercise_${value.name}")) {Text(labels.getValue(value))}
+                    }
+                }
+            }
+        },confirmButton={},dismissButton={TextButton(onClick={expanded=false}) {Text(stringResource(R.string.cancel))}})
     }
 }
 

@@ -1,13 +1,805 @@
 {
   "version": 1,
   "exercises": [
-    {"id":"SQUAT","variant":{"en":"Bodyweight squat","ar":"سكوات بوزن الجسم"},"reference":"https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/","cues":{"en":["Plant both feet, with toes slightly outward.","Move hips back and down; keep knees tracking toes.","Keep heels down and return with control."],"ar":["ثبّت القدمين مع توجيه الأصابع قليلًا للخارج.","حرّك الحوض للخلف ولأسفل والركبتين في اتجاه الأصابع.","أبقِ الكعبين ثابتين وارجع بتحكّم."]}},
-    {"id":"LEG_PRESS","variant":{"en":"45° sled leg press","ar":"دفع الرجلين على الجهاز المائل"},"reference":"https://www.nasm.org/resource-center/exercise-library/leg-press","cues":{"en":["Support your back and place feet flat on the plate.","Press smoothly without locking the knees.","Lower with control; keep your hips on the seat."],"ar":["اسند ظهرك وثبّت القدمين بالكامل على المنصة.","ادفع بسلاسة من غير قفل الركبتين.","انزل بتحكّم مع بقاء الحوض على المقعد."]}},
-    {"id":"CHEST_PRESS","variant":{"en":"Seated machine chest press","ar":"ضغط الصدر جالسًا على الجهاز"},"reference":"https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/","cues":{"en":["Adjust handles to mid-chest; support your back.","Press forward with straight wrists and relaxed shoulders.","Return slowly without letting the handles pull behind your chest."],"ar":["اضبط المقابض عند منتصف الصدر واسند ظهرك.","ادفع للأمام والرسغان مستقيمان والكتفان مستقران.","ارجع ببطء من غير سحب المقابض خلف مستوى الصدر."]}},
-    {"id":"ROW","variant":{"en":"Seated low cable row","ar":"سحب أفقي بالكابل جالسًا"},"reference":"https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/","cues":{"en":["Brace your feet and sit tall with soft knees.","Pull the handle toward your abdomen, elbows close.","Reach forward with control; keep your torso still."],"ar":["ثبّت القدمين واجلس مستقيمًا مع ثني بسيط للركبتين.","اسحب المقبض للبطن والمرفقان قريبان من الجسم.","مدّ الذراعين بتحكّم مع ثبات الجذع."]}},
-    {"id":"LAT_PULLDOWN","variant":{"en":"Front lat pulldown","ar":"سحب علوي أمام الصدر"},"reference":"https://www.nasm.org/resource-center/blog/training/the-biomechanics-of-the-lat-pulldown-muscles-grip-and-form","cues":{"en":["Secure thighs under the pad and plant your feet.","Bring elbows down as the bar approaches your upper chest.","Return slowly; keep the bar in front of your head."],"ar":["ثبّت الفخذين تحت الوسادة والقدمين على الأرض.","وجّه المرفقين لأسفل والبار يقترب من أعلى الصدر.","ارجع ببطء وأبقِ البار أمام الرأس."]}},
-    {"id":"HIP_HINGE","variant":{"en":"Dumbbell Romanian deadlift","ar":"رفعة رومانية بالدمبل"},"reference":"https://www.nasm.org/resource-center/exercise-library/dumbbell-romanian-deadlift","cues":{"en":["Stand tall with dumbbells close and knees slightly bent.","Push hips back, keeping a long, neutral spine.","Keep weights close; stand by bringing hips forward."],"ar":["قف والدمبل قريب من الجسم مع ثني بسيط للركبتين.","ادفع الحوض للخلف مع بقاء الظهر محايدًا وممتدًا.","أبقِ الأوزان قريبة وارجع بدفع الحوض للأمام."]}},
-    {"id":"SHOULDER_PRESS","variant":{"en":"Seated machine shoulder press","ar":"ضغط الكتف جالسًا على الجهاز"},"reference":"https://www.acefitness.org/resources/everyone/exercise-library/186/seated-shoulder-press/","cues":{"en":["Support your back; start with handles near shoulder height.","Press overhead with wrists aligned above elbows.","Lower slowly without arching your back."],"ar":["اسند ظهرك وابدأ بالمقابض قرب مستوى الكتفين.","ادفع لأعلى والرسغان في امتداد المرفقين.","انزل ببطء من غير زيادة تقوّس الظهر."]}},
-    {"id":"SPLIT_SQUAT","variant":{"en":"Bodyweight Bulgarian split squat","ar":"سكوات بلغاري بوزن الجسم"},"reference":"https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat","cues":{"en":["Rest the rear foot on a stable bench; plant the front foot.","Lower with control, keeping the front knee tracking your toes.","Press through the front foot; repeat on the other side."],"ar":["اسند القدم الخلفية على مقعد ثابت وثبّت القدم الأمامية.","انزل بتحكّم والركبة الأمامية في اتجاه الأصابع.","ادفع بالقدم الأمامية وكرّر للجانب الآخر."]}}
+    {
+      "id": "SQUAT",
+      "variant": {
+        "en": "Bodyweight squat",
+        "ar": "سكوات بوزن الجسم"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/",
+      "cues": {
+        "en": [
+          "Plant both feet, with toes slightly outward.",
+          "Move hips back and down; keep knees tracking toes.",
+          "Keep heels down and return with control."
+        ],
+        "ar": [
+          "ثبّت القدمين مع توجيه الأصابع قليلًا للخارج.",
+          "حرّك الحوض للخلف ولأسفل والركبتين في اتجاه الأصابع.",
+          "أبقِ الكعبين ثابتين وارجع بتحكّم."
+        ]
+      }
+    },
+    {
+      "id": "LEG_PRESS",
+      "variant": {
+        "en": "45° sled leg press",
+        "ar": "دفع الرجلين على الجهاز المائل"
+      },
+      "reference": "https://www.nasm.org/resource-center/exercise-library/leg-press",
+      "cues": {
+        "en": [
+          "Support your back and place feet flat on the plate.",
+          "Press smoothly without locking the knees.",
+          "Lower with control; keep your hips on the seat."
+        ],
+        "ar": [
+          "اسند ظهرك وثبّت القدمين بالكامل على المنصة.",
+          "ادفع بسلاسة من غير قفل الركبتين.",
+          "انزل بتحكّم مع بقاء الحوض على المقعد."
+        ]
+      }
+    },
+    {
+      "id": "CHEST_PRESS",
+      "variant": {
+        "en": "Seated machine chest press",
+        "ar": "ضغط الصدر جالسًا على الجهاز"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/",
+      "cues": {
+        "en": [
+          "Adjust handles to mid-chest; support your back.",
+          "Press forward with straight wrists and relaxed shoulders.",
+          "Return slowly without letting the handles pull behind your chest."
+        ],
+        "ar": [
+          "اضبط المقابض عند منتصف الصدر واسند ظهرك.",
+          "ادفع للأمام والرسغان مستقيمان والكتفان مستقران.",
+          "ارجع ببطء من غير سحب المقابض خلف مستوى الصدر."
+        ]
+      }
+    },
+    {
+      "id": "ROW",
+      "variant": {
+        "en": "Seated low cable row",
+        "ar": "سحب أفقي بالكابل جالسًا"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/",
+      "cues": {
+        "en": [
+          "Brace your feet and sit tall with soft knees.",
+          "Pull the handle toward your abdomen, elbows close.",
+          "Reach forward with control; keep your torso still."
+        ],
+        "ar": [
+          "ثبّت القدمين واجلس مستقيمًا مع ثني بسيط للركبتين.",
+          "اسحب المقبض للبطن والمرفقان قريبان من الجسم.",
+          "مدّ الذراعين بتحكّم مع ثبات الجذع."
+        ]
+      }
+    },
+    {
+      "id": "LAT_PULLDOWN",
+      "variant": {
+        "en": "Front lat pulldown",
+        "ar": "سحب علوي أمام الصدر"
+      },
+      "reference": "https://www.nasm.org/resource-center/blog/training/the-biomechanics-of-the-lat-pulldown-muscles-grip-and-form",
+      "cues": {
+        "en": [
+          "Secure thighs under the pad and plant your feet.",
+          "Bring elbows down as the bar approaches your upper chest.",
+          "Return slowly; keep the bar in front of your head."
+        ],
+        "ar": [
+          "ثبّت الفخذين تحت الوسادة والقدمين على الأرض.",
+          "وجّه المرفقين لأسفل والبار يقترب من أعلى الصدر.",
+          "ارجع ببطء وأبقِ البار أمام الرأس."
+        ]
+      }
+    },
+    {
+      "id": "HIP_HINGE",
+      "variant": {
+        "en": "Dumbbell Romanian deadlift",
+        "ar": "رفعة رومانية بالدمبل"
+      },
+      "reference": "https://www.nasm.org/resource-center/exercise-library/dumbbell-romanian-deadlift",
+      "cues": {
+        "en": [
+          "Stand tall with dumbbells close and knees slightly bent.",
+          "Push hips back, keeping a long, neutral spine.",
+          "Keep weights close; stand by bringing hips forward."
+        ],
+        "ar": [
+          "قف والدمبل قريب من الجسم مع ثني بسيط للركبتين.",
+          "ادفع الحوض للخلف مع بقاء الظهر محايدًا وممتدًا.",
+          "أبقِ الأوزان قريبة وارجع بدفع الحوض للأمام."
+        ]
+      }
+    },
+    {
+      "id": "SHOULDER_PRESS",
+      "variant": {
+        "en": "Seated machine shoulder press",
+        "ar": "ضغط الكتف جالسًا على الجهاز"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/186/seated-shoulder-press/",
+      "cues": {
+        "en": [
+          "Support your back; start with handles near shoulder height.",
+          "Press overhead with wrists aligned above elbows.",
+          "Lower slowly without arching your back."
+        ],
+        "ar": [
+          "اسند ظهرك وابدأ بالمقابض قرب مستوى الكتفين.",
+          "ادفع لأعلى والرسغان في امتداد المرفقين.",
+          "انزل ببطء من غير زيادة تقوّس الظهر."
+        ]
+      }
+    },
+    {
+      "id": "SPLIT_SQUAT",
+      "variant": {
+        "en": "Bodyweight Bulgarian split squat",
+        "ar": "سكوات بلغاري بوزن الجسم"
+      },
+      "reference": "https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat",
+      "cues": {
+        "en": [
+          "Rest the rear foot on a stable bench; plant the front foot.",
+          "Lower with control, keeping the front knee tracking your toes.",
+          "Press through the front foot; repeat on the other side."
+        ],
+        "ar": [
+          "اسند القدم الخلفية على مقعد ثابت وثبّت القدم الأمامية.",
+          "انزل بتحكّم والركبة الأمامية في اتجاه الأصابع.",
+          "ادفع بالقدم الأمامية وكرّر للجانب الآخر."
+        ]
+      }
+    },
+    {
+      "id": "GOBLET_SQUAT",
+      "variant": {
+        "en": "Goblet squat",
+        "ar": "سكوات بدمبل أمام الصدر"
+      },
+      "reference": "https://www.nasm.org/resource-center/exercise-library/goblet-squat",
+      "cues": {
+        "en": [
+          "Hold one dumbbell close to the chest.",
+          "Keep heels planted as hips and knees bend.",
+          "Stand up without rounding the back."
+        ],
+        "ar": [
+          "امسك دمبلًا واحدًا قريبًا من الصدر.",
+          "اثبت بالكعبين مع ثني الركبتين والفخذين.",
+          "قف مع الحفاظ على استقامة الظهر."
+        ]
+      }
+    },
+    {
+      "id": "BARBELL_BACK_SQUAT",
+      "variant": {
+        "en": "Barbell back squat",
+        "ar": "سكوات خلفي بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Set the bar on the upper back, clear of the neck.",
+          "Brace and bend hips and knees with feet planted.",
+          "Rise with the bar balanced over the mid-foot."
+        ],
+        "ar": [
+          "ضع البار على أعلى الظهر بعيدًا عن الرقبة.",
+          "شد الجذع واثنِ الفخذين والركبتين مع ثبات القدمين.",
+          "اصعد والبار متزن فوق منتصف القدم."
+        ]
+      }
+    },
+    {
+      "id": "REVERSE_LUNGE",
+      "variant": {
+        "en": "Reverse lunge",
+        "ar": "اندفاع خلفي"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Step one foot back from a stable stance.",
+          "Lower the rear knee toward the floor with the front heel down.",
+          "Push through the front foot to return; log reps per side."
+        ],
+        "ar": [
+          "اخطُ بقدم واحدة للخلف من وقفة متزنة.",
+          "اخفض الركبة الخلفية نحو الأرض مع ثبات الكعب الأمامي.",
+          "ادفع بالقدم الأمامية للرجوع وسجّل التكرارات لكل جانب."
+        ]
+      }
+    },
+    {
+      "id": "STEP_UP",
+      "variant": {
+        "en": "Step-up",
+        "ar": "صعود على صندوق"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Place the whole lead foot on a stable low box.",
+          "Rise using the lead leg without springing off the trailing foot.",
+          "Step down with control; log reps per side."
+        ],
+        "ar": [
+          "ضع القدم الأمامية بالكامل على صندوق منخفض ثابت.",
+          "اصعد بالرجل الأمامية دون القفز بالقدم الخلفية.",
+          "انزل بتحكم وسجّل التكرارات لكل جانب."
+        ]
+      }
+    },
+    {
+      "id": "LEG_EXTENSION",
+      "variant": {
+        "en": "Leg extension",
+        "ar": "فرد الرجل على الجهاز"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Align the machine pivot with the knee.",
+          "Keep hips and back against the pads.",
+          "Extend and lower the knees smoothly without swinging."
+        ],
+        "ar": [
+          "حاذِ محور الجهاز مع الركبة.",
+          "اثبت بالفخذين والظهر على الوسائد.",
+          "افرد الركبتين واخفضهما بهدوء دون تأرجح."
+        ]
+      }
+    },
+    {
+      "id": "SEATED_LEG_CURL",
+      "variant": {
+        "en": "Seated leg curl",
+        "ar": "ثني الرجل جالسًا"
+      },
+      "reference": "https://www.nasm.org/resource-center/exercise-library/seated-leg-curl",
+      "cues": {
+        "en": [
+          "Adjust the knee pivot and secure the thigh pad.",
+          "Start with legs extended without locking the knees.",
+          "Curl the heels under the seat and return slowly."
+        ],
+        "ar": [
+          "اضبط محور الركبة وثبّت وسادة الفخذين.",
+          "ابدأ والرجلان مفرودتان دون قفل الركبتين.",
+          "اسحب الكعبين أسفل المقعد ثم ارجع ببطء."
+        ]
+      }
+    },
+    {
+      "id": "STANDING_CALF_RAISE",
+      "variant": {
+        "en": "Standing calf raise",
+        "ar": "رفع السمانة واقفًا"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Stand with feet parallel and use light support for balance.",
+          "Lift both heels while keeping the knees softly straight.",
+          "Lower the heels with control."
+        ],
+        "ar": [
+          "قف والقدمان متوازيتان واستند بخفة للتوازن.",
+          "ارفع الكعبين والركبتان مفرودتان دون قفل.",
+          "اخفض الكعبين بتحكم."
+        ]
+      }
+    },
+    {
+      "id": "SEATED_CALF_RAISE",
+      "variant": {
+        "en": "Seated calf raise",
+        "ar": "رفع السمانة جالسًا"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Sit with forefeet on the platform and thigh pads secure.",
+          "Raise the heels while keeping knees bent.",
+          "Lower smoothly through a comfortable range."
+        ],
+        "ar": [
+          "اجلس ومقدمة القدمين على المنصة ووسائد الفخذين ثابتة.",
+          "ارفع الكعبين مع بقاء الركبتين مثنيتين.",
+          "اخفضهما بهدوء في مدى مريح."
+        ]
+      }
+    },
+    {
+      "id": "BARBELL_HIP_THRUST",
+      "variant": {
+        "en": "Barbell hip thrust",
+        "ar": "دفع الحوض بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Support the upper back on a stable bench and pad the bar.",
+          "Keep feet planted and lift the hips until trunk and thighs align.",
+          "Lower without overextending the lower back."
+        ],
+        "ar": [
+          "اسند أعلى الظهر على مقعد ثابت وضع وسادة حول البار.",
+          "ثبّت القدمين وارفع الحوض حتى يصطف الجذع والفخذان.",
+          "اخفض الحوض دون تقويس أسفل الظهر."
+        ]
+      }
+    },
+    {
+      "id": "GLUTE_BRIDGE",
+      "variant": {
+        "en": "Glute bridge",
+        "ar": "جسر الحوض"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Lie on the back with knees bent and feet planted.",
+          "Lift the hips while keeping the ribs down.",
+          "Lower slowly without pushing through the neck."
+        ],
+        "ar": [
+          "استلقِ على الظهر والركبتان مثنيتان والقدمان ثابتتان.",
+          "ارفع الحوض مع إبقاء الضلوع منخفضة.",
+          "انزل ببطء دون الضغط على الرقبة."
+        ]
+      }
+    },
+    {
+      "id": "BARBELL_ROMANIAN_DEADLIFT",
+      "variant": {
+        "en": "Barbell Romanian deadlift",
+        "ar": "ديدلفت روماني بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Hold the bar close to the thighs with knees slightly bent.",
+          "Send the hips back while the bar travels close to the legs.",
+          "Stand by extending the hips without leaning back."
+        ],
+        "ar": [
+          "امسك البار قريبًا من الفخذين مع ثني خفيف للركبتين.",
+          "ادفع الحوض للخلف والبار قريب من الرجلين.",
+          "قف بمد الفخذين دون الميل للخلف."
+        ]
+      }
+    },
+    {
+      "id": "DUMBBELL_BENCH_PRESS",
+      "variant": {
+        "en": "Dumbbell bench press",
+        "ar": "ضغط صدر بالدمبل على مقعد"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Lie on a stable flat bench with feet planted.",
+          "Lower the dumbbells beside the chest with forearms upright.",
+          "Press upward without bouncing or striking the dumbbells."
+        ],
+        "ar": [
+          "استلقِ على مقعد أفقي ثابت والقدمان على الأرض.",
+          "اخفض الدمبلين بجوار الصدر والساعدان رأسيان.",
+          "ادفع لأعلى دون ارتداد أو اصطدام الدمبلين."
+        ]
+      }
+    },
+    {
+      "id": "INCLINE_DUMBBELL_PRESS",
+      "variant": {
+        "en": "Incline dumbbell press",
+        "ar": "ضغط صدر مائل بالدمبل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Set a moderate incline and keep back and feet supported.",
+          "Lower the dumbbells beside the upper chest.",
+          "Press up with wrists stacked over elbows."
+        ],
+        "ar": [
+          "اضبط المقعد على ميل متوسط واسند الظهر وثبّت القدمين.",
+          "اخفض الدمبلين بجوار أعلى الصدر.",
+          "ادفع لأعلى والرسغان فوق المرفقين."
+        ]
+      }
+    },
+    {
+      "id": "PUSH_UP",
+      "variant": {
+        "en": "Push-up",
+        "ar": "ضغط أرضي"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Place hands under or slightly wider than the shoulders.",
+          "Keep shoulders, hips and heels in one line as the chest lowers.",
+          "Push back up without letting the hips sag."
+        ],
+        "ar": [
+          "ضع اليدين أسفل الكتفين أو أوسع قليلًا.",
+          "حافظ على خط واحد للكتفين والحوض والكعبين أثناء النزول.",
+          "ادفع لأعلى دون هبوط الحوض."
+        ]
+      }
+    },
+    {
+      "id": "KNEE_PUSH_UP",
+      "variant": {
+        "en": "Knee push-up",
+        "ar": "ضغط أرضي على الركبتين"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Rest knees on a mat and set hands near shoulder width.",
+          "Keep shoulders, hips and knees aligned while lowering.",
+          "Press back up without bending at the waist."
+        ],
+        "ar": [
+          "ضع الركبتين على بساط واليدين قرب عرض الكتفين.",
+          "حافظ على اصطفاف الكتفين والحوض والركبتين أثناء النزول.",
+          "ادفع لأعلى دون الانثناء من الوسط."
+        ]
+      }
+    },
+    {
+      "id": "CABLE_CHEST_FLY",
+      "variant": {
+        "en": "Cable chest fly",
+        "ar": "تفتيح صدر بالكابل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Stand balanced between pulleys with a slight elbow bend.",
+          "Bring the handles together in front of the chest.",
+          "Return slowly without letting the shoulders roll forward."
+        ],
+        "ar": [
+          "قف باتزان بين البكرتين مع ثني خفيف للمرفقين.",
+          "اجمع المقبضين أمام الصدر.",
+          "ارجع ببطء دون اندفاع الكتفين للأمام."
+        ]
+      }
+    },
+    {
+      "id": "SINGLE_ARM_DUMBBELL_ROW",
+      "variant": {
+        "en": "Single-arm dumbbell row",
+        "ar": "تجديف بدمبل بذراع واحدة"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Support one hand and knee on a stable bench.",
+          "Pull the dumbbell toward the hip without twisting the torso.",
+          "Lower under control; log reps and dumbbell load per side."
+        ],
+        "ar": [
+          "اسند يدًا وركبة على مقعد ثابت.",
+          "اسحب الدمبل نحو الفخذ دون لف الجذع.",
+          "اخفضه بتحكم وسجّل التكرارات ووزن الدمبل لكل جانب."
+        ]
+      }
+    },
+    {
+      "id": "CHEST_SUPPORTED_ROW",
+      "variant": {
+        "en": "Chest-supported dumbbell row",
+        "ar": "تجديف دمبل مع إسناد الصدر"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Rest the chest against an inclined bench with feet stable.",
+          "Pull the dumbbells toward the lower ribs.",
+          "Lower smoothly while keeping the chest supported."
+        ],
+        "ar": [
+          "اسند الصدر على مقعد مائل مع ثبات القدمين.",
+          "اسحب الدمبلين نحو أسفل الضلوع.",
+          "اخفضهما بهدوء مع بقاء الصدر على المسند."
+        ]
+      }
+    },
+    {
+      "id": "PULL_UP",
+      "variant": {
+        "en": "Pull-up",
+        "ar": "عقلة بقبضة علوية"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Use an overhand grip and hang with controlled shoulders.",
+          "Pull the chest toward the bar without swinging.",
+          "Lower steadily; log external added load only."
+        ],
+        "ar": [
+          "استخدم قبضة علوية وتعلّق مع التحكم في الكتفين.",
+          "اسحب الصدر نحو البار دون تأرجح.",
+          "انزل بثبات وسجّل الوزن الإضافي الخارجي فقط."
+        ]
+      }
+    },
+    {
+      "id": "FACE_PULL",
+      "variant": {
+        "en": "Cable face pull",
+        "ar": "سحب الحبل نحو الوجه"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Set a rope pulley around face height and stand balanced.",
+          "Pull the rope toward the face while separating the hands.",
+          "Return with control without shrugging the shoulders."
+        ],
+        "ar": [
+          "اضبط بكرة الحبل قرب ارتفاع الوجه وقف باتزان.",
+          "اسحب الحبل نحو الوجه مع إبعاد اليدين عن بعضهما.",
+          "ارجع بتحكم دون رفع الكتفين نحو الأذنين."
+        ]
+      }
+    },
+    {
+      "id": "DUMBBELL_SHOULDER_PRESS",
+      "variant": {
+        "en": "Dumbbell shoulder press",
+        "ar": "ضغط كتف بالدمبل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Sit with the back supported and feet planted.",
+          "Start with dumbbells near the shoulders and wrists over elbows.",
+          "Press overhead without arching the lower back."
+        ],
+        "ar": [
+          "اجلس مع إسناد الظهر وثبات القدمين.",
+          "ابدأ والدمبلان قرب الكتفين والرسغان فوق المرفقين.",
+          "ادفع فوق الرأس دون تقويس أسفل الظهر."
+        ]
+      }
+    },
+    {
+      "id": "LATERAL_RAISE",
+      "variant": {
+        "en": "Dumbbell lateral raise",
+        "ar": "رفرفة جانبية بالدمبل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Stand tall with a slight bend in the elbows.",
+          "Raise the arms out to the sides to about shoulder height.",
+          "Lower slowly without swinging or shrugging."
+        ],
+        "ar": [
+          "قف مستقيمًا مع ثني بسيط للمرفقين.",
+          "ارفع الذراعين للجانبين حتى قرب مستوى الكتفين.",
+          "اخفضهما ببطء دون تأرجح أو رفع الكتفين."
+        ]
+      }
+    },
+    {
+      "id": "REAR_DELT_FLY",
+      "variant": {
+        "en": "Bent-over rear delt fly",
+        "ar": "رفرفة خلفية بالدمبل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Hinge at the hips with a neutral back and softly bent knees.",
+          "Open the arms to the sides with a slight elbow bend.",
+          "Lower the dumbbells without moving the torso."
+        ],
+        "ar": [
+          "اثنِ من الفخذين مع ظهر مستقيم وثني بسيط للركبتين.",
+          "افتح الذراعين للجانبين مع ثني خفيف للمرفقين.",
+          "اخفض الدمبلين دون تحريك الجذع."
+        ]
+      }
+    },
+    {
+      "id": "DUMBBELL_SHRUG",
+      "variant": {
+        "en": "Dumbbell shrug",
+        "ar": "رفع الكتفين بالدمبل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Hold dumbbells at the sides with arms straight.",
+          "Lift the shoulders toward the ears without rolling them.",
+          "Lower smoothly while keeping the neck neutral."
+        ],
+        "ar": [
+          "امسك الدمبلين بجانب الجسم والذراعان مفرودتان.",
+          "ارفع الكتفين نحو الأذنين دون تدويرهما.",
+          "اخفضهما بهدوء مع بقاء الرقبة مستقيمة."
+        ]
+      }
+    },
+    {
+      "id": "DUMBBELL_CURL",
+      "variant": {
+        "en": "Dumbbell curl",
+        "ar": "بايسبس بالدمبل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Stand tall with palms facing forward and elbows near the sides.",
+          "Bend the elbows without swinging the upper arms.",
+          "Lower slowly; log the load of one dumbbell."
+        ],
+        "ar": [
+          "قف مستقيمًا والكفان للأمام والمرفقان قرب الجسم.",
+          "اثنِ المرفقين دون تأرجح أعلى الذراعين.",
+          "اخفض ببطء وسجّل وزن دمبل واحد."
+        ]
+      }
+    },
+    {
+      "id": "HAMMER_CURL",
+      "variant": {
+        "en": "Hammer curl",
+        "ar": "بايسبس هامر"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Hold the dumbbells with palms facing inward.",
+          "Curl while keeping elbows near the sides and wrists neutral.",
+          "Lower with control; log the load of one dumbbell."
+        ],
+        "ar": [
+          "امسك الدمبلين والكفان للداخل.",
+          "اثنِ المرفقين قرب الجسم مع ثبات الرسغين.",
+          "اخفض بتحكم وسجّل وزن دمبل واحد."
+        ]
+      }
+    },
+    {
+      "id": "MACHINE_PREACHER_CURL",
+      "variant": {
+        "en": "Machine preacher curl",
+        "ar": "بايسبس على جهاز بريتشر"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Adjust the seat so upper arms rest fully on the pad.",
+          "Curl the handles without lifting the arms off the support.",
+          "Return slowly without locking the elbows."
+        ],
+        "ar": [
+          "اضبط المقعد ليسند أعلى الذراعين بالكامل على الوسادة.",
+          "اثنِ المرفقين بالمقبضين دون رفع الذراعين عن المسند.",
+          "ارجع ببطء دون قفل المرفقين."
+        ]
+      }
+    },
+    {
+      "id": "TRICEPS_PUSHDOWN",
+      "variant": {
+        "en": "Cable triceps pushdown",
+        "ar": "ترايسبس دفع لأسفل بالكابل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Use a high pulley and keep elbows near the sides.",
+          "Straighten the elbows without leaning body weight onto the handle.",
+          "Return slowly while upper arms stay still."
+        ],
+        "ar": [
+          "استخدم بكرة علوية والمرفقان قريبان من الجسم.",
+          "افرد المرفقين دون الاتكاء بوزن الجسم على المقبض.",
+          "ارجع ببطء مع ثبات أعلى الذراعين."
+        ]
+      }
+    },
+    {
+      "id": "OVERHEAD_TRICEPS_EXTENSION",
+      "variant": {
+        "en": "Overhead dumbbell extension",
+        "ar": "ترايسبس خلف الرأس بدمبل"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Sit supported and hold one dumbbell with both hands overhead.",
+          "Bend the elbows to lower the weight behind the head.",
+          "Extend the elbows without arching the back."
+        ],
+        "ar": [
+          "اجلس مستندًا وامسك دمبلًا واحدًا بكلتا اليدين فوق الرأس.",
+          "اثنِ المرفقين لخفض الوزن خلف الرأس.",
+          "افرد المرفقين دون تقويس الظهر."
+        ]
+      }
+    },
+    {
+      "id": "DEAD_BUG",
+      "variant": {
+        "en": "Dead bug",
+        "ar": "الحشرة الميتة"
+      },
+      "reference": "https://hw.qld.gov.au/physical-activity/dead-bugs/",
+      "cues": {
+        "en": [
+          "Lie on the back with hips and knees bent and arms up.",
+          "Extend the opposite arm and leg while keeping the lower back stable.",
+          "Return and switch sides; log reps per side."
+        ],
+        "ar": [
+          "استلقِ على الظهر والفخذان والركبتان مثنيان والذراعان لأعلى.",
+          "مد ذراعًا والرجل المقابلة مع ثبات أسفل الظهر.",
+          "ارجع وبدّل الجانبين وسجّل التكرارات لكل جانب."
+        ]
+      }
+    },
+    {
+      "id": "REVERSE_CRUNCH",
+      "variant": {
+        "en": "Reverse crunch",
+        "ar": "كرنش عكسي"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Lie on the back with bent knees and arms resting at the sides.",
+          "Curl the pelvis toward the ribs with a small controlled lift.",
+          "Lower slowly without swinging the legs."
+        ],
+        "ar": [
+          "استلقِ على الظهر والركبتان مثنيتان والذراعان بجانب الجسم.",
+          "قرّب الحوض نحو الضلوع برفعة صغيرة متحكم بها.",
+          "انزل ببطء دون تأرجح الرجلين."
+        ]
+      }
+    },
+    {
+      "id": "CABLE_CRUNCH",
+      "variant": {
+        "en": "Kneeling cable crunch",
+        "ar": "كرنش بالكابل من الركوع"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Kneel facing a high pulley with the rope held beside the head.",
+          "Curl the ribs toward the pelvis rather than pulling with the arms.",
+          "Return with control while keeping hips relatively still."
+        ],
+        "ar": [
+          "اركع أمام بكرة علوية والحبل بجانب الرأس.",
+          "قرّب الضلوع نحو الحوض بدلًا من السحب بالذراعين.",
+          "ارجع بتحكم مع ثبات الفخذين نسبيًا."
+        ]
+      }
+    }
   ]
 }

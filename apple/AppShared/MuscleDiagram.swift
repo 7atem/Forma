@@ -33,8 +33,10 @@ struct MuscleDiagram: View {
             }.accessibilityHidden(true)
             Text("muscle_primary").foregroundStyle(.green)
             Text(activation.primary.map {$0.label(arabic:arabic)}.joined(separator:", "))
-            Text("muscle_secondary").foregroundStyle(.orange)
-            Text(activation.secondary.map {$0.label(arabic:arabic)}.joined(separator:", "))
+            if !activation.secondary.isEmpty {
+                Text("muscle_secondary").foregroundStyle(.orange)
+                Text(activation.secondary.map {$0.label(arabic:arabic)}.joined(separator:", "))
+            }
             Text("muscle_note").font(.caption)
         }
     }
