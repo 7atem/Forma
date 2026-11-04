@@ -6,6 +6,20 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class WatchTransferTest {
+    @Test fun versionTwoPreservesGuidedPlanSnapshotsAndCannotBeDowngradedSilently() {
+        val bytes=checkNotNull(javaClass.getResourceAsStream("/transfer-v2.json")).use {it.readBytes()}
+        val packet=WatchTransferCodec.decode(bytes)
+        assertEquals(2,packet.version)
+        assertEquals(packet,WatchTransferCodec.decode(WatchTransferCodec.encode(packet)))
+        assertEquals(packet.programs.single().prescriptions,packet.workouts.single().session().prescriptions)
+        assertEquals(2,packet.workouts.single().prescriptions.first().workingSets)
+        assertThrows(IllegalArgumentException::class.java) {packet.copy(version=1)}
+        val legacy=WatchTransferCodec.decode(fixture())
+        assertFalse(WatchTransferCodec.encode(legacy).toString(Charsets.UTF_8).contains("prescriptions"))
+        assertEquals(legacy,WatchTransferCodec.decode(WatchTransferCodec.encode(legacy)))
+        val unknown=bytes.toString(Charsets.UTF_8).replace("\"repMin\"","\"unknownField\"")
+        assertThrows(Exception::class.java) {WatchTransferCodec.decode(unknown.toByteArray())}
+    }
     @Test fun additiveExerciseNamesRoundTripWithoutBreakingLegacyPackets() {
         val legacy=WatchTransferCodec.decode(fixture())
         Exercise.entries.drop(8).forEach {exercise ->
@@ -25,7 +39,7 @@ class WatchTransferTest {
     }
     @Test fun rejectsUnknownExerciseAndProtocolAndUnboundedInput() {
         val source=fixture().toString(Charsets.UTF_8)
-        listOf(source.replace("SQUAT","UNKNOWN"),source.replace("\"KG\"","\"LB\""),source.replace("\"version\": 1","\"version\": 2"),source.replace("\"packetId\"","\"unknownKey\""))
+        listOf(source.replace("SQUAT","UNKNOWN"),source.replace("\"KG\"","\"LB\""),source.replace("\"version\": 1","\"version\": 3"),source.replace("\"packetId\"","\"unknownKey\""))
             .forEach {assertThrows(Exception::class.java) {WatchTransferCodec.decode(it.toByteArray())}}
         assertThrows(IllegalArgumentException::class.java) {WatchTransferCodec.read(ByteArrayInputStream(ByteArray(WatchTransferCodec.MAX_BYTES+1)))}
         assertThrows(IllegalArgumentException::class.java) {WatchTransferCodec.decode("[".repeat(30).toByteArray())}

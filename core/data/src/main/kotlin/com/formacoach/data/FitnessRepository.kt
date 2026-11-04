@@ -21,10 +21,12 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
         val starter=StarterTemplates.all.firstOrNull {it.id==templateId}
         val program=if(starter==null) checkNotNull(dao.program(templateId)) else null
         val session=Session(date=date,templateId=templateId,label=program?.name.orEmpty(),
-            plannedExercises=starter?.exercises?:kotlinx.serialization.json.Json.decodeFromString(program!!.exercises),restSeconds=program?.restSeconds?:90)
+            plannedExercises=starter?.exercises?:kotlinx.serialization.json.Json.decodeFromString(program!!.exercises),restSeconds=program?.restSeconds?:90,
+            prescriptions=program?.let {kotlinx.serialization.json.Json.decodeFromString(it.prescriptions)}?:emptyList())
         dao.startSession(session.row());return session.id
     }
     suspend fun addSet(set:TrainingSet)=dao.addSet(set.row())
+    suspend fun logSet(set:TrainingSet):List<TrainingSet> = dao.logSetAndRead(set.row()).map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg,SetKind.valueOf(it.kind),it.rpe)}
     suspend fun correctSet(set:TrainingSet)=dao.correctSet(set.row())
     suspend fun finishSession(id:String) {check(dao.finishSession(id,clock.millis())==1)}
     suspend fun removeSet(id:String)=dao.removeSet(id)
@@ -49,7 +51,8 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
         val old=checkNotNull(dao.session(id));check(old.completedAt!=null)
         val order=(kotlinx.serialization.json.Json.decodeFromString<List<Exercise>>(old.exerciseOrder)+dao.sessionSets(id).map {Exercise.valueOf(it.exercise)}).distinct()
         require(order.size in 1..20)
-        dao.startSession(Session(date=date,templateId="repeat",label=old.label,plannedExercises=order,restSeconds=old.restSeconds).row())
+        dao.startSession(Session(date=date,templateId="repeat",label=old.label,plannedExercises=order,restSeconds=old.restSeconds,
+            prescriptions=kotlinx.serialization.json.Json.decodeFromString(old.prescriptions)).row())
     }
     suspend fun saveFood(food:Food)=dao.saveFood(food.row())
     suspend fun deleteFood(id:String)=dao.deleteFood(id)

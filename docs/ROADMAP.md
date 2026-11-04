@@ -1,6 +1,6 @@
 # Delivery plan
 
-Current development version: **0.5.0-alpha05**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
+Current development version: **0.6.0-alpha06**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
 
 ## Completed foundation and daily workflow
 
@@ -79,5 +79,19 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [x] Exact balanced plate calculator using user-selected target/bar/available pairs.
 - [x] Preview/confirm copy of a meal day, immutable portion/source snapshots and stale-source rollback.
 - [x] Official-source product review and explicit implementation/deferred-feature matrix in `COMPETITOR_REVIEW_2026_11_04.md`.
-- [ ] Superset/circuit scheduling, custom exercise record types and timed/cardio logging remain separate typed-model work.
+- [x] Superset/circuit grouping and in-session round navigation implemented in alpha06 from explicit user plans.
+- [ ] Custom exercise record types and timed/cardio logging remain separate typed-model work.
 - [ ] Qualified pose/cue review, real usability study, physical-device acceptance and Mac/Apple tests remain open gates.
+
+## Alpha06 guided workflows
+
+- [x] Review 18 fitness/nutrition products using official sources and document adopted/deferred workflows.
+- [x] Optional manual working-set targets, rep ranges, per-exercise rest and program notes.
+- [x] Adjacent superset/circuit groups, actual-count navigation, warm-up exclusion and cleared input on exercise change.
+- [x] Immutable session plan snapshots, repeat/backup preservation and explicit encrypted Room 4→5 migration.
+- [x] Locale-aware completed-workout calendar and date-filtered history.
+- [x] Meal categories, grouped diary and progress against user-entered calorie/protein targets.
+- [x] Cross-language exercise search with Arabic diacritic normalization.
+- [x] Version 2 workout-transfer contract preserving targets/groups, version 1 read compatibility, matching Apple source/fixtures.
+- [x] 71 Android/JVM automated cases, R8 candidate and bilingual static checks.
+- [ ] Swift/Xcode and paired physical Apple validation; qualified exercise review and public-release acceptance remain open.

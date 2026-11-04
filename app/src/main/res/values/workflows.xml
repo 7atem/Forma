@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rep_range_note">For a fixed rep target, use the same number in both fields. Fill both ends of a range, or leave both blank.</string>
+    <string name="planned_sets_value">Planned working sets: %1$s</string>
+    <string name="rep_range_value">Your rep range: %1$s–%2$s</string>
+    <string name="exercise_rest_value">Configured rest: %1$s s</string>
+    <string name="linked_timing_note">Working sets move through the linked group. Rest starts when the round wraps; warm-ups stay on the current exercise.</string>
+    <string name="linked_group_value">Superset / circuit %1$s</string>
+    <string name="user_plan_targets_note">Enter targets from your chosen routine, or leave them blank. Blank rest uses the program timer. Warm-ups stay separate from working sets.</string>
+    <string name="planned_working_sets">Working-set target · optional (1–20)</string>
+    <string name="rep_min">Minimum reps · optional</string>
+    <string name="rep_max">Maximum reps · optional</string>
+    <string name="exercise_rest_optional">Rest override · seconds (15–600)</string>
+    <string name="program_exercise_notes">Program notes · optional, up to 1,000 characters</string>
+    <string name="link_previous_exercise">Link with the previous exercise</string>
+    <string name="plan_group_edit_note">Linked exercises stay adjacent. Moving or removing exercises may split or unlink their group.</string>
+    <string name="edit_plan_details">Set targets, rest and notes</string>
+    <string name="exercise_set_progress">Working sets recorded: %1$s / %2$s planned</string>
+    <string name="user_plan_done">End of planned exercise order. Review your sets, add more, or finish when ready.</string>
+    <string name="next_in_linked_group">Next in your linked group. Enter this exercise’s reps and load.</string>
+    <string name="next_in_plan">Next exercise from your saved plan. Enter its reps and load.</string>
+    <string name="workout_calendar">Workout calendar</string>
+    <string name="browse_dates">Browse dates</string>
+    <string name="workout_date_filter">Workout list · %1$s</string>
+    <string name="all_workout_dates">Show all dates</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
+    <string name="calendar_day_accessibility">%1$s · %2$s completed workouts recorded</string>
+    <string name="calendar_scope_note">Small counts show completed workouts recorded that day. Missing logs do not prove that no training happened.</string>
+    <string name="meal_slot_unspecified">Unassigned</string>
+    <string name="meal_slot_breakfast">Breakfast</string>
+    <string name="meal_slot_lunch">Lunch</string>
+    <string name="meal_slot_dinner">Dinner</string>
+    <string name="meal_slot_snack">Snacks</string>
+    <string name="log_meal_under">Log new portions under</string>
+    <string name="logged_calorie_target">Logged %1$s / your %2$s kcal target</string>
+    <string name="logged_protein_target">Logged %1$s / your %2$s g protein target</string>
+    <string name="meal_group_heading">%1$s · shown: %2$s kcal / %3$s g protein</string>
+</resources>

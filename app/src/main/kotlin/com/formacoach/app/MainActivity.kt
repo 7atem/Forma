@@ -189,8 +189,8 @@ private fun TodayContent(snapshot: FitnessSnapshot, today: LocalDate, vm: Fitnes
 }
 
 @Composable
-internal fun InfoCard(content:@Composable ColumnScope.()->Unit) {
-    Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface),shape=RoundedCornerShape(24.dp)) {
+internal fun InfoCard(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit) {
+    Card(modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface),shape=RoundedCornerShape(24.dp)) {
         Column(Modifier.fillMaxWidth().padding(18.dp),verticalArrangement=Arrangement.spacedBy(12.dp),content=content)
     }
 }

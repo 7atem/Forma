@@ -2,7 +2,7 @@
 
 Independent fitness and nutrition project with an Android app and native iPhone/Apple Watch companion source. Working name; no public brand or store listing has been selected. Nemory remains unchanged at `D:\Vault Brain`; see [its preservation record](docs/NEMORY_PRESERVATION.md).
 
-## Current version: 0.5.0-alpha05
+## Current version: 0.6.0-alpha06
 
 Offline bilingual logging with 40 original two-phase 3D exercise illustrations, named variation guides, an enlarged phase viewer, searchable exercise library, muscle highlighting, warm-up/RPE sets, recorded loads, and encrypted Room storage, editable saved training programs, set corrections and date backfill, a rest timer, session search/load history, sourced food/recipe portions, meal corrections, measurements and charts, evidence-based weekly reviews, explicit check-ins/schedule proposals, and portable password-encrypted backup/restore.
 
@@ -31,3 +31,7 @@ Current checks and installable APK paths are in [validation](docs/VALIDATION.md)
 Alpha04 improves the sticky header, adaptive phone/tablet navigation, Today progress, compact session logging, draft-preserving training sections and responsive food/measurement forms. [Illustrations, prompt provenance and UX details](docs/EXERCISE_DEMOS_AND_UX.md). Images are generated examples; qualified exercise review remains pending before public release.
 
 Alpha05 adds equipment/primary-muscle filters, favorites, personal notes, similar-muscle exploration, searchable workout/program exercise selection, program duplication, repeat-as-new workouts, completed-set CSV, an exact plate calculator and confirmed meal-day copy. [Implementation/compatibility](docs/ALPHA05_EXPANSION.md) and [official-source product review](docs/COMPETITOR_REVIEW_2026_11_04.md).
+
+Alpha06 adds user-entered sets/rep ranges/per-exercise rest and program notes, linked supersets/circuits, persisted-count workout navigation, a locale-aware history calendar, bilingual/diacritic-tolerant exercise search and a grouped meal diary with user-target progress. Detailed plans survive session snapshots, repeat, encrypted backup and v2 Watch transfer; readers keep legacy v1 support. [18-product workflow review and implementation choices](docs/PRODUCT_WORKFLOW_REVIEW_ALPHA06.md). Apple native builds and qualified exercise review remain pending.
+
+Alpha06 implementation and compatibility: [guided workflows](docs/ALPHA06_WORKFLOWS.md); executed checks: [validation](docs/VALIDATION.md).

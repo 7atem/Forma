@@ -46,6 +46,8 @@ kt += 'data class ExerciseDetails(val equipment:List<Equipment>,val perSide:Bool
 kt += 'object ExerciseCatalog {\n    fun of(exercise:Exercise):ExerciseDetails=when(exercise) {\n'
 for x in exercises:
     kt += f'        Exercise.{x["id"]}->ExerciseDetails(listOf('+','.join('Equipment.'+e for e in x['equipment'])+f'),{str(x["perSide"]).lower()})\n'
+kt += '    }\n    fun searchText(exercise:Exercise):String=when(exercise) {\n'
+for x in exercises:kt += f'        Exercise.{x["id"]}->{quote(x["en"]+" "+x["ar"]+" "+x["id"].replace("_"," "))}\n'
 kt += '    }\n    fun similar(exercise:Exercise):List<Exercise> = Exercise.entries.filter {it!=exercise && ExerciseMuscles.of(it).primary.any {muscle ->muscle in ExerciseMuscles.of(exercise).primary}}\n}\n'
 kt += 'enum class Muscle { ' + ', '.join(item['id'] for item in muscles) + ' }\n'
 kt += 'data class MuscleActivation(val primary: List<Muscle>, val secondary: List<Muscle>, val reference: String)\n'

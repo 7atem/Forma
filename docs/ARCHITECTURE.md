@@ -12,10 +12,10 @@ Android first: Kotlin + Compose + Hilt, using lessons from the existing project.
 |---|---|
 | `app` | Compose onboarding, Today, Train, Eat, Progress, Coach; saved programs, foods/recipes, SAF backup UI; Hilt wiring |
 | `core:model` | Typed fitness records, bounded numeric validation, Arabic/Persian digit parsing |
-| `core:data` | Room schema v4 with encrypted 1→2→3→4 migrations, transactional snapshots, SQLCipher/Keystore, repository |
+| `core:data` | Room schema v5 with encrypted 1→2→3→4→5 migrations, transactional snapshots, SQLCipher/Keystore, repository |
 | `core:coach` | JVM-only review/history/timer/coach tools, strict local-model fact-ID verification |
 
-| `core:wearables` | Bounded v1 workout transfer; validated wire records, no networking |
+| `core:wearables` | Bounded v2 workout transfer with v1 reader support; validated plan/workout records, no networking |
 | `apple/` | Native phone/watch source, outbox/ACK and muscle diagrams; pending Mac/device checks |
 | `core:backup` | JVM authenticated and bounded portable typed-record archive, independent of device keys |
 
@@ -32,6 +32,7 @@ Feature modules can be split when actual size and independent ownership justify 
 - `check_ins` / `plan_proposals`: explicit availability and confirmation state, with stale-target guards.
 - `measurements`: one record per local calendar date, optional weight/waist, at least one present. Saving replaces that day's record as stated in the form.
 - `exercise_preferences`: one encrypted favorite/notes row per stable exercise ID. Missing backup rows default empty. Both fields participate in confirmed snapshot replacement; favorites and notes edits preserve the other field.
+- Schema 5 adds typed prescription JSON to programs/session snapshots and a meal-slot column defaulting UNSPECIFIED. Optional user targets include working sets, rep range, exercise rest, adjacent linked group and notes. They are not model-generated recommendations. Atomic log-and-read returns current sets for navigation; warm-ups stay separate.
 
 The first alpha has one local user; it does not pretend to support coach accounts. Add trainer/client ownership and consent through an explicit future migration. Do not add unused multi-tenancy now.
 

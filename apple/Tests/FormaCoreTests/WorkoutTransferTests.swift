@@ -2,6 +2,28 @@ import XCTest
 @testable import FormaCore
 
 final class WorkoutTransferTests: XCTestCase {
+    func testVersionTwoFixturePreservesTargetsGroupsAndRejectsDowngrade() throws {
+        let url=Bundle.module.url(forResource:"transfer-v2",withExtension:"json",subdirectory:"Fixtures")!
+        let packet=try WatchTransferCodec.decode(Data(contentsOf:url))
+        XCTAssertEqual(packet.version,2)
+        XCTAssertEqual(packet.programs[0].prescriptions,packet.workouts[0].prescriptions)
+        XCTAssertEqual(packet,try WatchTransferCodec.decode(WatchTransferCodec.encode(packet)))
+        var downgraded=packet;downgraded.version=1
+        XCTAssertThrowsError(try downgraded.validate())
+        let legacy=try WatchTransferCodec.decode(fixture())
+        XCTAssertFalse(String(data:try WatchTransferCodec.encode(legacy),encoding:.utf8)!.contains("prescriptions"))
+    }
+    func testLinkedFlowExcludesWarmupsAndUsesRestBetweenRounds() throws {
+        let plans=[ExercisePrescription(exercise:.squat,workingSets:2,repMin:8,repMax:12,restSeconds:60,supersetGroup:1),ExercisePrescription(exercise:.row,workingSets:2,repMin:8,repMax:12,restSeconds:90,supersetGroup:1)]
+        let program=WatchProgram(id:"guided",name:"Guided",exercises:[.squat,.row],prescriptions:plans)
+        try program.validate()
+        let one=WatchSet(exercise:.squat,reps:8,weightKg:20)
+        let first=WorkoutFlow.afterSet(program:program,sets:[one],current:.squat,kind:.working)
+        XCTAssertEqual(first.exercise,.row);XCTAssertEqual(first.restSeconds,0)
+        let next=WorkoutFlow.afterSet(program:program,sets:[one,WatchSet(exercise:.row,reps:8,weightKg:20)],current:.row,kind:.working)
+        XCTAssertEqual(next.exercise,.squat);XCTAssertEqual(next.restSeconds,90)
+        XCTAssertEqual(WorkoutFlow.afterSet(program:program,sets:[],current:.squat,kind:.warmUp).exercise,.squat)
+    }
     private func fixture() throws -> Data {try Data(contentsOf:Bundle.module.url(forResource:"transfer-v1",withExtension:"json",subdirectory:"Fixtures")!)}
     func testCrossPlatformFixtureRoundTrip() throws {
         let packet=try WatchTransferCodec.decode(fixture())
@@ -12,7 +34,7 @@ final class WorkoutTransferTests: XCTestCase {
     }
     func testRejectsUnsupportedVersionExerciseAndUnits() throws {
         let raw=String(data:try fixture(),encoding:.utf8)!
-        for changed in [raw.replacingOccurrences(of:"SQUAT",with:"UNKNOWN"),raw.replacingOccurrences(of:"\"KG\"",with:"\"LB\""),raw.replacingOccurrences(of:"\"version\": 1",with:"\"version\": 2")] {
+        for changed in [raw.replacingOccurrences(of:"SQUAT",with:"UNKNOWN"),raw.replacingOccurrences(of:"\"KG\"",with:"\"LB\""),raw.replacingOccurrences(of:"\"version\": 1",with:"\"version\": 3")] {
             XCTAssertThrowsError(try WatchTransferCodec.decode(Data(changed.utf8)))
         }
     }

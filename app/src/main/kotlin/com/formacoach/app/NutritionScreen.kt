@@ -22,8 +22,9 @@ internal fun EatContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
     var editing by remember {mutableStateOf<Meal?>(null)}
     var foodId by rememberSaveable {mutableStateOf<String?>(null)}
     var quantity by rememberSaveable {mutableStateOf("")}
+    var slot by rememberSaveable {mutableStateOf(MealSlot.UNSPECIFIED)}
     val food=state.snapshot.foods.firstOrNull {it.id==foodId}
-    val portion=runCatching {food?.portion(requireNotNull(NumericInput.decimal(quantity)),date)}.getOrNull()
+    val portion=runCatching {food?.portion(requireNotNull(NumericInput.decimal(quantity)),date)?.copy(slot=slot)}.getOrNull()
     PageHeading(R.string.eat_title)
     DateChoice(date,today,{day=it.toEpochDay()},"food_date")
     val logged=state.snapshot.meals.filter {it.date==date}
@@ -35,7 +36,16 @@ internal fun EatContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
             MetricTile(number(logged.sumOf {it.protein}),stringResource(R.string.protein_logged),Modifier.weight(1f))
         }
         Text(stringResource(R.string.logged_only),style=MaterialTheme.typography.bodySmall)
+        state.snapshot.profile?.caloriesTarget?.let {target ->
+            Text(stringResource(R.string.logged_calorie_target,number(logged.sumOf {it.calories},0),number(target.toDouble(),0)))
+            LinearProgressIndicator(progress={(logged.sumOf {it.calories}/target).toFloat().coerceIn(0f,1f)},modifier=Modifier.fillMaxWidth())
+        }
+        state.snapshot.profile?.proteinTarget?.let {target ->
+            Text(stringResource(R.string.logged_protein_target,number(logged.sumOf {it.protein}),number(target)))
+            LinearProgressIndicator(progress={(logged.sumOf {it.protein}/target).toFloat().coerceIn(0f,1f)},modifier=Modifier.fillMaxWidth())
+        }
     }
+    MealSlotPicker(slot,{slot=it})
     OutlinedButton(onClick={library=!library},modifier=Modifier.fillMaxWidth().testTag("food_library")) {Text(stringResource(if(library) R.string.close_library else R.string.food_library))}
     if(library) FoodLibrary(state,vm)
     if(state.snapshot.foods.isNotEmpty()) InfoCard {
@@ -56,12 +66,15 @@ internal fun EatContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
             Button(onClick={portion?.let {vm.addMeal(it){quantity=""}}},enabled=portion!=null&&!state.busy,modifier=Modifier.fillMaxWidth().testTag("log_portion")) {Text(stringResource(R.string.save_meal))}
         }
     }
-    InfoCard {MealFields(null,date,state.busy,onSave={meal,done ->vm.addMeal(meal,done)})}
+    InfoCard {MealFields(null,date,state.busy,defaultSlot=slot,onSave={meal,done ->vm.addMeal(meal,done)})}
     Text(stringResource(R.string.food_for_date,dateLabel(date)),style=MaterialTheme.typography.titleLarge)
     Input(R.string.search_meals,search,{search=it},"meal_search",numeric=false)
     val meals=state.snapshot.meals.filter {it.date==date && (search.isBlank()||it.name.contains(search,true))}
     if(meals.isEmpty()) Text(stringResource(R.string.no_meals))
-    meals.forEach {meal -> key(meal.id) {InfoCard {
+    MealSlot.entries.forEach {group ->
+        val values=meals.filter {it.slot==group}
+        if(values.isNotEmpty()) Text(stringResource(R.string.meal_group_heading,stringResource(mealSlotLabel(group)),number(values.sumOf {it.calories},0),number(values.sumOf {it.protein})),style=MaterialTheme.typography.titleMedium,modifier=Modifier.testTag("meal_group_${group.name}"))
+        values.forEach {meal -> key(meal.id) {InfoCard {
         Text(meal.name,style=MaterialTheme.typography.titleMedium)
         NutrientSummary(meal.calories,meal.protein,meal.carbs,meal.fat)
         meal.quantity?.let {Text(stringResource(R.string.portion_record,number(it),stringResource(unitLabel(checkNotNull(meal.unit)))))}
@@ -70,12 +83,12 @@ internal fun EatContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
             TextButton(onClick={editing=meal},enabled=!state.busy) {Text(stringResource(R.string.edit))}
             ConfirmButton(R.string.remove,stringResource(R.string.delete_meal_note),!state.busy) {vm.removeMeal(meal.id)}
         }
-    }}}
+    }}}}
     Text(stringResource(R.string.reuse_meal),style=MaterialTheme.typography.titleLarge)
     Text(stringResource(R.string.reuse_selected_note),style=MaterialTheme.typography.bodySmall)
     state.snapshot.meals.distinctBy {listOf(it.name,it.calories,it.protein,it.carbs,it.fat,it.source)}.take(5).forEach {meal -> InfoCard {
         Text(meal.name);NutrientSummary(meal.calories,meal.protein,meal.carbs,meal.fat)
-        OutlinedButton(onClick={vm.addMeal(meal.copy(id=java.util.UUID.randomUUID().toString(),date=date)){}},enabled=!state.busy) {Text(stringResource(R.string.repeat_for_date,dateLabel(date)))}
+        OutlinedButton(onClick={vm.addMeal(meal.copy(id=java.util.UUID.randomUUID().toString(),date=date,slot=slot)){}},enabled=!state.busy) {Text(stringResource(R.string.repeat_for_date,dateLabel(date)))}
     }}
     editing?.let {meal -> AlertDialog(onDismissRequest={editing=null},title={Text(stringResource(R.string.edit_meal))},
         text={Column(Modifier.heightIn(max=500.dp).verticalScroll(rememberScrollState())) {
@@ -84,7 +97,7 @@ internal fun EatContent(state:AppState,today:LocalDate,vm:FitnessViewModel) {
 }
 
 @Composable
-private fun MealFields(initial:Meal?,date:LocalDate,busy:Boolean,onSave:(Meal,()->Unit)->Unit) {
+private fun MealFields(initial:Meal?,date:LocalDate,busy:Boolean,defaultSlot:MealSlot=MealSlot.UNSPECIFIED,onSave:(Meal,()->Unit)->Unit) {
     var name by rememberSaveable(initial?.id) {mutableStateOf(initial?.name.orEmpty())}
     var calories by rememberSaveable(initial?.id) {mutableStateOf(initial?.calories?.toString().orEmpty())}
     var protein by rememberSaveable(initial?.id) {mutableStateOf(initial?.protein?.toString().orEmpty())}
@@ -92,10 +105,12 @@ private fun MealFields(initial:Meal?,date:LocalDate,busy:Boolean,onSave:(Meal,()
     var fat by rememberSaveable(initial?.id) {mutableStateOf(initial?.fat?.toString().orEmpty())}
     var source by rememberSaveable(initial?.id) {mutableStateOf(initial?.source.orEmpty())}
     var editedDay by rememberSaveable(initial?.id) {mutableLongStateOf((initial?.date?:date).toEpochDay())}
-    val meal=runCatching {Meal(id=initial?.id?:java.util.UUID.randomUUID().toString(),date=if(initial!=null) LocalDate.ofEpochDay(editedDay) else date,name=name.trim(),calories=requireNotNull(NumericInput.decimal(calories)),protein=requireNotNull(NumericInput.decimal(protein)),carbs=requireNotNull(NumericInput.decimal(carbs)),fat=requireNotNull(NumericInput.decimal(fat)),source=source.trim())}.getOrNull()
+    var editedSlot by rememberSaveable(initial?.id) {mutableStateOf(initial?.slot?:defaultSlot)}
+    val meal=runCatching {Meal(id=initial?.id?:java.util.UUID.randomUUID().toString(),date=if(initial!=null) LocalDate.ofEpochDay(editedDay) else date,name=name.trim(),calories=requireNotNull(NumericInput.decimal(calories)),protein=requireNotNull(NumericInput.decimal(protein)),carbs=requireNotNull(NumericInput.decimal(carbs)),fat=requireNotNull(NumericInput.decimal(fat)),source=source.trim(),slot=if(initial==null) defaultSlot else editedSlot)}.getOrNull()
     Column(verticalArrangement=Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.manual_meal),style=MaterialTheme.typography.titleMedium)
         if(initial!=null) DateChoice(LocalDate.ofEpochDay(editedDay),LocalDate.now(),{editedDay=it.toEpochDay()},"edit_meal_date")
+        if(initial!=null) MealSlotPicker(editedSlot,{editedSlot=it})
         Text(stringResource(R.string.portion_note))
         Input(R.string.meal_name,name,{name=it},"meal_name",numeric=false)
         FormFieldPair(first={Input(R.string.calories,calories,{calories=it},"meal_calories")},second={Input(R.string.protein,protein,{protein=it},"meal_protein")})

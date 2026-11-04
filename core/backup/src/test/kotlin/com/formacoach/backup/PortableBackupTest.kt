@@ -7,6 +7,18 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class PortableBackupTest {
+    @Test fun guidedPlansAndMealGroupsRoundTripWhileLegacyRecordsHaveNoInferredTargets() {
+        val order=listOf(Exercise.CHEST_PRESS,Exercise.ROW)
+        val plans=order.map {ExercisePrescription(it,2,8,12,60,1,"ملاحظة البرنامج")}
+        val program=TrainingProgram(name="User plan",exercises=order,prescriptions=plans)
+        val session=Session(date=date,templateId=program.id,completedAt=1,plannedExercises=order,prescriptions=plans)
+        val data=sample().copy(programs=listOf(program),sessions=listOf(session),sets=listOf(TrainingSet(sessionId=session.id,exercise=order[0],reps=8,weightKg=20.0)),meals=sample().meals.map {it.copy(slot=MealSlot.BREAKFAST)})
+        assertEquals(data,PortableBackup.decrypt(PortableBackup.encrypt(data,password,1),password).data)
+        val json=kotlinx.serialization.json.Json
+        assertTrue(json.decodeFromString<TrainingProgram>("{\"name\":\"Legacy\",\"exercises\":[\"ROW\"]}").prescriptions.isEmpty())
+        val old=json.decodeFromString<Meal>("{\"date\":\"2026-11-03\",\"name\":\"Legacy\",\"calories\":100,\"protein\":5,\"carbs\":10,\"fat\":2}")
+        assertEquals(MealSlot.UNSPECIFIED,old.slot)
+    }
     @Test fun exerciseFavoritesAndArabicNotesRoundTripAndDuplicatesFail() {
         val prefs=listOf(ExercisePreference(Exercise.DEAD_BUG,true,"ملاحظة شخصية"))
         val data=FitnessSnapshot(exercisePreferences=prefs)

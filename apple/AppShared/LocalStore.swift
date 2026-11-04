@@ -79,7 +79,13 @@ struct SavedState: Codable {
     }
     func add(_ set: WatchSet) throws {
         try set.validate()
-        try commit {guard $0.draft != nil else {throw TransferError.invalid};$0.draft!.sets.append(set);$0.draft!.restUntil=Date().addingTimeInterval(Double($0.draft!.program.restSeconds))}
+        try commit {state in
+            guard var draft=state.draft else {throw TransferError.invalid}
+            draft.sets.append(set)
+            let next=WorkoutFlow.afterSet(program:draft.program,sets:draft.sets,current:set.exercise,kind:set.kind)
+            draft.restUntil=next.restSeconds>0 ? Date().addingTimeInterval(Double(next.restSeconds)) : nil
+            state.draft=draft
+        }
     }
     func edit(_ set: WatchSet) throws {
         try set.validate();try commit {guard let index=$0.draft?.sets.firstIndex(where:{$0.id==set.id}) else {throw TransferError.invalid};$0.draft!.sets[index]=set}

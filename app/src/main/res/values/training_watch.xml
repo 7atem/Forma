@@ -19,7 +19,7 @@
     <string name="rpe_value">RPE %1$s</string>
     <string name="apple_watch">Apple Watch</string>
     <string name="watch_bridge_note">Apple Watch requires a paired iPhone. Export programs here, open the file in the Forma iPhone companion, then send to the watch. Export finished workouts from iPhone and import them here. Apple source needs Mac and device validation before installation.</string>
-    <string name="watch_plaintext_note">Transfer files contain readable workout names and results. Choose a private destination. They exclude your profile, food logs and keys; use encrypted backup for a full archive.</string>
+    <string name="watch_plaintext_note">Transfer files contain readable workout names, program notes, targets and results. Choose a private destination and use the latest Forma companion to keep linked groups and targets. Files exclude your profile, food logs and keys; use encrypted backup for a full archive.</string>
     <string name="watch_exported">Program file saved. Open it in the iPhone companion.</string>
     <string name="watch_imported">Workouts merged. Identical existing workouts were kept once.</string>
     <string name="watch_failed">Unable to read or save this transfer. Check its format, size and supported exercises.</string>

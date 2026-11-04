@@ -28,6 +28,37 @@ import org.json.JSONArray
 
 @RunWith(AndroidJUnit4::class)
 class EncryptedStorageTest {
+    @Test fun schemaFourUpgradeAndGuidedSnapshotsRetainTargetsGroupsNotesAndMealCategories()=runBlocking {
+        val helper=createLegacy(4)
+        helper.writableDatabase.execSQL("INSERT INTO programs VALUES('legacy-program','Legacy','[\"ROW\"]',90)")
+        helper.writableDatabase.execSQL("INSERT INTO meals VALUES('legacy-meal',20759,'Legacy portion',300.0,20.0,30.0,10.0,NULL,150.0,'GRAMS','Original label')")
+        helper.close()
+        val repo=repository()
+        val legacy=database!!.dao().readSnapshot()
+        assertTrue(legacy.programs.single().prescriptions.isEmpty())
+        assertEquals(MealSlot.UNSPECIFIED,legacy.meals.single().slot)
+        val order=listOf(Exercise.CHEST_PRESS,Exercise.ROW)
+        val plans=order.map {ExercisePrescription(it,2,8,12,60,1,"User notes")}
+        val program=TrainingProgram(name="Guided",exercises=order,prescriptions=plans)
+        repo.saveProgram(program)
+        val session=repo.startSession(program.id)
+        repo.saveProgram(program.copy(prescriptions=plans.map {it.copy(workingSets=5,notes="Changed program")}))
+        val saved=repo.logSet(TrainingSet(sessionId=session,exercise=order[0],reps=8,weightKg=20.0))
+        assertEquals(1,saved.size)
+        repo.finishSession(session)
+        repo.addMeal(legacy.meals.single().copy(slot=MealSlot.BREAKFAST))
+        val data=database!!.dao().readSnapshot()
+        assertEquals(plans,data.sessions.single().prescriptions)
+        val archive=repo.export("guided workflow backup password".toCharArray())
+        repo.deleteProgram(program.id)
+        repo.restore(repo.previewRestore(archive,"guided workflow backup password".toCharArray()))
+        assertEquals(data,database!!.dao().readSnapshot())
+        repo.repeatSession(session)
+        assertEquals(plans,database!!.dao().readSnapshot().sessions.single {it.completedAt==null}.prescriptions)
+        val meal=data.meals.single()
+        repo.copyMealDay(listOf(meal),LocalDate.of(2026,11,3))
+        assertTrue(database!!.dao().readSnapshot().meals.all {it.slot==MealSlot.BREAKFAST})
+    }
     @Test fun copyingMealDayPreservesPortionsAndSourcesAndRejectsStalePreviews()=runBlocking {
         val repo=repository()
         val old=Meal(date=LocalDate.of(2026,11,2),name="Label portion",calories=300.0,protein=20.0,carbs=30.0,fat=10.0,quantity=150.0,unit=NutritionUnit.GRAMS,source="Original label")

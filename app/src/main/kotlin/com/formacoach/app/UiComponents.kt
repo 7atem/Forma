@@ -55,7 +55,7 @@ internal fun ExercisePicker(selected:Exercise,onChange:(Exercise)->Unit,choices:
             Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
                 Input(R.string.search_exercises,search,{search=it},"picker_exercise_search",numeric=false)
                 Column(Modifier.heightIn(max=350.dp).verticalScroll(rememberScrollState())) {
-                    choices.filter {search.isBlank()||labels.getValue(it).contains(search,true)}.forEach {value ->
+                    choices.filter {com.formacoach.coach.ExerciseSearch.matches(search,labels.getValue(it)+" "+com.formacoach.model.ExerciseCatalog.searchText(it))}.forEach {value ->
                         TextButton(onClick={onChange(value);expanded=false},modifier=Modifier.fillMaxWidth().testTag("exercise_${value.name}")) {Text(labels.getValue(value))}
                     }
                 }

@@ -10,6 +10,71 @@ import org.junit.runner.RunWith
 /** Run on a disposable emulator with fresh Forma application data. */
 @RunWith(AndroidJUnit4::class)
 class FitnessFlowTest {
+    @Test fun guidedProgramSupersetsAndCalendarWorkAcrossRecreation() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_1").performClick()
+        rule.onNodeWithTag("new_program").performScrollTo().performClick()
+        rule.onNodeWithTag("program_name").performTextInput("UI guided workflow")
+        for(exercise in listOf("CHEST_PRESS","ROW")) {
+            rule.onNodeWithTag("program_exercise_$exercise").performScrollTo().performClick()
+            rule.onNodeWithTag("plan_details_$exercise").performScrollTo().performClick()
+            rule.onNodeWithTag("plan_sets").performTextInput("١")
+            rule.onNodeWithTag("plan_rep_min").performScrollTo().performTextInput("٨")
+            rule.onNodeWithTag("plan_rep_max").performScrollTo().performTextInput("١٢")
+            rule.onNodeWithTag("plan_exercise_rest").performScrollTo().performTextInput("٤٥")
+            rule.onNodeWithTag("plan_exercise_rest").performImeAction()
+            rule.onNodeWithTag("save_plan_details").performClick()
+        }
+        rule.onNodeWithTag("link_previous_ROW").performScrollTo().performClick()
+        rule.onNodeWithTag("save_program").performClick()
+        val cardMatcher=SemanticsMatcher("saved program card") {node ->
+            val key=androidx.compose.ui.semantics.SemanticsProperties.TestTag
+            node.config.contains(key)&&node.config[key].startsWith("card_start_")
+        } and hasAnyDescendant(hasText("UI guided workflow"))
+        rule.waitUntil(10_000) {rule.onAllNodes(cardMatcher).fetchSemanticsNodes().isNotEmpty()}
+        val tag=rule.onNode(cardMatcher).fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag].removePrefix("card_")
+        rule.onNodeWithTag(tag).performScrollTo().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("set_reps").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("set_reps").performScrollTo().performTextInput("8")
+        rule.onNodeWithTag("set_weight").performTextInput("20")
+        rule.onNodeWithTag("set_weight").performImeAction()
+        rule.onNodeWithTag("add_set").performScrollTo().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("workout_flow_notice").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("exercise_picker").performScrollTo().assertTextContains(rule.activity.getString(exerciseLabel(com.formacoach.model.Exercise.ROW)))
+        rule.onNodeWithTag("set_weight").assert(SemanticsMatcher.expectValue(androidx.compose.ui.semantics.SemanticsProperties.EditableText,androidx.compose.ui.text.AnnotatedString("")))
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("set_reps").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("set_reps").performScrollTo().performTextInput("8")
+        rule.onNodeWithTag("set_weight").performTextInput("20")
+        rule.onNodeWithTag("set_weight").performImeAction()
+        rule.onNodeWithTag("add_set").performScrollTo().performClick()
+        rule.onNodeWithTag("finish_session").performScrollTo().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("toggle_workout_calendar").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("toggle_workout_calendar").performScrollTo().performClick()
+        rule.onNodeWithTag("calendar_day_${java.time.LocalDate.now()}").performScrollTo().performClick()
+        rule.onNodeWithTag("workout_date_filter").assertExists()
+        rule.onNodeWithText("UI guided workflow").performScrollTo().assertExists()
+    }
+    @Test fun ArabicExerciseSearchWorksInEnglishInterface() {
+        ensureProfile();rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_1").performClick()
+        rule.onNodeWithTag("exercise_search").performTextInput("الحَشَرة المَيّتة")
+        rule.onNodeWithTag("exercise_search").performImeAction()
+        rule.onNodeWithTag("library_DEAD_BUG").performScrollTo().assertExists()
+        rule.onNodeWithTag("library_SQUAT").assertDoesNotExist()
+    }
+    @Test fun mealCategoryPersistsWithRecordedPortion() {
+        ensureProfile();rule.onNodeWithTag("tab_2").performClick()
+        rule.onNodeWithTag("meal_slot_BREAKFAST").performScrollTo().performClick()
+        rule.onNodeWithTag("meal_name").performScrollTo().performTextInput("Breakfast workflow")
+        listOf("meal_calories" to "300","meal_protein" to "20","meal_carbs" to "30","meal_fat" to "10").forEach {(tag,value)->rule.onNodeWithTag(tag).performScrollTo().performTextInput(value)}
+        rule.onNodeWithTag("meal_fat").performImeAction()
+        rule.onNodeWithTag("save_meal").performScrollTo().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("meal_group_BREAKFAST").fetchSemanticsNodes().isNotEmpty()}
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("tab_2").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("tab_2").performClick()
+        rule.onNodeWithTag("meal_group_BREAKFAST").performScrollTo().assertExists()
+    }
     @Test fun plateToolAcceptsArabicDigitsAndShowsBalancedResult() {
         ensureProfile()
         rule.onNodeWithTag("tab_1").performClick()

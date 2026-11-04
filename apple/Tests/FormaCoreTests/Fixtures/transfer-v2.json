@@ -1,0 +1,95 @@
+{
+  "format": "forma.workouts",
+  "version": 2,
+  "units": "KG",
+  "catalogVersion": 1,
+  "packetId": "fixture-packet-2",
+  "programs": [
+    {
+      "id": "starter-A",
+      "name": "A",
+      "exercises": [
+        "SQUAT",
+        "CHEST_PRESS",
+        "ROW"
+      ],
+      "restSeconds": 90,
+      "prescriptions": [
+        {
+          "exercise": "SQUAT",
+          "workingSets": 2,
+          "repMin": 8,
+          "repMax": 12,
+          "restSeconds": 60,
+          "supersetGroup": 1,
+          "notes": "Seat setup"
+        },
+        {
+          "exercise": "CHEST_PRESS",
+          "workingSets": 2,
+          "repMin": 8,
+          "repMax": 12,
+          "restSeconds": 90,
+          "supersetGroup": 1,
+          "notes": ""
+        }
+      ]
+    }
+  ],
+  "workouts": [
+    {
+      "id": "watch-fixture-1",
+      "date": "2026-11-02",
+      "programId": "starter-A",
+      "programName": "A",
+      "exercises": [
+        "SQUAT",
+        "CHEST_PRESS",
+        "ROW"
+      ],
+      "restSeconds": 90,
+      "completedAtMillis": 1793613600000,
+      "sets": [
+        {
+          "id": "watch-set-1",
+          "exercise": "SQUAT",
+          "reps": 8,
+          "weightKg": 20.5,
+          "kind": "WARM_UP",
+          "rpe": 4.5
+        },
+        {
+          "id": "watch-set-2",
+          "exercise": "ROW",
+          "reps": 10,
+          "weightKg": 30,
+          "kind": "WORKING",
+          "rpe": 8
+        }
+      ],
+      "averageHeartRateBpm": null,
+      "activeEnergyKcal": null,
+      "healthKitWorkoutId": null,
+      "prescriptions": [
+        {
+          "exercise": "SQUAT",
+          "workingSets": 2,
+          "repMin": 8,
+          "repMax": 12,
+          "restSeconds": 60,
+          "supersetGroup": 1,
+          "notes": "Seat setup"
+        },
+        {
+          "exercise": "CHEST_PRESS",
+          "workingSets": 2,
+          "repMin": 8,
+          "repMax": 12,
+          "restSeconds": 90,
+          "supersetGroup": 1,
+          "notes": ""
+        }
+      ]
+    }
+  ]
+}

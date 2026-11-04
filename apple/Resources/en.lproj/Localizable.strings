@@ -8,7 +8,7 @@
 "storage_failed" = "Saved data could not be read. It has not been reset. Recover your original file before continuing.";
 "phone_bridge_note" = "Import programs exported by Forma Android, then send to your paired watch. Export each completed workout here and import the file on Android.";
 "watch_local_note" = "Log offline. Sync results to paired iPhone later. No heart-rate or energy recording in this build.";
-"transfer_privacy" = "Transfer files are readable workout data. Keep them private. No profile, meals or keys are included.";
+"transfer_privacy" = "Transfer files include readable workout data, program notes and targets. Keep them private and use the latest Forma companion. No profile, meals or keys are included.";
 "import_programs" = "Open programs file";
 "send_watch" = "Send programs to Apple Watch";
 "programs" = "Programs";
@@ -51,3 +51,6 @@
 "equipment_filter" = "Equipment";
 "all_equipment" = "All equipment";
 "per_side_note" = "Log repetitions per side.";
+"planned_sets" = "Working sets";
+"planned_reps" = "Your rep range";
+"linked_group" = "Superset / circuit";

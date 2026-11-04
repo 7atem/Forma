@@ -47,6 +47,48 @@ object ExerciseCatalog {
         Exercise.REVERSE_CRUNCH->ExerciseDetails(listOf(Equipment.BODYWEIGHT),false)
         Exercise.CABLE_CRUNCH->ExerciseDetails(listOf(Equipment.CABLE),false)
     }
+    fun searchText(exercise:Exercise):String=when(exercise) {
+        Exercise.SQUAT->"Squat سكوات SQUAT"
+        Exercise.LEG_PRESS->"Leg press دفع الرجلين LEG PRESS"
+        Exercise.CHEST_PRESS->"Chest press ضغط الصدر CHEST PRESS"
+        Exercise.ROW->"Row سحب أفقي ROW"
+        Exercise.LAT_PULLDOWN->"Lat pulldown سحب علوي LAT PULLDOWN"
+        Exercise.HIP_HINGE->"Hip hinge ثني مفصل الورك HIP HINGE"
+        Exercise.SHOULDER_PRESS->"Shoulder press ضغط الكتف SHOULDER PRESS"
+        Exercise.SPLIT_SQUAT->"Split squat سبليت سكوات SPLIT SQUAT"
+        Exercise.GOBLET_SQUAT->"Goblet squat سكوات بدمبل أمام الصدر GOBLET SQUAT"
+        Exercise.BARBELL_BACK_SQUAT->"Barbell back squat سكوات خلفي بالبار BARBELL BACK SQUAT"
+        Exercise.REVERSE_LUNGE->"Reverse lunge اندفاع خلفي REVERSE LUNGE"
+        Exercise.STEP_UP->"Step-up صعود على صندوق STEP UP"
+        Exercise.LEG_EXTENSION->"Leg extension فرد الرجل على الجهاز LEG EXTENSION"
+        Exercise.SEATED_LEG_CURL->"Seated leg curl ثني الرجل جالسًا SEATED LEG CURL"
+        Exercise.STANDING_CALF_RAISE->"Standing calf raise رفع السمانة واقفًا STANDING CALF RAISE"
+        Exercise.SEATED_CALF_RAISE->"Seated calf raise رفع السمانة جالسًا SEATED CALF RAISE"
+        Exercise.BARBELL_HIP_THRUST->"Barbell hip thrust دفع الحوض بالبار BARBELL HIP THRUST"
+        Exercise.GLUTE_BRIDGE->"Glute bridge جسر الحوض GLUTE BRIDGE"
+        Exercise.BARBELL_ROMANIAN_DEADLIFT->"Barbell Romanian deadlift ديدلفت روماني بالبار BARBELL ROMANIAN DEADLIFT"
+        Exercise.DUMBBELL_BENCH_PRESS->"Dumbbell bench press ضغط صدر بالدمبل على مقعد DUMBBELL BENCH PRESS"
+        Exercise.INCLINE_DUMBBELL_PRESS->"Incline dumbbell press ضغط صدر مائل بالدمبل INCLINE DUMBBELL PRESS"
+        Exercise.PUSH_UP->"Push-up ضغط أرضي PUSH UP"
+        Exercise.KNEE_PUSH_UP->"Knee push-up ضغط أرضي على الركبتين KNEE PUSH UP"
+        Exercise.CABLE_CHEST_FLY->"Cable chest fly تفتيح صدر بالكابل CABLE CHEST FLY"
+        Exercise.SINGLE_ARM_DUMBBELL_ROW->"Single-arm dumbbell row تجديف بدمبل بذراع واحدة SINGLE ARM DUMBBELL ROW"
+        Exercise.CHEST_SUPPORTED_ROW->"Chest-supported dumbbell row تجديف دمبل مع إسناد الصدر CHEST SUPPORTED ROW"
+        Exercise.PULL_UP->"Pull-up عقلة بقبضة علوية PULL UP"
+        Exercise.FACE_PULL->"Cable face pull سحب الحبل نحو الوجه FACE PULL"
+        Exercise.DUMBBELL_SHOULDER_PRESS->"Dumbbell shoulder press ضغط كتف بالدمبل DUMBBELL SHOULDER PRESS"
+        Exercise.LATERAL_RAISE->"Dumbbell lateral raise رفرفة جانبية بالدمبل LATERAL RAISE"
+        Exercise.REAR_DELT_FLY->"Bent-over rear delt fly رفرفة خلفية بالدمبل REAR DELT FLY"
+        Exercise.DUMBBELL_SHRUG->"Dumbbell shrug رفع الكتفين بالدمبل DUMBBELL SHRUG"
+        Exercise.DUMBBELL_CURL->"Dumbbell curl بايسبس بالدمبل DUMBBELL CURL"
+        Exercise.HAMMER_CURL->"Hammer curl بايسبس هامر HAMMER CURL"
+        Exercise.MACHINE_PREACHER_CURL->"Machine preacher curl بايسبس على جهاز بريتشر MACHINE PREACHER CURL"
+        Exercise.TRICEPS_PUSHDOWN->"Cable triceps pushdown ترايسبس دفع لأسفل بالكابل TRICEPS PUSHDOWN"
+        Exercise.OVERHEAD_TRICEPS_EXTENSION->"Overhead dumbbell extension ترايسبس خلف الرأس بدمبل OVERHEAD TRICEPS EXTENSION"
+        Exercise.DEAD_BUG->"Dead bug الحشرة الميتة DEAD BUG"
+        Exercise.REVERSE_CRUNCH->"Reverse crunch كرنش عكسي REVERSE CRUNCH"
+        Exercise.CABLE_CRUNCH->"Kneeling cable crunch كرنش بالكابل من الركوع CABLE CRUNCH"
+    }
     fun similar(exercise:Exercise):List<Exercise> = Exercise.entries.filter {it!=exercise && ExerciseMuscles.of(it).primary.any {muscle ->muscle in ExerciseMuscles.of(exercise).primary}}
 }
 enum class Muscle { CHEST, FRONT_DELTS, REAR_DELTS, LATS, UPPER_BACK, BICEPS, TRICEPS, CORE, GLUTES, QUADRICEPS, HAMSTRINGS, CALVES, ERECTORS, ADDUCTORS }

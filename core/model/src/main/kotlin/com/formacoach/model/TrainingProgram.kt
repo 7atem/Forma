@@ -9,11 +9,13 @@ data class TrainingProgram(
     val name: String,
     val exercises: List<Exercise>,
     val restSeconds: Int = 90,
+    val prescriptions:List<ExercisePrescription> = emptyList(),
 ) {
     init {
         require(id.isNotBlank() && id.length <= 80 && id !in listOf("A", "B"))
         require(name.isNotBlank() && name.length <= 120)
         require(exercises.isNotEmpty() && exercises.size <= 20 && exercises.distinct().size == exercises.size)
         require(restSeconds in 15..600)
+        PlanDetails.validate(exercises,prescriptions)
     }
 }

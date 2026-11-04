@@ -49,6 +49,7 @@ import FormaCore
     @ObservedObject var bridge:WatchBridge
     let draft:WorkoutDraft
     @State private var exercise=Exercise.squat
+    @State private var shownDraftID:String?
     @State private var editing:WatchSet?
     @State private var adding=false
     @State private var cancel=false
@@ -60,6 +61,15 @@ import FormaCore
             Text(draft.program.name).font(.headline)
             Picker("exercise",selection:$exercise) {ForEach((draft.program.exercises+Exercise.allCases).reduce(into:[Exercise]()) {if !$0.contains($1) {$0.append($1)}},id:\.self) {Text($0.label(arabic:arabic)).tag($0)}}
             NavigationLink("exercise_library") {ExerciseDetail(exercise:exercise)}
+            if let plan=draft.program.prescriptions.first(where:{$0.exercise==exercise}) {
+                if let group=plan.supersetGroup {Text("\(String(localized:"linked_group")) \(group)").font(.caption)}
+                if let target=plan.workingSets {
+                    let count=draft.sets.filter {$0.exercise==exercise && $0.kind == .working}.count
+                    Text("\(String(localized:"planned_sets")) \(count) / \(target)")
+                }
+                if let min=plan.repMin, let max=plan.repMax {Text("\(String(localized:"planned_reps")) \(min)–\(max)")}
+                if !plan.notes.isEmpty {Text(plan.notes).font(.caption)}
+            }
             Button("add_set") {adding=true}.disabled(draft.sets.count>=300)
             if let deadline=draft.restUntil {
                 TimelineView(.periodic(from:.now,by:1)) {context in
@@ -72,16 +82,25 @@ import FormaCore
             ForEach(draft.sets) {set in
                 Button {editing=set} label:{VStack(alignment:.leading) {
                     Text(set.exercise.label(arabic:arabic))
-                    Text("\(set.reps) Ã— \(set.weightKg.formatted()) kg")
+                    Text("\(set.reps) × \(set.weightKg.formatted()) kg")
                     Text(set.kind == .warmUp ? String(localized:"warmup") : String(localized:"working")).font(.caption)
                     if let rpe=set.rpe {Text("RPE \(rpe.formatted())").font(.caption)}
                 }}
             }
             Button("finish_workout") {finishing=true}.disabled(draft.sets.isEmpty)
             Button("discard_workout",role:.destructive) {cancel=true}
-        }.onAppear {exercise=draft.program.exercises.first ?? .squat}
+        }.onAppear {
+            if shownDraftID != draft.id {
+                exercise=draft.sets.last.map {WorkoutFlow.afterSet(program:draft.program,sets:draft.sets,current:$0.exercise,kind:$0.kind).exercise ?? $0.exercise} ?? draft.program.exercises.first ?? .squat
+                shownDraftID=draft.id
+            }
+        }
         .sheet(isPresented:$adding) {SetEditor(exercise:exercise,previous:draft.sets.last(where:{$0.exercise==exercise})) {set in
-            store.attempt {try store.add(set);adding=false;WKInterfaceDevice.current().play(.success)}
+            store.attempt {
+                try store.add(set)
+                let next=WorkoutFlow.afterSet(program:draft.program,sets:draft.sets+[set],current:set.exercise,kind:set.kind)
+                exercise=next.exercise ?? exercise;adding=false;WKInterfaceDevice.current().play(.success)
+            }
         }}
         .sheet(item:$editing) {set in SetEditor(exercise:set.exercise,previous:set,editing:true,onDelete:{store.attempt {try store.removeSet(set.id);editing=nil}}) {corrected in store.attempt {try store.edit(corrected);editing=nil}}}
         .confirmationDialog("discard_confirm",isPresented:$cancel,titleVisibility:.visible) {Button("discard_workout",role:.destructive) {store.attempt {try store.discardDraft()}}}

@@ -60,7 +60,7 @@ struct TransferDocument: FileDocument {
                         ForEach(Equipment.allCases,id:\.self) {Text($0.label(arabic:locale.language.languageCode?.identifier=="ar")).tag(Optional($0))}
                     }
                     ForEach(Exercise.allCases.filter {exercise in
-                        (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) && (exerciseSearch.isEmpty || exercise.label(arabic:locale.language.languageCode?.identifier=="ar").localizedCaseInsensitiveContains(exerciseSearch))
+                        (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) && (exerciseSearch.isEmpty || (exercise.label(arabic:false)+" "+exercise.label(arabic:true)).localizedStandardContains(exerciseSearch))
                     },id:\.self) {exercise in
                         NavigationLink {ExerciseDetail(exercise:exercise)} label: {
                             HStack {

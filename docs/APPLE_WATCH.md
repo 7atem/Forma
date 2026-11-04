@@ -1,4 +1,4 @@
-# Apple Watch companion — alpha05 source
+# Apple Watch companion — alpha06 source
 
 Native SwiftUI iPhone and watchOS application source now lives in `apple/`. It is **not yet a compiled, installed or device-validated Apple release**. This Windows machine has neither Swift nor Xcode; portable catalog/fixture/localization checks do not establish that the native applications build. A macOS workflow is prepared but has not run remotely.
 
@@ -25,11 +25,11 @@ Apple Watch uses a paired iPhone; it does not pair with Forma Android. See [Appl
 
 ## Transfer and privacy contract
 
-`core:wearables` and `apple/Sources/FormaCore` implement `forma.workouts` v1, catalog v1, canonical `KG`, Gregorian `yyyy-MM-dd` and UTC completion milliseconds. Stable exercise enum IDs come from `catalog/exercise-muscles.json`. Contract fixture: `contracts/apple-watch/transfer-v1.json`.
+`core:wearables` and `apple/Sources/FormaCore` now write `forma.workouts` v2 and read v1/v2, catalog v1, canonical `KG`, Gregorian `yyyy-MM-dd` and UTC completion milliseconds. Stable exercise enum IDs come from `catalog/exercise-muscles.json`. Fixtures: `contracts/apple-watch/transfer-v1.json` and `transfer-v2.json`. V2 carries optional user-entered working sets, rep ranges, exercise rest, adjacent linked groups and program notes. V1 cannot carry these details; attempts to downgrade a nonempty plan are rejected. Updated readers retain old files, while old companion builds reject v2 instead of dropping plan data. Update both sides before transferring new programs.
 
 Some Android providers append `.json` to the proposed `.formaworkouts` filename; both importers accept JSON and validate its contents.
 
-Files contain program names and workout results in readable JSON. The UI discloses this and asks for a destination through the platform file picker. They exclude profile, food, body measurements, Nemory content, passwords and device keys. They are not encrypted backups and their origin is not cryptographically authenticated. Use a private transfer destination; actual private transfer is the user's choice.
+Files contain program names, program exercise notes/targets and workout results in readable JSON. The UI discloses this and asks for a destination through the platform file picker. They exclude profile, food, body measurements, Nemory content, passwords and device keys. Android personal exercise-library notes remain separate and are not exported. These are not encrypted backups and their origin is not cryptographically authenticated. Use a private transfer destination; actual private transfer is the user's choice.
 
 Limits: 1 MiB, 20 programs, 100 workouts, 300 sets/workout, 3,000 total sets/packet, unique IDs, supported enums, finite bounded values and version/unit validation. Android parsing also bounds nesting. Unknown JSON fields are rejected by both readers. Android dates cannot be future local days and completion timestamps cannot exceed the injected clock by five minutes. Conflicting imports roll back the entire Room transaction; identical re-import is a no-op. Correcting/deleting the Android copy does not mutate the watch/phone original; a later conflicting re-import is rejected for review.
 
@@ -54,3 +54,13 @@ Physical acceptance gates: first pairing/install, EN/AR layout and VoiceOver, al
 
 
 Alpha04 adds shared original 3D still assets, generated named variations/cues and an exercise detail view to the native source. Android and XcodeGen reference the same PNG directory; no duplicated image files or cloud image fetch. These Apple UI additions remain uncompiled/device-unverified on this Windows host. Full-screen individual-phase viewing is currently Android only. See `EXERCISE_DEMOS_AND_UX.md` for generation provenance and qualified-review boundaries.
+
+
+Alpha06 adds optional manual working-set/rep targets, per-exercise rest and notes,
+linked groups and actual-count navigation to the shared native source. A program
+snapshot stays attached to its completed workout. Warm-ups do not consume working-set
+targets; automatic exercise changes clear entered reps/load. Both readers accept v1
+and v2; current exports use v2, and v1 encoding refuses nonempty plan details. Install
+the matching companion before transferring new packets. Six Swift tests are written,
+but none were executed on this Windows host. Static source checks are not a native
+build or WatchConnectivity/device validation.

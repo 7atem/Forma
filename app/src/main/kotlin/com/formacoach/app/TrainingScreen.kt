@@ -25,13 +25,16 @@ import com.formacoach.coach.*
 import com.formacoach.model.*
 import kotlinx.coroutines.delay
 import java.time.LocalDate
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
 internal fun TrainContent(state:AppState,today:LocalDate,vm:FitnessViewModel,scrollState:ScrollState) {
     var section by rememberSaveable {mutableIntStateOf(0)}
     var day by rememberSaveable {mutableLongStateOf(today.toEpochDay())}
-    var editor by remember {mutableStateOf<TrainingProgram?>(null)}
+    var editorPayload by rememberSaveable {mutableStateOf<String?>(null)}
+    val editor=editorPayload?.let {Json.decodeFromString<TrainingProgram>(it)}
     var creating by rememberSaveable {mutableStateOf(false)}
     val active=state.snapshot.sessions.firstOrNull {it.completedAt==null}
     if(section==0) PageHeading(R.string.training_title,if(active==null) R.string.training_intro else R.string.session_focus)
@@ -52,8 +55,8 @@ internal fun TrainContent(state:AppState,today:LocalDate,vm:FitnessViewModel,scr
                 state.snapshot.programs.forEach {program ->
                     ProgramCard(program.name,program.exercises,"start_${program.id}",state.busy,{vm.start(program.id,date)}) {
                         FlowRow {
-                            TextButton(onClick={editor=program}) {Text(stringResource(R.string.edit))}
-                            TextButton(onClick={editor=program.copy(id=java.util.UUID.randomUUID().toString())},enabled=!state.busy,modifier=Modifier.testTag("duplicate_${program.id}")) {Text(stringResource(R.string.duplicate_program))}
+                            TextButton(onClick={editorPayload=Json.encodeToString(program)}) {Text(stringResource(R.string.edit))}
+                            TextButton(onClick={editorPayload=Json.encodeToString(program.copy(id=java.util.UUID.randomUUID().toString()))},enabled=!state.busy,modifier=Modifier.testTag("duplicate_${program.id}")) {Text(stringResource(R.string.duplicate_program))}
                             ConfirmButton(R.string.remove,stringResource(R.string.delete_program_note),!state.busy) {vm.deleteProgram(program.id)}
                         }
                     }
@@ -70,12 +73,12 @@ internal fun TrainContent(state:AppState,today:LocalDate,vm:FitnessViewModel,scr
         }
     }
     PlateCalculatorButton()
-    if(creating||editor!=null) ProgramDialog(editor,state.busy,{creating=false;editor=null}) {vm.saveProgram(it){creating=false;editor=null}}
+    if(creating||editor!=null) ProgramDialog(editor,state.busy,{creating=false;editorPayload=null}) {vm.saveProgram(it){creating=false;editorPayload=null}}
 }
 
 @Composable
 private fun ProgramCard(name:String,exercises:List<Exercise>,tag:String,busy:Boolean,onStart:()->Unit,actions:@Composable ()->Unit={}) {
-    InfoCard {
+    InfoCard(Modifier.testTag("card_$tag")) {
         Row(horizontalArrangement=Arrangement.spacedBy(14.dp),verticalAlignment=Alignment.CenterVertically) {
             ExerciseThumbnail(exercises.first(),Modifier.width(118.dp).clip(RoundedCornerShape(14.dp)))
             Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(6.dp)) {
@@ -92,7 +95,8 @@ private fun ProgramCard(name:String,exercises:List<Exercise>,tag:String,busy:Boo
 @Composable
 private fun SessionForm(session:Session,state:AppState,vm:FitnessViewModel,onFinished:()->Unit) {
     val choices=(session.plannedExercises+Exercise.entries).distinct()
-    var exercise by rememberSaveable(session.id) {mutableStateOf(choices.first())}
+    val sets=state.snapshot.sets.filter {it.sessionId==session.id}
+    var exercise by rememberSaveable(session.id) {mutableStateOf(sets.lastOrNull()?.let {WorkoutFlow.afterSet(session,sets,it.exercise,it.kind).exercise?:it.exercise}?:choices.first())}
     var reps by rememberSaveable(session.id) {mutableStateOf("")}
     var weight by rememberSaveable(session.id) {mutableStateOf("")}
     var warmup by rememberSaveable(session.id) {mutableStateOf(false)}
@@ -101,15 +105,22 @@ private fun SessionForm(session:Session,state:AppState,vm:FitnessViewModel,onFin
     var guide by rememberSaveable(session.id) {mutableStateOf(false)}
     var allSets by rememberSaveable(session.id) {mutableStateOf(false)}
     var deadline by rememberSaveable(session.id) {mutableLongStateOf(0)}
+    var timerDuration by rememberSaveable(session.id) {mutableIntStateOf(session.restSeconds)}
+    var flowNotice by rememberSaveable(session.id) {mutableStateOf<Int?>(null)}
     var elapsed by remember {mutableLongStateOf(SystemClock.elapsedRealtime())}
     LaunchedEffect(deadline) {while(deadline>SystemClock.elapsedRealtime()) {elapsed=SystemClock.elapsedRealtime();delay(1000)};elapsed=SystemClock.elapsedRealtime()}
-    val remaining=RestTimer.remainingSeconds(deadline,elapsed,session.restSeconds)
-    val sets=state.snapshot.sets.filter {it.sessionId==session.id}
+    val remaining=RestTimer.remainingSeconds(deadline,elapsed,timerDuration)
     val candidate=runCatching {TrainingSet(sessionId=session.id,exercise=exercise,reps=requireNotNull(NumericInput.integer(reps)),weightKg=requireNotNull(NumericInput.decimal(weight)),kind=if(warmup) SetKind.WARM_UP else SetKind.WORKING,rpe=if(rpe.isBlank()) null else requireNotNull(NumericInput.decimal(rpe)))}.getOrNull()
     InfoCard {
         Text(session.label.ifBlank {stringResource(R.string.active_session,session.templateId)},style=MaterialTheme.typography.titleLarge)
         Text(stringResource(R.string.session_status,number(sets.size.toDouble(),0),dateLabel(session.date)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
-        ExercisePicker(exercise,{exercise=it},choices)
+        ExercisePicker(exercise,{next ->if(next!=exercise) {exercise=next;reps="";weight="";rpe="";warmup=false;flowNotice=null}},choices)
+        flowNotice?.let {Text(stringResource(it),color=MaterialTheme.colorScheme.primary,modifier=Modifier.testTag("workout_flow_notice"))}
+        session.prescriptions.firstOrNull {it.exercise==exercise}?.let {spec ->
+            spec.workingSets?.let {target ->Text(stringResource(R.string.exercise_set_progress,number((WorkoutFlow.counts(session,sets)[exercise]?:0).toDouble(),0),number(target.toDouble(),0)),style=MaterialTheme.typography.titleMedium,modifier=Modifier.testTag("exercise_plan_progress"))}
+            PrescriptionSummary(spec.copy(workingSets=null))
+        }
+        if(session.prescriptions.any {it.supersetGroup!=null}) Text(stringResource(R.string.linked_timing_note),style=MaterialTheme.typography.bodySmall)
         OutlinedCard(onClick={guide=true},modifier=Modifier.fillMaxWidth().testTag("session_form_guide"),colors=CardDefaults.outlinedCardColors(containerColor=MaterialTheme.colorScheme.background)) {
             Row(Modifier.padding(10.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(12.dp)) {
                 ExerciseThumbnail(exercise,Modifier.width(110.dp))
@@ -138,16 +149,20 @@ private fun SessionForm(session:Session,state:AppState,vm:FitnessViewModel,onFin
             Input(R.string.rpe_optional,rpe,{rpe=it},"set_rpe",error=rpe.isNotBlank()&&NumericInput.decimal(rpe)?.let {it in 0.0..10.0}!=true)
             Text(stringResource(R.string.rpe_note),style=MaterialTheme.typography.bodySmall)
         }
-        Button(onClick={candidate?.let {vm.addSet(session.id,it.exercise,it.reps,it.weightKg,it.kind,it.rpe) {
-            // Keep the user's last entered load/reps for the next set, never prescribe a progression.
-            rpe="";elapsed=SystemClock.elapsedRealtime();deadline=elapsed+session.restSeconds*1000L
+        Button(onClick={candidate?.let {value ->vm.logSet(value) {saved ->
+            val next=WorkoutFlow.afterSet(session,saved,value.exercise,value.kind)
+            flowNotice=when {next.exercise==null->R.string.user_plan_done;next.exercise!=value.exercise&&next.withinGroup->R.string.next_in_linked_group;next.exercise!=value.exercise->R.string.next_in_plan;else->null}
+            val following=next.exercise
+            if(following!=null&&following!=exercise) {exercise=following;reps="";weight="";warmup=false}
+            rpe="";elapsed=SystemClock.elapsedRealtime()
+            if(next.restSeconds>0) {timerDuration=next.restSeconds;deadline=elapsed+timerDuration*1000L} else deadline=0
         }}},enabled=candidate!=null&&!state.busy,modifier=Modifier.fillMaxWidth().heightIn(min=54.dp).testTag("add_set")) {Text(stringResource(R.string.add_set))}
         if(deadline>0) Surface(color=MaterialTheme.colorScheme.primaryContainer,shape=RoundedCornerShape(18.dp),modifier=Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(R.string.rest_countdown,number(remaining.toDouble(),0),number(session.restSeconds.toDouble(),0)),style=MaterialTheme.typography.titleLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
-                LinearProgressIndicator(progress={remaining.toFloat()/session.restSeconds},modifier=Modifier.fillMaxWidth(),drawStopIndicator={})
+                Text(stringResource(R.string.rest_countdown,number(remaining.toDouble(),0),number(timerDuration.toDouble(),0)),style=MaterialTheme.typography.titleLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
+                LinearProgressIndicator(progress={remaining.toFloat()/timerDuration},modifier=Modifier.fillMaxWidth(),drawStopIndicator={})
                 Row {
-                    TextButton(onClick={elapsed=SystemClock.elapsedRealtime();deadline=elapsed+session.restSeconds*1000L}) {Text(stringResource(R.string.restart_timer))}
+                    TextButton(onClick={elapsed=SystemClock.elapsedRealtime();deadline=elapsed+timerDuration*1000L}) {Text(stringResource(R.string.restart_timer))}
                     TextButton(onClick={deadline=0}) {Text(stringResource(R.string.stop_timer))}
                 }
             }
@@ -170,7 +185,10 @@ private fun TrainingHistoryContent(state:AppState,today:LocalDate,vm:FitnessView
     var guide by rememberSaveable {mutableStateOf(false)}
     var search by rememberSaveable {mutableStateOf("")}
     var limit by rememberSaveable {mutableIntStateOf(10)}
+    var filterDay by rememberSaveable {mutableStateOf<Long?>(null)}
     TrainingExport(state,vm)
+    WorkoutCalendarPanel(state.snapshot,today,filterDay?.let(LocalDate::ofEpochDay)) {filterDay=it?.toEpochDay();limit=10}
+    if(filterDay==null) {
     InfoCard {
         Text(stringResource(R.string.load_history),style=MaterialTheme.typography.titleLarge)
         ExercisePicker(exercise,{exercise=it})
@@ -186,10 +204,11 @@ private fun TrainingHistoryContent(state:AppState,today:LocalDate,vm:FitnessView
         if(counts.isEmpty()) Text(stringResource(R.string.no_sessions))
         counts.forEach {Text(stringResource(R.string.muscle_set_count,stringResource(muscleLabel(it.muscle)),number(it.primarySets.toDouble(),0),number(it.secondarySets.toDouble(),0)),style=MaterialTheme.typography.bodyMedium)}
     }
+    }
     Text(stringResource(R.string.recent_sessions),style=MaterialTheme.typography.titleLarge)
     Input(R.string.search_history,search,{search=it;limit=10},"session_search",numeric=false)
     val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))}
-    val sessions=state.snapshot.sessions.filter {it.completedAt!=null && (search.isBlank()||it.label.contains(search,true)||it.date.toString().contains(search)||state.snapshot.sets.any {set ->set.sessionId==it.id&&names.getValue(set.exercise).contains(search,true)})}
+    val sessions=state.snapshot.sessions.filter {it.completedAt!=null && (filterDay==null||it.date.toEpochDay()==filterDay) && (search.isBlank()||it.label.contains(search,true)||it.date.toString().contains(search)||state.snapshot.sets.any {set ->set.sessionId==it.id&&ExerciseSearch.matches(search,names.getValue(set.exercise)+" "+ExerciseCatalog.searchText(set.exercise))})}
     if(sessions.isEmpty()) EmptyState(R.string.no_sessions,R.string.history_empty_hint)
     sessions.take(limit).forEach {session ->key(session.id) {SessionHistoryCard(session,state,vm,today)}}
     if(sessions.size>limit) TextButton(onClick={limit+=10}) {Text(stringResource(R.string.show_more))}
@@ -215,6 +234,7 @@ private fun SessionHistoryCard(session:Session,state:AppState,vm:FitnessViewMode
                 session.activeEnergyKcal?.let {Text(stringResource(R.string.watch_energy,number(it,0)))}
             }
             DateChoice(session.date,today,{vm.moveSession(session.id,it)},"session_date_${session.id}")
+            session.prescriptions.forEach {Text(stringResource(exerciseLabel(it.exercise)),style=MaterialTheme.typography.titleSmall);PrescriptionSummary(it)}
             sets.forEach {SetCard(it,state.busy,sets.size>1,vm)}
             if(sets.size==1) Text(stringResource(R.string.last_set_note),style=MaterialTheme.typography.bodySmall)
             ConfirmButton(R.string.delete_session,stringResource(R.string.delete_session_note),!state.busy) {vm.deleteSession(session.id)}
@@ -255,28 +275,41 @@ private fun SetDialog(set:TrainingSet,busy:Boolean,onDismiss:()->Unit,onSave:(Tr
 
 @Composable
 private fun ProgramDialog(program:TrainingProgram?,busy:Boolean,onDismiss:()->Unit,onSave:(TrainingProgram)->Unit) {
-    var name by remember {mutableStateOf(program?.name.orEmpty())}
-    var selected by remember {mutableStateOf(program?.exercises?:emptyList())}
-    var rest by remember {mutableStateOf((program?.restSeconds?:90).toString())}
+    var name by rememberSaveable(program?.id) {mutableStateOf(program?.name.orEmpty())}
+    var selected by rememberSaveable(program?.id) {mutableStateOf(program?.exercises?:emptyList())}
+    var rest by rememberSaveable(program?.id) {mutableStateOf((program?.restSeconds?:90).toString())}
+    var detailsPayload by rememberSaveable(program?.id) {mutableStateOf(Json.encodeToString(program?.prescriptions?:emptyList<ExercisePrescription>()))}
+    val details=Json.decodeFromString<List<ExercisePrescription>>(detailsPayload)
+    var detailExercise by rememberSaveable(program?.id) {mutableStateOf<Exercise?>(null)}
+    fun orderChanged(order:List<Exercise>) {detailsPayload=Json.encodeToString(PlanEditing.normalize(order,details));selected=order}
     var search by remember {mutableStateOf("")}
     var limit by remember {mutableIntStateOf(12)}
-    val candidate=runCatching {TrainingProgram(id=program?.id?:java.util.UUID.randomUUID().toString(),name=name.trim(),exercises=selected,restSeconds=requireNotNull(NumericInput.integer(rest)))}.getOrNull()
+    val candidate=runCatching {TrainingProgram(id=program?.id?:java.util.UUID.randomUUID().toString(),name=name.trim(),exercises=selected,restSeconds=requireNotNull(NumericInput.integer(rest)),prescriptions=details)}.getOrNull()
     AlertDialog(onDismissRequest=onDismiss,title={Text(stringResource(R.string.saved_program))},text={Column(Modifier.heightIn(max=480.dp).verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(8.dp)) {
         Input(R.string.program_name,name,{name=it},"program_name",numeric=false)
         Input(R.string.rest_seconds,rest,{rest=it},"program_rest")
         Text(stringResource(R.string.program_note))
+        Text(stringResource(R.string.plan_group_edit_note),style=MaterialTheme.typography.bodySmall)
         selected.forEachIndexed {index,exercise ->
             Text(stringResource(exerciseLabel(exercise)))
+            details.firstOrNull {it.exercise==exercise}?.let {PrescriptionSummary(it)}
+            TextButton(onClick={detailExercise=exercise},modifier=Modifier.testTag("plan_details_${exercise.name}")) {Text(stringResource(R.string.edit_plan_details))}
+            if(index>0) {
+                val group=details.firstOrNull {it.exercise==exercise}?.supersetGroup
+                val previous=details.firstOrNull {it.exercise==selected[index-1]}?.supersetGroup
+                GroupLink(group!=null&&group==previous,{linked ->detailsPayload=Json.encodeToString(PlanEditing.linkPrevious(selected,details,exercise,linked))},exercise)
+            }
             Row {
-                TextButton(onClick={selected=selected.toMutableList().apply {java.util.Collections.swap(this,index,index-1)}},enabled=index>0) {Text(stringResource(R.string.move_up))}
-                TextButton(onClick={selected=selected.toMutableList().apply {java.util.Collections.swap(this,index,index+1)}},enabled=index<selected.lastIndex) {Text(stringResource(R.string.move_down))}
-                TextButton(onClick={selected=selected-exercise}) {Text(stringResource(R.string.remove))}
+                TextButton(onClick={orderChanged(selected.toMutableList().apply {java.util.Collections.swap(this,index,index-1)})},enabled=index>0) {Text(stringResource(R.string.move_up))}
+                TextButton(onClick={orderChanged(selected.toMutableList().apply {java.util.Collections.swap(this,index,index+1)})},enabled=index<selected.lastIndex) {Text(stringResource(R.string.move_down))}
+                TextButton(onClick={orderChanged(selected-exercise)}) {Text(stringResource(R.string.remove))}
             }
         }
         Input(R.string.search_exercises,search,{search=it;limit=12},"program_exercise_search",numeric=false)
         val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))}
-        val matches=Exercise.entries.filter {search.isBlank()||names.getValue(it).contains(search,true)}
-        matches.take(limit).forEach {exercise -> FilterChip(selected=exercise in selected,onClick={selected=if(exercise in selected) selected-exercise else selected+exercise},enabled=exercise in selected||selected.size<20,label={Text(stringResource(exerciseLabel(exercise)))},modifier=Modifier.testTag("program_exercise_${exercise.name}"))}
+        val matches=Exercise.entries.filter {ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
+        matches.take(limit).forEach {exercise -> FilterChip(selected=exercise in selected,onClick={orderChanged(if(exercise in selected) selected-exercise else selected+exercise)},enabled=exercise in selected||selected.size<20,label={Text(stringResource(exerciseLabel(exercise)))},modifier=Modifier.testTag("program_exercise_${exercise.name}"))}
         if(matches.size>limit) TextButton(onClick={limit+=12}) {Text(stringResource(R.string.show_more))}
     }},confirmButton={TextButton(onClick={candidate?.let(onSave)},enabled=candidate!=null&&!busy,modifier=Modifier.testTag("save_program")) {Text(stringResource(R.string.save))}},dismissButton={TextButton(onClick=onDismiss) {Text(stringResource(R.string.cancel))}})
+    detailExercise?.let {exercise ->PrescriptionEditor(details.firstOrNull {it.exercise==exercise}?:ExercisePrescription(exercise),busy,{detailExercise=null}) {value ->detailsPayload=Json.encodeToString(details.filter {it.exercise!=exercise}+value);detailExercise=null}}
 }

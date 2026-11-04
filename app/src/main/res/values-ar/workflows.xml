@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rep_range_note">لهدف تكرارات ثابت، استخدم نفس الرقم في الحقلين. املأ طرفي النطاق أو اتركهما فارغين معًا.</string>
+    <string name="planned_sets_value">المجموعات الأساسية المخططة: %1$s</string>
+    <string name="rep_range_value">نطاق التكرارات الذي اخترته: %1$s–%2$s</string>
+    <string name="exercise_rest_value">وقت الراحة المضبوط: %1$s ثانية</string>
+    <string name="linked_timing_note">تنتقل المجموعات الأساسية عبر المجموعة المرتبطة. تبدأ الراحة عند اكتمال الجولة؛ الإحماء يبقى على التمرين الحالي.</string>
+    <string name="linked_group_value">سوبرسِت / دائرة %1$s</string>
+    <string name="user_plan_targets_note">أدخل أهداف برنامجك الذي اخترته أو اتركها فارغة. وقت الراحة الفارغ يستخدم مؤقت البرنامج. الإحماء منفصل عن المجموعات الأساسية.</string>
+    <string name="planned_working_sets">هدف المجموعات الأساسية · اختياري (١–٢٠)</string>
+    <string name="rep_min">أقل تكرارات · اختياري</string>
+    <string name="rep_max">أقصى تكرارات · اختياري</string>
+    <string name="exercise_rest_optional">راحة خاصة · ثانية (١٥–٦٠٠)</string>
+    <string name="program_exercise_notes">ملاحظات البرنامج · اختياري، حتى ١٬٠٠٠ حرف</string>
+    <string name="link_previous_exercise">اربطه بالتمرين السابق</string>
+    <string name="plan_group_edit_note">تظل التمارين المرتبطة متجاورة. نقل التمارين أو حذفها قد يفصل المجموعة أو يلغي ارتباطها.</string>
+    <string name="edit_plan_details">ضبط الأهداف والراحة والملاحظات</string>
+    <string name="exercise_set_progress">المجموعات الأساسية المسجلة: %1$s / %2$s مخططة</string>
+    <string name="user_plan_done">وصلت لنهاية ترتيب التمارين. راجع المجموعات أو أضف المزيد، ثم أنهِ الحصة عندما تكون جاهزًا.</string>
+    <string name="next_in_linked_group">التمرين التالي في مجموعتك المرتبطة. أدخل تكرارات هذا التمرين ووزنه.</string>
+    <string name="next_in_plan">التمرين التالي في برنامجك المحفوظ. أدخل تكراراته ووزنه.</string>
+    <string name="workout_calendar">تقويم الحصص</string>
+    <string name="browse_dates">تصفّح التواريخ</string>
+    <string name="workout_date_filter">قائمة الحصص · %1$s</string>
+    <string name="all_workout_dates">عرض كل التواريخ</string>
+    <string name="previous_month">الشهر السابق</string>
+    <string name="next_month">الشهر التالي</string>
+    <string name="calendar_day_accessibility">%1$s؛ %2$s حصة مكتملة مسجلة</string>
+    <string name="calendar_scope_note">الأرقام الصغيرة تعرض الحصص المكتملة المسجلة في ذلك اليوم. غياب السجلات لا يثبت عدم التدريب.</string>
+    <string name="meal_slot_unspecified">غير مصنّفة</string>
+    <string name="meal_slot_breakfast">فطار</string>
+    <string name="meal_slot_lunch">غداء</string>
+    <string name="meal_slot_dinner">عشاء</string>
+    <string name="meal_slot_snack">وجبات خفيفة</string>
+    <string name="log_meal_under">سجّل الحصص الجديدة ضمن</string>
+    <string name="logged_calorie_target">المسجل %1$s / هدفك %2$s سعرة</string>
+    <string name="logged_protein_target">المسجل %1$s / هدفك %2$s جم بروتين</string>
+    <string name="meal_group_heading">%1$s · المعروض: %2$s سعرة / %3$s جم بروتين</string>
+</resources>

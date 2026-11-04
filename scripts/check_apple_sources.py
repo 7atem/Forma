@@ -8,6 +8,10 @@ fixture = root / 'contracts/apple-watch/transfer-v1.json'
 assert fixture.read_bytes() == (root / 'apple/Tests/FormaCoreTests/Fixtures/transfer-v1.json').read_bytes()
 packet = json.loads(fixture.read_text(encoding='utf-8'))
 assert packet['format'] == 'forma.workouts' and packet['units'] == 'KG' and packet['version'] == 1
+v2=root/'contracts/apple-watch/transfer-v2.json'
+assert v2.read_bytes()==(root/'apple/Tests/FormaCoreTests/Fixtures/transfer-v2.json').read_bytes()
+assert 'contracts/apple-watch' in (root/'core/wearables/build.gradle.kts').read_text(encoding='utf-8')
+assert json.loads(v2.read_text(encoding='utf-8'))['version']==2
 
 def strings(lang):
     source = (root / f'apple/Resources/{lang}.lproj/Localizable.strings').read_text(encoding='utf-8')

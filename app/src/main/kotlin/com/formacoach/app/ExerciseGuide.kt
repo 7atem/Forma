@@ -188,7 +188,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel) {
     val completed=state.snapshot.sessions.filter {it.completedAt!=null}.map {it.id}.toSet()
     val recent=state.snapshot.sets.filter {it.sessionId in completed}.map {it.exercise}.toSet()
     val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
-    val matches=Exercise.entries.filter {(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&(search.isBlank() || names.getValue(it).contains(search,true))}
+    val matches=Exercise.entries.filter {(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
     Text(stringResource(R.string.exercise_results,number(matches.size.toDouble(),0),number(Exercise.entries.size.toDouble(),0)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
     if(matches.isEmpty()) EmptyState(R.string.no_matching_exercises,R.string.exercise_search_hint)
     matches.take(limit).chunked(columns).forEach {row -> Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {

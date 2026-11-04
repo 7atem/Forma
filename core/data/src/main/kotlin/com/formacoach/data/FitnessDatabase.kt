@@ -23,17 +23,20 @@ data class SessionRow(@PrimaryKey val id:String,val day:Long,val templateId:Stri
     @ColumnInfo(defaultValue="'[]'") val exerciseOrder:String="[]",
     @ColumnInfo(defaultValue="90") val restSeconds:Int=90,
     @ColumnInfo(defaultValue="'LOCAL'") val source:String="LOCAL",
-    val averageHeartRateBpm:Double?=null,val activeEnergyKcal:Double?=null,val healthKitWorkoutId:String?=null)
+    val averageHeartRateBpm:Double?=null,val activeEnergyKcal:Double?=null,val healthKitWorkoutId:String?=null,
+    @ColumnInfo(defaultValue="'[]'") val prescriptions:String="[]")
 @Entity(tableName="training_sets",foreignKeys=[ForeignKey(entity=SessionRow::class,parentColumns=["id"],childColumns=["sessionId"],onDelete=ForeignKey.CASCADE)],indices=[Index("sessionId")])
 data class SetRow(@PrimaryKey val id:String,val sessionId:String,val exercise:String,val reps:Int,val weightKg:Double,
     @ColumnInfo(defaultValue="'WORKING'") val kind:String="WORKING",val rpe:Double?=null)
 @Entity(tableName="meals",indices=[Index("day")])
 data class MealRow(@PrimaryKey val id:String,val day:Long,val name:String,val calories:Double,val protein:Double,val carbs:Double,val fat:Double,
-    val foodId:String?=null,val quantity:Double?=null,val unit:String?=null,@ColumnInfo(defaultValue="''") val source:String="")
+    val foodId:String?=null,val quantity:Double?=null,val unit:String?=null,@ColumnInfo(defaultValue="''") val source:String="",
+    @ColumnInfo(defaultValue="'UNSPECIFIED'") val slot:String="UNSPECIFIED")
 @Entity(tableName="measurements")
 data class MeasurementRow(@PrimaryKey val day:Long,val weightKg:Double?,val waistCm:Double?)
 @Entity(tableName="programs")
-data class ProgramRow(@PrimaryKey val id:String,val name:String,val exercises:String,val restSeconds:Int)
+data class ProgramRow(@PrimaryKey val id:String,val name:String,val exercises:String,val restSeconds:Int,
+    @ColumnInfo(defaultValue="'[]'") val prescriptions:String="[]")
 @Entity(tableName="foods")
 data class FoodRow(@PrimaryKey val id:String,val name:String,val payload:String)
 @Entity(tableName="check_ins",indices=[Index("day")])
@@ -69,11 +72,11 @@ interface FitnessDao {
     @Transaction
     suspend fun readSnapshot():FitnessSnapshot=FitnessSnapshot(
         readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget)},
-        allSessions().map {Session(it.id,LocalDate.ofEpochDay(it.day),it.templateId,it.completedAt,it.label,Json.decodeFromString(it.exerciseOrder),it.restSeconds,SessionSource.valueOf(it.source),it.averageHeartRateBpm,it.activeEnergyKcal,it.healthKitWorkoutId)},
+        allSessions().map {Session(it.id,LocalDate.ofEpochDay(it.day),it.templateId,it.completedAt,it.label,Json.decodeFromString(it.exerciseOrder),it.restSeconds,SessionSource.valueOf(it.source),it.averageHeartRateBpm,it.activeEnergyKcal,it.healthKitWorkoutId,Json.decodeFromString(it.prescriptions))},
         allSets().map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg,SetKind.valueOf(it.kind),it.rpe)},
-        allMeals().map {Meal(it.id,LocalDate.ofEpochDay(it.day),it.name,it.calories,it.protein,it.carbs,it.fat,it.foodId,it.quantity,it.unit?.let(NutritionUnit::valueOf),it.source)},
+        allMeals().map {Meal(it.id,LocalDate.ofEpochDay(it.day),it.name,it.calories,it.protein,it.carbs,it.fat,it.foodId,it.quantity,it.unit?.let(NutritionUnit::valueOf),it.source,MealSlot.valueOf(it.slot))},
         allMeasurements().map {Measurement(LocalDate.ofEpochDay(it.day),it.weightKg,it.waistCm)},
-        allPrograms().map {TrainingProgram(it.id,it.name,Json.decodeFromString(it.exercises),it.restSeconds)},
+        allPrograms().map {TrainingProgram(it.id,it.name,Json.decodeFromString(it.exercises),it.restSeconds,Json.decodeFromString(it.prescriptions))},
         allFoods().map {Json.decodeFromString<Food>(it.payload).also {food -> check(food.id==it.id && food.name==it.name)}},
         allCheckIns().map {WeeklyCheckIn(it.id,LocalDate.ofEpochDay(it.day),it.availableSessions,it.foodLogComplete,it.notes)},
         allProposals().map {PlanProposal(it.id,it.checkInId,it.baseSessions,it.proposedSessions,Json.decodeFromString(it.evidence),ProposalStatus.valueOf(it.status))},
@@ -103,6 +106,7 @@ interface FitnessDao {
         }
     }
     @Transaction suspend fun addSet(row:SetRow) {check(checkNotNull(session(row.sessionId)).completedAt==null);insertSet(row)}
+    @Transaction suspend fun logSetAndRead(row:SetRow):List<SetRow> {addSet(row);return sessionSets(row.sessionId)}
     @Query("SELECT * FROM training_sets WHERE id=:id") suspend fun set(id:String):SetRow?
     @Query("SELECT COUNT(*) FROM training_sets WHERE sessionId=:id") suspend fun setCount(id:String):Int
     @Update suspend fun updateSet(row:SetRow)
@@ -173,18 +177,25 @@ interface FitnessDao {
 }
 
 internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget)
-internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds,source.name,averageHeartRateBpm,activeEnergyKcal,healthKitWorkoutId)
+internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds,source.name,averageHeartRateBpm,activeEnergyKcal,healthKitWorkoutId,Json.encodeToString(prescriptions))
 internal fun TrainingSet.row()=SetRow(id,sessionId,exercise.name,reps,weightKg,kind.name,rpe)
-internal fun Meal.row()=MealRow(id,date.toEpochDay(),name,calories,protein,carbs,fat,foodId,quantity,unit?.name,source)
-internal fun TrainingProgram.row()=ProgramRow(id,name,Json.encodeToString(exercises),restSeconds)
+internal fun Meal.row()=MealRow(id,date.toEpochDay(),name,calories,protein,carbs,fat,foodId,quantity,unit?.name,source,slot.name)
+internal fun TrainingProgram.row()=ProgramRow(id,name,Json.encodeToString(exercises),restSeconds,Json.encodeToString(prescriptions))
 internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
 internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
 internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
-@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class],version=4,exportSchema=true)
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class],version=5,exportSchema=true)
 abstract class FitnessDatabase:RoomDatabase() {
     abstract fun dao():FitnessDao
     companion object {
+        val MIGRATION_4_5=object:Migration(4,5) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE programs ADD COLUMN prescriptions TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE sessions ADD COLUMN prescriptions TEXT NOT NULL DEFAULT '[]'")
+                db.execSQL("ALTER TABLE meals ADD COLUMN slot TEXT NOT NULL DEFAULT 'UNSPECIFIED'")
+            }
+        }
         val MIGRATION_3_4=object:Migration(3,4) {
             override fun migrate(db:SupportSQLiteDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS exercise_preferences (exercise TEXT NOT NULL PRIMARY KEY, favorite INTEGER NOT NULL, notes TEXT NOT NULL)")
@@ -222,7 +233,7 @@ abstract class FitnessDatabase:RoomDatabase() {
             System.loadLibrary("sqlcipher")
             val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
             return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4).build()
+                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5).build()
         }
     }
 }

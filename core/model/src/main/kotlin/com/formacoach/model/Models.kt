@@ -49,6 +49,7 @@ data class Session(
     val averageHeartRateBpm: Double? = null,
     val activeEnergyKcal: Double? = null,
     val healthKitWorkoutId: String? = null,
+    val prescriptions:List<ExercisePrescription> = emptyList(),
 ) {
     init {
         require(id.isNotBlank() && id.length <= 80)
@@ -59,6 +60,7 @@ data class Session(
         require(averageHeartRateBpm == null || averageHeartRateBpm.isFinite() && averageHeartRateBpm in 1.0..300.0)
         require(activeEnergyKcal == null || activeEnergyKcal.isFinite() && activeEnergyKcal in 0.0..100000.0)
         require(healthKitWorkoutId == null || healthKitWorkoutId.isNotBlank() && healthKitWorkoutId.length <= 80)
+        PlanDetails.validate(plannedExercises,prescriptions)
     }
 }
 
@@ -81,6 +83,8 @@ data class TrainingSet(
 }
 
 /** All nutrient numbers describe the whole logged portion, explicitly supplied by the user. */
+enum class MealSlot { BREAKFAST, LUNCH, DINNER, SNACK, UNSPECIFIED }
+
 @Serializable
 data class Meal(
     val id: String = UUID.randomUUID().toString(),
@@ -94,6 +98,7 @@ data class Meal(
     val quantity: Double? = null,
     val unit: NutritionUnit? = null,
     val source: String = "",
+    val slot:MealSlot = MealSlot.UNSPECIFIED,
 ) {
     init {
         require(id.isNotBlank() && id.length <= 80)
