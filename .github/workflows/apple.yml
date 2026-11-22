@@ -1,10 +1,7 @@
 name: Apple source validation
-on:
-  workflow_dispatch:
-  push:
-    paths: ['apple/**', 'catalog/**', 'assets/**', 'contracts/**', 'scripts/**', '.github/workflows/apple.yml']
-  pull_request:
-    paths: ['apple/**', 'catalog/**', 'assets/**', 'contracts/**', 'scripts/**', '.github/workflows/apple.yml']
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
 jobs:
   apple:
     runs-on: macos-15
