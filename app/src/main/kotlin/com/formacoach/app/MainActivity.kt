@@ -180,7 +180,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                                         ) {
-                                            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                            LivePulseDot(MaterialTheme.colorScheme.primary)
                                             Column(Modifier.weight(1f)) {
                                                 Text(
                                                     liveSession.label.ifBlank { stringResource(R.string.active_session, liveSession.templateId) },

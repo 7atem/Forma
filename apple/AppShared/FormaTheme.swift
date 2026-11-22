@@ -122,6 +122,42 @@ enum FormaTheme {
     }
 }
 
+struct FormaPulseDot: View {
+    var color: Color = FormaTheme.primary
+    @State private var pulsing = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(color.opacity(pulsing ? 0.32 : 0.12))
+                .frame(width: 14, height: 14)
+                .scaleEffect(pulsing ? 1.25 : 0.85)
+            Circle()
+                .fill(color)
+                .frame(width: 7, height: 7)
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 0.95).repeatForever(autoreverses: true)) {
+                pulsing = true
+            }
+        }
+    }
+}
+
+enum FormaHaptics {
+    static func tap() {
+        #if os(iOS)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        #endif
+    }
+
+    static func success() {
+        #if os(iOS)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+        #endif
+    }
+}
+
 struct FormaPill: View {
     let text: String
     var background: Color = FormaTheme.primaryContainer

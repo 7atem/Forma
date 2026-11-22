@@ -42,6 +42,16 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
     case dead_bug = "DEAD_BUG"
     case reverse_crunch = "REVERSE_CRUNCH"
     case cable_crunch = "CABLE_CRUNCH"
+    case barbell_bench_press = "BARBELL_BENCH_PRESS"
+    case incline_barbell_press = "INCLINE_BARBELL_PRESS"
+    case dip = "DIP"
+    case conventional_deadlift = "CONVENTIONAL_DEADLIFT"
+    case barbell_row = "BARBELL_ROW"
+    case barbell_overhead_press = "BARBELL_OVERHEAD_PRESS"
+    case cable_lateral_raise = "CABLE_LATERAL_RAISE"
+    case barbell_curl = "BARBELL_CURL"
+    case skull_crusher = "SKULL_CRUSHER"
+    case hanging_leg_raise = "HANGING_LEG_RAISE"
     public func label(arabic: Bool) -> String {
         switch self {
         case .squat: return arabic ? "سكوات" : "Squat"
@@ -84,6 +94,16 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
         case .dead_bug: return arabic ? "الحشرة الميتة" : "Dead bug"
         case .reverse_crunch: return arabic ? "كرنش عكسي" : "Reverse crunch"
         case .cable_crunch: return arabic ? "كرنش بالكابل من الركوع" : "Kneeling cable crunch"
+        case .barbell_bench_press: return arabic ? "ضغط الصدر بالبار" : "Barbell bench press"
+        case .incline_barbell_press: return arabic ? "ضغط صدر مائل بالبار" : "Incline barbell press"
+        case .dip: return arabic ? "متوازي للصدر والترايسبس" : "Parallel bar dip"
+        case .conventional_deadlift: return arabic ? "ديدلفت تقليدي بالبار" : "Conventional deadlift"
+        case .barbell_row: return arabic ? "تجديف بالبار" : "Bent-over barbell row"
+        case .barbell_overhead_press: return arabic ? "ضغط كتف واقفًا بالبار" : "Barbell overhead press"
+        case .cable_lateral_raise: return arabic ? "رفرفة جانبية بالكابل" : "Cable lateral raise"
+        case .barbell_curl: return arabic ? "بايسبس بالبار" : "Barbell curl"
+        case .skull_crusher: return arabic ? "ترايسبس نائم بالبار" : "Lying triceps extension"
+        case .hanging_leg_raise: return arabic ? "رفع الأرجل معلقًا" : "Hanging leg raise"
         }
     }
 }
@@ -149,6 +169,16 @@ public enum ExerciseCatalog {public static func of(_ exercise:Exercise)->Exercis
     case .dead_bug:return .init(equipment:[.bodyweight],perSide:true)
     case .reverse_crunch:return .init(equipment:[.bodyweight],perSide:false)
     case .cable_crunch:return .init(equipment:[.cable],perSide:false)
+    case .barbell_bench_press:return .init(equipment:[.barbell,.bench],perSide:false)
+    case .incline_barbell_press:return .init(equipment:[.barbell,.bench],perSide:false)
+    case .dip:return .init(equipment:[.bodyweight],perSide:false)
+    case .conventional_deadlift:return .init(equipment:[.barbell],perSide:false)
+    case .barbell_row:return .init(equipment:[.barbell],perSide:false)
+    case .barbell_overhead_press:return .init(equipment:[.barbell],perSide:false)
+    case .cable_lateral_raise:return .init(equipment:[.cable],perSide:true)
+    case .barbell_curl:return .init(equipment:[.barbell],perSide:false)
+    case .skull_crusher:return .init(equipment:[.barbell,.bench],perSide:false)
+    case .hanging_leg_raise:return .init(equipment:[.pull_up_bar,.bodyweight],perSide:false)
 }}}
 public enum Muscle: String, Codable, CaseIterable, Sendable {
     case chest = "CHEST"
@@ -248,6 +278,16 @@ public enum ExerciseMuscles {
         case .dead_bug: return .init(primary: [.core], secondary: [], reference: "https://hw.qld.gov.au/physical-activity/dead-bugs/")
         case .reverse_crunch: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .cable_crunch: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_bench_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .incline_barbell_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dip: return .init(primary: [.chest, .triceps], secondary: [.front_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .conventional_deadlift: return .init(primary: [.hamstrings, .glutes], secondary: [.erectors, .upper_back, .quadriceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts, .erectors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_overhead_press: return .init(primary: [.front_delts], secondary: [.triceps, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .cable_lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .skull_crusher: return .init(primary: [.triceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .hanging_leg_raise: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         }
     }
 }

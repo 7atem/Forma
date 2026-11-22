@@ -54,4 +54,14 @@
     <string name="catalog_exercise_dead_bug">Dead bug</string>
     <string name="catalog_exercise_reverse_crunch">Reverse crunch</string>
     <string name="catalog_exercise_cable_crunch">Kneeling cable crunch</string>
+    <string name="catalog_exercise_barbell_bench_press">Barbell bench press</string>
+    <string name="catalog_exercise_incline_barbell_press">Incline barbell press</string>
+    <string name="catalog_exercise_dip">Parallel bar dip</string>
+    <string name="catalog_exercise_conventional_deadlift">Conventional deadlift</string>
+    <string name="catalog_exercise_barbell_row">Bent-over barbell row</string>
+    <string name="catalog_exercise_barbell_overhead_press">Barbell overhead press</string>
+    <string name="catalog_exercise_cable_lateral_raise">Cable lateral raise</string>
+    <string name="catalog_exercise_barbell_curl">Barbell curl</string>
+    <string name="catalog_exercise_skull_crusher">Lying triceps extension</string>
+    <string name="catalog_exercise_hanging_leg_raise">Hanging leg raise</string>
 </resources>

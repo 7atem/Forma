@@ -60,6 +60,16 @@ internal fun exerciseLabel(exercise:com.formacoach.model.Exercise):Int=when(exer
     com.formacoach.model.Exercise.DEAD_BUG->R.string.catalog_exercise_dead_bug
     com.formacoach.model.Exercise.REVERSE_CRUNCH->R.string.catalog_exercise_reverse_crunch
     com.formacoach.model.Exercise.CABLE_CRUNCH->R.string.catalog_exercise_cable_crunch
+    com.formacoach.model.Exercise.BARBELL_BENCH_PRESS->R.string.catalog_exercise_barbell_bench_press
+    com.formacoach.model.Exercise.INCLINE_BARBELL_PRESS->R.string.catalog_exercise_incline_barbell_press
+    com.formacoach.model.Exercise.DIP->R.string.catalog_exercise_dip
+    com.formacoach.model.Exercise.CONVENTIONAL_DEADLIFT->R.string.catalog_exercise_conventional_deadlift
+    com.formacoach.model.Exercise.BARBELL_ROW->R.string.catalog_exercise_barbell_row
+    com.formacoach.model.Exercise.BARBELL_OVERHEAD_PRESS->R.string.catalog_exercise_barbell_overhead_press
+    com.formacoach.model.Exercise.CABLE_LATERAL_RAISE->R.string.catalog_exercise_cable_lateral_raise
+    com.formacoach.model.Exercise.BARBELL_CURL->R.string.catalog_exercise_barbell_curl
+    com.formacoach.model.Exercise.SKULL_CRUSHER->R.string.catalog_exercise_skull_crusher
+    com.formacoach.model.Exercise.HANGING_LEG_RAISE->R.string.catalog_exercise_hanging_leg_raise
 }
 
 internal fun equipmentLabel(value:com.formacoach.model.Equipment):Int=when(value) {

@@ -15,7 +15,7 @@ for item in manifest:
     file=root/item['file'];data=file.read_bytes()
     assert data[:8]==b'\x89PNG\r\n\x1a\n',file
     width,height=struct.unpack('>II',data[16:24])
-    assert (width,height)==(1536,1024),(file,width,height)
+    assert (width,height)==(960,640),(file,width,height)
     assert hashlib.sha256(data).hexdigest()==item['sha256'],file
     assert len(data)==item['bytes'],file
     assert file.name==f"exercise_{item['id']}.png"

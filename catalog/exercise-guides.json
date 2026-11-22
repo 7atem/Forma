@@ -800,6 +800,206 @@
           "ارجع بتحكم مع ثبات الفخذين نسبيًا."
         ]
       }
+    },
+    {
+      "id": "BARBELL_BENCH_PRESS",
+      "variant": {
+        "en": "Flat barbell bench press",
+        "ar": "ضغط الصدر بالبار على مقعد أفقي"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Lie flat with feet planted and grip the bar slightly wider than shoulder width.",
+          "Lower the bar smoothly to mid-chest with elbows tucked roughly 45 degrees.",
+          "Press back up with straight wrists and stable shoulders."
+        ],
+        "ar": [
+          "استلقِ على المقعد مع ثبات القدمين وامسك البار أوسع قليلًا من الكتفين.",
+          "اخفض البار بتحكم نحو منتصف الصدر مع ضم المرفقين قليلًا.",
+          "ادفع لأعلى مع استقامة الرسغين وثبات الكتفين."
+        ]
+      }
+    },
+    {
+      "id": "INCLINE_BARBELL_PRESS",
+      "variant": {
+        "en": "Incline barbell bench press",
+        "ar": "ضغط صدر مائل بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Set a moderate incline and keep upper back and feet firmly supported.",
+          "Lower the barbell to the upper chest with vertical forearms.",
+          "Press smoothly upward without bouncing off the chest."
+        ],
+        "ar": [
+          "اضبط المقعد على ميل متوسط واسند الظهر وثبّت القدمين.",
+          "اخفض البار نحو أعلى الصدر مع بقاء الساعدين رأسيين.",
+          "ادفع لأعلى بسلاسة دون ارتداد على الصدر."
+        ]
+      }
+    },
+    {
+      "id": "DIP",
+      "variant": {
+        "en": "Parallel bar dip",
+        "ar": "متوازي للصدر والترايسبس"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Start on straight arms with shoulders depressed and a slight forward lean.",
+          "Lower under control until upper arms are roughly parallel to the floor.",
+          "Press back up without shrugging the shoulders."
+        ],
+        "ar": [
+          "ابدأ والذراعان مفرودتان مع خفض الكتفين وميل بسيط للأمام.",
+          "انزل بتحكم حتى يوازي أعلى الذراعين الأرض تقريبًا.",
+          "ادفع لأعلى دون رفع الكتفين نحو الأذنين."
+        ]
+      }
+    },
+    {
+      "id": "CONVENTIONAL_DEADLIFT",
+      "variant": {
+        "en": "Conventional barbell deadlift",
+        "ar": "ديدلفت تقليدي بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Stand with mid-foot under the bar, hinge at the hips and grip just outside the knees.",
+          "Brace the trunk and keep the bar close to the shins and thighs as you stand.",
+          "Lock out tall by extending the hips without leaning backward."
+        ],
+        "ar": [
+          "قف ومنتصف القدم أسفل البار واثنِ من الحوض وامسك البار خارج الركبتين.",
+          "شد الجذع وأبقِ البار قريبًا من الساقين والفخذين أثناء الصعود.",
+          "قف مستقيمًا بمد الحوض دون الميل للخلف."
+        ]
+      }
+    },
+    {
+      "id": "BARBELL_ROW",
+      "variant": {
+        "en": "Bent-over barbell row",
+        "ar": "تجديف بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Hinge forward with a neutral spine and soft knees, holding the bar at arm's length.",
+          "Pull the barbell toward the lower ribs while driving the elbows back.",
+          "Lower with control without letting the torso bob up and down."
+        ],
+        "ar": [
+          "انحنِ للأمام بظهر محايد وثني خفيف للركبتين والبار مفرود الذراعين.",
+          "اسحب البار نحو أسفل الضلوع مع توجيه المرفقين للخلف.",
+          "اخفضه بتحكم دون تأرجح الجذع."
+        ]
+      }
+    },
+    {
+      "id": "BARBELL_OVERHEAD_PRESS",
+      "variant": {
+        "en": "Standing barbell overhead press",
+        "ar": "ضغط كتف واقفًا بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Start with the bar resting at the upper chest and forearms stacked vertically.",
+          "Brace your trunk and press the bar straight overhead.",
+          "Lower smoothly back to the front rack without arching the lower back."
+        ],
+        "ar": [
+          "ابدأ والبار عند أعلى الصدر والساعدان في وضع رأسي.",
+          "شد الجذع وادفع البار لأعلى مباشرة فوق الرأس.",
+          "اخفضه بسلاسة دون زيادة تقوّس أسفل الظهر."
+        ]
+      }
+    },
+    {
+      "id": "CABLE_LATERAL_RAISE",
+      "variant": {
+        "en": "Single-arm cable lateral raise",
+        "ar": "رفرفة جانبية بالكابل بذراع واحدة"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Stand tall beside a low pulley and hold the handle with a slight elbow bend.",
+          "Raise the arm smoothly out to shoulder height without shrugging.",
+          "Lower with control and log repetitions per side."
+        ],
+        "ar": [
+          "قف مستقيمًا بجانب بكرة منخفضة وامسك المقبض بثني خفيف للمرفق.",
+          "ارفع الذراع للجانب حتى مستوى الكتف دون رفع الكتفين.",
+          "اخفضه بتحكم وسجّل التكرارات لكل جانب."
+        ]
+      }
+    },
+    {
+      "id": "BARBELL_CURL",
+      "variant": {
+        "en": "Standing barbell biceps curl",
+        "ar": "بايسبس واقفًا بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Stand tall with an underhand shoulder-width grip and elbows close to your sides.",
+          "Curl the bar smoothly toward the shoulders without swinging the torso.",
+          "Lower under control to full comfortable extension."
+        ],
+        "ar": [
+          "قف مستقيمًا بقبضة سفلية بعرض الكتفين والمرفقان بجانب الجسم.",
+          "اثنِ المرفقين لرفع البار نحو الكتفين دون تأرجح الجذع.",
+          "اخفضه بتحكم حتى المد المريح."
+        ]
+      }
+    },
+    {
+      "id": "SKULL_CRUSHER",
+      "variant": {
+        "en": "Lying barbell triceps extension",
+        "ar": "ترايسبس نائم بالبار"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Lie flat on a bench holding the bar above your shoulders with straight arms.",
+          "Bend only at the elbows to lower the bar smoothly above or behind the forehead.",
+          "Extend the elbows back to the start while keeping upper arms steady."
+        ],
+        "ar": [
+          "استلقِ على المقعد وامسك البار فوق الكتفين والذراعان مفرودتان.",
+          "اثنِ المرفقين فقط لخفض البار بتحكم فوق الجبهة أو خلفها قليلًا.",
+          "افرد المرفقين للرجوع مع ثبات أعلى الذراعين."
+        ]
+      }
+    },
+    {
+      "id": "HANGING_LEG_RAISE",
+      "variant": {
+        "en": "Hanging leg raise",
+        "ar": "رفع الأرجل معلقًا"
+      },
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "cues": {
+        "en": [
+          "Hang steadily from a pull-up bar with engaged shoulders and legs straight.",
+          "Raise the legs forward to roughly horizontal using your core.",
+          "Lower slowly without swinging your body."
+        ],
+        "ar": [
+          "تعلّق بثبات على عقلة مع تفعيل الكتفين واستقامة الرجلين.",
+          "ارفع الرجلين للأمام حتى الوضع الأفقي تقريبًا باستخدام البطن.",
+          "انزل ببطء دون تأرجح الجسم."
+        ]
+      }
     }
   ]
 }

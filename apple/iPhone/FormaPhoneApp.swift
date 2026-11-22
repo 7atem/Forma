@@ -285,6 +285,7 @@ private struct MealSlotOption: Identifiable {
                                     }
                                 }
                                 Button {
+                                    FormaHaptics.success()
                                     store.attempt { try store.start(program) }
                                 } label: {
                                     HStack {
@@ -446,7 +447,10 @@ private struct MealSlotOption: Identifiable {
             FormaCard {
                 HStack {
                     VStack(alignment: .leading, spacing: 3) {
-                        FormaPill(text: String(localized: "active_workout"))
+                        HStack(spacing: 6) {
+                            FormaPulseDot()
+                            FormaPill(text: String(localized: "active_workout"))
+                        }
                         Text(draft.program.name)
                             .font(.title2.weight(.bold))
                             .foregroundStyle(FormaTheme.textPrimary)
@@ -630,6 +634,7 @@ private struct MealSlotOption: Identifiable {
                 }
 
                 Button {
+                    FormaHaptics.success()
                     let item = WatchSet(
                         id: UUID().uuidString,
                         exercise: exercise,
@@ -841,7 +846,7 @@ private struct MealSlotOption: Identifiable {
                     // Main Muscle Category Chips
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            Button { selectedMuscle = nil } label: {
+                            Button { withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) { selectedMuscle = nil }; FormaHaptics.tap() } label: {
                                 FormaPill(
                                     text: String(localized: "all_muscles"),
                                     background: selectedMuscle == nil ? FormaTheme.primary : FormaTheme.surface,
@@ -850,7 +855,7 @@ private struct MealSlotOption: Identifiable {
                             }
                             ForEach(mainMuscles, id: \.self) { m in
                                 let count = Exercise.allCases.filter { ExerciseMuscles.of($0).primary.first == m }.count
-                                Button { selectedMuscle = m } label: {
+                                Button { withAnimation(.spring(response: 0.32, dampingFraction: 0.78)) { selectedMuscle = m }; FormaHaptics.tap() } label: {
                                     FormaPill(
                                         text: "\(m.label(arabic: arabic)) (\(count))",
                                         background: selectedMuscle == m ? FormaTheme.primary : FormaTheme.surface,
@@ -1046,6 +1051,7 @@ private struct MealSlotOption: Identifiable {
                         HStack(spacing: 10) {
                             ForEach(Array(starterQuickFoods.enumerated()), id: \.offset) { _, item in
                                 Button {
+                                    FormaHaptics.success()
                                     store.attempt {
                                         try store.addMeal(PhoneMeal(
                                             date: today,

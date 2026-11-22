@@ -54,4 +54,14 @@
     <string name="catalog_exercise_dead_bug">الحشرة الميتة</string>
     <string name="catalog_exercise_reverse_crunch">كرنش عكسي</string>
     <string name="catalog_exercise_cable_crunch">كرنش بالكابل من الركوع</string>
+    <string name="catalog_exercise_barbell_bench_press">ضغط الصدر بالبار</string>
+    <string name="catalog_exercise_incline_barbell_press">ضغط صدر مائل بالبار</string>
+    <string name="catalog_exercise_dip">متوازي للصدر والترايسبس</string>
+    <string name="catalog_exercise_conventional_deadlift">ديدلفت تقليدي بالبار</string>
+    <string name="catalog_exercise_barbell_row">تجديف بالبار</string>
+    <string name="catalog_exercise_barbell_overhead_press">ضغط كتف واقفًا بالبار</string>
+    <string name="catalog_exercise_cable_lateral_raise">رفرفة جانبية بالكابل</string>
+    <string name="catalog_exercise_barbell_curl">بايسبس بالبار</string>
+    <string name="catalog_exercise_skull_crusher">ترايسبس نائم بالبار</string>
+    <string name="catalog_exercise_hanging_leg_raise">رفع الأرجل معلقًا</string>
 </resources>

@@ -1,6 +1,10 @@
 package com.formacoach.app
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -595,6 +599,24 @@ internal fun MacroDonutRing(
                 PillBadge("F ${kotlin.math.round(fFrac * 100).toInt()}%", containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = fColor)
             }
         }
+    }
+}
+
+@Composable
+internal fun LivePulseDot(
+    color: Color = MaterialTheme.colorScheme.primary,
+    modifier: Modifier = Modifier,
+) {
+    val transition = rememberInfiniteTransition(label = "live_pulse")
+    val pulse by transition.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(950), RepeatMode.Reverse),
+        label = "pulse_alpha",
+    )
+    Box(modifier.size(14.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(14.dp).clip(CircleShape).background(color.copy(alpha = 0.25f * pulse)))
+        Box(Modifier.size(8.dp).clip(CircleShape).background(color.copy(alpha = 0.7f + 0.3f * pulse)))
     }
 }
 

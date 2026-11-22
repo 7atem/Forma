@@ -256,11 +256,14 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                 }
             }
             if (deadline > 0) {
-                PillBadge(
-                    text = "${number(remaining.toDouble(), 0)}s",
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    LivePulseDot(MaterialTheme.colorScheme.primary)
+                    PillBadge(
+                        text = "${number(remaining.toDouble(), 0)}s",
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    )
+                }
             }
         }
     }
@@ -500,6 +503,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
 
         Button(
             onClick = {
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 candidate?.let { value ->
                     vm.logSet(value) { saved ->
                         val next = WorkoutFlow.afterSet(session, saved, value.exercise, value.kind)

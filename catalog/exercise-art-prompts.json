@@ -201,6 +201,56 @@
       "id": "cable_crunch",
       "tool": "image_gen (built-in)",
       "prompt": "Use case: scientific-educational. Asset: original 3D exercise demonstration for Forma mobile app. One landscape 1536x1024 3:2 render, EXACTLY TWO equally sized side-by-side panels; NO text, numbers, arrows, logos or watermark. Left is the start, right is the second phase. In both, the SAME adult athletic silver-gray mannequin wearing a muted sage-green fitted shirt, charcoal shorts and plain gray flat training shoes. Anatomically credible proportions, smooth neutral face, full body and entire relevant equipment visible. Consistent three-quarter SIDE view at identical camera angle and scale in both panels. Dark forest-green studio #10231D, soft shadows, clear even lighting and polished realistic 3D materials. Simple mechanically plausible equipment; nothing passes through the body. No muscle overlays. Precise instructional posture, no extra limbs or excessive loads. Kneeling onmat facing highpulleycabletower ropeendsheldbesidetemples, left torso upright slightforwardlean, right trunk rounded crunch ribstowardpelvis elbowsnear thighs, hips above knees not sittingonheels."
+    },
+    {
+      "id": "barbell_bench_press",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (barbell bench press), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "incline_barbell_press",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (incline barbell press), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "dip",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (dip), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "conventional_deadlift",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (conventional deadlift), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "barbell_row",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (barbell row), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "barbell_overhead_press",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (barbell overhead press), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "cable_lateral_raise",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (cable lateral raise), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "barbell_curl",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (barbell curl), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "skull_crusher",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (skull crusher), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "hanging_leg_raise",
+      "tool": "image-generator (built-in)",
+      "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (hanging leg raise), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
     }
   ]
 }

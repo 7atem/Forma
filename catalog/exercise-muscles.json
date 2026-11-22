@@ -815,6 +815,174 @@
       ],
       "perSide": false,
       "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "BARBELL_BENCH_PRESS",
+      "en": "Barbell bench press",
+      "ar": "ضغط الصدر بالبار",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS",
+        "TRICEPS"
+      ],
+      "equipment": [
+        "BARBELL",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "INCLINE_BARBELL_PRESS",
+      "en": "Incline barbell press",
+      "ar": "ضغط صدر مائل بالبار",
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS",
+        "TRICEPS"
+      ],
+      "equipment": [
+        "BARBELL",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "DIP",
+      "en": "Parallel bar dip",
+      "ar": "متوازي للصدر والترايسبس",
+      "primary": [
+        "CHEST",
+        "TRICEPS"
+      ],
+      "secondary": [
+        "FRONT_DELTS"
+      ],
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "CONVENTIONAL_DEADLIFT",
+      "en": "Conventional deadlift",
+      "ar": "ديدلفت تقليدي بالبار",
+      "primary": [
+        "HAMSTRINGS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "ERECTORS",
+        "UPPER_BACK",
+        "QUADRICEPS"
+      ],
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "BARBELL_ROW",
+      "en": "Bent-over barbell row",
+      "ar": "تجديف بالبار",
+      "primary": [
+        "UPPER_BACK",
+        "LATS"
+      ],
+      "secondary": [
+        "BICEPS",
+        "REAR_DELTS",
+        "ERECTORS"
+      ],
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "BARBELL_OVERHEAD_PRESS",
+      "en": "Barbell overhead press",
+      "ar": "ضغط كتف واقفًا بالبار",
+      "primary": [
+        "FRONT_DELTS"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "CORE"
+      ],
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "CABLE_LATERAL_RAISE",
+      "en": "Cable lateral raise",
+      "ar": "رفرفة جانبية بالكابل",
+      "primary": [
+        "FRONT_DELTS"
+      ],
+      "secondary": [
+        "UPPER_BACK"
+      ],
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": true,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "BARBELL_CURL",
+      "en": "Barbell curl",
+      "ar": "بايسبس بالبار",
+      "primary": [
+        "BICEPS"
+      ],
+      "secondary": [],
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "SKULL_CRUSHER",
+      "en": "Lying triceps extension",
+      "ar": "ترايسبس نائم بالبار",
+      "primary": [
+        "TRICEPS"
+      ],
+      "secondary": [],
+      "equipment": [
+        "BARBELL",
+        "BENCH"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
+    },
+    {
+      "id": "HANGING_LEG_RAISE",
+      "en": "Hanging leg raise",
+      "ar": "رفع الأرجل معلقًا",
+      "primary": [
+        "CORE"
+      ],
+      "secondary": [],
+      "equipment": [
+        "PULL_UP_BAR",
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/"
     }
   ]
 }
