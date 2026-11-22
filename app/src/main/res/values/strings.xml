@@ -216,4 +216,23 @@
     <string name="model_downloading">System model download in progress.</string>
     <string name="model_ready">Local model ready on this device.</string>
     <string name="model_error">Could not check or use the device model.</string>
+    <string name="starter_foods_title">Starter whole foods</string>
+    <string name="starter_foods_note">Public-domain USDA reference values. Add any item to your own editable library.</string>
+    <string name="add_starter_food">Add</string>
+    <string name="added_to_library">Saved</string>
+    <string name="load_all_starters">Add all starter foods</string>
+    <string name="chart_mode_load">Max load</string>
+    <string name="chart_mode_e1rm">Est. 1RM</string>
+    <string name="best_e1rm_value">Best est. 1RM: %1$s kg (%2$s)</string>
+    <string name="session_tonnage">Volume: %1$s kg</string>
+    <string name="weekly_volume_label">7-day volume (kg)</string>
+    <string name="muscle_heatmap_title">7-day body heat map</string>
+    <string name="muscle_heatmap_note">Colors show recorded working sets in the last 7 days, not recovery or measured activation.</string>
+    <string name="heatmap_light">1–3 sets</string>
+    <string name="heatmap_moderate">4–7 sets</string>
+    <string name="heatmap_high">8+ sets</string>
+    <string name="personal_records_title">Personal records</string>
+    <string name="warmup_ramp_title">Optional warm-up ramp</string>
+    <string name="macro_split_title">Macro energy split</string>
+    <string name="workout_complete_banner">Session saved</string>
 </resources>

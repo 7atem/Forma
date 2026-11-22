@@ -63,7 +63,23 @@ private fun PlateDialog(onDismiss:()->Unit) {
         if(calculated) {
             val value=result
             if(value==null) Text(stringResource(R.string.plates_unavailable),color=MaterialTheme.colorScheme.error)
-            else Text(stringResource(R.string.plates_per_side,if(value.perSide.isEmpty()) stringResource(R.string.empty_bar) else value.perSide.map {stringResource(R.string.plate_kg,number(it))}.joinToString(" + ")),style=MaterialTheme.typography.titleMedium,modifier=Modifier.testTag("plate_result"))
+            else {
+                BarbellVisualizer(value.perSide)
+                Text(stringResource(R.string.plates_per_side,if(value.perSide.isEmpty()) stringResource(R.string.empty_bar) else value.perSide.map {stringResource(R.string.plate_kg,number(it))}.joinToString(" + ")),style=MaterialTheme.typography.titleMedium,modifier=Modifier.testTag("plate_result"))
+                val ramp = inputs?.let { WarmupRamp.steps(it.first, it.second) }.orEmpty()
+                if (ramp.isNotEmpty()) {
+                    HorizontalDivider()
+                    Text(stringResource(R.string.warmup_ramp_title), style = MaterialTheme.typography.titleSmall)
+                    ramp.forEach { step ->
+                        Text(
+                            "${number(step.weightKg)} ${stringResource(R.string.kg)} × ${number(step.reps.toDouble(), 0)}" +
+                                if (step.percent > 0) " (${step.percent}%)" else "",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
         }
     }},confirmButton={TextButton(onClick={inputs?.let {result=runCatching {PlateCalculator.calculate(it.first,it.second,it.third)}.getOrNull();calculated=true}},enabled=inputs!=null,modifier=Modifier.testTag("calculate_plates")) {Text(stringResource(R.string.calculate))}},dismissButton={TextButton(onClick=onDismiss) {Text(stringResource(R.string.close))}})
 }

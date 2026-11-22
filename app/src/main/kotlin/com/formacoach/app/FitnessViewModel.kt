@@ -83,6 +83,7 @@ class FitnessViewModel @Inject constructor(private val repository: FitnessReposi
     fun exerciseNotes(exercise:Exercise,value:String,done:()->Unit)=write(done) {repository.exerciseNotes(exercise,value)}
     fun repeatSession(id:String)=write {repository.repeatSession(id)}
     fun saveFood(food: Food,done: () -> Unit) = write(done) {repository.saveFood(food)}
+    fun saveFoods(foods: List<Food>, done: () -> Unit = {}) = write(done) { foods.forEach { repository.saveFood(it) } }
     fun deleteFood(id: String) = write {repository.deleteFood(id)}
     fun checkIn(value: WeeklyCheckIn,done: () -> Unit) = write(done) {repository.recordCheckIn(value)}
     fun acceptProposal(id: String) = write {repository.acceptProposal(id)}

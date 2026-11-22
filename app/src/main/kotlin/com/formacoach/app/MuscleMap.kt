@@ -53,3 +53,51 @@ internal fun MuscleMap(exercise:Exercise) {
         Text(stringResource(R.string.muscle_note),style=MaterialTheme.typography.bodySmall)
     }
 }
+
+/** 7-day descriptive muscle heat map colored purely by recorded completed working sets. */
+@Composable
+internal fun WeeklyMuscleHeatMap(primarySetsByMuscle: Map<Muscle, Int>) {
+    val outline = remember { checkNotNull(PathParser.createPathFromPathData(ExerciseMuscles.outline)).asComposePath() }
+    val regions = remember { ExerciseMuscles.regions.map { it to checkNotNull(PathParser.createPathFromPathData(it.path)).asComposePath() } }
+    val neutral = MaterialTheme.colorScheme.surfaceVariant
+    val untrained = MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)
+    val light = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.72f)
+    val moderate = MaterialTheme.colorScheme.primary
+    val high = MaterialTheme.colorScheme.secondary
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Text(stringResource(R.string.muscle_heatmap_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+            ScopeInfoButton(R.string.muscle_heatmap_title, R.string.muscle_heatmap_note)
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            listOf(true, false).forEach { front ->
+                Column(Modifier.weight(1f), horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                    Text(stringResource(if (front) R.string.body_front else R.string.body_back), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Canvas(Modifier.fillMaxWidth().height(210.dp)) {
+                        val factor = minOf(size.width / 100f, size.height / 220f)
+                        translate((size.width - 100f * factor) / 2f, 0f) {
+                            scale(factor, factor, pivot = androidx.compose.ui.geometry.Offset.Zero) {
+                                drawPath(outline, neutral)
+                                regions.filter { it.first.front == front }.forEach { (region, path) ->
+                                    val sets = primarySetsByMuscle[region.muscle] ?: 0
+                                    val color = when {
+                                        sets >= 8 -> high
+                                        sets >= 4 -> moderate
+                                        sets >= 1 -> light
+                                        else -> untrained
+                                    }
+                                    drawPath(path, color)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            PillBadge(stringResource(R.string.heatmap_light), containerColor = MaterialTheme.colorScheme.tertiaryContainer, contentColor = MaterialTheme.colorScheme.tertiary)
+            PillBadge(stringResource(R.string.heatmap_moderate), containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.primary)
+            PillBadge(stringResource(R.string.heatmap_high), containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.secondary)
+        }
+    }
+}

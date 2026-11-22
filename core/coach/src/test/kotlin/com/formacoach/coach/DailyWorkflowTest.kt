@@ -58,4 +58,47 @@ class DailyWorkflowTest {
             assertEquals(java.time.ZoneId.of("America/Los_Angeles"),DeviceClock.zone)
         } finally {java.util.TimeZone.setDefault(previous)}
     }
+
+    @Test fun `e1rm and tonnage exclude warmups drafts and high rep sets`() {
+        val sessions = listOf(
+            Session("s1", date.minusDays(2), "A", completedAt = 100L),
+            Session("s2", date.minusDays(10), "A", completedAt = 100L),
+            Session("draft", date, "A", completedAt = null),
+        )
+        val sets = listOf(
+            TrainingSet(sessionId = "s1", exercise = Exercise.BARBELL_BACK_SQUAT, reps = 10, weightKg = 60.0, kind = SetKind.WARM_UP),
+            TrainingSet(sessionId = "s1", exercise = Exercise.BARBELL_BACK_SQUAT, reps = 5, weightKg = 100.0, kind = SetKind.WORKING),
+            TrainingSet(sessionId = "s1", exercise = Exercise.BARBELL_BACK_SQUAT, reps = 20, weightKg = 40.0, kind = SetKind.WORKING),
+            TrainingSet(sessionId = "s2", exercise = Exercise.BARBELL_BACK_SQUAT, reps = 1, weightKg = 110.0, kind = SetKind.WORKING),
+            TrainingSet(sessionId = "draft", exercise = Exercise.BARBELL_BACK_SQUAT, reps = 5, weightKg = 200.0, kind = SetKind.WORKING),
+        )
+        val snapshot = FitnessSnapshot(sessions = sessions, sets = sets)
+        assertNull(TrainingHistory.estimatedOneRepMax(0.0, 5))
+        assertNull(TrainingHistory.estimatedOneRepMax(60.0, 20))
+        assertEquals(110.0, TrainingHistory.estimatedOneRepMax(110.0, 1)!!, 0.0001)
+        assertEquals(116.6667, TrainingHistory.estimatedOneRepMax(100.0, 5)!!, 0.01)
+        assertEquals(116.6667, TrainingHistory.bestE1rm(snapshot, Exercise.BARBELL_BACK_SQUAT, date)!!.value, 0.01)
+        // s1 working tonnage: (5 * 100) + (20 * 40) = 1300 (warm-up excluded, s2 outside 7-day window, draft excluded)
+        assertEquals(1300.0, TrainingHistory.weeklyTonnage(snapshot, date), 0.0001)
+    }
+
+    @Test fun `starter whole foods produce valid bilingual source-attributed records`() {
+        assertTrue(StarterFoods.all.size >= 25)
+        assertEquals(StarterFoods.all.size, StarterFoods.all.map { it.id }.distinct().size)
+        StarterFoods.all.forEach { entry ->
+            val en = entry.toFood(arabic = false)
+            val ar = entry.toFood(arabic = true)
+            assertTrue(en.source.isNotBlank())
+            assertTrue(ar.name.isNotBlank())
+            val portion = en.portion(en.referenceAmount, date)
+            assertEquals(en.nutrients.calories, portion.calories, 0.0001)
+        }
+    }
+
+    @Test fun `warmup ramp rounds to 2_5kg steps and stays below working load`() {
+        assertTrue(WarmupRamp.steps(20.0, 20.0).isEmpty())
+        val steps = WarmupRamp.steps(100.0, 20.0)
+        assertEquals(listOf(20.0, 50.0, 70.0, 85.0), steps.map { it.weightKg })
+        assertTrue(steps.all { it.weightKg < 100.0 })
+    }
 }

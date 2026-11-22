@@ -3,28 +3,33 @@ package com.formacoach.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.automirrored.filled.ShowChart
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,12 +50,35 @@ class MainActivity : ComponentActivity() {
 }
 
 private val FormaColors = darkColorScheme(
-    primary=Color(0xFFC5EE89), onPrimary=Color(0xFF18311B),
-    primaryContainer=Color(0xFF2D452A), onPrimaryContainer=Color(0xFFE0F6CC),
-    secondary=Color(0xFFFFBD8A), secondaryContainer=Color(0xFF36583B), onSecondaryContainer=Color(0xFFE5F7DE), background=Color(0xFF10231D),
-    surface=Color(0xFF19332A), surfaceVariant=Color(0xFF254237),
-    onBackground=Color(0xFFF2F6EC), onSurface=Color(0xFFF2F6EC),
-    onSurfaceVariant=Color(0xFFBED0C3), outline=Color(0xFF6E8C7A),
+    primary = Color(0xFFC8F57B),
+    onPrimary = Color(0xFF102412),
+    primaryContainer = Color(0xFF233D29),
+    onPrimaryContainer = Color(0xFFE3FAC6),
+    secondary = Color(0xFFFFBE7B),
+    onSecondary = Color(0xFF2D1905),
+    secondaryContainer = Color(0xFF3E2D1B),
+    onSecondaryContainer = Color(0xFFFFE4C4),
+    tertiary = Color(0xFF6EE7B7),
+    onTertiary = Color(0xFF06281C),
+    tertiaryContainer = Color(0xFF153B2E),
+    onTertiaryContainer = Color(0xFFA7F3D0),
+    background = Color(0xFF0B1713),
+    onBackground = Color(0xFFF3F8F1),
+    surface = Color(0xFF13251F),
+    onSurface = Color(0xFFF3F8F1),
+    surfaceVariant = Color(0xFF1E372E),
+    onSurfaceVariant = Color(0xFFB3C7BA),
+    surfaceContainerLowest = Color(0xFF08110E),
+    surfaceContainerLow = Color(0xFF101F1A),
+    surfaceContainer = Color(0xFF142721),
+    surfaceContainerHigh = Color(0xFF1B332B),
+    surfaceContainerHighest = Color(0xFF234036),
+    outline = Color(0xFF567363),
+    outlineVariant = Color(0xFF264338),
+    error = Color(0xFFFF8A80),
+    onError = Color(0xFF3B0907),
+    errorContainer = Color(0xFF5C1814),
+    onErrorContainer = Color(0xFFFFDAD6),
 )
 
 @Composable
@@ -58,47 +86,132 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var editingProfile by rememberSaveable { mutableStateOf(false) }
-    var showWatch by rememberSaveable {mutableStateOf(false)}
-    var showBackup by rememberSaveable {mutableStateOf(false)}
-    var generation by rememberSaveable {mutableIntStateOf(0)}
-    val pageState=key(generation) {rememberSaveableStateHolder()}
+    var showWatch by rememberSaveable { mutableStateOf(false) }
+    var showBackup by rememberSaveable { mutableStateOf(false) }
+    var generation by rememberSaveable { mutableIntStateOf(0) }
+    val pageState = key(generation) { rememberSaveableStateHolder() }
     // Re-evaluate calendar totals if the app remains open over local midnight.
     var today by remember { mutableStateOf(LocalDate.now()) }
     LaunchedEffect(Unit) {
-        while (true) { today=LocalDate.now(); kotlinx.coroutines.delay(30_000) }
+        while (true) {
+            today = LocalDate.now()
+            kotlinx.coroutines.delay(30_000)
+        }
     }
-    LaunchedEffect(today) {vm.onDayChanged()}
-    MaterialTheme(colorScheme=FormaColors, shapes=Shapes(medium=RoundedCornerShape(16.dp), large=RoundedCornerShape(24.dp))) {
-        Surface(Modifier.fillMaxSize(), color=MaterialTheme.colorScheme.background) {
+    LaunchedEffect(today) { vm.onDayChanged() }
+    MaterialTheme(
+        colorScheme = FormaColors,
+        shapes = Shapes(
+            small = RoundedCornerShape(12.dp),
+            medium = RoundedCornerShape(16.dp),
+            large = RoundedCornerShape(24.dp),
+        ),
+    ) {
+        Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             if (state.loading) {
-                Box(Modifier.fillMaxSize(), contentAlignment=Alignment.Center) { CircularProgressIndicator() }
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             } else if (state.loadFailed) {
-                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment=Alignment.Center) {
+                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.load_failed))
                 }
             } else if (state.snapshot.profile == null || editingProfile) {
-                Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment=Alignment.TopCenter) {
-                    ProfileForm(state.snapshot.profile, state.busy, state.error,
-                        onSave={ vm.saveProfile(it) { editingProfile=false } },
-                        onCancel=if (state.snapshot.profile == null) null else ({ editingProfile=false }),
-                        onBackup={showBackup=true})
+                Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
+                    ProfileForm(
+                        state.snapshot.profile,
+                        state.busy,
+                        state.error,
+                        onSave = { vm.saveProfile(it) { editingProfile = false } },
+                        onCancel = if (state.snapshot.profile == null) null else ({ editingProfile = false }),
+                        onBackup = { showBackup = true },
+                    )
                 }
             } else {
-                FormaScaffold(tab,{tab=it},today,onProfile={editingProfile=true},onWatch={showWatch=true},onBackup={showBackup=true}) {padding ->
-                    Box(Modifier.fillMaxSize().padding(padding).imePadding(),contentAlignment=Alignment.TopCenter) {
+                FormaScaffold(
+                    tab,
+                    { tab = it },
+                    today,
+                    onProfile = { editingProfile = true },
+                    onWatch = { showWatch = true },
+                    onBackup = { showBackup = true },
+                ) { padding ->
+                    Box(Modifier.fillMaxSize().padding(padding).imePadding(), contentAlignment = Alignment.TopCenter) {
                         pageState.SaveableStateProvider(tab) {
-                            val scrollState=rememberScrollState()
-                            Column(Modifier.widthIn(max=880.dp).fillMaxWidth().verticalScroll(scrollState).padding(horizontal=20.dp,vertical=20.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
-                                if(state.error) InfoCard {
-                                    Text(stringResource(R.string.save_failed))
-                                    TextButton(onClick=vm::clearError) {Text(stringResource(R.string.dismiss))}
+                            val scrollState = rememberScrollState()
+                            Column(
+                                Modifier
+                                    .widthIn(max = 880.dp)
+                                    .fillMaxWidth()
+                                    .verticalScroll(scrollState)
+                                    .padding(horizontal = 18.dp, vertical = 18.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                if (state.error) {
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.errorContainer,
+                                        shape = RoundedCornerShape(16.dp),
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Row(
+                                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                stringResource(R.string.save_failed),
+                                                Modifier.weight(1f),
+                                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                            )
+                                            TextButton(onClick = vm::clearError) {
+                                                Text(stringResource(R.string.dismiss), color = MaterialTheme.colorScheme.onErrorContainer)
+                                            }
+                                        }
+                                    }
                                 }
-                                when(tab) {
-                                    0 -> TodayContent(state.snapshot,today,vm,onTrain={tab=1},onEat={tab=2})
-                                    1 -> TrainContent(state,today,vm,scrollState)
-                                    2 -> EatContent(state,today,vm)
-                                    3 -> ProgressContent(state,today,vm)
-                                    4 -> CoachContent(state,today,vm)
+                                val liveSession = state.snapshot.sessions.firstOrNull { it.completedAt == null }
+                                if (liveSession != null && tab != 1) {
+                                    Surface(
+                                        onClick = { tab = 1 },
+                                        color = MaterialTheme.colorScheme.primaryContainer,
+                                        shape = RoundedCornerShape(16.dp),
+                                        border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)),
+                                        modifier = Modifier.fillMaxWidth(),
+                                    ) {
+                                        Row(
+                                            Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                        ) {
+                                            Icon(Icons.Default.PlayArrow, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                            Column(Modifier.weight(1f)) {
+                                                Text(
+                                                    liveSession.label.ifBlank { stringResource(R.string.active_session, liveSession.templateId) },
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                )
+                                                Text(
+                                                    stringResource(R.string.resume_session),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                )
+                                            }
+                                            PillBadge(number(state.snapshot.sets.count { it.sessionId == liveSession.id }.toDouble(), 0))
+                                        }
+                                    }
+                                }
+                                when (tab) {
+                                    0 -> TodayContent(
+                                        state.snapshot,
+                                        today,
+                                        vm,
+                                        busy = state.busy,
+                                        onTrain = { tab = 1 },
+                                        onEat = { tab = 2 },
+                                        onStartProgram = { id -> vm.start(id, today); tab = 1 },
+                                    )
+                                    1 -> TrainContent(state, today, vm, scrollState)
+                                    2 -> EatContent(state, today, vm)
+                                    3 -> ProgressContent(state, today, vm)
+                                    4 -> CoachContent(state, today, vm)
                                 }
                                 Spacer(Modifier.height(12.dp))
                             }
@@ -106,117 +219,446 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                     }
                 }
             }
-            if(showWatch) WatchTransferDialog(vm,state) {showWatch=false}
-            if(showBackup) BackupDialog(vm,state,onDismiss={showBackup=false},onRestored={showBackup=false;editingProfile=false;tab=0;generation++})
+            if (showWatch) WatchTransferDialog(vm, state) { showWatch = false }
+            if (showBackup) {
+                BackupDialog(
+                    vm,
+                    state,
+                    onDismiss = { showBackup = false },
+                    onRestored = {
+                        showBackup = false
+                        editingProfile = false
+                        tab = 0
+                        generation++
+                    },
+                )
+            }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun ProfileForm(profile: Profile?, busy: Boolean, error: Boolean, onSave:(Profile)->Unit, onCancel:(()->Unit)?, onBackup:()->Unit) {
+private fun ProfileForm(
+    profile: Profile?,
+    busy: Boolean,
+    error: Boolean,
+    onSave: (Profile) -> Unit,
+    onCancel: (() -> Unit)?,
+    onBackup: () -> Unit,
+) {
     var name by rememberSaveable { mutableStateOf(profile?.name.orEmpty()) }
     var goal by rememberSaveable { mutableStateOf(profile?.goal ?: Goal.FAT_LOSS) }
     var sessions by rememberSaveable { mutableIntStateOf(profile?.sessionsPerWeek ?: 3) }
     var calories by rememberSaveable { mutableStateOf(profile?.caloriesTarget?.toString().orEmpty()) }
     var protein by rememberSaveable { mutableStateOf(profile?.proteinTarget?.toString().orEmpty()) }
-    val candidate=runCatching {
-        Profile(name.trim(), goal, sessions,
-            if(calories.isBlank()) null else requireNotNull(NumericInput.integer(calories)),
-            if(protein.isBlank()) null else requireNotNull(NumericInput.decimal(protein)))
+    val candidate = runCatching {
+        Profile(
+            name.trim(),
+            goal,
+            sessions,
+            if (calories.isBlank()) null else requireNotNull(NumericInput.integer(calories)),
+            if (protein.isBlank()) null else requireNotNull(NumericInput.decimal(protein)),
+        )
     }.getOrNull()
-    Column(Modifier.widthIn(max=600.dp).fillMaxWidth().verticalScroll(rememberScrollState()).padding(28.dp), verticalArrangement=Arrangement.spacedBy(18.dp)) {
-        Text(stringResource(R.string.welcome), style=MaterialTheme.typography.headlineLarge, fontWeight=FontWeight.Bold)
-        Text(stringResource(R.string.welcome_body), color=MaterialTheme.colorScheme.onSurfaceVariant)
-        Input(R.string.name, name, {name=it}, "profile_name", numeric=false)
-        Text(stringResource(R.string.your_goal), style=MaterialTheme.typography.titleMedium)
-        Goal.entries.forEach { value ->
-            FilterChip(selected=goal==value, onClick={goal=value}, label={Text(stringResource(goalLabel(value)))})
+    Column(
+        Modifier
+            .widthIn(max = 600.dp)
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+    ) {
+        Surface(
+            shape = RoundedCornerShape(18.dp),
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(52.dp),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.FitnessCenter, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(28.dp))
+            }
         }
-        Text(stringResource(R.string.sessions_per_week))
-        Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-            (2..4).forEach { count -> FilterChip(selected=sessions==count, onClick={sessions=count}, label={Text(number(count.toDouble(),0))},modifier=Modifier.testTag("target_sessions_$count")) }
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.welcome), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.ExtraBold)
+            Text(stringResource(R.string.welcome_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         InfoCard {
-            Text(stringResource(R.string.manual_targets), style=MaterialTheme.typography.titleMedium)
-            Text(stringResource(R.string.manual_targets_body))
-            Input(R.string.calorie_target,calories,{calories=it},"profile_calories")
-            Input(R.string.protein_target,protein,{protein=it},"profile_protein")
+            Input(R.string.name, name, { name = it }, "profile_name", numeric = false)
+            Text(stringResource(R.string.your_goal), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Goal.entries.forEach { value ->
+                    FilterChip(
+                        selected = goal == value,
+                        onClick = { goal = value },
+                        label = { Text(stringResource(goalLabel(value))) },
+                    )
+                }
+            }
+            Text(stringResource(R.string.sessions_per_week), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                (2..4).forEach { count ->
+                    FilterChip(
+                        selected = sessions == count,
+                        onClick = { sessions = count },
+                        label = { Text(number(count.toDouble(), 0), fontWeight = FontWeight.Bold) },
+                        modifier = Modifier.testTag("target_sessions_$count"),
+                    )
+                }
+            }
         }
-        if(error) Text(stringResource(R.string.save_failed),color=MaterialTheme.colorScheme.error)
-        Button(onClick={candidate?.let(onSave)}, enabled=candidate!=null&&!busy, modifier=Modifier.fillMaxWidth().testTag("save_profile")) {
-            Text(stringResource(if(profile==null) R.string.start_journey else R.string.save))
+        InfoCard {
+            Text(stringResource(R.string.manual_targets), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.manual_targets_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            FormFieldPair(
+                first = { Input(R.string.calorie_target, calories, { calories = it }, "profile_calories") },
+                second = { Input(R.string.protein_target, protein, { protein = it }, "profile_protein") },
+            )
         }
-        onCancel?.let { TextButton(onClick=it) { Text(stringResource(R.string.cancel)) } }
-        TextButton(onClick=onBackup) {Text(stringResource(R.string.backup))}
-        Text(stringResource(R.string.local_privacy),style=MaterialTheme.typography.bodySmall)
+        if (error) Text(stringResource(R.string.save_failed), color = MaterialTheme.colorScheme.error)
+        Button(
+            onClick = { candidate?.let(onSave) },
+            enabled = candidate != null && !busy,
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).testTag("save_profile"),
+        ) {
+            Text(
+                stringResource(if (profile == null) R.string.start_journey else R.string.save),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            onCancel?.let { TextButton(onClick = it) { Text(stringResource(R.string.cancel)) } }
+            TextButton(onClick = onBackup) { Text(stringResource(R.string.backup)) }
+        }
+        Text(stringResource(R.string.local_privacy), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 @Composable
-private fun TodayContent(snapshot: FitnessSnapshot, today: LocalDate, vm: FitnessViewModel, onTrain:()->Unit, onEat:()->Unit) {
-    val profile=checkNotNull(snapshot.profile)
-    val meals=snapshot.meals.filter { it.date==today }
-    val review=vm.reviewEngine.review(snapshot,today)
-    Text(stringResource(R.string.greeting,profile.name),style=MaterialTheme.typography.headlineMedium,fontWeight=FontWeight.Bold)
-    Text(stringResource(R.string.today_subtitle),style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
-    Surface(color=MaterialTheme.colorScheme.primaryContainer,shape=RoundedCornerShape(24.dp),modifier=Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(22.dp),verticalArrangement=Arrangement.spacedBy(14.dp)) {
-            Text(stringResource(R.string.your_week),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
-            Text(stringResource(R.string.workout_count,number(review.completedSessions.toDouble(),0),number(profile.sessionsPerWeek.toDouble(),0)),style=MaterialTheme.typography.headlineLarge,color=MaterialTheme.colorScheme.onPrimaryContainer)
-            LinearProgressIndicator(progress={(review.completedSessions.toFloat()/profile.sessionsPerWeek).coerceIn(0f,1f)},modifier=Modifier.fillMaxWidth(),trackColor=MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha=0.15f),drawStopIndicator={})
-            Text(stringResource(R.string.completed_sessions),style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onPrimaryContainer)
-            Button(onClick=onTrain,modifier=Modifier.fillMaxWidth().heightIn(min=52.dp)) {
-                Text(stringResource(if(snapshot.sessions.any {it.completedAt==null}) R.string.resume_session else R.string.open_training))
+private fun TodayContent(
+    snapshot: FitnessSnapshot,
+    today: LocalDate,
+    vm: FitnessViewModel,
+    busy: Boolean,
+    onTrain: () -> Unit,
+    onEat: () -> Unit,
+    onStartProgram: (String) -> Unit,
+) {
+    val profile = checkNotNull(snapshot.profile)
+    val meals = snapshot.meals.filter { it.date == today }
+    val review = vm.reviewEngine.review(snapshot, today)
+    val activeDates = remember(snapshot.sessions) {
+        snapshot.sessions.filter { it.completedAt != null }.map { it.date }.toSet()
+    }
+    val hasActiveSession = snapshot.sessions.any { it.completedAt == null }
+    val weeklyVol = com.formacoach.coach.TrainingHistory.weeklyTonnage(snapshot, today)
+    val latestWeight = snapshot.measurements.firstOrNull { it.weightKg != null }?.weightKg
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            stringResource(R.string.greeting, profile.name),
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.ExtraBold,
+        )
+        Text(
+            stringResource(R.string.today_subtitle),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+
+    WeeklyActivityStrip(today = today, activeDates = activeDates)
+
+    // Hero Weekly Training Card
+    Surface(
+        shape = RoundedCornerShape(24.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            Color(0xFF1D3827),
+                            Color(0xFF13261E),
+                        ),
+                    ),
+                )
+                .padding(20.dp),
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        PillBadge(stringResource(R.string.your_week))
+                        Text(
+                            stringResource(
+                                R.string.workout_count,
+                                number(review.completedSessions.toDouble(), 0),
+                                number(profile.sessionsPerWeek.toDouble(), 0),
+                            ),
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        )
+                        Text(
+                            stringResource(R.string.completed_sessions),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    CircularProgressRing(
+                        progress = review.completedSessions.toFloat() / profile.sessionsPerWeek.coerceAtLeast(1),
+                        valueText = "${number(review.completedSessions.toDouble(), 0)}/${number(profile.sessionsPerWeek.toDouble(), 0)}",
+                        labelText = "",
+                        size = 86.dp,
+                        strokeWidth = 9.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Button(
+                    onClick = onTrain,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+                ) {
+                    Icon(
+                        if (hasActiveSession) Icons.Default.PlayArrow else Icons.Default.FitnessCenter,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        stringResource(if (hasActiveSession) R.string.resume_session else R.string.open_training),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
             }
         }
     }
-    InfoCard {
-        Text(stringResource(R.string.food_today),style=MaterialTheme.typography.titleLarge)
-        Row(horizontalArrangement=Arrangement.spacedBy(12.dp)) {
-            MetricTile(number(meals.sumOf {it.calories},0),stringResource(R.string.calories_logged),Modifier.weight(1f))
-            MetricTile(number(meals.sumOf {it.protein}),stringResource(R.string.protein_logged),Modifier.weight(1f))
+
+    // 1-Tap Quick Start Programs Row (when no active session)
+    if (weeklyVol > 0.0 || latestWeight != null) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (weeklyVol > 0.0) {
+                MetricTile(
+                    number(weeklyVol, 0),
+                    stringResource(R.string.weekly_volume_label),
+                    Modifier.weight(1f),
+                    accent = MaterialTheme.colorScheme.primary,
+                )
+            }
+            latestWeight?.let {
+                MetricTile(
+                    "${number(it)} ${stringResource(R.string.kg)}",
+                    stringResource(R.string.body_weight),
+                    Modifier.weight(1f),
+                    accent = MaterialTheme.colorScheme.tertiary,
+                )
+            }
         }
-        profile.caloriesTarget?.let {Text(stringResource(R.string.user_calorie_target,number(it.toDouble(),0)),style=MaterialTheme.typography.bodySmall)}
-        profile.proteinTarget?.let {Text(stringResource(R.string.user_protein_target,number(it)),style=MaterialTheme.typography.bodySmall)}
-        Text(stringResource(R.string.logged_only),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-        OutlinedButton(onClick=onEat,modifier=Modifier.fillMaxWidth().heightIn(min=48.dp)) {Text(stringResource(R.string.add_meal))}
     }
+
+    if (!hasActiveSession) {
+        val quickItems = if (snapshot.programs.isNotEmpty()) {
+            snapshot.programs.map { Triple(it.id, it.name, it.exercises) }
+        } else {
+            StarterTemplates.all.map {
+                Triple(it.id, stringResource(if (it.id == "A") R.string.template_a else R.string.template_b), it.exercises)
+            }
+        }
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            quickItems.take(5).forEach { (id, name, exercises) ->
+                Surface(
+                    onClick = { if (!busy) onStartProgram(id) },
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
+                    modifier = Modifier.width(210.dp),
+                ) {
+                    Row(
+                        Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        if (exercises.isNotEmpty()) {
+                            ExerciseThumbnail(
+                                exercises.first(),
+                                Modifier.width(58.dp).clip(RoundedCornerShape(10.dp)),
+                            )
+                        }
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(
+                                name,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                stringResource(R.string.program_exercise_count, number(exercises.size.toDouble(), 0)),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    // Daily Nutrition Overview Card
+    val totalKcal = meals.sumOf { it.calories }
+    val totalProtein = meals.sumOf { it.protein }
+    val totalCarbs = meals.sumOf { it.carbs }
+    val totalFat = meals.sumOf { it.fat }
     InfoCard {
-        Text(stringResource(R.string.next_step),style=MaterialTheme.typography.titleMedium)
-        Text(stringResource(actionLabel(review.nextAction)),style=MaterialTheme.typography.bodyLarge)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.food_today), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            ScopeInfoButton(R.string.food_today, R.string.logged_only)
+            Icon(Icons.Default.Restaurant, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+        }
+        if (profile.caloriesTarget != null || profile.proteinTarget != null) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                profile.caloriesTarget?.let { target ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        CircularProgressRing(
+                            progress = (totalKcal / target).toFloat(),
+                            valueText = number(totalKcal, 0),
+                            labelText = "/ ${number(target.toDouble(), 0)}",
+                            size = 98.dp,
+                            strokeWidth = 9.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Text(stringResource(R.string.calories_logged), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } ?: MetricTile(number(totalKcal, 0), stringResource(R.string.calories_logged), Modifier.weight(1f), accent = MaterialTheme.colorScheme.primary)
+                profile.proteinTarget?.let { target ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        CircularProgressRing(
+                            progress = (totalProtein / target).toFloat(),
+                            valueText = number(totalProtein, 0),
+                            labelText = "/ ${number(target, 0)}g",
+                            size = 98.dp,
+                            strokeWidth = 9.dp,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                        Text(stringResource(R.string.protein_logged), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } ?: MetricTile(number(totalProtein), stringResource(R.string.protein_logged), Modifier.weight(1f), accent = MaterialTheme.colorScheme.secondary)
+            }
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                MetricTile(number(totalKcal, 0), stringResource(R.string.calories_logged), Modifier.weight(1f), accent = MaterialTheme.colorScheme.primary)
+                MetricTile(number(totalProtein), stringResource(R.string.protein_logged), Modifier.weight(1f), accent = MaterialTheme.colorScheme.secondary)
+            }
+        }
+        if (totalKcal > 0) {
+            MacroBreakdownBar(protein = totalProtein, carbs = totalCarbs, fat = totalFat)
+        }
+        OutlinedButton(
+            onClick = onEat,
+            shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.add_meal), fontWeight = FontWeight.SemiBold)
+        }
     }
-    Text(stringResource(R.string.alpha_note),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-}
 
-@Composable
-internal fun InfoCard(modifier:Modifier=Modifier,content:@Composable ColumnScope.()->Unit) {
-    Card(modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface),shape=RoundedCornerShape(24.dp)) {
-        Column(Modifier.fillMaxWidth().padding(18.dp),verticalArrangement=Arrangement.spacedBy(12.dp),content=content)
+    // Compact Next Step Banner
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.tertiaryContainer, modifier = Modifier.size(40.dp)) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Lightbulb, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
+                }
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(stringResource(R.string.next_step), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
+                Text(stringResource(actionLabel(review.nextAction)), style = MaterialTheme.typography.bodyMedium)
+            }
+            ScopeInfoButton(R.string.app_name, R.string.alpha_note)
+        }
     }
 }
 
 @Composable
-internal fun Input(label: Int, value: String, onChange:(String)->Unit, tag: String, numeric: Boolean=true,error:Boolean=false) {
-    OutlinedTextField(value=value,onValueChange=onChange,label={Text(stringResource(label))},singleLine=true,isError=error,
-        keyboardOptions=KeyboardOptions(keyboardType=if(numeric) KeyboardType.Decimal else KeyboardType.Text,imeAction=ImeAction.Done),
-        modifier=Modifier.fillMaxWidth().testTag(tag))
+internal fun InfoCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
+        shape = RoundedCornerShape(22.dp),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
+    }
 }
 
 @Composable
-internal fun number(value: Double, digits: Int=2): String {
-    val locale=LocalConfiguration.current.locales[0]
-    return NumberFormat.getNumberInstance(locale).apply {maximumFractionDigits=digits}.format(value)
+internal fun Input(label: Int, value: String, onChange: (String) -> Unit, tag: String, numeric: Boolean = true, error: Boolean = false) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onChange,
+        label = { Text(stringResource(label)) },
+        singleLine = true,
+        isError = error,
+        shape = RoundedCornerShape(14.dp),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = if (numeric) KeyboardType.Decimal else KeyboardType.Text,
+            imeAction = ImeAction.Done,
+        ),
+        modifier = Modifier.fillMaxWidth().testTag(tag),
+    )
 }
 
 @Composable
-internal fun dateLabel(date: LocalDate): String = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(LocalConfiguration.current.locales[0]))
+internal fun number(value: Double, digits: Int = 2): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = digits }.format(value)
+}
 
-internal fun goalLabel(goal: Goal): Int = when(goal) {
+@Composable
+internal fun dateLabel(date: LocalDate): String =
+    date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(LocalConfiguration.current.locales[0]))
+
+internal fun goalLabel(goal: Goal): Int = when (goal) {
     Goal.FAT_LOSS -> R.string.goal_fat_loss
     Goal.BUILD_STRENGTH -> R.string.goal_strength
     Goal.BUILD_HABIT -> R.string.goal_habit
 }
-internal fun actionLabel(action: NextAction): Int = when(action) {
+
+internal fun actionLabel(action: NextAction): Int = when (action) {
     NextAction.LOG_FIRST_SESSION -> R.string.action_first_session
     NextAction.KEEP_TRAINING_LOG -> R.string.action_keep_training
     NextAction.ADD_MEAL_CONTEXT -> R.string.action_meals

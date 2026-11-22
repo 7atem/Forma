@@ -42,7 +42,7 @@ struct MuscleDiagram: View {
     }
 }
 /// Parser for the original, generator-validated M/L/C/Z subset, in a 100 × 220 coordinate space.
-private struct DiagramShape: Shape {
+struct DiagramShape: Shape {
     let commands: String
     func path(in rect: CGRect) -> Path {
         let tokens=commands.split(separator:" ").map(String.init)
@@ -59,5 +59,45 @@ private struct DiagramShape: Shape {
             }
         }
         return path
+    }
+}
+
+struct WeeklyMuscleHeatMapView: View {
+    let setsByMuscle: [Muscle: Int]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("muscle_heatmap_title")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(FormaTheme.textPrimary)
+            HStack {
+                ForEach([true, false], id: \.self) { front in
+                    VStack {
+                        Text(front ? String(localized: "body_front") : String(localized: "body_back"))
+                            .font(.caption)
+                            .foregroundStyle(FormaTheme.textMuted)
+                        GeometryReader { proxy in
+                            let factor = min(proxy.size.width / 100, proxy.size.height / 220)
+                            ZStack(alignment: .topLeading) {
+                                DiagramShape(commands: ExerciseMuscles.outline).fill(FormaTheme.surfaceHigh)
+                                ForEach(Array(ExerciseMuscles.regions.enumerated()), id: \.offset) { _, region in
+                                    if region.front == front {
+                                        let count = setsByMuscle[region.muscle] ?? 0
+                                        let color: Color = count >= 8 ? FormaTheme.secondary : count >= 4 ? FormaTheme.primary : count >= 1 ? FormaTheme.tertiary.opacity(0.75) : Color.gray.opacity(0.25)
+                                        DiagramShape(commands: region.path).fill(color)
+                                    }
+                                }
+                            }
+                            .frame(width: 100, height: 220)
+                            .scaleEffect(factor, anchor: .topLeading)
+                            .offset(x: (proxy.size.width - 100 * factor) / 2)
+                        }
+                        .frame(height: 170)
+                    }
+                }
+            }
+            .accessibilityHidden(true)
+            Text("muscle_note").font(.caption2).foregroundStyle(FormaTheme.textMuted)
+        }
     }
 }

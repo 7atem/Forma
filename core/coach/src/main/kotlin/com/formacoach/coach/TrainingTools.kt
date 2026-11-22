@@ -57,3 +57,20 @@ object TrainingCsv {
         }
     }
 }
+
+/** Deterministic percentage-ramp arithmetic helper from user-entered bar and working loads. */
+object WarmupRamp {
+    data class Step(val percent: Int, val weightKg: Double, val reps: Int)
+
+    fun steps(workingKg: Double, barKg: Double = 20.0): List<Step> {
+        if (!workingKg.isFinite() || !barKg.isFinite() || workingKg <= barKg || barKg < 0.0) return emptyList()
+        fun round2_5(value: Double): Double = (kotlin.math.round(value / 2.5) * 2.5).coerceAtLeast(barKg)
+        val raw = listOf(
+            Step(0, barKg, 10),
+            Step(50, round2_5(workingKg * 0.50), 6),
+            Step(70, round2_5(workingKg * 0.70), 4),
+            Step(85, round2_5(workingKg * 0.85), 2),
+        )
+        return raw.filter { it.weightKg < workingKg }.distinctBy { it.weightKg }
+    }
+}

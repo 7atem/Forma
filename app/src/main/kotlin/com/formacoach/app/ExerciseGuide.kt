@@ -2,16 +2,20 @@ package com.formacoach.app
 
 import android.graphics.BitmapFactory
 import android.util.LruCache
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,6 +36,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -193,14 +199,51 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel) {
     if(matches.isEmpty()) EmptyState(R.string.no_matching_exercises,R.string.exercise_search_hint)
     matches.take(limit).chunked(columns).forEach {row -> Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
         row.forEach {exercise ->
-            Card(onClick={opened=exercise},modifier=Modifier.weight(1f).testTag("library_${exercise.name}"),colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface),shape=RoundedCornerShape(20.dp)) {
-                ExerciseThumbnail(exercise,Modifier.fillMaxWidth())
-                Column(Modifier.padding(14.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                    Text(stringResource(exerciseLabel(exercise)),style=MaterialTheme.typography.titleMedium)
-                    Text(stringResource(muscleLabel(ExerciseMuscles.of(exercise).primary.first())),style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.primary)
-                    Text(ExerciseCatalog.of(exercise).equipment.map {stringResource(equipmentLabel(it))}.joinToString(" · "),style=MaterialTheme.typography.bodySmall)
-                    TextButton(onClick={vm.favorite(exercise,exercise !in favorites)},enabled=!state.busy,modifier=Modifier.testTag("favorite_${exercise.name}")) {Text(stringResource(if(exercise in favorites) R.string.remove_favorite else R.string.add_favorite))}
-                    Text(stringResource(R.string.view_exercise),style=MaterialTheme.typography.labelMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
+            val isFavorite = exercise in favorites
+            Card(
+                onClick={opened=exercise},
+                modifier=Modifier.weight(1f).testTag("library_${exercise.name}"),
+                colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surface),
+                border=BorderStroke(1.dp,MaterialTheme.colorScheme.outlineVariant.copy(alpha=0.65f)),
+                shape=RoundedCornerShape(20.dp),
+            ) {
+                Box(Modifier.fillMaxWidth()) {
+                    ExerciseThumbnail(exercise,Modifier.fillMaxWidth())
+                    Surface(
+                        shape=CircleShape,
+                        color=MaterialTheme.colorScheme.background.copy(alpha=0.72f),
+                        modifier=Modifier.align(Alignment.TopEnd).padding(8.dp).size(34.dp),
+                    ) {
+                        IconButton(
+                            onClick={vm.favorite(exercise,!isFavorite)},
+                            enabled=!state.busy,
+                            modifier=Modifier.testTag("favorite_${exercise.name}"),
+                        ) {
+                            Icon(
+                                if(isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription=stringResource(if(isFavorite) R.string.remove_favorite else R.string.add_favorite),
+                                tint=if(isFavorite) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier=Modifier.size(18.dp),
+                            )
+                        }
+                    }
+                }
+                Column(Modifier.padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        stringResource(exerciseLabel(exercise)),
+                        style=MaterialTheme.typography.titleMedium,
+                        fontWeight=FontWeight.Bold,
+                        maxLines=2,
+                        overflow=TextOverflow.Ellipsis,
+                    )
+                    PillBadge(stringResource(muscleLabel(ExerciseMuscles.of(exercise).primary.first())))
+                    Text(
+                        ExerciseCatalog.of(exercise).equipment.map {stringResource(equipmentLabel(it))}.joinToString(" · "),
+                        style=MaterialTheme.typography.labelSmall,
+                        color=MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines=1,
+                        overflow=TextOverflow.Ellipsis,
+                    )
                 }
             }
         }

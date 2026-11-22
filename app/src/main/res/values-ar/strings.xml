@@ -216,4 +216,23 @@
     <string name="model_downloading">النظام بينزّل النموذج.</string>
     <string name="model_ready">النموذج المحلي جاهز على الجهاز ده.</string>
     <string name="model_error">تعذر فحص أو استخدام نموذج الجهاز.</string>
+    <string name="starter_foods_title">أطعمة أساسية جاهزة</string>
+    <string name="starter_foods_note">قيم مرجعية عامة من USDA. أضف أي صنف لمكتبتك الخاصة وعدّلها بحرية.</string>
+    <string name="add_starter_food">أضف</string>
+    <string name="added_to_library">محفوظ</string>
+    <string name="load_all_starters">أضف كل الأطعمة الأساسية</string>
+    <string name="chart_mode_load">أقصى وزن</string>
+    <string name="chart_mode_e1rm">1RM تقديري</string>
+    <string name="best_e1rm_value">أفضل 1RM تقديري: %1$s كجم (%2$s)</string>
+    <string name="session_tonnage">الحجم: %1$s كجم</string>
+    <string name="weekly_volume_label">حجم 7 أيام (كجم)</string>
+    <string name="muscle_heatmap_title">خريطة عضلات 7 أيام</string>
+    <string name="muscle_heatmap_note">الألوان توضح مجموعات العمل المسجلة خلال آخر 7 أيام فقط، وليست قياسًا للاستشفاء.</string>
+    <string name="heatmap_light">١–٣ مجموعات</string>
+    <string name="heatmap_moderate">٤–٧ مجموعات</string>
+    <string name="heatmap_high">+٨ مجموعات</string>
+    <string name="personal_records_title">الأرقام القياسية</string>
+    <string name="warmup_ramp_title">تسلسل إحماء اختياري</string>
+    <string name="macro_split_title">توزيع السعرات</string>
+    <string name="workout_complete_banner">تم حفظ الجلسة</string>
 </resources>
