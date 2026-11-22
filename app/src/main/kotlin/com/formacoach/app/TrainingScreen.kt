@@ -451,6 +451,13 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             }
         }
         val parsedWeight = NumericInput.decimal(weight)
+        if (!warmup && parsedWeight != null && TrainingHistory.isNewWeightPr(state.snapshot, exercise, parsedWeight, session.date)) {
+            PillBadge(
+                text = "★ " + stringResource(R.string.new_pr_badge),
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.secondary,
+            )
+        }
         if (Equipment.BARBELL in ExerciseCatalog.of(exercise).equipment && parsedWeight != null && parsedWeight >= 20.0) {
             val stdPairs = mapOf(25.0 to 4, 20.0 to 4, 15.0 to 4, 10.0 to 4, 5.0 to 4, 2.5 to 4, 1.25 to 4)
             val preview = remember(parsedWeight) { runCatching { PlateCalculator.calculate(parsedWeight, 20.0, stdPairs) }.getOrNull() }
@@ -472,6 +479,15 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             )
         }
         if (showRpe) {
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf("7" to "3 RIR", "8" to "2 RIR", "9" to "1 RIR", "10" to "0 RIR").forEach { (valStr, rir) ->
+                    FilterChip(
+                        selected = rpe == valStr,
+                        onClick = { rpe = valStr },
+                        label = { Text("RPE $valStr · $rir") },
+                    )
+                }
+            }
             Input(
                 R.string.rpe_optional,
                 rpe,

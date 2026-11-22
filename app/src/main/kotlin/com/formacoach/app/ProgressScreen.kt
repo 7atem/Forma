@@ -109,6 +109,21 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         WeeklyMuscleHeatMap(weeklyMuscleMap)
     }
 
+    // 12-Week GitHub-Style Training Consistency Grid + Streak
+    val countsByDate = remember(state.snapshot.sessions) {
+        state.snapshot.sessions.filter { it.completedAt != null }.groupingBy { it.date }.eachCount()
+    }
+    val weekStreak = remember(state.snapshot, today) { TrainingHistory.activeWeekStreak(state.snapshot, today) }
+    InfoCard {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.activity_heatmap_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            if (weekStreak > 0) {
+                PillBadge(stringResource(R.string.week_streak_badge, number(weekStreak.toDouble(), 0)))
+            }
+        }
+        ActivityHeatmapGrid(today = today, countsByDate = countsByDate)
+    }
+
     // Personal Records (PR) Trophy Wall
     val records = remember(state.snapshot, today) {
         Exercise.entries.mapNotNull { ex ->

@@ -101,4 +101,20 @@ class DailyWorkflowTest {
         assertEquals(listOf(20.0, 50.0, 70.0, 85.0), steps.map { it.weightKg })
         assertTrue(steps.all { it.weightKg < 100.0 })
     }
+
+    @Test fun `pr detection streak and macro calorie helper are deterministic`() {
+        val sessions = listOf(
+            Session("w1", date.minusDays(1), "A", completedAt = 10L),
+            Session("w2", date.minusDays(8), "A", completedAt = 10L),
+        )
+        val sets = listOf(
+            TrainingSet(sessionId = "w1", exercise = Exercise.CHEST_PRESS, reps = 8, weightKg = 60.0, kind = SetKind.WORKING),
+            TrainingSet(sessionId = "w1", exercise = Exercise.CHEST_PRESS, reps = 5, weightKg = 90.0, kind = SetKind.WARM_UP),
+        )
+        val snap = FitnessSnapshot(sessions = sessions, sets = sets)
+        assertTrue(TrainingHistory.isNewWeightPr(snap, Exercise.CHEST_PRESS, 62.5, date))
+        assertFalse(TrainingHistory.isNewWeightPr(snap, Exercise.CHEST_PRESS, 60.0, date))
+        assertEquals(2, TrainingHistory.activeWeekStreak(snap, date))
+        assertEquals(470.0, TrainingHistory.macroCalories(30.0, 50.0, 16.6667), 0.1)
+    }
 }

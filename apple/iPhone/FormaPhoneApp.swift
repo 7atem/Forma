@@ -540,6 +540,30 @@ private struct MealSlotOption: Identifiable {
 
                 Divider().overlay(FormaTheme.border)
 
+                if let prev = store.state.workouts.reversed().flatMap(\.sets).first(where: { $0.exercise == exercise }) {
+                    HStack {
+                        Text("\(prev.reps) × \(prev.weightKg.formatted()) kg")
+                            .font(.caption)
+                            .foregroundStyle(FormaTheme.textMuted)
+                        Spacer()
+                        Button("copy_previous_set") {
+                            reps = prev.reps
+                            kg = prev.weightKg
+                            warmup = prev.kind == .warmUp
+                            if let r = prev.rpe { hasRpe = true; rpe = r }
+                        }
+                        .font(.caption.weight(.semibold))
+                    }
+                }
+
+                if !warmup && FormaTheme.isNewWeightPr(workouts: store.state.workouts, exercise: exercise, weightKg: kg) {
+                    FormaPill(
+                        text: "★ \(String(localized: "new_pr_badge"))",
+                        background: FormaTheme.secondary.opacity(0.22),
+                        foreground: FormaTheme.secondary
+                    )
+                }
+
                 Stepper(value: $reps, in: 1...1000) {
                     Text("\(String(localized: "reps")): \(reps)")
                         .font(.body.weight(.semibold))
@@ -589,6 +613,21 @@ private struct MealSlotOption: Identifiable {
                 Toggle("warmup", isOn: $warmup).tint(FormaTheme.secondary)
                 Toggle("record_rpe", isOn: $hasRpe).tint(FormaTheme.tertiary)
                 if hasRpe {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach([7.0, 8.0, 9.0, 10.0], id: \.self) { val in
+                                let rir = Int(10.0 - val)
+                                let sel = abs(rpe - val) < 0.01
+                                Button { rpe = val } label: {
+                                    FormaPill(
+                                        text: "RPE \(Int(val)) · \(rir) RIR",
+                                        background: sel ? FormaTheme.tertiary : FormaTheme.surfaceHigh,
+                                        foreground: sel ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                    )
+                                }
+                            }
+                        }
+                    }
                     Stepper(value: $rpe, in: 0...10, step: 0.5) {
                         Text("RPE \(rpe.formatted())").foregroundStyle(FormaTheme.tertiary)
                     }
@@ -1050,6 +1089,9 @@ private struct MealSlotOption: Identifiable {
                 Stepper("\(String(localized: "protein_label")): \(Int(protein))g", value: $protein, in: 0...500, step: 2)
                 Stepper("\(String(localized: "carbs_label")): \(Int(carbs))g", value: $carbs, in: 0...500, step: 5)
                 Stepper("\(String(localized: "fat_label")): \(Int(fat))g", value: $fat, in: 0...300, step: 2)
+                Button("calc_from_macros") {
+                    kcal = (protein * 4.0) + (carbs * 4.0) + (fat * 9.0)
+                }
             }
             .navigationTitle("log_meal")
             .toolbar {
@@ -1163,6 +1205,26 @@ private struct MealSlotOption: Identifiable {
                         return counts
                     }()
                     FormaCard { WeeklyMuscleHeatMapView(setsByMuscle: muscleCounts) }
+
+                    // 12-Week GitHub-Style Training Grid + Streak
+                    let countsByDate: [String: Int] = {
+                        var map: [String: Int] = [:]
+                        for w in store.state.workouts { map[w.date, default: 0] += 1 }
+                        return map
+                    }()
+                    let streak = FormaTheme.activeWeekStreak(workouts: store.state.workouts)
+                    FormaCard {
+                        HStack {
+                            Text("activity_heatmap_title")
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(FormaTheme.textPrimary)
+                            Spacer()
+                            if streak > 0 {
+                                FormaPill(text: "\(streak) \(String(localized: "week_streak_label"))")
+                            }
+                        }
+                        FormaActivityHeatmap(countsByDate: countsByDate)
+                    }
                 }
                 .padding(16)
             }

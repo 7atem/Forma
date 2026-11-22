@@ -43,6 +43,31 @@ object TrainingHistory {
         return sessionTonnage(data.sets.filter { it.sessionId in completedIds })
     }
 
+    /** True when weightKg strictly beats all prior completed working sets for this exercise. */
+    fun isNewWeightPr(data: FitnessSnapshot, exercise: Exercise, weightKg: Double, asOf: LocalDate): Boolean {
+        if (!weightKg.isFinite() || weightKg <= 0.0) return false
+        val completedIds = data.sessions.filter { it.completedAt != null && it.date <= asOf }.map { it.id }.toSet()
+        val priorBest = data.sets
+            .filter { it.exercise == exercise && it.kind == SetKind.WORKING && it.sessionId in completedIds }
+            .maxOfOrNull { it.weightKg } ?: return true
+        return weightKg > priorBest
+    }
+
+    /** Consecutive 7-day rolling windows ending at asOf with at least one completed workout. */
+    fun activeWeekStreak(data: FitnessSnapshot, asOf: LocalDate): Int {
+        val dates = data.sessions.filter { it.completedAt != null && it.date <= asOf }.map { it.date }.toSet()
+        var streak = 0
+        while (streak < 52) {
+            val end = asOf.minusDays(streak * 7L)
+            val start = end.minusDays(6)
+            if (dates.any { it in start..end }) streak++ else break
+        }
+        return streak
+    }
+
+    fun macroCalories(protein: Double, carbs: Double, fat: Double): Double =
+        (protein.coerceAtLeast(0.0) * 4.0) + (carbs.coerceAtLeast(0.0) * 4.0) + (fat.coerceAtLeast(0.0) * 9.0)
+
     fun weights(data: FitnessSnapshot, asOf: LocalDate): List<HistoryPoint> = data.measurements
         .filter { it.date in asOf.minusDays(89)..asOf && it.weightKg != null }
         .sortedBy { it.date }.map { HistoryPoint(it.date, it.weightKg!!) }

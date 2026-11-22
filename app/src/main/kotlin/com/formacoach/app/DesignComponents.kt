@@ -599,6 +599,46 @@ internal fun MacroDonutRing(
 }
 
 @Composable
+internal fun ActivityHeatmapGrid(
+    today: LocalDate,
+    countsByDate: Map<LocalDate, Int>,
+    modifier: Modifier = Modifier,
+) {
+    val weeks = 12
+    val totalDays = weeks * 7
+    val start = today.minusDays((totalDays - 1).toLong())
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        repeat(weeks) { col ->
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                repeat(7) { row ->
+                    val day = start.plusDays((col * 7 + row).toLong())
+                    val count = countsByDate[day] ?: 0
+                    val color = when {
+                        count >= 2 -> MaterialTheme.colorScheme.primary
+                        count == 1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.62f)
+                        day == today -> MaterialTheme.colorScheme.primaryContainer
+                        else -> MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+                    }
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(color),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 internal fun ScopeInfoButton(title: Int, vararg notes: Int, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
     IconButton(onClick = { open = true }, modifier = modifier.size(32.dp)) {

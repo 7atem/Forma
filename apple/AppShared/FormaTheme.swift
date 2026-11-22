@@ -39,6 +39,40 @@ enum FormaTheme {
         }
     }
 
+    static func isNewWeightPr(workouts: [WatchWorkout], exercise: Exercise, weightKg: Double) -> Bool {
+        guard weightKg.isFinite, weightKg > 0 else { return false }
+        let priorBest = workouts
+            .flatMap(\.sets)
+            .filter { $0.exercise == exercise && $0.kind == .working }
+            .map(\.weightKg)
+            .max()
+        guard let priorBest else { return true }
+        return weightKg > priorBest
+    }
+
+    static func activeWeekStreak(workouts: [WatchWorkout]) -> Int {
+        let dates = Set(workouts.map(\.date))
+        let cal = Calendar.current
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .gregorian)
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.dateFormat = "yyyy-MM-dd"
+        let today = Date()
+        var streak = 0
+        while streak < 52 {
+            var hit = false
+            for dayOffset in 0..<7 {
+                if let d = cal.date(byAdding: .day, value: -(streak * 7 + dayOffset), to: today),
+                   dates.contains(fmt.string(from: d)) {
+                    hit = true
+                    break
+                }
+            }
+            if hit { streak += 1 } else { break }
+        }
+        return streak
+    }
+
     static func platesPerSide(totalKg: Double, barKg: Double = 20.0) -> [Double] {
         var remaining = (totalKg - barKg) / 2.0
         guard remaining > 0 else { return [] }
@@ -249,5 +283,47 @@ struct FormaWeeklyStrip: View {
         .padding(.vertical, 12)
         .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(FormaTheme.border.opacity(0.75), lineWidth: 1))
+    }
+}
+
+struct FormaActivityHeatmap: View {
+    let countsByDate: [String: Int]
+
+    private var gridDates: [[String]] {
+        let cal = Calendar.current
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .gregorian)
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.dateFormat = "yyyy-MM-dd"
+        let today = Date()
+        let total = 12 * 7
+        var cols: [[String]] = []
+        for col in 0..<12 {
+            var column: [String] = []
+            for row in 0..<7 {
+                let offset = (total - 1) - (col * 7 + row)
+                let d = cal.date(byAdding: .day, value: -offset, to: today) ?? today
+                column.append(fmt.string(from: d))
+            }
+            cols.append(column)
+        }
+        return cols
+    }
+
+    var body: some View {
+        let cols = gridDates
+        HStack(spacing: 4) {
+            ForEach(0..<cols.count, id: \.self) { c in
+                VStack(spacing: 4) {
+                    ForEach(0..<cols[c].count, id: \.self) { r in
+                        let count = countsByDate[cols[c][r]] ?? 0
+                        let color: Color = count >= 2 ? FormaTheme.primary : count == 1 ? FormaTheme.primary.opacity(0.6) : FormaTheme.surfaceHigh.opacity(0.75)
+                        RoundedRectangle(cornerRadius: 3.5, style: .continuous)
+                            .fill(color)
+                            .aspectRatio(1, contentMode: .fit)
+                    }
+                }
+            }
+        }
     }
 }

@@ -93,3 +93,8 @@
 "meal_lunch" = "غداء";
 "meal_dinner" = "عشاء";
 "meal_snack" = "سناك";
+"new_pr_badge" = "رقم قياسي جديد!";
+"activity_heatmap_title" = "شبكة تدريب ١٢ أسبوع";
+"week_streak_label" = "أسابيع متتالية";
+"calc_from_macros" = "احسب السعرات من الماكروز";
+"copy_previous_set" = "نسخ آخر مجموعة";

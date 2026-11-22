@@ -235,4 +235,8 @@
     <string name="warmup_ramp_title">Optional warm-up ramp</string>
     <string name="macro_split_title">Macro energy split</string>
     <string name="workout_complete_banner">Session saved</string>
+    <string name="new_pr_badge">NEW PR!</string>
+    <string name="activity_heatmap_title">12-week training grid</string>
+    <string name="week_streak_badge">%1$s-week streak</string>
+    <string name="calc_from_macros">Calc kcal</string>
 </resources>

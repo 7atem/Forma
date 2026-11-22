@@ -385,6 +385,18 @@ private fun MealFields(initial: Meal?, date: LocalDate, busy: Boolean, defaultSl
             first = { Input(R.string.carbs, carbs, { carbs = it }, "meal_carbs") },
             second = { Input(R.string.fat, fat, { fat = it }, "meal_fat") },
         )
+        val pVal = NumericInput.decimal(protein)
+        val cVal = NumericInput.decimal(carbs)
+        val fVal = NumericInput.decimal(fat)
+        if (pVal != null && cVal != null && fVal != null) {
+            val computed = kotlin.math.round(com.formacoach.coach.TrainingHistory.macroCalories(pVal, cVal, fVal)).toInt()
+            OutlinedButton(
+                onClick = { calories = computed.toString() },
+                shape = RoundedCornerShape(12.dp),
+            ) {
+                Text("${stringResource(R.string.calc_from_macros)} ($computed kcal)")
+            }
+        }
         Input(R.string.source_optional, source, { source = it }, "meal_source", numeric = false)
         if (initial != null) Text(stringResource(R.string.manual_correction_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Button(
