@@ -228,7 +228,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
                 Text(stringResource(R.string.source_value, item.source), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 portion?.let { NutrientSummary(it.calories, it.protein, it.carbs, it.fat) }
                 Button(
-                    onClick = { portion?.let { vm.addMeal(it) { quantity = "" } } },
+                    onClick = { if (vm.state.value.busy) return@Button; portion?.let { vm.addMeal(it) { quantity = "" } } },
                     enabled = portion != null && !state.busy,
                     shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("log_portion"),

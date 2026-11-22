@@ -50,9 +50,10 @@
     <string name="active_session">Active session · %1$s</string>
     <string name="reps">Repetitions</string>
     <string name="weight_kg">External load · kg</string>
+    <string name="weight_lb">External load · lb</string>
     <string name="zero_external_load">For an unloaded or bodyweight set, enter 0 kg.</string>
     <string name="add_set">Save set</string>
-    <string name="set_summary">%1$s · %2$s reps × %3$s kg</string>
+    <string name="set_summary">%1$s · %2$s reps × %3$s</string>
     <string name="finish_session">Finish session</string>
     <string name="eat_title">Keep food simple.</string>
     <string name="portion_note">Enter the totals for the whole portion you ate, using a label, recipe or another source you trust. All four values are required; enter 0 only when that value is known to be zero.</string>
@@ -68,6 +69,7 @@
     <string name="progress_title">See your effort.</string>
     <string name="measure_note">Enter at least one value. Saving replaces today’s measurement record, including any field left blank.</string>
     <string name="body_weight">Body weight · kg</string>
+    <string name="body_weight_lb">Body weight · lb</string>
     <string name="waist">Waist · cm</string>
     <string name="save_measurement">Save measurements</string>
     <string name="weekly_review">Your weekly review</string>
@@ -75,15 +77,15 @@
     <string name="review_sessions">Completed sessions · %1$s</string>
     <string name="review_meal_days">Days with food entries · %1$s / 7</string>
     <string name="review_calories">Average logged calories per logged day · %1$s kcal</string>
-    <string name="review_weight">Average body weight · %1$s kg from %2$s observations</string>
+    <string name="review_weight">Average body weight · %1$s from %2$s observations</string>
     <string name="review_waist">Average recorded waist · %1$s cm</string>
-    <string name="review_delta">Average weight difference from the previous 7 days · %1$s kg</string>
+    <string name="review_delta">Average weight difference from the previous 7 days · %1$s</string>
     <string name="comparison_range">Comparison window · %1$s – %2$s · %3$s weight observations</string>
     <string name="not_enough_weight">A weight comparison needs at least 3 recorded days in each 7-day window. This is a data coverage check, not a medical assessment.</string>
     <string name="no_auto_change">This review does not change your targets or plan. It describes the log without explaining the cause of weight changes.</string>
     <string name="measurement_history">Measurement history</string>
     <string name="no_measurements">Your recorded measurements will appear here.</string>
-    <string name="body_weight_value">Body weight · %1$s kg</string>
+    <string name="body_weight_value">Body weight · %1$s</string>
     <string name="waist_value">Waist · %1$s cm</string>
     <string name="action_first_session">When you next train, log your session so you have a starting point.</string>
     <string name="action_keep_training">Your log shows fewer completed sessions than your weekly plan. Check whether you need to record a session or review the plan you chose.</string>
@@ -113,7 +115,7 @@
     <string name="delete_program_note">Delete this saved program? Existing sessions keep their recorded names, exercises and loads.</string>
     <string name="search_history">Search sessions by name, exercise or ISO date</string>
     <string name="show_more">Show more</string>
-    <string name="previous_set">Previously logged · %1$s reps × %2$s kg</string>
+    <string name="previous_set">Previously logged · %1$s reps × %2$s</string>
     <string name="rest_countdown">Rest timer · %1$s seconds left / %2$s seconds</string>
     <string name="timer_note">Starts after saving a set. Elapsed time is preserved while you leave the screen; there is no background alarm.</string>
     <string name="restart_timer">Restart timer</string>
@@ -173,7 +175,7 @@
     <string name="review_evidence">Records behind this review</string>
     <string name="session_evidence">%1$s · %2$s · %3$s sets</string>
     <string name="meal_evidence">%1$s · %2$s · %3$s kcal</string>
-    <string name="measurement_evidence">%1$s · %2$s kg</string>
+    <string name="measurement_evidence">%1$s · %2$s</string>
     <string name="no_evidence">There are no records for this window yet.</string>
     <string name="check_in">Weekly check-in</string>
     <string name="check_in_note">How many sessions can you fit into the coming week? A different choice creates a proposal for your confirmation.</string>
@@ -223,8 +225,8 @@
     <string name="load_all_starters">Add all starter foods</string>
     <string name="chart_mode_load">Max load</string>
     <string name="chart_mode_e1rm">Est. 1RM</string>
-    <string name="best_e1rm_value">Best est. 1RM: %1$s kg (%2$s)</string>
-    <string name="session_tonnage">Volume: %1$s kg</string>
+    <string name="best_e1rm_value">Best est. 1RM: %1$s (%2$s)</string>
+    <string name="session_tonnage">Volume: %1$s</string>
     <string name="weekly_volume_label">7-day volume (kg)</string>
     <string name="muscle_heatmap_title">7-day body heat map</string>
     <string name="muscle_heatmap_note">Colors show recorded working sets in the last 7 days, not recovery or measured activation.</string>

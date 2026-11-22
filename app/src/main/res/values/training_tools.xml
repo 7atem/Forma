@@ -40,10 +40,9 @@
     <string name="bar_weight">Bar weight · kg</string>
     <string name="target_weight">Chosen total · kg</string>
     <string name="available_pairs">Available pairs (edit before calculating)</string>
-    <string name="plate_pair_count">Pairs of %1$s kg plates</string>
+    <string name="plate_pair_count">Pairs of %1$s plates</string>
     <string name="plates_unavailable">Exact balanced load is unavailable with these pairs. Check the total and available plates.</string>
     <string name="plates_per_side">On each side: %1$s</string>
     <string name="empty_bar">Empty bar</string>
-    <string name="plate_kg">%1$s kg</string>
     <string name="calculate">Calculate</string>
 </resources>

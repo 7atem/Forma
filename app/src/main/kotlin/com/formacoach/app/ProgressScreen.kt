@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,12 +29,28 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     var day by rememberSaveable { mutableLongStateOf(today.toEpochDay()) }
     val date = LocalDate.ofEpochDay(day)
     val existing = state.snapshot.measurements.firstOrNull { it.date == date }
-    var weight by rememberSaveable(day, existing?.weightKg) { mutableStateOf(existing?.weightKg?.toString().orEmpty()) }
-    var waist by rememberSaveable(day, existing?.waistCm) { mutableStateOf(existing?.waistCm?.toString().orEmpty()) }
+    val unit = LocalWeightUnit.current
+    val unitStr = weightUnitLabel()
+    val locale = LocalConfiguration.current.locales[0]
+    var weight by rememberSaveable(day, existing?.weightKg) {
+        mutableStateOf(existing?.weightKg?.let { formatInputNumber(WeightUnits.fromKg(it, unit), locale, 2) }.orEmpty())
+    }
+    var inputUnit by rememberSaveable(day, existing?.weightKg) { mutableStateOf(unit) }
+    LaunchedEffect(unit) {
+        if (inputUnit != unit) {
+            NumericInput.decimal(weight)?.let { parsed ->
+                weight = formatInputNumber(WeightUnits.convert(parsed, inputUnit, unit), locale, 2)
+            }
+            inputUnit = unit
+        }
+    }
+    var waist by rememberSaveable(day, existing?.waistCm) {
+        mutableStateOf(existing?.waistCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
     val measure = runCatching {
         Measurement(
             date,
-            if (weight.isBlank()) null else requireNotNull(NumericInput.decimal(weight)),
+            if (weight.isBlank()) null else WeightUnits.toKg(requireNotNull(NumericInput.decimal(weight)), unit),
             if (waist.isBlank()) null else requireNotNull(NumericInput.decimal(waist)),
         )
     }.getOrNull()
@@ -41,8 +58,6 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     val latestWeight = state.snapshot.measurements.firstOrNull { it.weightKg != null }
     val latestWaist = state.snapshot.measurements.firstOrNull { it.waistCm != null }
     val weeklyVolume = TrainingHistory.weeklyTonnage(state.snapshot, today)
-    val unit = LocalWeightUnit.current
-    val unitStr = stringResource(if (unit == WeightUnit.KG) R.string.kg else R.string.lb)
 
     PageHeading(R.string.progress_title)
 
@@ -83,7 +98,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
             ScopeInfoButton(R.string.progress_title, R.string.measure_note)
         }
         FormFieldPair(
-            first = { Input(R.string.body_weight, weight, { weight = it }, "body_weight") },
+            first = { Input(if (unit == WeightUnit.KG) R.string.body_weight else R.string.body_weight_lb, weight, { weight = it }, "body_weight") },
             second = { Input(R.string.waist, waist, { waist = it }, "waist") },
         )
         Button(
@@ -160,14 +175,14 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                "${number(best.weightKg)} ${stringResource(R.string.kg)} × ${number(best.repsAtWeight.toDouble(), 0)}",
+                                "${formatWeight(best.weightKg)} × ${number(best.repsAtWeight.toDouble(), 0)}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary,
                             )
                             e1rm?.let {
                                 PillBadge(
-                                    "${stringResource(R.string.chart_mode_e1rm)} ${number(it.value, 1)}",
+                                    "${stringResource(R.string.chart_mode_e1rm)} ${formatWeight(it.value, 1)}",
                                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                                     contentColor = MaterialTheme.colorScheme.tertiary,
                                 )
@@ -189,7 +204,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(dateLabel(value.date), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        value.weightKg?.let { PillBadge(stringResource(R.string.body_weight_value, number(it))) }
+                        value.weightKg?.let { PillBadge(stringResource(R.string.body_weight_value, formatWeight(it))) }
                         value.waistCm?.let {
                             PillBadge(
                                 stringResource(R.string.waist_value, number(it)),
@@ -245,8 +260,8 @@ internal fun WeeklyReviewCard(snapshot: FitnessSnapshot, date: LocalDate, vm: Fi
                 }
                 review.meanWeight?.let {
                     MetricTile(
-                        "${number(it)} ${stringResource(R.string.kg)}",
-                        stringResource(R.string.review_weight, number(it), number(review.weightObservations.toDouble(), 0)),
+                        formatWeight(it, 1),
+                        stringResource(R.string.review_weight, formatWeight(it, 1), number(review.weightObservations.toDouble(), 0)),
                         Modifier.weight(1f),
                         accent = MaterialTheme.colorScheme.tertiary,
                     )
@@ -257,7 +272,7 @@ internal fun WeeklyReviewCard(snapshot: FitnessSnapshot, date: LocalDate, vm: Fi
         val delta = review.weightDelta
         if (delta != null) {
             PillBadge(
-                stringResource(R.string.review_delta, number(delta)),
+                stringResource(R.string.review_delta, formatWeight(delta, 2)),
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.tertiary,
             )

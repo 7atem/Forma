@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -34,7 +35,7 @@ import kotlinx.serialization.json.Json
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
-internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewModel, scrollState: ScrollState, onSetDeleted: (TrainingSet) -> Unit = {}) {
+internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewModel, scrollState: ScrollState, onSetDeleted: (TrainingSet, List<String>) -> Unit = { _, _ -> }) {
     var section by rememberSaveable { mutableIntStateOf(0) }
     var day by rememberSaveable { mutableLongStateOf(today.toEpochDay()) }
     var editorPayload by rememberSaveable { mutableStateOf<String?>(null) }
@@ -171,7 +172,7 @@ private fun ProgramCard(
 }
 
 @Composable
-private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel, onSetDeleted: (TrainingSet) -> Unit = {}, onFinished: () -> Unit) {
+private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel, onSetDeleted: (TrainingSet, List<String>) -> Unit = { _, _ -> }, onFinished: () -> Unit) {
     val choices = (session.plannedExercises + Exercise.entries).distinct()
     val sets = state.snapshot.sets.filter { it.sessionId == session.id }
     val workingCounts = remember(session, sets) { WorkoutFlow.counts(session, sets) }
@@ -200,7 +201,17 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         elapsed = SystemClock.elapsedRealtime()
     }
     val unit = LocalWeightUnit.current
-    val unitLabel = stringResource(if (unit == WeightUnit.KG) R.string.kg else R.string.lb)
+    val unitLabel = weightUnitLabel()
+    val locale = LocalConfiguration.current.locales[0]
+    var inputUnit by rememberSaveable(session.id) { mutableStateOf(unit) }
+    LaunchedEffect(unit) {
+        if (inputUnit != unit) {
+            NumericInput.decimal(weight)?.let { parsed ->
+                weight = formatInputNumber(WeightUnits.convert(parsed, inputUnit, unit), locale, 2)
+            }
+            inputUnit = unit
+        }
+    }
     val remaining = RestTimer.remainingSeconds(deadline, elapsed, timerDuration)
     val candidate = runCatching {
         TrainingSet(
@@ -251,7 +262,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                 val tonnage = TrainingHistory.sessionTonnage(sets)
                 if (tonnage > 0.0) {
                     Text(
-                        stringResource(R.string.session_tonnage, number(tonnage, 0)),
+                        stringResource(R.string.session_tonnage, formatWeight(tonnage, 0)),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f),
                     )
@@ -383,17 +394,18 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), number(last.weightKg)),
+                        stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), formatWeight(last.weightKg)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
                     )
                     TextButton(
                         onClick = {
-                            reps = last.reps.toString()
-                            weight = last.weightKg.toString()
+                            reps = formatInputNumber(last.reps.toDouble(), locale, 0)
+                            weight = formatInputNumber(WeightUnits.fromKg(last.weightKg, unit), locale, 2)
+                            inputUnit = unit
                             warmup = last.kind == SetKind.WARM_UP
-                            rpe = last.rpe?.toString().orEmpty()
+                            rpe = last.rpe?.let { formatInputNumber(it, locale, 1) }.orEmpty()
                             showRpe = last.rpe != null
                         },
                     ) { Text(stringResource(R.string.copy_previous_set), fontWeight = FontWeight.SemiBold) }
@@ -419,7 +431,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             },
             second = {
                 StepperInput(
-                    label = R.string.weight_kg,
+                    label = if (unit == WeightUnit.KG) R.string.weight_kg else R.string.weight_lb,
                     value = weight,
                     onChange = { weight = it },
                     tag = "set_weight",
@@ -428,7 +440,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     max = if (unit == WeightUnit.KG) 1000.0 else 2200.0,
                     integer = false,
                     error = weight.isNotBlank() && NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) in 0.0..1000.0 } != true,
-                    placeholder = previous?.let { "${WeightUnits.fromKg(it.weightKg, unit)} $unitLabel" },
+                    placeholder = previous?.let { formatWeight(it.weightKg) },
                 )
             },
         )
@@ -452,7 +464,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                         val cur = NumericInput.decimal(weight) ?: 0.0
                         val cap = if (unit == WeightUnit.KG) 1000.0 else 2200.0
                         val next = (cur + bump).coerceAtMost(cap)
-                        weight = if (next == next.toLong().toDouble()) next.toLong().toString() else next.toString()
+                        weight = formatInputNumber(next, locale, 2)
                     },
                     label = { Text("+${number(bump)} $unitLabel", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold) },
                 )
@@ -509,6 +521,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
 
         Button(
             onClick = {
+                if (vm.state.value.busy) return@Button
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 candidate?.let { value ->
                     vm.logSet(value) { saved ->
@@ -612,7 +625,9 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                 Text(stringResource(R.string.logged_sets), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 PillBadge(number(sets.size.toDouble(), 0))
             }
-            (if (allSets) sets else sets.takeLast(4)).forEach { SetCard(it, state.busy, true, vm, onRemoved = onSetDeleted) }
+            (if (allSets) sets else sets.takeLast(4)).forEach { setItem ->
+                SetCard(setItem, state.busy, true, vm, onRemoved = { deleted -> onSetDeleted(deleted, sets.map { it.id }) })
+            }
             if (sets.size > 4) {
                 TextButton(onClick = { allSets = !allSets }) {
                     Text(stringResource(if (allSets) R.string.show_less else R.string.show_more))
@@ -674,7 +689,7 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                         Text(stringResource(R.string.workout_complete_banner), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
                         if (tonnage > 0.0) {
-                            Text(stringResource(R.string.session_tonnage, number(tonnage, 0)), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                            Text(stringResource(R.string.session_tonnage, formatWeight(tonnage, 0)), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
                         }
                     }
                     IconButton(onClick = onDismissVictory) {
@@ -700,6 +715,8 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                 onSelect = { chartMode = it },
                 tagPrefix = "chart_mode",
             )
+            val unit = LocalWeightUnit.current
+            val unitLabel = weightUnitLabel()
             if (chartMode == 0) {
                 MuscleTraining.best(state.snapshot, exercise, today)?.let {
                     Surface(
@@ -708,7 +725,7 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            stringResource(R.string.best_recorded_load, number(it.weightKg), number(it.repsAtWeight.toDouble(), 0), dateLabel(it.date)),
+                            stringResource(R.string.best_recorded_load, formatWeight(it.weightKg), number(it.repsAtWeight.toDouble(), 0), dateLabel(it.date)),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold,
@@ -716,7 +733,10 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                         )
                     }
                 }
-                HistoryChart(TrainingHistory.loads(state.snapshot, exercise, today).takeLast(30), stringResource(R.string.kg))
+                HistoryChart(
+                    TrainingHistory.loads(state.snapshot, exercise, today).takeLast(30).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) },
+                    unitLabel,
+                )
             } else {
                 TrainingHistory.bestE1rm(state.snapshot, exercise, today)?.let {
                     Surface(
@@ -725,7 +745,7 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(
-                            stringResource(R.string.best_e1rm_value, number(it.value, 1), dateLabel(it.date)),
+                            stringResource(R.string.best_e1rm_value, formatWeight(it.value, 1), dateLabel(it.date)),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.tertiary,
                             fontWeight = FontWeight.SemiBold,
@@ -733,7 +753,10 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                         )
                     }
                 }
-                HistoryChart(TrainingHistory.e1rm(state.snapshot, exercise, today).takeLast(30), stringResource(R.string.kg))
+                HistoryChart(
+                    TrainingHistory.e1rm(state.snapshot, exercise, today).takeLast(30).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) },
+                    unitLabel,
+                )
             }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.external_load_note), Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -798,7 +821,7 @@ private fun SessionHistoryCard(session: Session, state: AppState, vm: FitnessVie
                 )
                 val tonnage = TrainingHistory.sessionTonnage(sets)
                 if (tonnage > 0.0) {
-                    PillBadge(stringResource(R.string.session_tonnage, number(tonnage, 0)))
+                    PillBadge(stringResource(R.string.session_tonnage, formatWeight(tonnage, 0)))
                 }
             }
             TextButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("history_expand_${session.id}")) {
@@ -845,7 +868,7 @@ private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: Fit
         Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    stringResource(R.string.set_summary, stringResource(exerciseLabel(set.exercise)), number(set.reps.toDouble(), 0), number(set.weightKg)),
+                    stringResource(R.string.set_summary, stringResource(exerciseLabel(set.exercise)), number(set.reps.toDouble(), 0), formatWeight(set.weightKg)),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
@@ -885,16 +908,27 @@ private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: Fit
 
 @Composable
 private fun SetDialog(set: TrainingSet, busy: Boolean, onDismiss: () -> Unit, onSave: (TrainingSet) -> Unit) {
+    val unit = LocalWeightUnit.current
+    val locale = LocalConfiguration.current.locales[0]
     var exercise by remember { mutableStateOf(set.exercise) }
-    var reps by remember { mutableStateOf(set.reps.toString()) }
-    var weight by remember { mutableStateOf(set.weightKg.toString()) }
+    var reps by remember { mutableStateOf(formatInputNumber(set.reps.toDouble(), locale, 0)) }
+    var weight by remember { mutableStateOf(formatInputNumber(WeightUnits.fromKg(set.weightKg, unit), locale, 2)) }
+    var inputUnit by remember { mutableStateOf(unit) }
+    LaunchedEffect(unit) {
+        if (inputUnit != unit) {
+            NumericInput.decimal(weight)?.let { parsed ->
+                weight = formatInputNumber(WeightUnits.convert(parsed, inputUnit, unit), locale, 2)
+            }
+            inputUnit = unit
+        }
+    }
     var warmup by remember { mutableStateOf(set.kind == SetKind.WARM_UP) }
-    var rpe by remember { mutableStateOf(set.rpe?.toString().orEmpty()) }
+    var rpe by remember { mutableStateOf(set.rpe?.let { formatInputNumber(it, locale, 1) }.orEmpty()) }
     val value = runCatching {
         set.copy(
             exercise = exercise,
             reps = requireNotNull(NumericInput.integer(reps)),
-            weightKg = requireNotNull(NumericInput.decimal(weight)),
+            weightKg = WeightUnits.toKg(requireNotNull(NumericInput.decimal(weight)), unit),
             kind = if (warmup) SetKind.WARM_UP else SetKind.WORKING,
             rpe = if (rpe.isBlank()) null else requireNotNull(NumericInput.decimal(rpe)),
         )
@@ -908,7 +942,7 @@ private fun SetDialog(set: TrainingSet, busy: Boolean, onDismiss: () -> Unit, on
                 Input(R.string.rpe_optional, rpe, { rpe = it }, "edit_rpe")
                 ExercisePicker(exercise, { exercise = it })
                 Input(R.string.reps, reps, { reps = it }, "edit_reps")
-                Input(R.string.weight_kg, weight, { weight = it }, "edit_weight")
+                Input(if (unit == WeightUnit.KG) R.string.weight_kg else R.string.weight_lb, weight, { weight = it }, "edit_weight")
             }
         },
         confirmButton = {

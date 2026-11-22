@@ -1,10 +1,10 @@
-# Exercise demonstrations and experience — alpha05
+# Exercise demonstrations and experience
 
-40 original, generated 3D **still illustrations** show two distinct phases per current exercise. They are not interactive 3D models, motion capture, videos or a validated assessment of an individual user's form. They ship offline with the app. No exercise imagery or videos were copied from another product.
+50 original, generated 3D **still illustrations** show two distinct phases per current exercise. They are not interactive 3D models, motion capture, videos or a validated assessment of an individual user's form. They ship offline with the app. No exercise imagery or videos were copied from another product.
 
 ## Assets and editorial references
 
-Canonical assets: `assets/exercises/res/drawable-nodpi/exercise_*.png`. Each is an unchanged 1536×1024 generated PNG with two side-by-side panels. Start is physically left and movement physically right; the image and its phase labels are intentionally not mirrored in Arabic. The generated subjects are adult mannequins in neutral gym clothing. Equipment is representative and simplified.
+Canonical assets: `assets/exercises/res/drawable-nodpi/exercise_*.png`. Each is a compressed 960×640 quantized PNG (downscaled from 1536×1024 originals, ~18.09 MB total across all 50 assets) with two side-by-side panels. Start is physically left and movement physically right; the image and its phase labels are intentionally not mirrored in Arabic. The generated subjects are adult mannequins in neutral gym clothing. Equipment is representative and simplified.
 
 | Original stable exercise ID | Illustrated variation | Technique reference |
 |---|---|---|

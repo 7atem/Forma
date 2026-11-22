@@ -30,6 +30,7 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     suspend fun correctSet(set:TrainingSet)=dao.correctSet(set.row())
     suspend fun finishSession(id:String) {check(dao.finishSession(id,clock.millis())==1)}
     suspend fun removeSet(id:String)=dao.removeSet(id)
+    suspend fun restoreSet(set:TrainingSet,orderedSessionSetIds:List<String>)=dao.restoreSet(set.row(),orderedSessionSetIds)
     suspend fun moveSession(id:String,date:LocalDate) {checkDate(date);dao.moveSession(id,date.toEpochDay())}
     suspend fun deleteSession(id:String)=dao.deleteSession(id)
     suspend fun addMeal(meal:Meal) {checkDate(meal.date);dao.addMeal(meal.row())}

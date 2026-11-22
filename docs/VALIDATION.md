@@ -1,4 +1,26 @@
-# Validation record — alpha06
+# Validation record — current branch (post-alpha06)
+
+Updated 22 November 2026. Application `com.formacoach.app`, encrypted Room schema 5. Development candidate; public-release, physical paired-device Apple testing, and qualified exercise approval remain pending.
+
+> **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle and Light/Dark theme) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
+
+## Current branch verification (22 November 2026)
+
+| Check | Result |
+|---|---|
+| JVM unit tests (`:core:coach:test`, `:core:backup:test`, `:core:wearables:test`) | **50 passed, 0 failed** (including `kg`/`lb` round-trip & mid-entry unit conversion) |
+| Android EN/AR localization (`check_localization.py`) | **658 EN/AR keys & placeholders match** |
+| Apple source localization (`check_apple_sources.py`) | **108 EN/AR keys match** |
+| Canonical/generated catalog (`generate_exercise_catalog.py --check`) | **50 stable exercises**, equipment & 14 simplified muscle groups; no drift |
+| Shared movement guides & art (`generate_exercise_guides.py --check`, `check_exercise_art.py`) | **50 bilingual guides** and **50 compressed 960×640 two-phase PNGs (~18.09 MB)**; hashes, XML escaping & packaging match |
+| Android debug, lint & R8 minified release (`--max-workers=1`) | Passed (0 lint errors; application `INTERNET` permission absent) |
+| GitHub Actions `macos-15` CI (`Apple source validation`) | `swift test`, XcodeGen, `FormaPhone` iOS Simulator, `FormaWatch` watchOS Simulator, and unsigned ARM64 `FormaPhone-unsigned.ipa` artifact built on `macos-15` |
+| Emulator instrumented tests (`:app:connectedDebugAndroidTest`) | Last full run on alpha06 (26 passed on API 35); re-run on updated UI pending emulator availability |
+| Physical paired iPhone/Watch WatchConnectivity & qualified pose/cue review | **Not performed** |
+
+---
+
+## Historical alpha06 baseline (4 November 2026)
 
 4 November 2026. Application `com.formacoach.app`, `0.6.0-alpha06`, encrypted Room
 schema 5. Development candidate; public-release and qualified exercise approval remain pending.

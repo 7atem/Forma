@@ -350,17 +350,13 @@ internal fun StepperInput(
     placeholder: String? = null,
 ) {
     val haptics = LocalHapticFeedback.current
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     fun adjust(delta: Double) {
         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         val current = if (integer) NumericInput.integer(value)?.toDouble() else NumericInput.decimal(value)
         val base = current ?: if (delta > 0) 0.0 else min
         val next = (base + delta).coerceIn(min, max)
-        val formatted = if (integer) {
-            next.toInt().toString()
-        } else {
-            val rounded = kotlin.math.round(next * 100.0) / 100.0
-            if (rounded == rounded.toLong().toDouble()) rounded.toLong().toString() else rounded.toString()
-        }
+        val formatted = formatInputNumber(next, locale, if (integer) 0 else 2)
         onChange(formatted)
     }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

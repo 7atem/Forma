@@ -50,9 +50,10 @@
     <string name="active_session">التمرين الحالي · %1$s</string>
     <string name="reps">التكرارات</string>
     <string name="weight_kg">الوزن الخارجي · كجم</string>
+    <string name="weight_lb">الوزن الخارجي · رطل</string>
     <string name="zero_external_load">لو المجموعة بدون أوزان خارجية أو بوزن الجسم، اكتب ٠ كجم.</string>
     <string name="add_set">احفظ المجموعة</string>
-    <string name="set_summary">%1$s · %2$s تكرارات × %3$s كجم</string>
+    <string name="set_summary">%1$s · %2$s تكرارات × %3$s</string>
     <string name="finish_session">إنهاء التمرين</string>
     <string name="eat_title">خلي تسجيل الأكل بسيط.</string>
     <string name="portion_note">اكتب إجمالي الكمية اللي أكلتها من ملصق العبوة أو الوصفة أو مصدر تثق فيه. القيم الأربع مطلوبة؛ اكتب صفر فقط لو متأكد إن القيمة صفر.</string>
@@ -68,6 +69,7 @@
     <string name="progress_title">شوف مجهودك.</string>
     <string name="measure_note">اكتب قيمة واحدة على الأقل. الحفظ بيستبدل سجل قياسات النهارده، بما فيه أي خانة سيبتها فاضية.</string>
     <string name="body_weight">وزن الجسم · كجم</string>
+    <string name="body_weight_lb">وزن الجسم · رطل</string>
     <string name="waist">محيط الخصر · سم</string>
     <string name="save_measurement">احفظ القياسات</string>
     <string name="weekly_review">مراجعتك الأسبوعية</string>
@@ -75,15 +77,15 @@
     <string name="review_sessions">التمارين المكتملة · %1$s</string>
     <string name="review_meal_days">أيام فيها أكل مسجل · %1$s / ٧</string>
     <string name="review_calories">متوسط السعرات المسجلة لكل يوم فيه تسجيل · %1$s كيلوكالوري</string>
-    <string name="review_weight">متوسط وزن الجسم · %1$s كجم من %2$s قياسات</string>
+    <string name="review_weight">متوسط وزن الجسم · %1$s من %2$s قياسات</string>
     <string name="review_waist">متوسط محيط الخصر المسجل · %1$s سم</string>
-    <string name="review_delta">فرق متوسط الوزن عن الـ٧ أيام السابقة · %1$s كجم</string>
+    <string name="review_delta">فرق متوسط الوزن عن الـ٧ أيام السابقة · %1$s</string>
     <string name="comparison_range">فترة المقارنة · %1$s – %2$s · %3$s قياسات وزن</string>
     <string name="not_enough_weight">مقارنة الوزن محتاجة ٣ أيام مسجلة على الأقل في كل فترة من ٧ أيام. ده شرط لاكتمال البيانات، مش تقييم طبي.</string>
     <string name="no_auto_change">المراجعة دي مش بتغير أهدافك أو خطتك. بتوصف السجل بدون تحديد سبب تغير الوزن.</string>
     <string name="measurement_history">سجل القياسات</string>
     <string name="no_measurements">قياساتك المسجلة هتظهر هنا.</string>
-    <string name="body_weight_value">وزن الجسم · %1$s كجم</string>
+    <string name="body_weight_value">وزن الجسم · %1$s</string>
     <string name="waist_value">محيط الخصر · %1$s سم</string>
     <string name="action_first_session">لما تتمرن المرة الجاية، سجل تمرينك عشان يبقى عندك نقطة بداية.</string>
     <string name="action_keep_training">السجل فيه تمارين مكتملة أقل من خطتك الأسبوعية. راجع لو فيه تمرين محتاج تسجله أو خطة حابب تراجعها.</string>
@@ -113,7 +115,7 @@
     <string name="delete_program_note">تحذف البرنامج المحفوظ؟ الجلسات السابقة بتحتفظ بأسمائها وتمارينها وأوزانها.</string>
     <string name="search_history">دور باسم الجلسة أو التمرين أو تاريخ بصيغة سنة-شهر-يوم</string>
     <string name="show_more">اعرض أكتر</string>
-    <string name="previous_set">مجموعة مسجلة قبل كده · %1$s تكرارات × %2$s كجم</string>
+    <string name="previous_set">مجموعة مسجلة قبل كده · %1$s تكرارات × %2$s</string>
     <string name="rest_countdown">مؤقت الراحة · باقي %1$s ثانية / %2$s ثانية</string>
     <string name="timer_note">بيبدأ بعد حفظ المجموعة. الوقت بيكمل لو سبت الشاشة؛ مفيش منبه في الخلفية.</string>
     <string name="restart_timer">ابدأ المؤقت تاني</string>
@@ -173,7 +175,7 @@
     <string name="review_evidence">السجلات اللي المراجعة مبنية عليها</string>
     <string name="session_evidence">%1$s · %2$s · %3$s مجموعات</string>
     <string name="meal_evidence">%1$s · %2$s · %3$s كيلوكالوري</string>
-    <string name="measurement_evidence">%1$s · %2$s كجم</string>
+    <string name="measurement_evidence">%1$s · %2$s</string>
     <string name="no_evidence">مفيش سجلات للفترة دي لسه.</string>
     <string name="check_in">متابعة أسبوعية</string>
     <string name="check_in_note">تقدر تخصص كام جلسة للأسبوع الجاي؟ لو اختيارك مختلف، هنجهز اقتراح ينتظر تأكيدك.</string>
@@ -223,8 +225,8 @@
     <string name="load_all_starters">أضف كل الأطعمة الأساسية</string>
     <string name="chart_mode_load">أقصى وزن</string>
     <string name="chart_mode_e1rm">1RM تقديري</string>
-    <string name="best_e1rm_value">أفضل 1RM تقديري: %1$s كجم (%2$s)</string>
-    <string name="session_tonnage">الحجم: %1$s كجم</string>
+    <string name="best_e1rm_value">أفضل 1RM تقديري: %1$s (%2$s)</string>
+    <string name="session_tonnage">الحجم: %1$s</string>
     <string name="weekly_volume_label">حجم 7 أيام (كجم)</string>
     <string name="muscle_heatmap_title">خريطة عضلات 7 أيام</string>
     <string name="muscle_heatmap_note">الألوان توضح مجموعات العمل المسجلة خلال آخر 7 أيام فقط، وليست قياسًا للاستشفاء.</string>

@@ -80,7 +80,7 @@ internal fun BackupDialog(vm:FitnessViewModel,state:AppState,onDismiss:()->Unit,
                         try {
                             if(mode==1) {
                                 pendingExport=vm.export(secret)
-                                createFile.launch("forma-${java.time.LocalDate.now()}.formabackup")
+                                createFile.launch("forma-${java.time.LocalDate.now(vm.clock)}.formabackup")
                             } else {
                                 val bytes=withContext(Dispatchers.IO) {checkNotNull(context.contentResolver.openInputStream(checkNotNull(selectedUri))).use {PortableBackup.readBounded(it)}}
                                 preview=vm.previewRestore(bytes,secret)

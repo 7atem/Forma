@@ -40,17 +40,20 @@ internal fun PlateCalculatorButton() {
 @Composable
 private fun PlateDialog(onDismiss:()->Unit) {
     val scroll=rememberScrollState()
-    var bar by remember {mutableStateOf("20")}
-    var target by remember {mutableStateOf("100")}
-    val sizes=listOf(25.0,20.0,15.0,10.0,5.0,2.5,1.25,0.5)
-    val counts=remember {mutableStateListOf(*Array(sizes.size){"2"})}
-    var result by remember {mutableStateOf<PlateCalculator.Result?>(null)}
-    var calculated by remember {mutableStateOf(false)}
+    val unit = LocalWeightUnit.current
+    val unitLabel = weightUnitLabel()
+    var bar by remember(unit) {mutableStateOf(if (unit == WeightUnit.KG) "20" else "45")}
+    var target by remember(unit) {mutableStateOf(if (unit == WeightUnit.KG) "100" else "225")}
+    val sizes = if (unit == WeightUnit.KG) listOf(25.0,20.0,15.0,10.0,5.0,2.5,1.25,0.5) else listOf(45.0,35.0,25.0,10.0,5.0,2.5)
+    val counts=remember(unit) {mutableStateListOf(*Array(sizes.size){"2"})}
+    var result by remember(unit) {mutableStateOf<PlateCalculator.Result?>(null)}
+    var calculated by remember(unit) {mutableStateOf(false)}
     LaunchedEffect(calculated) {if(calculated) {withFrameNanos {};scroll.animateScrollTo(scroll.maxValue)}}
     fun reset() {calculated=false;result=null}
     val inputs=runCatching {
         val b=requireNotNull(NumericInput.decimal(bar));val t=requireNotNull(NumericInput.decimal(target))
-        require(b in 0.0..1000.0 && t in b..1000.0)
+        val cap = if (unit == WeightUnit.KG) 1000.0 else 2200.0
+        require(b in 0.0..cap && t in b..cap)
         val pairs=sizes.mapIndexed {i,size ->size to requireNotNull(NumericInput.integer(counts[i])).also {require(it in 0..20)}}.toMap()
         Triple(t,b,pairs)
     }.getOrNull()
@@ -59,20 +62,20 @@ private fun PlateDialog(onDismiss:()->Unit) {
         Input(R.string.bar_weight,bar,{bar=it;reset()},"plate_bar")
         Input(R.string.target_weight,target,{target=it;reset()},"plate_target")
         Text(stringResource(R.string.available_pairs),style=MaterialTheme.typography.titleSmall)
-        sizes.forEachIndexed {i,size ->OutlinedTextField(counts[i],{counts[i]=it;reset()},label={Text(stringResource(R.string.plate_pair_count,number(size)))},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("plate_count_$i"))}
+        sizes.forEachIndexed {i,size ->OutlinedTextField(counts[i],{counts[i]=it;reset()},label={Text(stringResource(R.string.plate_pair_count,"${number(size)} $unitLabel"))},singleLine=true,modifier=Modifier.fillMaxWidth().testTag("plate_count_$i"))}
         if(calculated) {
             val value=result
             if(value==null) Text(stringResource(R.string.plates_unavailable),color=MaterialTheme.colorScheme.error)
             else {
                 BarbellVisualizer(value.perSide)
-                Text(stringResource(R.string.plates_per_side,if(value.perSide.isEmpty()) stringResource(R.string.empty_bar) else value.perSide.map {stringResource(R.string.plate_kg,number(it))}.joinToString(" + ")),style=MaterialTheme.typography.titleMedium,modifier=Modifier.testTag("plate_result"))
+                Text(stringResource(R.string.plates_per_side,if(value.perSide.isEmpty()) stringResource(R.string.empty_bar) else value.perSide.map { "${number(it)} $unitLabel" }.joinToString(" + ")),style=MaterialTheme.typography.titleMedium,modifier=Modifier.testTag("plate_result"))
                 val ramp = inputs?.let { WarmupRamp.steps(it.first, it.second) }.orEmpty()
                 if (ramp.isNotEmpty()) {
                     HorizontalDivider()
                     Text(stringResource(R.string.warmup_ramp_title), style = MaterialTheme.typography.titleSmall)
                     ramp.forEach { step ->
                         Text(
-                            "${number(step.weightKg)} ${stringResource(R.string.kg)} × ${number(step.reps.toDouble(), 0)}" +
+                            "${number(step.weightKg)} $unitLabel × ${number(step.reps.toDouble(), 0)}" +
                                 if (step.percent > 0) " (${step.percent}%)" else "",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

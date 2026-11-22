@@ -122,4 +122,22 @@ class DailyWorkflowTest {
         assertEquals(100.0, WeightUnits.toKg(220.46226, WeightUnit.LB), 0.01)
         assertEquals(100.0, WeightUnits.fromKg(100.0, WeightUnit.KG), 0.0001)
     }
+
+    @Test fun `weight unit lb round-trip repeat and mid-entry switch preserve canonical kg`() {
+        // User logs 225 lb -> stored as canonical kg (~102.058 kg)
+        val firstSavedKg = WeightUnits.toKg(225.0, WeightUnit.LB)
+        assertEquals(102.058, firstSavedKg, 0.01)
+
+        // "Use last set" in lb mode converts stored kg back to lb, then saves again -> must stay ~102.058 kg (never 46.3 kg)
+        val prefilledLb = WeightUnits.fromKg(firstSavedKg, WeightUnit.LB)
+        assertEquals(225.0, prefilledLb, 0.1)
+        val repeatedSavedKg = WeightUnits.toKg(prefilledLb, WeightUnit.LB)
+        assertEquals(firstSavedKg, repeatedSavedKg, 0.05)
+
+        // Switching kg -> lb -> kg mid-entry preserves the physical load
+        val switchedToLb = WeightUnits.convert(100.0, WeightUnit.KG, WeightUnit.LB)
+        assertEquals(220.5, switchedToLb, 0.1)
+        val switchedBackToKg = WeightUnits.convert(switchedToLb, WeightUnit.LB, WeightUnit.KG)
+        assertEquals(100.0, switchedBackToKg, 0.05)
+    }
 }

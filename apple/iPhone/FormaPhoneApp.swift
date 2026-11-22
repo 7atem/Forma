@@ -173,7 +173,7 @@ private struct MealSlotOption: Identifiable {
                                         .font(.largeTitle.weight(.heavy))
                                         .foregroundStyle(FormaTheme.textPrimary)
                                     if totalVolume > 0 {
-                                        Text("\(String(localized: "volume_kg")): \(Int(totalVolume.rounded())) kg")
+                                        Text("\(String(localized: "volume_kg")): \(FormaTheme.formatWeight(totalVolume, useLb: useLb))")
                                             .font(.caption.weight(.semibold))
                                             .foregroundStyle(FormaTheme.primary)
                                     }
@@ -235,12 +235,12 @@ private struct MealSlotOption: Identifiable {
                                                 .font(.caption.weight(.bold))
                                                 .foregroundStyle(FormaTheme.textPrimary)
                                                 .lineLimit(1)
-                                            Text("\(item.weight.formatted()) kg × \(item.reps)")
+                                            Text("\(FormaTheme.formatWeight(item.weight, useLb: useLb)) × \(item.reps)")
                                                 .font(.headline.weight(.heavy))
                                                 .foregroundStyle(FormaTheme.primary)
                                             if let est = item.e1rm {
                                                 FormaPill(
-                                                    text: "\(String(localized: "best_e1rm")) \(Int(est.rounded()))",
+                                                    text: "\(String(localized: "best_e1rm")) \(FormaTheme.formatWeight(est, useLb: useLb))",
                                                     background: FormaTheme.tertiary.opacity(0.2),
                                                     foreground: FormaTheme.tertiary
                                                 )
@@ -330,7 +330,7 @@ private struct MealSlotOption: Identifiable {
                                         }
                                         Spacer()
                                         if tonnage > 0 {
-                                            FormaPill(text: "\(Int(tonnage.rounded())) kg")
+                                            FormaPill(text: FormaTheme.formatWeight(tonnage, useLb: useLb))
                                         }
                                     }
                                     HStack(spacing: 12) {
@@ -388,6 +388,7 @@ private struct MealSlotOption: Identifiable {
 
 @MainActor private struct PhoneWorkoutSummarySheet: View {
     let workout: WatchWorkout
+    @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -417,7 +418,7 @@ private struct MealSlotOption: Identifiable {
                         HStack(spacing: 10) {
                             FormaPill(text: "\(workingSets) \(String(localized: "sets"))")
                             if tonnage > 0 {
-                                FormaPill(text: "\(Int(tonnage.rounded())) kg", background: FormaTheme.secondary.opacity(0.2), foreground: FormaTheme.secondary)
+                                FormaPill(text: FormaTheme.formatWeight(tonnage, useLb: useLb), background: FormaTheme.secondary.opacity(0.2), foreground: FormaTheme.secondary)
                             }
                         }
                     }
@@ -508,6 +509,7 @@ private struct MealSlotOption: Identifiable {
     @State private var editing: WatchSet?
     @State private var confirmFinish = false
     @State private var confirmDiscard = false
+    @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
 
@@ -540,7 +542,7 @@ private struct MealSlotOption: Identifiable {
                     Spacer()
                     if tonnage > 0 {
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text("\(Int(tonnage.rounded())) kg")
+                            Text(FormaTheme.formatWeight(tonnage, useLb: useLb))
                                 .font(.headline.weight(.bold))
                                 .foregroundStyle(FormaTheme.primary)
                             Text("volume_kg")
@@ -621,7 +623,7 @@ private struct MealSlotOption: Identifiable {
 
                 if let prev = store.state.workouts.reversed().flatMap(\.sets).first(where: { $0.exercise == exercise }) {
                     HStack {
-                        Text("\(prev.reps) × \(prev.weightKg.formatted()) kg")
+                        Text("\(prev.reps) × \(FormaTheme.formatWeight(prev.weightKg, useLb: useLb))")
                             .font(.caption)
                             .foregroundStyle(FormaTheme.textMuted)
                         Spacer()
@@ -648,8 +650,8 @@ private struct MealSlotOption: Identifiable {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(FormaTheme.textPrimary)
                 }
-                Stepper(value: $kg, in: 0...1000, step: 0.5) {
-                    Text("\(kg.formatted()) kg")
+                Stepper(value: $kg, in: 0...1000, step: useLb ? (5.0 / 2.20462262185) : 0.5) {
+                    Text(FormaTheme.formatWeight(kg, useLb: useLb))
                         .font(.body.weight(.semibold))
                         .foregroundStyle(FormaTheme.textPrimary)
                 }
@@ -660,9 +662,12 @@ private struct MealSlotOption: Identifiable {
                                 FormaPill(text: "\(preset)×", background: FormaTheme.surfaceHigh, foreground: FormaTheme.textPrimary)
                             }
                         }
-                        ForEach([2.5, 5.0, 10.0], id: \.self) { bump in
-                            Button { kg = min(1000.0, kg + bump) } label: {
-                                FormaPill(text: "+\(bump.formatted()) kg")
+                        ForEach(useLb ? [5.0, 10.0, 25.0] : [2.5, 5.0, 10.0], id: \.self) { bump in
+                            Button {
+                                let deltaKg = useLb ? (bump / 2.20462262185) : bump
+                                kg = min(1000.0, ((kg + deltaKg) * 1000.0).rounded() / 1000.0)
+                            } label: {
+                                FormaPill(text: "+\(bump.formatted()) \(useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))")
                             }
                         }
                     }
@@ -679,7 +684,7 @@ private struct MealSlotOption: Identifiable {
                                 HStack(spacing: 6) {
                                     ForEach(Array(ramp.enumerated()), id: \.offset) { _, step in
                                         FormaPill(
-                                            text: "\(step.weightKg.formatted()) kg × \(step.reps)",
+                                            text: "\(FormaTheme.formatWeight(step.weightKg, useLb: useLb)) × \(step.reps)",
                                             background: FormaTheme.surfaceHigh,
                                             foreground: FormaTheme.textMuted
                                         )
@@ -866,6 +871,7 @@ private struct MealSlotOption: Identifiable {
     @State private var warmup: Bool
     @State private var hasRpe: Bool
     @State private var rpe: Double
+    @AppStorage("forma_use_lb") private var useLb = false
 
     init(set: WatchSet, onSave: @escaping (WatchSet) -> Void, onDelete: @escaping () -> Void) {
         self.set = set
@@ -882,7 +888,7 @@ private struct MealSlotOption: Identifiable {
         NavigationStack {
             Form {
                 Stepper("\(String(localized: "reps")) \(reps)", value: $reps, in: 1...1000)
-                Stepper("\(kg.formatted()) kg", value: $kg, in: 0...1000, step: 0.5)
+                Stepper(FormaTheme.formatWeight(kg, useLb: useLb), value: $kg, in: 0...1000, step: useLb ? (5.0 / 2.20462262185) : 0.5)
                 Toggle("warmup", isOn: $warmup)
                 Toggle("record_rpe", isOn: $hasRpe)
                 if hasRpe { Stepper("RPE \(rpe.formatted())", value: $rpe, in: 0...10, step: 0.5) }

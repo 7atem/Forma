@@ -112,10 +112,21 @@ interface FitnessDao {
     @Update suspend fun updateSet(row:SetRow)
     @Transaction suspend fun correctSet(row:SetRow) {check(checkNotNull(set(row.id)).sessionId==row.sessionId);updateSet(row)}
     @Query("DELETE FROM training_sets WHERE id=:id") suspend fun deleteSet(id:String)
+    @Query("DELETE FROM training_sets WHERE sessionId=:sessionId") suspend fun deleteSessionSets(sessionId:String)
     @Transaction suspend fun removeSet(id:String) {
         val row=checkNotNull(set(id))
         check(session(row.sessionId)?.completedAt==null || setCount(row.sessionId)>1)
         deleteSet(id)
+    }
+    @Transaction suspend fun restoreSet(row:SetRow,orderedSessionSetIds:List<String>) {
+        val sess=session(row.sessionId) ?: return
+        if(sess.completedAt!=null) return
+        if(set(row.id)!=null) return
+        val existing=sessionSets(row.sessionId)
+        val byId=(existing+row).associateBy {it.id}
+        val ordered=orderedSessionSetIds.mapNotNull {byId[it]}+existing.filter {it.id !in orderedSessionSetIds}
+        deleteSessionSets(row.sessionId)
+        ordered.forEach {insertSet(it)}
     }
     @Query("UPDATE sessions SET completedAt=:now WHERE id=:id AND completedAt IS NULL AND EXISTS (SELECT 1 FROM training_sets WHERE sessionId=:id)") suspend fun finishSession(id:String,now:Long):Int
     @Query("UPDATE sessions SET day=:day WHERE id=:id") suspend fun moveSession(id:String,day:Long)

@@ -268,7 +268,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                         onEat = { tab = 2 },
                                         onStartProgram = { id -> vm.start(id, today); tab = 1 },
                                     )
-                                    1 -> TrainContent(state, today, vm, scrollState) { deletedSet ->
+                                    1 -> TrainContent(state, today, vm, scrollState) { deletedSet, originalIds ->
                                         scope.launch {
                                             val res = snackbarHostState.showSnackbar(
                                                 message = setRemovedMsg,
@@ -276,7 +276,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                                 duration = SnackbarDuration.Short,
                                             )
                                             if (res == SnackbarResult.ActionPerformed) {
-                                                vm.logSet(deletedSet) {}
+                                                vm.restoreSet(deletedSet, originalIds)
                                             }
                                         }
                                     }
@@ -759,6 +759,28 @@ internal fun number(value: Double, digits: Int = 2): String {
     val locale = LocalConfiguration.current.locales[0]
     return NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = digits }.format(value)
 }
+
+@Composable
+internal fun weightUnitLabel(): String =
+    stringResource(if (LocalWeightUnit.current == WeightUnit.KG) R.string.kg else R.string.lb)
+
+@Composable
+internal fun formatWeight(kg: Double, digits: Int = 2): String =
+    "${number(WeightUnits.fromKg(kg, LocalWeightUnit.current), digits)} ${weightUnitLabel()}"
+
+internal fun formatInputNumber(value: Double, locale: java.util.Locale, digits: Int = 2): String =
+    NumberFormat.getNumberInstance(locale).apply {
+        isGroupingUsed = false
+        maximumFractionDigits = digits
+    }.format(value)
+
+@Composable
+internal fun formatInputNumber(value: Double, digits: Int = 2): String =
+    formatInputNumber(value, LocalConfiguration.current.locales[0], digits)
+
+@Composable
+internal fun formatWeightInput(kg: Double): String =
+    formatInputNumber(WeightUnits.fromKg(kg, LocalWeightUnit.current), 2)
 
 @Composable
 internal fun dateLabel(date: LocalDate): String =

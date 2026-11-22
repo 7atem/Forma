@@ -85,6 +85,7 @@ class FitnessViewModel @Inject constructor(
     fun finish(id: String, done: () -> Unit = {}) = write(done) { repository.finishSession(id) }
     fun logSet(value: TrainingSet, done: (List<TrainingSet>) -> Unit) = write { done(repository.logSet(value)) }
     fun removeSet(id: String) = write { repository.removeSet(id) }
+    fun restoreSet(set: TrainingSet, orderedSessionSetIds: List<String>) = write { repository.restoreSet(set, orderedSessionSetIds) }
     fun addMeal(meal: Meal, done: () -> Unit) = write(done) { repository.addMeal(meal) }
     fun repeatMeal(meal: Meal) = write { repository.addMeal(meal.copy(id = UUID.randomUUID().toString(), date = LocalDate.now(clock))) }
     fun removeMeal(id: String) = write { repository.removeMeal(id) }
@@ -124,10 +125,10 @@ class FitnessViewModel @Inject constructor(
     }
     fun selectHighlights(isForeground:()->Boolean)=modelAction {
         val basis=mutableState.value.snapshot
-        val day=LocalDate.now()
+        val day=LocalDate.now(clock)
         val facts=LocalHighlights.facts(basis,reviewEngine.review(basis,day))
         val selected=LocalHighlights.select(localModel,facts,isForeground)
-        mutableState.update {it.copy(highlights=if(it.snapshot==basis && LocalDate.now()==day) selected.orEmpty() else emptyList(),aiFailed=selected==null)}
+        mutableState.update {it.copy(highlights=if(it.snapshot==basis && LocalDate.now(clock)==day) selected.orEmpty() else emptyList(),aiFailed=selected==null)}
     }
     private fun modelAction(block:suspend ()->Unit) {
         if(mutableState.value.aiBusy) return

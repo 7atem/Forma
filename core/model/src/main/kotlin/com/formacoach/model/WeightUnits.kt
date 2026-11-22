@@ -14,6 +14,9 @@ object WeightUnits {
     fun toKg(displayValue: Double, unit: WeightUnit): Double =
         if (unit == WeightUnit.KG) displayValue else round((displayValue / LB_PER_KG) * 1000.0) / 1000.0
 
+    fun convert(value: Double, from: WeightUnit, to: WeightUnit): Double =
+        if (from == to) value else fromKg(toKg(value, from), to)
+
     fun step(unit: WeightUnit): Double = if (unit == WeightUnit.KG) 2.5 else 5.0
 
     fun quickBumps(unit: WeightUnit): List<Double> =

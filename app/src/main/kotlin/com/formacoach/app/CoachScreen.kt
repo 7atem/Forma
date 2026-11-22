@@ -87,7 +87,7 @@ internal fun CoachContent(state: AppState, today: LocalDate, vm: FitnessViewMode
             if (question == CoachQuestion.WEEK || question == CoachQuestion.WEIGHT) {
                 state.snapshot.measurements.filter { it.date in review.measurementEvidence + review.comparisonMeasurementEvidence }.forEach { measurement ->
                     measurement.weightKg?.let {
-                        Text(stringResource(R.string.measurement_evidence, dateLabel(measurement.date), number(it)), style = MaterialTheme.typography.bodyMedium)
+                        Text(stringResource(R.string.measurement_evidence, dateLabel(measurement.date), formatWeight(it)), style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }
@@ -226,7 +226,7 @@ private fun LocalAiPanel(state: AppState, today: LocalDate, vm: FitnessViewModel
             when (id) {
                 "training" -> Text(stringResource(R.string.review_sessions, number(review.completedSessions.toDouble(), 0)))
                 "food" -> Text(stringResource(R.string.review_meal_days, number(review.mealDays.toDouble(), 0)))
-                "weight" -> review.meanWeight?.let { Text(stringResource(R.string.review_weight, number(it), number(review.weightObservations.toDouble(), 0))) }
+                "weight" -> review.meanWeight?.let { Text(stringResource(R.string.review_weight, formatWeight(it, 1), number(review.weightObservations.toDouble(), 0))) }
                 "coverage" -> Text(stringResource(R.string.logged_only))
             }
         }
