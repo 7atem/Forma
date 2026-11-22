@@ -239,4 +239,11 @@
     <string name="activity_heatmap_title">12-week training grid</string>
     <string name="week_streak_badge">%1$s active weeks</string>
     <string name="calc_from_macros">Calc kcal</string>
+    <string name="toggle_theme">Switch light or dark theme</string>
+    <string name="play_demo">Animate</string>
+    <string name="pause_demo">Static</string>
+    <string name="quick_log">Quick log</string>
+    <string name="set_removed_undo">Set removed</string>
+    <string name="undo">Undo</string>
+    <string name="session_muscles_hit">Muscles trained this session</string>
 </resources>

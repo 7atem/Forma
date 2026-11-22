@@ -5,7 +5,10 @@ struct ExerciseDetail: View {
     let exercise: Exercise
     @State private var muscles = false
     @State private var phase = 0
+    @State private var animating = false
+    @State private var showSecondPhase = false
     @Environment(\.locale) private var locale
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
 
     var body: some View {
@@ -55,11 +58,24 @@ struct ExerciseDetail: View {
                     let phaseKeys = ["both_phases", "phase_start", "phase_movement"]
                     HStack(spacing: 6) {
                         ForEach(0..<phaseKeys.count, id: \.self) { idx in
-                            Button { phase = idx } label: {
+                            Button { animating = false; phase = idx } label: {
                                 FormaPill(
                                     text: String(localized: String.LocalizationValue(phaseKeys[idx])),
-                                    background: phase == idx ? FormaTheme.primary : FormaTheme.surface,
-                                    foreground: phase == idx ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                    background: (!animating && phase == idx) ? FormaTheme.primary : FormaTheme.surface,
+                                    foreground: (!animating && phase == idx) ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                )
+                            }
+                        }
+                        Spacer()
+                        if !reduceMotion {
+                            Button {
+                                animating.toggle()
+                                if animating { showSecondPhase = false }
+                            } label: {
+                                FormaPill(
+                                    text: animating ? String(localized: "pause_demo") : String(localized: "play_demo"),
+                                    background: animating ? FormaTheme.secondary : FormaTheme.primaryContainer,
+                                    foreground: animating ? FormaTheme.onPrimary : FormaTheme.primary
                                 )
                             }
                         }
@@ -67,13 +83,34 @@ struct ExerciseDetail: View {
                     #endif
                     GeometryReader { geo in
                         let width = geo.size.width
-                        FormaExerciseImage(asset: guide.asset, contentMode: .fill)
-                            .frame(width: phase == 0 ? width : width * 2, height: width / 1.5, alignment: phase == 2 ? .trailing : .leading)
-                            .clipped()
+                        if animating && !reduceMotion {
+                            ZStack {
+                                FormaExerciseImage(asset: guide.asset, contentMode: .fill)
+                                    .frame(width: width * 2, height: width / 1.5, alignment: .leading)
+                                    .clipped()
+                                    .opacity(showSecondPhase ? 0.0 : 1.0)
+                                FormaExerciseImage(asset: guide.asset, contentMode: .fill)
+                                    .frame(width: width * 2, height: width / 1.5, alignment: .trailing)
+                                    .clipped()
+                                    .opacity(showSecondPhase ? 1.0 : 0.0)
+                            }
+                            .animation(.easeInOut(duration: 0.55), value: showSecondPhase)
+                        } else {
+                            FormaExerciseImage(asset: guide.asset, contentMode: .fill)
+                                .frame(width: phase == 0 ? width : width * 2, height: width / 1.5, alignment: phase == 2 ? .trailing : .leading)
+                                .clipped()
+                        }
                     }
                     .aspectRatio(1.5, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .accessibilityLabel(guide.variant)
+                    .task(id: animating) {
+                        guard animating && !reduceMotion else { return }
+                        while !Task.isCancelled && animating {
+                            try? await Task.sleep(nanoseconds: 1_500_000_000)
+                            showSecondPhase.toggle()
+                        }
+                    }
 
                     HStack {
                         Text("phase_start")

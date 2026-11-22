@@ -239,4 +239,11 @@
     <string name="activity_heatmap_title">شبكة تدريب 12 أسبوع</string>
     <string name="week_streak_badge">%1$s أسابيع مسجلة</string>
     <string name="calc_from_macros">احسب السعرات</string>
+    <string name="toggle_theme">تبديل المظهر الفاتح أو الداكن</string>
+    <string name="play_demo">تحريك</string>
+    <string name="pause_demo">ثابت</string>
+    <string name="quick_log">تسجيل سريع</string>
+    <string name="set_removed_undo">تم حذف المجموعة</string>
+    <string name="undo">تراجع</string>
+    <string name="session_muscles_hit">العضلات المدربة في هذه الجلسة</string>
 </resources>

@@ -34,7 +34,7 @@ import kotlinx.serialization.json.Json
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
-internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewModel, scrollState: ScrollState) {
+internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewModel, scrollState: ScrollState, onSetDeleted: (TrainingSet) -> Unit = {}) {
     var section by rememberSaveable { mutableIntStateOf(0) }
     var day by rememberSaveable { mutableLongStateOf(today.toEpochDay()) }
     var editorPayload by rememberSaveable { mutableStateOf<String?>(null) }
@@ -59,7 +59,7 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
     pages.SaveableStateProvider(section) {
         when (section) {
             0 -> if (active != null) {
-                SessionForm(active, state, vm) { justFinished = true; section = 2 }
+                SessionForm(active, state, vm, onSetDeleted = onSetDeleted) { justFinished = true; section = 2 }
             } else {
                 val date = LocalDate.ofEpochDay(day)
                 Row(
@@ -171,7 +171,7 @@ private fun ProgramCard(
 }
 
 @Composable
-private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel, onFinished: () -> Unit) {
+private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel, onSetDeleted: (TrainingSet) -> Unit = {}, onFinished: () -> Unit) {
     val choices = (session.plannedExercises + Exercise.entries).distinct()
     val sets = state.snapshot.sets.filter { it.sessionId == session.id }
     val workingCounts = remember(session, sets) { WorkoutFlow.counts(session, sets) }
@@ -399,7 +399,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             }
         }
 
-        // Reps & Weight with Gym-Ready Steppers
+        // Reps & Weight with Gym-Ready Steppers + Ghost Previous-Set Hints
         FormFieldPair(
             first = {
                 StepperInput(
@@ -412,6 +412,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     max = 1000.0,
                     integer = true,
                     error = reps.isNotBlank() && NumericInput.integer(reps)?.let { it in 1..1000 } != true,
+                    placeholder = previous?.reps?.toString(),
                 )
             },
             second = {
@@ -425,6 +426,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     max = 1000.0,
                     integer = false,
                     error = weight.isNotBlank() && NumericInput.decimal(weight)?.let { it in 0.0..1000.0 } != true,
+                    placeholder = previous?.weightKg?.toString(),
                 )
             },
         )
@@ -607,7 +609,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                 Text(stringResource(R.string.logged_sets), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 PillBadge(number(sets.size.toDouble(), 0))
             }
-            (if (allSets) sets else sets.takeLast(4)).forEach { SetCard(it, state.busy, true, vm) }
+            (if (allSets) sets else sets.takeLast(4)).forEach { SetCard(it, state.busy, true, vm, onRemoved = onSetDeleted) }
             if (sets.size > 4) {
                 TextButton(onClick = { allSets = !allSets }) {
                     Text(stringResource(if (allSets) R.string.show_less else R.string.show_more))
@@ -649,22 +651,35 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
         val latest = state.snapshot.sessions.filter { it.completedAt != null }.maxByOrNull { it.completedAt ?: 0L }
         val latestSets = latest?.let { s -> state.snapshot.sets.filter { it.sessionId == s.id } }.orEmpty()
         val tonnage = TrainingHistory.sessionTonnage(latestSets)
+        val sessionMuscles = remember(latestSets) {
+            val map = mutableMapOf<Muscle, Int>()
+            latestSets.filter { it.kind == SetKind.WORKING }.forEach { set ->
+                val act = ExerciseMuscles.of(set.exercise)
+                (act.primary + act.secondary).forEach { m -> map[m] = (map[m] ?: 0) + 1 }
+            }
+            map
+        }
         Surface(
             color = MaterialTheme.colorScheme.primaryContainer,
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(22.dp),
             border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(stringResource(R.string.workout_complete_banner), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    if (tonnage > 0.0) {
-                        Text(stringResource(R.string.session_tonnage, number(tonnage, 0)), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(28.dp))
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(stringResource(R.string.workout_complete_banner), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        if (tonnage > 0.0) {
+                            Text(stringResource(R.string.session_tonnage, number(tonnage, 0)), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                    IconButton(onClick = onDismissVictory) {
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.dismiss))
                     }
                 }
-                IconButton(onClick = onDismissVictory) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.dismiss))
+                if (sessionMuscles.isNotEmpty()) {
+                    WeeklyMuscleHeatMap(sessionMuscles)
                 }
             }
         }
@@ -817,7 +832,7 @@ private fun SessionHistoryCard(session: Session, state: AppState, vm: FitnessVie
 }
 
 @Composable
-private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: FitnessViewModel) {
+private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: FitnessViewModel, onRemoved: ((TrainingSet) -> Unit)? = null) {
     var editing by remember { mutableStateOf(false) }
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
@@ -850,7 +865,15 @@ private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: Fit
                     )
                 }
                 Spacer(Modifier.weight(1f))
-                ConfirmButton(R.string.remove, stringResource(R.string.delete_set_note), !busy && canRemove) { vm.removeSet(set.id) }
+                if (onRemoved != null) {
+                    TextButton(
+                        onClick = { vm.removeSet(set.id); onRemoved(set) },
+                        enabled = !busy && canRemove,
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.9f)),
+                    ) { Text(stringResource(R.string.remove)) }
+                } else {
+                    ConfirmButton(R.string.remove, stringResource(R.string.delete_set_note), !busy && canRemove) { vm.removeSet(set.id) }
+                }
             }
         }
     }

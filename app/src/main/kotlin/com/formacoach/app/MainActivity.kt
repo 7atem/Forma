@@ -41,6 +41,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
+import kotlinx.coroutines.launch
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,14 +83,53 @@ private val FormaColors = darkColorScheme(
     onErrorContainer = Color(0xFFFFDAD6),
 )
 
+private val FormaLightColors = lightColorScheme(
+    primary = Color(0xFF2E6B24),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFFD9F5C8),
+    onPrimaryContainer = Color(0xFF0E2909),
+    secondary = Color(0xFFB35B12),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFFFFE4C7),
+    onSecondaryContainer = Color(0xFF361902),
+    tertiary = Color(0xFF0F766E),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFFCCFBF1),
+    onTertiaryContainer = Color(0xFF042F2E),
+    background = Color(0xFFF3F7F3),
+    onBackground = Color(0xFF112018),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF112018),
+    surfaceVariant = Color(0xFFE3ECE5),
+    onSurfaceVariant = Color(0xFF42594B),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF7FAF7),
+    surfaceContainer = Color(0xFFEDF3EE),
+    surfaceContainerHigh = Color(0xFFE4EDE6),
+    surfaceContainerHighest = Color(0xFFDAE6DD),
+    outline = Color(0xFF708778),
+    outlineVariant = Color(0xFFCAD8CE),
+    error = Color(0xFFBA1A1A),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormaApp(vm: FitnessViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    var darkTheme by rememberSaveable { mutableStateOf(true) }
+    var showQuickLog by rememberSaveable { mutableStateOf(false) }
     var editingProfile by rememberSaveable { mutableStateOf(false) }
     var showWatch by rememberSaveable { mutableStateOf(false) }
     var showBackup by rememberSaveable { mutableStateOf(false) }
     var generation by rememberSaveable { mutableIntStateOf(0) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val setRemovedMsg = stringResource(R.string.set_removed_undo)
+    val undoLabel = stringResource(R.string.undo)
     val pageState = key(generation) { rememberSaveableStateHolder() }
     // Re-evaluate calendar totals if the app remains open over local midnight.
     var today by remember { mutableStateOf(LocalDate.now(vm.clock)) }
@@ -100,7 +141,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     }
     LaunchedEffect(today) { vm.onDayChanged() }
     MaterialTheme(
-        colorScheme = FormaColors,
+        colorScheme = if (darkTheme) FormaColors else FormaLightColors,
         shapes = Shapes(
             small = RoundedCornerShape(12.dp),
             medium = RoundedCornerShape(16.dp),
@@ -130,6 +171,10 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                     tab,
                     { tab = it },
                     today,
+                    darkTheme = darkTheme,
+                    onToggleTheme = { darkTheme = !darkTheme },
+                    snackbarHostState = snackbarHostState,
+                    onQuickLog = { showQuickLog = true },
                     onProfile = { editingProfile = true },
                     onWatch = { showWatch = true },
                     onBackup = { showBackup = true },
@@ -208,13 +253,61 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                         onEat = { tab = 2 },
                                         onStartProgram = { id -> vm.start(id, today); tab = 1 },
                                     )
-                                    1 -> TrainContent(state, today, vm, scrollState)
+                                    1 -> TrainContent(state, today, vm, scrollState) { deletedSet ->
+                                        scope.launch {
+                                            val res = snackbarHostState.showSnackbar(
+                                                message = setRemovedMsg,
+                                                actionLabel = undoLabel,
+                                                duration = SnackbarDuration.Short,
+                                            )
+                                            if (res == SnackbarResult.ActionPerformed) {
+                                                vm.logSet(deletedSet) {}
+                                            }
+                                        }
+                                    }
                                     2 -> EatContent(state, today, vm)
                                     3 -> ProgressContent(state, today, vm)
                                     4 -> CoachContent(state, today, vm)
                                 }
                                 Spacer(Modifier.height(12.dp))
                             }
+                        }
+                    }
+                }
+            }
+            if (showQuickLog) {
+                ModalBottomSheet(
+                    onDismissRequest = { showQuickLog = false },
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(stringResource(R.string.quick_log), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Button(
+                            onClick = { showQuickLog = false; tab = 1 },
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp),
+                        ) {
+                            Icon(Icons.Default.FitnessCenter, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(if (state.snapshot.sessions.any { it.completedAt == null }) R.string.resume_session else R.string.open_training), fontWeight = FontWeight.Bold)
+                        }
+                        FilledTonalButton(
+                            onClick = { showQuickLog = false; tab = 2 },
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                        ) {
+                            Icon(Icons.Default.Restaurant, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.add_meal), fontWeight = FontWeight.SemiBold)
+                        }
+                        FilledTonalButton(
+                            onClick = { showQuickLog = false; tab = 3 },
+                            shape = RoundedCornerShape(14.dp),
+                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                        ) {
+                            Icon(Icons.Default.MonitorWeight, null, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.save_measurement), fontWeight = FontWeight.SemiBold)
                         }
                     }
                 }
@@ -626,11 +719,12 @@ internal fun InfoCard(modifier: Modifier = Modifier, content: @Composable Column
 }
 
 @Composable
-internal fun Input(label: Int, value: String, onChange: (String) -> Unit, tag: String, numeric: Boolean = true, error: Boolean = false) {
+internal fun Input(label: Int, value: String, onChange: (String) -> Unit, tag: String, numeric: Boolean = true, error: Boolean = false, placeholder: String? = null) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
         label = { Text(stringResource(label)) },
+        placeholder = placeholder?.let { hint -> ({ Text(hint, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)) }) },
         singleLine = true,
         isError = error,
         shape = RoundedCornerShape(14.dp),

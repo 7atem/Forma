@@ -1,7 +1,10 @@
 package com.formacoach.app
 
 import android.graphics.BitmapFactory
+import android.provider.Settings
 import android.util.LruCache
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -17,6 +20,8 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -98,8 +103,31 @@ internal fun ExerciseGuideSheet(exercise:Exercise,tools:@Composable ()->Unit={},
                 }
             }
             if(tab==0) {
-                ExerciseIllustration(exercise){enlarged=true}
-                PhaseLabels()
+                val context = LocalContext.current
+                val reduceMotion = remember {
+                    runCatching { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }.getOrDefault(false)
+                }
+                var animating by rememberSaveable(exercise) { mutableStateOf(false) }
+                if (animating && !reduceMotion) {
+                    AnimatedExerciseIllustration(exercise) { enlarged = true }
+                } else {
+                    ExerciseIllustration(exercise) { enlarged = true }
+                }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                    if (!animating || reduceMotion) {
+                        Box(Modifier.weight(1f)) { PhaseLabels() }
+                    } else {
+                        Spacer(Modifier.weight(1f))
+                    }
+                    if (!reduceMotion) {
+                        FilterChip(
+                            selected = animating,
+                            onClick = { animating = !animating },
+                            leadingIcon = { Icon(if (animating) Icons.Default.Pause else Icons.Default.PlayArrow, null, modifier = Modifier.size(16.dp)) },
+                            label = { Text(stringResource(if (animating) R.string.pause_demo else R.string.play_demo)) },
+                        )
+                    }
+                }
                 guide.cues.forEachIndexed {index,cue -> Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.Top) {
                     Surface(shape=RoundedCornerShape(10.dp),color=MaterialTheme.colorScheme.primaryContainer) {Text(number((index+1).toDouble(),0),Modifier.padding(horizontal=11.dp,vertical=7.dp),color=MaterialTheme.colorScheme.onPrimaryContainer)}
                     Text(stringResource(cue),Modifier.weight(1f).padding(top=4.dp),style=MaterialTheme.typography.bodyLarge)
@@ -111,6 +139,38 @@ internal fun ExerciseGuideSheet(exercise:Exercise,tools:@Composable ()->Unit={},
         }
     }
     if(enlarged) ExerciseImageViewer(exercise){enlarged=false}
+}
+
+@Composable
+private fun AnimatedExerciseIllustration(exercise: Exercise, onOpen: () -> Unit) {
+    val guide = guideResources(exercise)
+    val bitmap = ImageBitmap.imageResource(guide.image)
+    var showSecond by remember(exercise) { mutableStateOf(false) }
+    LaunchedEffect(exercise) {
+        while (true) {
+            kotlinx.coroutines.delay(1500)
+            showSecond = !showSecond
+        }
+    }
+    val alphaSecond by animateFloatAsState(if (showSecond) 1f else 0f, tween(550), label = "phase_crossfade")
+    val description = stringResource(R.string.exercise_visual_description, stringResource(guide.variant))
+    Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).clickable(onClick = onOpen).testTag("open_illustration")) {
+        Canvas(Modifier.fillMaxWidth().aspectRatio(1.25f).semantics { contentDescription = description }.testTag("exercise_art_${exercise.name}")) {
+            val halfW = bitmap.width / 2
+            val factor = minOf(size.width / halfW, size.height / bitmap.height)
+            val w = (halfW * factor).roundToInt()
+            val h = (bitmap.height * factor).roundToInt()
+            val dx = ((size.width - w) / 2).roundToInt()
+            val dy = ((size.height - h) / 2).roundToInt()
+            drawImage(bitmap, srcOffset = IntOffset(0, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = 1f - alphaSecond)
+            drawImage(bitmap, srcOffset = IntOffset(halfW, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = alphaSecond)
+        }
+        PillBadge(
+            text = stringResource(if (showSecond) R.string.phase_movement else R.string.phase_start),
+            modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+        )
+        Icon(Icons.Default.OpenInFull, contentDescription = stringResource(R.string.enlarge_image), modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp).size(20.dp), tint = MaterialTheme.colorScheme.primary)
+    }
 }
 
 @Composable

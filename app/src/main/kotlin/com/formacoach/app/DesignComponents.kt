@@ -117,7 +117,7 @@ internal fun MetricTile(
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 value,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineSmall.copy(fontFeatureSettings = "tnum"),
                 fontWeight = FontWeight.Bold,
                 color = accent,
                 maxLines = 1,
@@ -180,7 +180,7 @@ internal fun CircularProgressRing(
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 10.dp)) {
             Text(
                 valueText,
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
@@ -347,6 +347,7 @@ internal fun StepperInput(
     max: Double = 1000.0,
     integer: Boolean = false,
     error: Boolean = false,
+    placeholder: String? = null,
 ) {
     val haptics = LocalHapticFeedback.current
     fun adjust(delta: Double) {
@@ -363,7 +364,7 @@ internal fun StepperInput(
         onChange(formatted)
     }
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Input(label = label, value = value, onChange = onChange, tag = tag, numeric = true, error = error)
+        Input(label = label, value = value, onChange = onChange, tag = tag, numeric = true, error = error, placeholder = placeholder)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilledTonalIconButton(
                 onClick = { adjust(-step) },

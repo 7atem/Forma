@@ -21,6 +21,10 @@ internal fun FormaScaffold(
     tab: Int,
     onTab: (Int) -> Unit,
     today: LocalDate,
+    darkTheme: Boolean,
+    onToggleTheme: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    onQuickLog: () -> Unit,
     onProfile: () -> Unit,
     onWatch: () -> Unit,
     onBackup: () -> Unit,
@@ -78,6 +82,17 @@ internal fun FormaScaffold(
             Scaffold(
                 modifier = Modifier.weight(1f).fillMaxHeight(),
                 containerColor = MaterialTheme.colorScheme.background,
+                snackbarHost = { SnackbarHost(snackbarHostState) },
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = onQuickLog,
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shape = RoundedCornerShape(18.dp),
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.quick_log))
+                    }
+                },
                 topBar = {
                     Surface(color = MaterialTheme.colorScheme.background) {
                         Column {
@@ -117,6 +132,7 @@ internal fun FormaScaffold(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
+                                TopBarAction(if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode, R.string.toggle_theme, onToggleTheme)
                                 TopBarAction(Icons.Default.Watch, R.string.apple_watch, onWatch, Modifier.testTag("watch_settings"))
                                 TopBarAction(Icons.Default.AccountCircle, R.string.profile, onProfile)
                                 TopBarAction(Icons.Default.SaveAlt, R.string.backup, onBackup, Modifier.testTag("backup_settings"))

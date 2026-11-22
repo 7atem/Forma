@@ -2,6 +2,8 @@ package com.formacoach.app
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +22,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -171,15 +174,17 @@ internal fun HistoryChart(points: List<HistoryPoint>, unit: String) {
     val lineColor = MaterialTheme.colorScheme.primary
     val surfaceColor = MaterialTheme.colorScheme.surface
     val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
+    var scrubbedIndex by remember(points) { mutableStateOf<Int?>(null) }
+    val activePoint = scrubbedIndex?.let { points.getOrNull(it) }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Text(
-                stringResource(R.string.chart_range, number(min), number(max), unit),
+                if (activePoint != null) dateLabel(activePoint.date) else stringResource(R.string.chart_range, number(min), number(max), unit),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (activePoint != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                PillBadge("${number(latest)} $unit")
+                PillBadge("${number(activePoint?.value ?: latest)} $unit")
                 ScopeInfoButton(R.string.progress_title, R.string.chart_note)
             }
         }
@@ -189,16 +194,55 @@ internal fun HistoryChart(points: List<HistoryPoint>, unit: String) {
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Canvas(Modifier.fillMaxWidth().height(168.dp).padding(horizontal = 6.dp, vertical = 8.dp).semantics { contentDescription = description }) {
+            val days = (end.toEpochDay() - start.toEpochDay()).coerceAtLeast(1)
+            Canvas(
+                Modifier
+                    .fillMaxWidth()
+                    .height(168.dp)
+                    .padding(horizontal = 6.dp, vertical = 8.dp)
+                    .pointerInput(points) {
+                        fun pick(x: Float) {
+                            val pad = 14.dp.toPx()
+                            val width = (size.width - 2 * pad).coerceAtLeast(1f)
+                            var best = 0
+                            var bestDist = Float.MAX_VALUE
+                            points.forEachIndexed { idx, pt ->
+                                val px = pad + ((pt.date.toEpochDay() - start.toEpochDay()).toDouble() / days * width).toFloat()
+                                val d = kotlin.math.abs(px - x)
+                                if (d < bestDist) { bestDist = d; best = idx }
+                            }
+                            scrubbedIndex = best
+                        }
+                        detectTapGestures { offset -> pick(offset.x) }
+                    }
+                    .pointerInput(points) {
+                        fun pick(x: Float) {
+                            val pad = 14.dp.toPx()
+                            val width = (size.width - 2 * pad).coerceAtLeast(1f)
+                            var best = 0
+                            var bestDist = Float.MAX_VALUE
+                            points.forEachIndexed { idx, pt ->
+                                val px = pad + ((pt.date.toEpochDay() - start.toEpochDay()).toDouble() / days * width).toFloat()
+                                val d = kotlin.math.abs(px - x)
+                                if (d < bestDist) { bestDist = d; best = idx }
+                            }
+                            scrubbedIndex = best
+                        }
+                        detectHorizontalDragGestures(
+                            onDragEnd = { scrubbedIndex = null },
+                            onDragCancel = { scrubbedIndex = null },
+                            onHorizontalDrag = { change, _ -> pick(change.position.x) },
+                        )
+                    }
+                    .semantics { contentDescription = description },
+            ) {
                 val pad = 14.dp.toPx()
                 val width = (size.width - 2 * pad).coerceAtLeast(1f)
                 val height = (size.height - 2 * pad).coerceAtLeast(1f)
-                // Horizontal reference gridlines
                 listOf(0f, 0.5f, 1f).forEach { frac ->
                     val y = pad + height * frac
                     drawLine(gridColor, Offset(pad, y), Offset(pad + width, y), 1.dp.toPx())
                 }
-                val days = (end.toEpochDay() - start.toEpochDay()).coerceAtLeast(1)
                 val span = (max - min).takeIf { it > 0 } ?: 1.0
                 val coords = points.map { point ->
                     Offset(
@@ -232,13 +276,19 @@ internal fun HistoryChart(points: List<HistoryPoint>, unit: String) {
                         style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
                     )
                 }
+                val highlightIdx = scrubbedIndex ?: coords.lastIndex
+                coords.getOrNull(highlightIdx)?.let { sel ->
+                    if (scrubbedIndex != null) {
+                        drawLine(lineColor.copy(alpha = 0.45f), Offset(sel.x, pad), Offset(sel.x, pad + height), 1.5.dp.toPx())
+                    }
+                }
                 coords.forEachIndexed { index, offset ->
-                    val isLast = index == coords.lastIndex
-                    if (isLast) {
-                        drawCircle(lineColor.copy(alpha = 0.25f), 9.dp.toPx(), offset)
+                    val isHighlight = index == highlightIdx
+                    if (isHighlight) {
+                        drawCircle(lineColor.copy(alpha = 0.28f), 10.dp.toPx(), offset)
                     }
                     drawCircle(surfaceColor, 5.dp.toPx(), offset)
-                    drawCircle(lineColor, if (isLast) 4.5.dp.toPx() else 3.5.dp.toPx(), offset)
+                    drawCircle(lineColor, if (isHighlight) 5.dp.toPx() else 3.5.dp.toPx(), offset)
                 }
             }
         }

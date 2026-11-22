@@ -99,3 +99,8 @@
 "calc_from_macros" = "احسب السعرات من الماكروز";
 "copy_previous_set" = "نسخ آخر مجموعة";
 "all_muscles" = "كل العضلات";
+"play_demo" = "تحريك";
+"pause_demo" = "ثابت";
+"workout_summary" = "اكتملت الجلسة";
+"session_muscles_hit" = "العضلات المدربة";
+"toggle_theme" = "تبديل المظهر";

@@ -145,6 +145,7 @@ private struct MealSlotOption: Identifiable {
     let onExport: (WatchWorkout) -> Void
     let onDelete: (String) -> Void
     @State private var creatingProgram = false
+    @State private var finishedSummary: WatchWorkout?
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
 
@@ -153,7 +154,9 @@ private struct MealSlotOption: Identifiable {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     if let draft = store.state.draft {
-                        PhoneWorkoutView(store: store, draft: draft)
+                        PhoneWorkoutView(store: store, draft: draft) { completed in
+                            finishedSummary = completed
+                        }
                     } else {
                         let workoutDates = Set(store.state.workouts.map(\.date))
                         let recentCount = min(store.state.workouts.count, 3)
@@ -359,6 +362,66 @@ private struct MealSlotOption: Identifiable {
                 .preferredColorScheme(.dark)
                 .tint(FormaTheme.primary)
             }
+            .sheet(item: $finishedSummary) { summary in
+                PhoneWorkoutSummarySheet(workout: summary)
+                    .preferredColorScheme(.dark)
+                    .tint(FormaTheme.primary)
+            }
+        }
+    }
+}
+
+@MainActor private struct PhoneWorkoutSummarySheet: View {
+    let workout: WatchWorkout
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        let tonnage = FormaTheme.workingTonnage(workout.sets)
+        let workingSets = workout.sets.filter { $0.kind == .working }.count
+        let muscleMap: [Muscle: Int] = {
+            var m: [Muscle: Int] = [:]
+            for s in workout.sets where s.kind == .working {
+                let act = ExerciseMuscles.of(s.exercise)
+                for muscle in act.primary + act.secondary { m[muscle, default: 0] += 1 }
+            }
+            return m
+        }()
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    FormaCard {
+                        HStack(spacing: 12) {
+                            Image(systemName: "trophy.fill")
+                                .font(.title)
+                                .foregroundStyle(FormaTheme.primary)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("workout_summary").font(.title2.weight(.heavy)).foregroundStyle(FormaTheme.textPrimary)
+                                Text(workout.programName).font(.subheadline).foregroundStyle(FormaTheme.textMuted)
+                            }
+                        }
+                        HStack(spacing: 10) {
+                            FormaPill(text: "\(workingSets) \(String(localized: "sets"))")
+                            if tonnage > 0 {
+                                FormaPill(text: "\(Int(tonnage.rounded())) kg", background: FormaTheme.secondary.opacity(0.2), foreground: FormaTheme.secondary)
+                            }
+                        }
+                    }
+                    if !muscleMap.isEmpty {
+                        FormaCard {
+                            Text("session_muscles_hit").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                            WeeklyMuscleHeatMapView(setsByMuscle: muscleMap)
+                        }
+                    }
+                }
+                .padding(16)
+            }
+            .background(FormaTheme.background.ignoresSafeArea())
+            .navigationTitle("Forma")
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("ok") { dismiss() }
+                }
+            }
         }
     }
 }
@@ -419,6 +482,7 @@ private struct MealSlotOption: Identifiable {
 @MainActor private struct PhoneWorkoutView: View {
     @ObservedObject var store: LocalStore
     let draft: WorkoutDraft
+    var onFinished: (WatchWorkout) -> Void = { _ in }
     @State private var exercise: Exercise = .squat
     @State private var initializedID: String?
     @State private var reps = 8
@@ -755,7 +819,13 @@ private struct MealSlotOption: Identifiable {
             }
         }
         .confirmationDialog("finish_phone_confirm", isPresented: $confirmFinish, titleVisibility: .visible) {
-            Button("finish_workout") { store.attempt { try store.finish(queueForPhone: false) } }
+            Button("finish_workout") {
+                FormaHaptics.success()
+                store.attempt {
+                    try store.finish(queueForPhone: false)
+                    if let saved = store.state.workouts.last { onFinished(saved) }
+                }
+            }
         }
         .confirmationDialog("discard_confirm", isPresented: $confirmDiscard, titleVisibility: .visible) {
             Button("discard_workout", role: .destructive) { store.attempt { try store.discardDraft() } }
@@ -1166,6 +1236,7 @@ private struct MealSlotOption: Identifiable {
     let onOpenBridge: () -> Void
     @State private var weightKg = 75.0
     @State private var initializedWeight = false
+    @State private var scrubbedIndex: Int?
 
     var body: some View {
         NavigationStack {
@@ -1197,10 +1268,17 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    // Gradient Weight Trend Chart
+                    // Interactive Scrubbable Gradient Weight Trend Chart
                     FormaCard {
-                        Text("weight_trend").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                         let points = Array(store.state.weights.suffix(30))
+                        let activePoint = scrubbedIndex.flatMap { $0 < points.count ? points[$0] : nil }
+                        HStack {
+                            Text("weight_trend").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                            Spacer()
+                            if let active = activePoint {
+                                FormaPill(text: "\(active.weightKg.formatted()) kg · \(active.date)")
+                            }
+                        }
                         if points.count < 2 {
                             Text("no_weights").font(.caption).foregroundStyle(FormaTheme.textMuted)
                         } else {
@@ -1216,6 +1294,7 @@ private struct MealSlotOption: Identifiable {
                                     let y = h - norm * (h - 20) - 10
                                     return CGPoint(x: x, y: y)
                                 }
+                                let highlight = scrubbedIndex ?? (coords.count - 1)
                                 ZStack {
                                     Path { p in
                                         guard let first = coords.first, let last = coords.last else { return }
@@ -1233,13 +1312,32 @@ private struct MealSlotOption: Identifiable {
                                     }
                                     .stroke(FormaTheme.primary, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
 
-                                    ForEach(Array(coords.enumerated()), id: \.offset) { _, pt in
+                                    if let selIdx = scrubbedIndex, selIdx < coords.count {
+                                        Path { p in
+                                            p.move(to: CGPoint(x: coords[selIdx].x, y: 4))
+                                            p.addLine(to: CGPoint(x: coords[selIdx].x, y: h - 4))
+                                        }
+                                        .stroke(FormaTheme.primary.opacity(0.45), lineWidth: 1.5)
+                                    }
+
+                                    ForEach(0..<coords.count, id: \.self) { idx in
+                                        let isSel = idx == highlight
                                         Circle()
                                             .fill(FormaTheme.primary)
-                                            .frame(width: 7, height: 7)
-                                            .position(pt)
+                                            .frame(width: isSel ? 10 : 6, height: isSel ? 10 : 6)
+                                            .position(coords[idx])
                                     }
                                 }
+                                .contentShape(Rectangle())
+                                .gesture(
+                                    DragGesture(minimumDistance: 0)
+                                        .onChanged { value in
+                                            let clamped = min(max(0, value.location.x), max(1, w))
+                                            let idx = Int(((clamped / max(1, w)) * CGFloat(points.count - 1)).rounded())
+                                            scrubbedIndex = min(max(0, idx), points.count - 1)
+                                        }
+                                        .onEnded { _ in scrubbedIndex = nil }
+                                )
                             }
                             .frame(height: 150)
                         }

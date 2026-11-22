@@ -220,6 +220,7 @@ struct FormaProgressRing: View {
             VStack(spacing: 1) {
                 Text(valueText)
                     .font(.system(size: size * 0.22, weight: .bold, design: .rounded))
+                    .monospacedDigit()
                     .foregroundStyle(FormaTheme.textPrimary)
                     .lineLimit(1)
                 if !labelText.isEmpty {
