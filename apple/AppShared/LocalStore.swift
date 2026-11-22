@@ -79,7 +79,7 @@ struct SavedState: Codable {
         } catch { failedToLoad = true }
     }
 
-    static func todayString() -> String {
+    nonisolated static func todayString() -> String {
         let formatter = DateFormatter()
         formatter.calendar = Calendar(identifier: .gregorian)
         formatter.locale = Locale(identifier: "en_US_POSIX")
