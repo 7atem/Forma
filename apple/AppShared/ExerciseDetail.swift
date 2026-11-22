@@ -52,11 +52,12 @@ struct ExerciseDetail: View {
                     MuscleDiagram(exercise: exercise)
                 } else {
                     #if os(iOS)
+                    let phaseKeys = ["both_phases", "phase_start", "phase_movement"]
                     HStack(spacing: 6) {
-                        ForEach(Array([(0, "both_phases"), (1, "phase_start"), (2, "phase_movement")]), id: \.0) { idx, key in
+                        ForEach(0..<phaseKeys.count, id: \.self) { idx in
                             Button { phase = idx } label: {
                                 FormaPill(
-                                    text: String(localized: String.LocalizationValue(key)),
+                                    text: String(localized: String.LocalizationValue(phaseKeys[idx])),
                                     background: phase == idx ? FormaTheme.primary : FormaTheme.surface,
                                     foreground: phase == idx ? FormaTheme.onPrimary : FormaTheme.textMuted
                                 )

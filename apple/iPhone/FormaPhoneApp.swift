@@ -126,6 +126,19 @@ struct TransferDocument: FileDocument {
     }
 }
 
+private struct PRCardItem: Identifiable {
+    let exercise: Exercise
+    let weight: Double
+    let reps: Int
+    let e1rm: Double?
+    var id: Exercise { exercise }
+}
+
+private struct MealSlotOption: Identifiable {
+    let id: String
+    let labelKey: String
+}
+
 @MainActor private struct PhoneTrainTab: View {
     @ObservedObject var store: LocalStore
     let onOpenBridge: () -> Void
@@ -186,7 +199,7 @@ struct TransferDocument: FileDocument {
                         }
 
                         // Personal Records (PR) Trophy Strip
-                        let prs: [(exercise: Exercise, weight: Double, reps: Int, e1rm: Double?)] = {
+                        let prs: [PRCardItem] = {
                             var bestByExercise: [Exercise: WatchSet] = [:]
                             for workout in store.state.workouts {
                                 for set in workout.sets where set.kind == .working && set.weightKg > 0 {
@@ -202,7 +215,7 @@ struct TransferDocument: FileDocument {
                             return bestByExercise.values
                                 .sorted { $0.weightKg > $1.weightKg }
                                 .prefix(8)
-                                .map { ($0.exercise, $0.weightKg, $0.reps, FormaTheme.estimatedOneRepMax(weightKg: $0.weightKg, reps: $0.reps)) }
+                                .map { PRCardItem(exercise: $0.exercise, weight: $0.weightKg, reps: $0.reps, e1rm: FormaTheme.estimatedOneRepMax(weightKg: $0.weightKg, reps: $0.reps)) }
                         }()
                         if !prs.isEmpty {
                             Text("personal_records_title")
@@ -210,7 +223,7 @@ struct TransferDocument: FileDocument {
                                 .foregroundStyle(FormaTheme.textPrimary)
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
-                                    ForEach(prs, id: \.exercise) { item in
+                                    ForEach(prs) { item in
                                         VStack(alignment: .leading, spacing: 6) {
                                             Text(item.exercise.label(arabic: arabic))
                                                 .font(.caption.weight(.bold))
@@ -921,13 +934,19 @@ struct TransferDocument: FileDocument {
                     }
 
                     // Meal slot selector
+                    let slotOptions = [
+                        MealSlotOption(id: "BREAKFAST", labelKey: "meal_breakfast"),
+                        MealSlotOption(id: "LUNCH", labelKey: "meal_lunch"),
+                        MealSlotOption(id: "DINNER", labelKey: "meal_dinner"),
+                        MealSlotOption(id: "SNACK", labelKey: "meal_snack"),
+                    ]
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            ForEach([("BREAKFAST", "meal_breakfast"), ("LUNCH", "meal_lunch"), ("DINNER", "meal_dinner"), ("SNACK", "meal_snack")], id: \.0) { code, key in
-                                let active = selectedSlot == code
-                                Button { selectedSlot = code } label: {
+                            ForEach(slotOptions) { option in
+                                let active = selectedSlot == option.id
+                                Button { selectedSlot = option.id } label: {
                                     FormaPill(
-                                        text: String(localized: String.LocalizationValue(key)),
+                                        text: String(localized: String.LocalizationValue(option.labelKey)),
                                         background: active ? FormaTheme.primary : FormaTheme.surface,
                                         foreground: active ? FormaTheme.onPrimary : FormaTheme.textMuted
                                     )
@@ -1099,7 +1118,8 @@ struct TransferDocument: FileDocument {
                                 let h = geo.size.height
                                 let coords: [CGPoint] = points.enumerated().map { idx, item in
                                     let x = w * CGFloat(idx) / CGFloat(max(1, points.count - 1))
-                                    let y = h - ((item.weightKg - minW) / span) * (h - 20) - 10
+                                    let norm = CGFloat((item.weightKg - minW) / span)
+                                    let y = h - norm * (h - 20) - 10
                                     return CGPoint(x: x, y: y)
                                 }
                                 ZStack {

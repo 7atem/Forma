@@ -189,10 +189,17 @@ struct FormaBarbellView: View {
     }
 }
 
+struct StripDay: Identifiable {
+    let id: String
+    let label: String
+    let dayNum: String
+    let isToday: Bool
+}
+
 struct FormaWeeklyStrip: View {
     let workoutDates: Set<String>
 
-    private var last7Days: [(label: String, dayNum: String, iso: String, isToday: Bool)] {
+    private var last7Days: [StripDay] {
         let cal = Calendar.current
         let isoFmt = DateFormatter()
         isoFmt.calendar = Calendar(identifier: .gregorian)
@@ -204,14 +211,14 @@ struct FormaWeeklyStrip: View {
         return (0..<7).reversed().compactMap { offset in
             guard let d = cal.date(byAdding: .day, value: -offset, to: today) else { return nil }
             let dayNum = String(cal.component(.day, from: d))
-            return (dayFmt.string(from: d), dayNum, isoFmt.string(from: d), offset == 0)
+            return StripDay(id: isoFmt.string(from: d), label: dayFmt.string(from: d), dayNum: dayNum, isToday: offset == 0)
         }
     }
 
     var body: some View {
         HStack(spacing: 6) {
-            ForEach(last7Days, id: \.iso) { item in
-                let done = workoutDates.contains(item.iso)
+            ForEach(last7Days) { item in
+                let done = workoutDates.contains(item.id)
                 VStack(spacing: 5) {
                     Text(item.label)
                         .font(.caption2.weight(item.isToday ? .bold : .regular))
