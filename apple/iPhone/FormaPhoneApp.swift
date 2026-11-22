@@ -46,6 +46,7 @@ struct TransferDocument: FileDocument {
     @State private var exporting = false
     @State private var deleting: String?
     @State private var showBridge = false
+    @State private var selectedTab = 0
 
     var body: some View {
         Group {
@@ -56,7 +57,15 @@ struct TransferDocument: FileDocument {
                         .padding()
                 }
             } else {
-                TabView {
+                TabView(selection: $selectedTab) {
+                    PhoneExercisesTab(
+                        store: store,
+                        onOpenBridge: { showBridge = true },
+                        onOpenTrain: { selectedTab = 1 }
+                    )
+                    .tabItem { Label("tab_exercises", systemImage: "figure.strengthtraining.traditional") }
+                    .tag(0)
+
                     PhoneTrainTab(
                         store: store,
                         onOpenBridge: { showBridge = true },
@@ -69,15 +78,15 @@ struct TransferDocument: FileDocument {
                         onDelete: { deleting = $0 }
                     )
                     .tabItem { Label("tab_train", systemImage: "dumbbell.fill") }
+                    .tag(1)
 
                     PhoneEatTab(store: store, onOpenBridge: { showBridge = true })
                         .tabItem { Label("tab_eat", systemImage: "fork.knife") }
+                        .tag(2)
 
                     PhoneProgressTab(store: store, onOpenBridge: { showBridge = true })
                         .tabItem { Label("tab_progress", systemImage: "chart.xyaxis.line") }
-
-                    PhoneExercisesTab(onOpenBridge: { showBridge = true })
-                        .tabItem { Label("tab_exercises", systemImage: "figure.strengthtraining.traditional") }
+                        .tag(3)
                 }
                 .tint(FormaTheme.primary)
             }
@@ -903,10 +912,13 @@ private struct MealSlotOption: Identifiable {
 }
 
 @MainActor private struct PhoneExercisesTab: View {
+    @ObservedObject var store: LocalStore
     let onOpenBridge: () -> Void
+    let onOpenTrain: () -> Void
     @State private var exerciseSearch = ""
     @State private var equipment: Equipment?
     @State private var selectedMuscle: Muscle?
+    @State private var recordingExercise: Exercise?
     @AppStorage("forma_dark_mode") private var darkMode = true
     @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
@@ -931,6 +943,28 @@ private struct MealSlotOption: Identifiable {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
+                    if let draft = store.state.draft {
+                        Button(action: onOpenTrain) {
+                            HStack(spacing: 10) {
+                                FormaPulseDot()
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(draft.program.name)
+                                        .font(.subheadline.weight(.bold))
+                                        .foregroundStyle(FormaTheme.textPrimary)
+                                    Text("\(draft.sets.count) \(String(localized: "sets"))")
+                                        .font(.caption)
+                                        .foregroundStyle(FormaTheme.primary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundStyle(FormaTheme.primary)
+                            }
+                            .padding(12)
+                            .background(FormaTheme.primaryContainer, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(FormaTheme.primary.opacity(0.45), lineWidth: 1))
+                        }
+                    }
+
                     TextField("search_exercises", text: $exerciseSearch)
                         .padding(12)
                         .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -998,26 +1032,44 @@ private struct MealSlotOption: Identifiable {
 
                         LazyVGrid(columns: columns, spacing: 12) {
                             ForEach(items, id: \.self) { exercise in
-                                NavigationLink { ExerciseDetail(exercise: exercise) } label: {
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
-                                            .frame(maxWidth: .infinity)
-                                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                        Text(exercise.label(arabic: arabic))
-                                            .font(.subheadline.weight(.bold))
-                                            .foregroundStyle(FormaTheme.textPrimary)
-                                            .lineLimit(2)
-                                            .multilineTextAlignment(.leading)
-                                        Text(ExerciseCatalog.of(exercise).equipment.map { $0.label(arabic: arabic) }.joined(separator: " · "))
-                                            .font(.caption2)
-                                            .foregroundStyle(FormaTheme.textMuted)
-                                            .lineLimit(1)
+                                VStack(alignment: .leading, spacing: 8) {
+                                    NavigationLink {
+                                        ExerciseDetail(
+                                            exercise: exercise,
+                                            onRecordSet: { recordingExercise = exercise }
+                                        )
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 6) {
+                                            FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
+                                                .frame(maxWidth: .infinity)
+                                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            Text(exercise.label(arabic: arabic))
+                                                .font(.subheadline.weight(.bold))
+                                                .foregroundStyle(FormaTheme.textPrimary)
+                                                .lineLimit(2)
+                                                .multilineTextAlignment(.leading)
+                                            Text(ExerciseCatalog.of(exercise).equipment.map { $0.label(arabic: arabic) }.joined(separator: " · "))
+                                                .font(.caption2)
+                                                .foregroundStyle(FormaTheme.textMuted)
+                                                .lineLimit(1)
+                                        }
                                     }
-                                    .padding(10)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(FormaTheme.border.opacity(0.75), lineWidth: 1))
+                                    Button {
+                                        FormaHaptics.tap()
+                                        recordingExercise = exercise
+                                    } label: {
+                                        Label("record_exercise", systemImage: "plus")
+                                            .font(.caption.weight(.bold))
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 6)
+                                            .background(FormaTheme.primaryContainer, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                            .foregroundStyle(FormaTheme.primary)
+                                    }
                                 }
+                                .padding(10)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(FormaTheme.border.opacity(0.75), lineWidth: 1))
                             }
                         }
                     }
@@ -1041,6 +1093,94 @@ private struct MealSlotOption: Identifiable {
                         Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
                     }
                     Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
+                }
+            }
+            .sheet(isPresented: Binding(get: { recordingExercise != nil }, set: { if !$0 { recordingExercise = nil } })) {
+                if let ex = recordingExercise {
+                    PhoneQuickRecordSheet(
+                        exercise: ex,
+                        store: store,
+                        onDismiss: { recordingExercise = nil }
+                    )
+                    .tint(FormaTheme.primary)
+                }
+            }
+        }
+    }
+}
+
+@MainActor private struct PhoneQuickRecordSheet: View {
+    let exercise: Exercise
+    @ObservedObject var store: LocalStore
+    let onDismiss: () -> Void
+    @AppStorage("forma_use_lb") private var useLb = false
+    @Environment(\.locale) private var locale
+    @State private var reps = 8
+    @State private var kg = 0.0
+    @State private var warmup = false
+    @State private var initialized = false
+    private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
+
+    var body: some View {
+        let previous = store.state.workouts.reversed().flatMap(\.sets).first(where: { $0.exercise == exercise })
+            ?? store.state.draft?.sets.reversed().first(where: { $0.exercise == exercise })
+        NavigationStack {
+            Form {
+                if let prev = previous {
+                    Section {
+                        HStack {
+                            Text("\(prev.reps) × \(FormaTheme.formatWeight(prev.weightKg, useLb: useLb))")
+                                .font(.caption)
+                                .foregroundStyle(FormaTheme.textMuted)
+                            Spacer()
+                            Button("copy_previous_set") {
+                                reps = prev.reps
+                                kg = prev.weightKg
+                                warmup = prev.kind == .warmUp
+                            }
+                            .font(.caption.weight(.semibold))
+                        }
+                    }
+                }
+                Section {
+                    Stepper("\(String(localized: "reps")): \(reps)", value: $reps, in: 1...1000)
+                    Stepper(FormaTheme.formatWeight(kg, useLb: useLb), value: $kg, in: 0...1000, step: useLb ? (5.0 / 2.20462262185) : 2.5)
+                    Toggle("warmup", isOn: $warmup)
+                }
+                Section {
+                    Button {
+                        FormaHaptics.success()
+                        let set = WatchSet(
+                            exercise: exercise,
+                            reps: reps,
+                            weightKg: kg,
+                            kind: warmup ? .warmUp : .working,
+                            rpe: nil
+                        )
+                        store.attempt {
+                            try store.quickLog(set, label: exercise.label(arabic: arabic))
+                        }
+                        onDismiss()
+                    } label: {
+                        Text("record_set")
+                            .font(.headline.weight(.bold))
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+            }
+            .navigationTitle(exercise.label(arabic: arabic))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("cancel", action: onDismiss)
+                }
+            }
+            .onAppear {
+                if !initialized {
+                    initialized = true
+                    if let prev = previous {
+                        reps = prev.reps
+                        kg = prev.weightKg
+                    }
                 }
             }
         }

@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
@@ -30,10 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.imageResource
@@ -46,7 +50,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.formacoach.coach.TrainingHistory
 import com.formacoach.model.*
+import java.time.LocalDate
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -75,16 +81,24 @@ internal fun ExerciseIllustration(exercise:Exercise,onOpen:(()->Unit)?=null) {
     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).then(if(onOpen!=null) Modifier.clickable(onClick=onOpen).testTag("open_illustration") else Modifier)) {
         Image(painterResource(guide.image),contentDescription=description,contentScale=ContentScale.Fit,
             modifier=Modifier.fillMaxWidth().aspectRatio(1.5f).testTag("exercise_art_${exercise.name}"))
+        CompactMuscleOverlay(exercise, pulsePeak = false, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
         if(onOpen!=null) Icon(Icons.Default.OpenInFull,contentDescription=stringResource(R.string.enlarge_image),modifier=Modifier.align(Alignment.BottomEnd).padding(12.dp).size(20.dp),tint=MaterialTheme.colorScheme.primary)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-internal fun ExerciseGuideSheet(exercise:Exercise,tools:@Composable ()->Unit={},onDismiss:()->Unit) {
+internal fun ExerciseGuideSheet(
+    exercise: Exercise,
+    snapshot: FitnessSnapshot? = null,
+    onRecord: (() -> Unit)? = null,
+    tools: @Composable () -> Unit = {},
+    onDismiss: () -> Unit,
+) {
     var tab by rememberSaveable(exercise) {mutableIntStateOf(0)}
     var enlarged by rememberSaveable(exercise) {mutableStateOf(false)}
     val guide=guideResources(exercise)
+    val activation=ExerciseMuscles.of(exercise)
     val uri=LocalUriHandler.current
     val guideScroll=rememberScrollState()
     LaunchedEffect(exercise) {guideScroll.scrollTo(0)}
@@ -92,10 +106,21 @@ internal fun ExerciseGuideSheet(exercise:Exercise,tools:@Composable ()->Unit={},
         Column(Modifier.fillMaxWidth().heightIn(max=850.dp).verticalScroll(guideScroll).padding(horizontal=20.dp).navigationBarsPadding().padding(bottom=24.dp),verticalArrangement=Arrangement.spacedBy(16.dp)) {
             Row(verticalAlignment=Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text(stringResource(exerciseLabel(exercise)),style=MaterialTheme.typography.headlineSmall)
+                    Text(stringResource(exerciseLabel(exercise)),style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
                     Text(stringResource(guide.variant),style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 IconButton(onClick=onDismiss,modifier=Modifier.testTag("guide_close")) {Icon(Icons.Default.Close,stringResource(R.string.close))}
+            }
+            if (onRecord != null) {
+                Button(
+                    onClick = onRecord,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("guide_record_set"),
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.record_set_for, stringResource(exerciseLabel(exercise))), fontWeight = FontWeight.Bold)
+                }
             }
             TabRow(selectedTabIndex=tab,containerColor=MaterialTheme.colorScheme.background) {
                 listOf(R.string.technique,R.string.muscles_working).forEachIndexed {index,label ->
@@ -107,7 +132,7 @@ internal fun ExerciseGuideSheet(exercise:Exercise,tools:@Composable ()->Unit={},
                 val reduceMotion = remember {
                     runCatching { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }.getOrDefault(false)
                 }
-                var animating by rememberSaveable(exercise) { mutableStateOf(false) }
+                var animating by rememberSaveable(exercise) { mutableStateOf(!reduceMotion) }
                 if (animating && !reduceMotion) {
                     AnimatedExerciseIllustration(exercise) { enlarged = true }
                 } else {
@@ -126,6 +151,46 @@ internal fun ExerciseGuideSheet(exercise:Exercise,tools:@Composable ()->Unit={},
                             leadingIcon = { Icon(if (animating) Icons.Default.Pause else Icons.Default.PlayArrow, null, modifier = Modifier.size(16.dp)) },
                             label = { Text(stringResource(if (animating) R.string.pause_demo else R.string.play_demo)) },
                         )
+                    }
+                }
+                // Live Affected Muscles Summary Chips right under the moving demo
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    activation.primary.forEach { m ->
+                        PillBadge(
+                            text = stringResource(muscleLabel(m)),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                    activation.secondary.forEach { m ->
+                        PillBadge(
+                            text = stringResource(muscleLabel(m)),
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.secondary,
+                        )
+                    }
+                }
+                // Per-Exercise Rep-Max Ladder
+                if (snapshot != null) {
+                    val ladder = remember(snapshot, exercise) { TrainingHistory.repMaxLadder(snapshot, exercise) }
+                    if (ladder.isNotEmpty()) {
+                        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Text(stringResource(R.string.rep_max_ladder), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                ladder.forEach { (repBucket, bestKg) ->
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)),
+                                    ) {
+                                        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                            Text("${number(repBucket.toDouble(), 0)}RM", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                            Text(formatWeight(bestKg, 1), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.ExtraBold)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 guide.cues.forEachIndexed {index,cue -> Row(horizontalArrangement=Arrangement.spacedBy(12.dp),verticalAlignment=Alignment.Top) {
@@ -148,27 +213,47 @@ private fun AnimatedExerciseIllustration(exercise: Exercise, onOpen: () -> Unit)
     var showSecond by remember(exercise) { mutableStateOf(false) }
     LaunchedEffect(exercise) {
         while (true) {
-            kotlinx.coroutines.delay(1500)
+            kotlinx.coroutines.delay(1300)
             showSecond = !showSecond
         }
     }
-    val alphaSecond by animateFloatAsState(if (showSecond) 1f else 0f, tween(550), label = "phase_crossfade")
+    val progress by animateFloatAsState(if (showSecond) 1f else 0f, tween(620), label = "phase_crossfade")
     val description = stringResource(R.string.exercise_visual_description, stringResource(guide.variant))
     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).clickable(onClick = onOpen).testTag("open_illustration")) {
-        Canvas(Modifier.fillMaxWidth().aspectRatio(1.25f).semantics { contentDescription = description }.testTag("exercise_art_${exercise.name}")) {
+        Canvas(Modifier.fillMaxWidth().aspectRatio(1.22f).semantics { contentDescription = description }.testTag("exercise_art_${exercise.name}")) {
             val halfW = bitmap.width / 2
-            val factor = minOf(size.width / halfW, size.height / bitmap.height)
+            val baseFactor = minOf(size.width / halfW, size.height / bitmap.height)
+            // Subtle breathing scale (1.0 -> 1.035) gives lifelike motion between start and peak phases
+            val scaleMotion = 1f + 0.035f * progress
+            val factor = baseFactor * scaleMotion
             val w = (halfW * factor).roundToInt()
             val h = (bitmap.height * factor).roundToInt()
             val dx = ((size.width - w) / 2).roundToInt()
             val dy = ((size.height - h) / 2).roundToInt()
-            drawImage(bitmap, srcOffset = IntOffset(0, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = 1f - alphaSecond)
-            drawImage(bitmap, srcOffset = IntOffset(halfW, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = alphaSecond)
+            drawImage(bitmap, srcOffset = IntOffset(0, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = 1f - progress)
+            drawImage(bitmap, srcOffset = IntOffset(halfW, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = progress)
         }
-        PillBadge(
-            text = stringResource(if (showSecond) R.string.phase_movement else R.string.phase_start),
-            modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+        CompactMuscleOverlay(
+            exercise = exercise,
+            pulsePeak = showSecond,
+            modifier = Modifier.align(Alignment.TopEnd).padding(10.dp),
         )
+        Column(
+            Modifier.align(Alignment.BottomStart).padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            PillBadge(
+                text = stringResource(if (showSecond) R.string.phase_movement else R.string.phase_start),
+                containerColor = if (showSecond) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+                contentColor = if (showSecond) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+            )
+            LinearProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.width(84.dp).height(4.dp).clip(RoundedCornerShape(99.dp)),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f),
+            )
+        }
         Icon(Icons.Default.OpenInFull, contentDescription = stringResource(R.string.enlarge_image), modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp).size(20.dp), tint = MaterialTheme.colorScheme.primary)
     }
 }
@@ -216,10 +301,11 @@ private fun ExerciseImageViewer(exercise:Exercise,onDismiss:()->Unit) {
 }
 
 @Composable
-internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel) {
+internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=LocalDate.now(vm.clock),onSetRecorded:()->Unit={}) {
     val columns=if(LocalConfiguration.current.screenWidthDp>=840) 3 else 2
     var search by rememberSaveable {mutableStateOf("")}
     var opened by rememberSaveable {mutableStateOf<Exercise?>(null)}
+    var recording by rememberSaveable {mutableStateOf<Exercise?>(null)}
     var equipment by rememberSaveable {mutableStateOf<Equipment?>(null)}
     var muscle by rememberSaveable {mutableStateOf<Muscle?>(null)}
     var favoritesOnly by rememberSaveable {mutableStateOf(false)}
@@ -320,6 +406,16 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel) {
                         maxLines=1,
                         overflow=TextOverflow.Ellipsis,
                     )
+                    FilledTonalButton(
+                        onClick = { recording = exercise },
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.fillMaxWidth().testTag("quick_record_${exercise.name}"),
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.record_exercise), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    }
                 }
             }
         }
@@ -327,7 +423,165 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel) {
     }}
     }
     if(matches.size>limit) TextButton(onClick={limit+=12},modifier=Modifier.testTag("more_exercises")) {Text(stringResource(R.string.show_more))}
-    opened?.let {exercise ->ExerciseGuideSheet(exercise,tools={ExerciseTools(exercise,state,vm,onSimilar={opened=it})},onDismiss={opened=null})}
+    opened?.let { exercise ->
+        ExerciseGuideSheet(
+            exercise = exercise,
+            snapshot = state.snapshot,
+            onRecord = { recording = exercise },
+            tools = { ExerciseTools(exercise, state, vm, onSimilar = { opened = it }) },
+            onDismiss = { opened = null },
+        )
+    }
+    recording?.let { exercise ->
+        QuickRecordExerciseSheet(
+            exercise = exercise,
+            state = state,
+            today = today,
+            vm = vm,
+            onSaved = {
+                recording = null
+                onSetRecorded()
+            },
+            onDismiss = { recording = null },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun QuickRecordExerciseSheet(
+    exercise: Exercise,
+    state: AppState,
+    today: LocalDate,
+    vm: FitnessViewModel,
+    onSaved: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val unit = LocalWeightUnit.current
+    val unitLabel = weightUnitLabel()
+    val locale = LocalConfiguration.current.locales[0]
+    val haptics = LocalHapticFeedback.current
+    val previous = remember(state.snapshot, exercise) {
+        state.snapshot.sets.lastOrNull { it.exercise == exercise }
+    }
+    var reps by rememberSaveable(exercise) {
+        mutableStateOf(previous?.reps?.let { formatInputNumber(it.toDouble(), locale, 0) } ?: "8")
+    }
+    var weight by rememberSaveable(exercise) {
+        mutableStateOf(previous?.weightKg?.let { formatInputNumber(WeightUnits.fromKg(it, unit), locale, 2) } ?: "0")
+    }
+    var inputUnit by rememberSaveable(exercise) { mutableStateOf(unit) }
+    LaunchedEffect(unit) {
+        if (inputUnit != unit) {
+            NumericInput.decimal(weight)?.let { parsed ->
+                weight = formatInputNumber(WeightUnits.convert(parsed, inputUnit, unit), locale, 2)
+            }
+            inputUnit = unit
+        }
+    }
+    var warmup by rememberSaveable(exercise) { mutableStateOf(false) }
+    var rpe by rememberSaveable(exercise) { mutableStateOf("") }
+    val valid = runCatching {
+        val r = requireNotNull(NumericInput.integer(reps))
+        val w = WeightUnits.toKg(requireNotNull(NumericInput.decimal(weight)), unit)
+        val e = if (rpe.isBlank()) null else requireNotNull(NumericInput.decimal(rpe))
+        require(r in 1..1000 && w in 0.0..1000.0 && (e == null || e in 0.0..10.0))
+        Triple(r, w, e)
+    }.getOrNull()
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.background,
+    ) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .navigationBarsPadding()
+                .padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                ExerciseThumbnail(exercise, Modifier.width(68.dp).clip(RoundedCornerShape(10.dp)))
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(exerciseLabel(exercise)), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    PillBadge(stringResource(muscleLabel(ExerciseMuscles.of(exercise).primary.first())))
+                }
+                IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close)) }
+            }
+            previous?.let { last ->
+                Text(
+                    stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), formatWeight(last.weightKg)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            FormFieldPair(
+                first = {
+                    StepperInput(
+                        label = R.string.reps,
+                        value = reps,
+                        onChange = { reps = it },
+                        tag = "quick_reps",
+                        step = 1.0,
+                        min = 1.0,
+                        max = 1000.0,
+                        integer = true,
+                    )
+                },
+                second = {
+                    StepperInput(
+                        label = if (unit == WeightUnit.KG) R.string.weight_kg else R.string.weight_lb,
+                        value = weight,
+                        onChange = { weight = it },
+                        tag = "quick_weight",
+                        step = WeightUnits.step(unit),
+                        min = 0.0,
+                        max = if (unit == WeightUnit.KG) 1000.0 else 2200.0,
+                        integer = false,
+                    )
+                },
+            )
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                FilterChip(selected = warmup, onClick = { warmup = !warmup }, label = { Text(stringResource(R.string.warmup_set)) })
+                WeightUnits.quickBumps(unit).forEach { bump ->
+                    AssistChip(
+                        onClick = {
+                            haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            val cur = NumericInput.decimal(weight) ?: 0.0
+                            val cap = if (unit == WeightUnit.KG) 1000.0 else 2200.0
+                            weight = formatInputNumber((cur + bump).coerceAtMost(cap), locale, 2)
+                        },
+                        label = { Text("+${number(bump)} $unitLabel", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold) },
+                    )
+                }
+            }
+            Button(
+                onClick = {
+                    if (vm.state.value.busy) return@Button
+                    valid?.let { (r, w, e) ->
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                        vm.quickLogExerciseSet(
+                            exercise = exercise,
+                            reps = r,
+                            kg = w,
+                            kind = if (warmup) SetKind.WARM_UP else SetKind.WORKING,
+                            rpe = e,
+                            date = today,
+                            done = onSaved,
+                        )
+                    }
+                },
+                enabled = valid != null && !state.busy,
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("quick_save_set"),
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(R.string.add_set), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
 }
 
 @Composable

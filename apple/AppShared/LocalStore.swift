@@ -173,6 +173,31 @@ struct SavedState: Codable {
         }
     }
 
+    func quickLog(_ set: WatchSet, label: String) throws {
+        try set.validate()
+        let date = Self.todayString()
+        try commit { state in
+            if var draft = state.draft {
+                draft.sets.append(set)
+                let next = WorkoutFlow.afterSet(program: draft.program, sets: draft.sets, current: set.exercise, kind: set.kind)
+                draft.restUntil = next.restSeconds > 0 ? Date().addingTimeInterval(Double(next.restSeconds)) : nil
+                state.draft = draft
+            } else {
+                let program = WatchProgram(
+                    id: "quick",
+                    name: label.isEmpty ? set.exercise.rawValue : label,
+                    exercises: [set.exercise],
+                    restSeconds: 90,
+                    prescriptions: []
+                )
+                var draft = WorkoutDraft(date: date, program: program)
+                draft.sets.append(set)
+                draft.restUntil = Date().addingTimeInterval(90)
+                state.draft = draft
+            }
+        }
+    }
+
     func edit(_ set: WatchSet) throws {
         try set.validate()
         try commit {

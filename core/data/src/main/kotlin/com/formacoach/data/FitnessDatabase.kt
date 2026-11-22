@@ -87,7 +87,13 @@ interface FitnessDao {
     @Query("UPDATE plan_proposals SET status='SUPERSEDED' WHERE status='PENDING' AND baseSessions != :target") suspend fun supersedeMismatched(target:Int)
     @Insert suspend fun insertSession(row:SessionRow)
     @Query("SELECT COUNT(*) FROM sessions WHERE completedAt IS NULL") suspend fun draftCount():Int
+    @Query("SELECT * FROM sessions WHERE completedAt IS NULL ORDER BY day DESC, rowid DESC LIMIT 1") suspend fun activeSession():SessionRow?
     @Transaction suspend fun startSession(row:SessionRow) {check(draftCount()==0);insertSession(row)}
+    @Transaction suspend fun quickLogExerciseSet(fallbackSession:SessionRow,set:SetRow) {
+        val existing=activeSession()
+        val targetId=if(existing!=null) existing.id else {insertSession(fallbackSession);fallbackSession.id}
+        insertSet(set.copy(sessionId=targetId))
+    }
     @Query("SELECT * FROM sessions WHERE id=:id") suspend fun session(id:String):SessionRow?
     @Insert suspend fun insertSet(row:SetRow)
     @Query("SELECT * FROM training_sets WHERE sessionId=:id") suspend fun sessionSets(id:String):List<SetRow>

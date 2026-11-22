@@ -33,13 +33,12 @@ internal fun FormaScaffold(
     onBackup: () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val labels = listOf(R.string.today, R.string.train, R.string.eat, R.string.progress, R.string.coach)
+    val labels = listOf(R.string.exercises_tab, R.string.train, R.string.eat, R.string.you_tab)
     val icons = listOf(
-        Icons.Default.Home,
+        Icons.Default.AccessibilityNew,
         Icons.Default.FitnessCenter,
         Icons.Default.Restaurant,
-        Icons.AutoMirrored.Filled.ShowChart,
-        Icons.Default.Forum,
+        Icons.Default.Person,
     )
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 840.dp

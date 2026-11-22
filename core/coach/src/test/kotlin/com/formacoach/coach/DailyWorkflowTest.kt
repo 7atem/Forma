@@ -139,5 +139,21 @@ class DailyWorkflowTest {
         assertEquals(220.5, switchedToLb, 0.1)
         val switchedBackToKg = WeightUnits.convert(switchedToLb, WeightUnit.LB, WeightUnit.KG)
         assertEquals(100.0, switchedBackToKg, 0.05)
+
+        // Rep-max ladder ignores warm-ups and ranks working sets accurately
+        val s1 = Session("r1", date, "A", completedAt = 100L)
+        val ladderSnap = FitnessSnapshot(
+            sessions = listOf(s1),
+            sets = listOf(
+                TrainingSet(sessionId = "r1", exercise = Exercise.SQUAT, reps = 5, weightKg = 100.0, kind = SetKind.WORKING),
+                TrainingSet(sessionId = "r1", exercise = Exercise.SQUAT, reps = 8, weightKg = 85.0, kind = SetKind.WORKING),
+                TrainingSet(sessionId = "r1", exercise = Exercise.SQUAT, reps = 1, weightKg = 140.0, kind = SetKind.WARM_UP),
+            ),
+        )
+        val ladder = TrainingHistory.repMaxLadder(ladderSnap, Exercise.SQUAT).toMap()
+        assertEquals(100.0, ladder[1]!!, 0.01)
+        assertEquals(100.0, ladder[5]!!, 0.01)
+        assertEquals(85.0, ladder[8]!!, 0.01)
+        assertFalse(10 in ladder)
     }
 }

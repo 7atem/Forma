@@ -250,4 +250,14 @@
     <string name="session_muscles_hit">العضلات المدربة في هذه الجلسة</string>
     <string name="lb">رطل</string>
     <string name="weight_unit_toggle">تبديل كجم أو رطل</string>
+    <string name="exercises_tab">التمارين</string>
+    <string name="you_tab">حسابي</string>
+    <string name="record_exercise">سجّل</string>
+    <string name="record_set_for">تسجيل مجموعة · %1$s</string>
+    <string name="set_logged_toast">تم تسجيل المجموعة</string>
+    <string name="open_session">الجلسة</string>
+    <string name="rep_max_ladder">أفضل المجموعات المسجلة</string>
+    <string name="milestones_title">إنجازات مسجلة</string>
+    <string name="milestone_first_session">أول تمرين مسجل</string>
+    <string name="milestone_sets_count">تم تسجيل %1$s مجموعة عمل</string>
 </resources>

@@ -74,6 +74,18 @@ object TrainingHistory {
     fun weights(data: FitnessSnapshot, asOf: LocalDate): List<HistoryPoint> = data.measurements
         .filter { it.date in asOf.minusDays(89)..asOf && it.weightKg != null }
         .sortedBy { it.date }.map { HistoryPoint(it.date, it.weightKg!!) }
+
+    /** Best recorded working load per rep target (1, 3, 5, 8, 10, 12 reps). Warm-ups excluded. */
+    fun repMaxLadder(data: FitnessSnapshot, exercise: Exercise): List<Pair<Int, Double>> {
+        val completedIds = data.sessions.filter { it.completedAt != null }.map { it.id }.toSet()
+        val working = data.sets.filter {
+            it.sessionId in completedIds && it.exercise == exercise && it.kind == SetKind.WORKING && it.weightKg > 0.0
+        }
+        return listOf(1, 3, 5, 8, 10, 12).mapNotNull { repsTarget ->
+            val best = working.filter { it.reps >= repsTarget }.maxOfOrNull { it.weightKg }
+            best?.let { repsTarget to it }
+        }
+    }
 }
 
 object RestTimer {

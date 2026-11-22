@@ -101,3 +101,46 @@ internal fun WeeklyMuscleHeatMap(primarySetsByMuscle: Map<Muscle, Int>) {
         }
     }
 }
+
+/** Compact floating front/back schematic overlay for exercise demos & cards showing marked primary/supporting muscles. */
+@Composable
+internal fun CompactMuscleOverlay(exercise: Exercise, pulsePeak: Boolean = false, modifier: Modifier = Modifier) {
+    val activation = ExerciseMuscles.of(exercise)
+    val outline = remember { checkNotNull(PathParser.createPathFromPathData(ExerciseMuscles.outline)).asComposePath() }
+    val regions = remember { ExerciseMuscles.regions.map { it to checkNotNull(PathParser.createPathFromPathData(it.path)).asComposePath() } }
+    val neutral = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
+    val inactive = MaterialTheme.colorScheme.outline.copy(alpha = 0.22f)
+    val primaryAlpha = if (pulsePeak) 1f else 0.78f
+    val main = MaterialTheme.colorScheme.primary.copy(alpha = primaryAlpha)
+    val supporting = MaterialTheme.colorScheme.secondary.copy(alpha = if (pulsePeak) 0.95f else 0.72f)
+    Surface(
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.88f),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = if (pulsePeak) 0.65f else 0.3f)),
+        modifier = modifier,
+    ) {
+        Row(
+            Modifier.padding(horizontal = 6.dp, vertical = 5.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            listOf(true, false).forEach { front ->
+                Canvas(Modifier.size(width = 30.dp, height = 64.dp)) {
+                    val factor = minOf(size.width / 100f, size.height / 220f)
+                    translate((size.width - 100f * factor) / 2f, 0f) {
+                        scale(factor, factor, pivot = androidx.compose.ui.geometry.Offset.Zero) {
+                            drawPath(outline, neutral)
+                            regions.filter { it.first.front == front }.forEach { (region, path) ->
+                                val color = when (region.muscle) {
+                                    in activation.primary -> main
+                                    in activation.secondary -> supporting
+                                    else -> inactive
+                                }
+                                drawPath(path, color)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

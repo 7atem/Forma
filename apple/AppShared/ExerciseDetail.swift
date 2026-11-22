@@ -3,9 +3,10 @@ import FormaCore
 
 struct ExerciseDetail: View {
     let exercise: Exercise
+    var onRecordSet: (() -> Void)? = nil
     @State private var muscles = false
     @State private var phase = 0
-    @State private var animating = false
+    @State private var animating = true
     @State private var showSecondPhase = false
     @Environment(\.locale) private var locale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -13,6 +14,7 @@ struct ExerciseDetail: View {
 
     var body: some View {
         let guide = ExerciseGuides.of(exercise, arabic: arabic)
+        let activation = ExerciseMuscles.of(exercise)
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -20,7 +22,7 @@ struct ExerciseDetail: View {
                         .font(.headline.weight(.bold))
                         .foregroundStyle(FormaTheme.textPrimary)
                     HStack(spacing: 6) {
-                        if let primary = ExerciseMuscles.of(exercise).primary.first {
+                        if let primary = activation.primary.first {
                             FormaPill(text: primary.label(arabic: arabic))
                         }
                         Text(ExerciseCatalog.of(exercise).equipment.map { $0.label(arabic: arabic) }.joined(separator: " · "))
@@ -31,6 +33,22 @@ struct ExerciseDetail: View {
                         Text("per_side_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
                     }
                 }
+
+                #if os(iOS)
+                if let onRecordSet {
+                    Button {
+                        FormaHaptics.tap()
+                        onRecordSet()
+                    } label: {
+                        Label("record_set", systemImage: "plus.circle.fill")
+                            .font(.headline.weight(.bold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(FormaTheme.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .foregroundStyle(FormaTheme.onPrimary)
+                    }
+                }
+                #endif
 
                 HStack(spacing: 8) {
                     Button { muscles = false } label: {
@@ -83,22 +101,30 @@ struct ExerciseDetail: View {
                     #endif
                     GeometryReader { geo in
                         let width = geo.size.width
-                        if animating && !reduceMotion {
-                            ZStack {
+                        ZStack(alignment: .topTrailing) {
+                            if animating && !reduceMotion {
+                                ZStack {
+                                    FormaExerciseImage(asset: guide.asset, contentMode: .fill)
+                                        .frame(width: width * 2, height: width / 1.5, alignment: .leading)
+                                        .clipped()
+                                        .scaleEffect(showSecondPhase ? 1.035 : 1.0)
+                                        .opacity(showSecondPhase ? 0.0 : 1.0)
+                                    FormaExerciseImage(asset: guide.asset, contentMode: .fill)
+                                        .frame(width: width * 2, height: width / 1.5, alignment: .trailing)
+                                        .clipped()
+                                        .scaleEffect(showSecondPhase ? 1.035 : 1.0)
+                                        .opacity(showSecondPhase ? 1.0 : 0.0)
+                                }
+                                .animation(.easeInOut(duration: 0.6), value: showSecondPhase)
+                            } else {
                                 FormaExerciseImage(asset: guide.asset, contentMode: .fill)
-                                    .frame(width: width * 2, height: width / 1.5, alignment: .leading)
+                                    .frame(width: phase == 0 ? width : width * 2, height: width / 1.5, alignment: phase == 2 ? .trailing : .leading)
                                     .clipped()
-                                    .opacity(showSecondPhase ? 0.0 : 1.0)
-                                FormaExerciseImage(asset: guide.asset, contentMode: .fill)
-                                    .frame(width: width * 2, height: width / 1.5, alignment: .trailing)
-                                    .clipped()
-                                    .opacity(showSecondPhase ? 1.0 : 0.0)
                             }
-                            .animation(.easeInOut(duration: 0.55), value: showSecondPhase)
-                        } else {
-                            FormaExerciseImage(asset: guide.asset, contentMode: .fill)
-                                .frame(width: phase == 0 ? width : width * 2, height: width / 1.5, alignment: phase == 2 ? .trailing : .leading)
-                                .clipped()
+                            #if os(iOS)
+                            CompactMuscleOverlayView(exercise: exercise, pulsePeak: animating && !reduceMotion && showSecondPhase)
+                                .padding(8)
+                            #endif
                         }
                     }
                     .aspectRatio(1.5, contentMode: .fit)
@@ -107,8 +133,28 @@ struct ExerciseDetail: View {
                     .task(id: animating) {
                         guard animating && !reduceMotion else { return }
                         while !Task.isCancelled && animating {
-                            try? await Task.sleep(nanoseconds: 1_500_000_000)
+                            try? await Task.sleep(nanoseconds: 1_300_000_000)
                             showSecondPhase.toggle()
+                        }
+                    }
+
+                    // Affected muscles summary pills directly under the moving demo
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 6) {
+                            ForEach(activation.primary, id: \.self) { m in
+                                FormaPill(
+                                    text: m.label(arabic: arabic),
+                                    background: FormaTheme.primaryContainer,
+                                    foreground: FormaTheme.primary
+                                )
+                            }
+                            ForEach(activation.secondary, id: \.self) { m in
+                                FormaPill(
+                                    text: m.label(arabic: arabic),
+                                    background: FormaTheme.secondary.opacity(0.2),
+                                    foreground: FormaTheme.secondary
+                                )
+                            }
                         }
                     }
 

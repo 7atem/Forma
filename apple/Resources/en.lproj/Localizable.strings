@@ -106,3 +106,7 @@
 "toggle_theme" = "Switch theme";
 "unit_kg" = "kg";
 "unit_lb" = "lb";
+"record_exercise" = "Record";
+"record_set" = "Record set";
+"set_logged_toast" = "Set recorded";
+"rep_max_ladder" = "Best recorded sets";

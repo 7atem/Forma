@@ -228,6 +228,8 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                 }
                                 val liveSession = state.snapshot.sessions.firstOrNull { it.completedAt == null }
                                 if (liveSession != null && tab != 1) {
+                                    val liveSets = state.snapshot.sets.filter { it.sessionId == liveSession.id }
+                                    val lastEx = liveSets.lastOrNull()?.exercise
                                     Surface(
                                         onClick = { tab = 1 },
                                         color = MaterialTheme.colorScheme.primaryContainer,
@@ -249,25 +251,32 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                                                 )
                                                 Text(
-                                                    stringResource(R.string.resume_session),
+                                                    lastEx?.let { stringResource(exerciseLabel(it)) } ?: stringResource(R.string.resume_session),
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.primary,
                                                 )
                                             }
-                                            PillBadge(number(state.snapshot.sets.count { it.sessionId == liveSession.id }.toDouble(), 0))
+                                            PillBadge(number(liveSets.size.toDouble(), 0))
                                         }
                                     }
                                 }
+                                val setLoggedMsg = stringResource(R.string.set_logged_toast)
+                                val openSessionLabel = stringResource(R.string.open_session)
+                                var youSection by rememberSaveable { mutableIntStateOf(0) }
                                 when (tab) {
-                                    0 -> TodayContent(
-                                        state.snapshot,
-                                        today,
-                                        vm,
-                                        busy = state.busy,
-                                        onTrain = { tab = 1 },
-                                        onEat = { tab = 2 },
-                                        onStartProgram = { id -> vm.start(id, today); tab = 1 },
-                                    )
+                                    0 -> {
+                                        PageHeading(R.string.exercise_library)
+                                        ExerciseLibrary(state, vm, today) {
+                                            scope.launch {
+                                                val res = snackbarHostState.showSnackbar(
+                                                    message = setLoggedMsg,
+                                                    actionLabel = openSessionLabel,
+                                                    duration = SnackbarDuration.Short,
+                                                )
+                                                if (res == SnackbarResult.ActionPerformed) tab = 1
+                                            }
+                                        }
+                                    }
                                     1 -> TrainContent(state, today, vm, scrollState) { deletedSet, originalIds ->
                                         scope.launch {
                                             val res = snackbarHostState.showSnackbar(
@@ -281,8 +290,30 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                         }
                                     }
                                     2 -> EatContent(state, today, vm)
-                                    3 -> ProgressContent(state, today, vm)
-                                    4 -> CoachContent(state, today, vm)
+                                    3 -> {
+                                        SegmentedTabs(
+                                            selectedIndex = youSection,
+                                            labels = listOf(R.string.today, R.string.progress, R.string.coach),
+                                            onSelect = { youSection = it },
+                                            tagPrefix = "you_section",
+                                        )
+                                        when (youSection) {
+                                            0 -> {
+                                                TodayContent(
+                                                    state.snapshot,
+                                                    today,
+                                                    vm,
+                                                    busy = state.busy,
+                                                    onTrain = { tab = 1 },
+                                                    onEat = { tab = 2 },
+                                                    onStartProgram = { id -> vm.start(id, today); tab = 1 },
+                                                )
+                                                MilestonesCard(state.snapshot)
+                                            }
+                                            1 -> ProgressContent(state, today, vm)
+                                            else -> CoachContent(state, today, vm)
+                                        }
+                                    }
                                 }
                                 Spacer(Modifier.height(12.dp))
                             }
@@ -720,6 +751,37 @@ private fun TodayContent(
                 Text(stringResource(actionLabel(review.nextAction)), style = MaterialTheme.typography.bodyMedium)
             }
             ScopeInfoButton(R.string.app_name, R.string.alpha_note)
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun MilestonesCard(snapshot: FitnessSnapshot) {
+    val completedSessions = snapshot.sessions.count { it.completedAt != null }
+    val workingSets = snapshot.sets.count { it.kind == SetKind.WORKING }
+    if (completedSessions == 0 && workingSets == 0) return
+    val setMilestones = listOf(10, 50, 100, 250, 500, 1000).filter { workingSets >= it }
+    InfoCard {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+            Text(stringResource(R.string.milestones_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (completedSessions >= 1) {
+                PillBadge(
+                    text = "★ " + stringResource(R.string.milestone_first_session),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                )
+            }
+            setMilestones.forEach { count ->
+                PillBadge(
+                    text = "★ " + stringResource(R.string.milestone_sets_count, number(count.toDouble(), 0)),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.secondary,
+                )
+            }
         }
     }
 }

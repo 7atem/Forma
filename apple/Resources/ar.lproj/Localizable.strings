@@ -106,3 +106,7 @@
 "toggle_theme" = "تبديل المظهر";
 "unit_kg" = "كجم";
 "unit_lb" = "رطل";
+"record_exercise" = "سجّل";
+"record_set" = "سجّل مجموعة";
+"set_logged_toast" = "تم تسجيل المجموعة";
+"rep_max_ladder" = "أفضل المجموعات المسجلة";

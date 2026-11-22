@@ -250,4 +250,14 @@
     <string name="session_muscles_hit">Muscles trained this session</string>
     <string name="lb">lb</string>
     <string name="weight_unit_toggle">Switch kg or lb</string>
+    <string name="exercises_tab">Exercises</string>
+    <string name="you_tab">You</string>
+    <string name="record_exercise">Record</string>
+    <string name="record_set_for">Record set · %1$s</string>
+    <string name="set_logged_toast">Set recorded</string>
+    <string name="open_session">Session</string>
+    <string name="rep_max_ladder">Best recorded sets</string>
+    <string name="milestones_title">Recorded milestones</string>
+    <string name="milestone_first_session">First workout recorded</string>
+    <string name="milestone_sets_count">%1$s working sets logged</string>
 </resources>

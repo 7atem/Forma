@@ -82,6 +82,9 @@ class FitnessViewModel @Inject constructor(
     fun addSet(session: String, exercise: Exercise, reps: Int, kg: Double, kind: SetKind = SetKind.WORKING, rpe: Double? = null, done: () -> Unit) = write(done) {
         repository.addSet(TrainingSet(sessionId = session, exercise = exercise, reps = reps, weightKg = kg, kind = kind, rpe = rpe))
     }
+    fun quickLogExerciseSet(exercise: Exercise, reps: Int, kg: Double, kind: SetKind = SetKind.WORKING, rpe: Double? = null, date: LocalDate = LocalDate.now(clock), done: () -> Unit) = write(done) {
+        repository.quickLogExerciseSet(exercise, reps, kg, kind, rpe, date)
+    }
     fun finish(id: String, done: () -> Unit = {}) = write(done) { repository.finishSession(id) }
     fun logSet(value: TrainingSet, done: (List<TrainingSet>) -> Unit) = write { done(repository.logSet(value)) }
     fun removeSet(id: String) = write { repository.removeSet(id) }

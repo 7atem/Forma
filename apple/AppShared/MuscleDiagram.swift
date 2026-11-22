@@ -101,3 +101,47 @@ struct WeeklyMuscleHeatMapView: View {
         }
     }
 }
+
+struct CompactMuscleOverlayView: View {
+    let exercise: Exercise
+    var pulsePeak: Bool = false
+
+    var body: some View {
+        let activation = ExerciseMuscles.of(exercise)
+        HStack(spacing: 4) {
+            ForEach([true, false], id: \.self) { front in
+                GeometryReader { proxy in
+                    let factor = min(proxy.size.width / 100.0, proxy.size.height / 220.0)
+                    ZStack(alignment: .topLeading) {
+                        DiagramShape(commands: ExerciseMuscles.outline)
+                            .fill(Color.gray.opacity(0.22))
+                        ForEach(Array(ExerciseMuscles.regions.enumerated()), id: \.offset) { _, region in
+                            if region.front == front {
+                                let primary = activation.primary.contains(region.muscle)
+                                let secondary = activation.secondary.contains(region.muscle)
+                                let fill: Color = primary
+                                    ? FormaTheme.primary.opacity(pulsePeak ? 1.0 : 0.78)
+                                    : secondary
+                                        ? FormaTheme.secondary.opacity(pulsePeak ? 0.95 : 0.72)
+                                        : Color.gray.opacity(0.25)
+                                DiagramShape(commands: region.path).fill(fill)
+                            }
+                        }
+                    }
+                    .frame(width: 100, height: 220)
+                    .scaleEffect(factor, anchor: .topLeading)
+                    .offset(x: (proxy.size.width - 100.0 * factor) / 2.0)
+                }
+                .frame(width: 28, height: 60)
+            }
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 5)
+        .background(FormaTheme.surface.opacity(0.9), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(FormaTheme.primary.opacity(pulsePeak ? 0.65 : 0.3), lineWidth: 1)
+        )
+        .accessibilityHidden(true)
+    }
+}

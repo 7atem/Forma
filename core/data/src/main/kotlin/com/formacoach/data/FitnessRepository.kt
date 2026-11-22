@@ -26,6 +26,12 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
         dao.startSession(session.row());return session.id
     }
     suspend fun addSet(set:TrainingSet)=dao.addSet(set.row())
+    suspend fun quickLogExerciseSet(exercise:Exercise,reps:Int,weightKg:Double,kind:SetKind=SetKind.WORKING,rpe:Double?=null,date:LocalDate=LocalDate.now(clock)) {
+        checkDate(date)
+        val fallback=Session(date=date,templateId="quick",label="",plannedExercises=listOf(exercise),restSeconds=90)
+        val set=TrainingSet(sessionId=fallback.id,exercise=exercise,reps=reps,weightKg=weightKg,kind=kind,rpe=rpe)
+        dao.quickLogExerciseSet(fallback.row(),set.row())
+    }
     suspend fun logSet(set:TrainingSet):List<TrainingSet> = dao.logSetAndRead(set.row()).map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg,SetKind.valueOf(it.kind),it.rpe)}
     suspend fun correctSet(set:TrainingSet)=dao.correctSet(set.row())
     suspend fun finishSession(id:String) {check(dao.finishSession(id,clock.millis())==1)}
