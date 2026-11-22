@@ -36,17 +36,40 @@ struct FormaExerciseImage: View {
 }
 
 enum FormaTheme {
-    static let background = Color(red: 0.043, green: 0.090, blue: 0.075)        // #0B1713
-    static let surface = Color(red: 0.075, green: 0.145, blue: 0.122)           // #13251F
-    static let surfaceHigh = Color(red: 0.106, green: 0.200, blue: 0.169)       // #1B332B
-    static let primary = Color(red: 0.784, green: 0.961, blue: 0.482)           // #C8F57B
-    static let onPrimary = Color(red: 0.063, green: 0.141, blue: 0.071)         // #102412
-    static let primaryContainer = Color(red: 0.137, green: 0.239, blue: 0.161)  // #233D29
-    static let secondary = Color(red: 1.000, green: 0.745, blue: 0.482)         // #FFBE7B
-    static let tertiary = Color(red: 0.431, green: 0.906, blue: 0.718)          // #6EE7B7
-    static let border = Color(red: 0.149, green: 0.263, blue: 0.220)            // #264338
-    static let textPrimary = Color(red: 0.953, green: 0.973, blue: 0.945)       // #F3F8F1
-    static let textMuted = Color(red: 0.702, green: 0.780, blue: 0.729)         // #B3C7BA
+    private static func dynamic(dark: (CGFloat, CGFloat, CGFloat), light: (CGFloat, CGFloat, CGFloat)) -> Color {
+        #if os(iOS)
+        return Color(UIColor { traits in
+            let c = traits.userInterfaceStyle == .light ? light : dark
+            return UIColor(red: c.0, green: c.1, blue: c.2, alpha: 1.0)
+        })
+        #else
+        return Color(red: dark.0, green: dark.1, blue: dark.2)
+        #endif
+    }
+
+    static let background = dynamic(dark: (0.043, 0.090, 0.075), light: (0.953, 0.969, 0.953))
+    static let surface = dynamic(dark: (0.075, 0.145, 0.122), light: (1.000, 1.000, 1.000))
+    static let surfaceHigh = dynamic(dark: (0.106, 0.200, 0.169), light: (0.894, 0.929, 0.902))
+    static let primary = dynamic(dark: (0.784, 0.961, 0.482), light: (0.180, 0.420, 0.141))
+    static let onPrimary = dynamic(dark: (0.063, 0.141, 0.071), light: (1.000, 1.000, 1.000))
+    static let primaryContainer = dynamic(dark: (0.137, 0.239, 0.161), light: (0.851, 0.961, 0.784))
+    static let secondary = dynamic(dark: (1.000, 0.745, 0.482), light: (0.702, 0.357, 0.071))
+    static let tertiary = dynamic(dark: (0.431, 0.906, 0.718), light: (0.059, 0.463, 0.431))
+    static let border = dynamic(dark: (0.149, 0.263, 0.220), light: (0.792, 0.847, 0.808))
+    static let textPrimary = dynamic(dark: (0.953, 0.973, 0.945), light: (0.067, 0.125, 0.094))
+    static let textMuted = dynamic(dark: (0.702, 0.780, 0.729), light: (0.259, 0.349, 0.294))
+
+    static let lbPerKg = 2.20462262185
+
+    static func displayWeight(_ kg: Double, useLb: Bool) -> Double {
+        useLb ? ((kg * lbPerKg) * 10.0).rounded() / 10.0 : kg
+    }
+
+    static func formatWeight(_ kg: Double, useLb: Bool) -> String {
+        let value = displayWeight(kg, useLb: useLb)
+        let unit = useLb ? String(localized: "unit_lb") : String(localized: "unit_kg")
+        return "\(value.formatted()) \(unit)"
+    }
 
     static func workingTonnage(_ sets: [WatchSet]) -> Double {
         sets.filter { $0.kind == .working }.reduce(0.0) { $0 + Double($1.reps) * $1.weightKg }

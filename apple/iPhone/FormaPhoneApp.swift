@@ -22,6 +22,7 @@ struct TransferDocument: FileDocument {
 @main @MainActor struct FormaPhoneApp: App {
     @StateObject private var store: LocalStore
     @StateObject private var bridge: WatchBridge
+    @AppStorage("forma_dark_mode") private var darkMode = true
     init() {
         let storage = LocalStore()
         _store = StateObject(wrappedValue: storage)
@@ -30,7 +31,7 @@ struct TransferDocument: FileDocument {
     var body: some Scene {
         WindowGroup {
             PhoneRoot(store: store, bridge: bridge)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(darkMode ? .dark : .light)
                 .tint(FormaTheme.primary)
         }
     }
@@ -146,6 +147,8 @@ private struct MealSlotOption: Identifiable {
     let onDelete: (String) -> Void
     @State private var creatingProgram = false
     @State private var finishedSummary: WatchWorkout?
+    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
 
@@ -348,7 +351,19 @@ private struct MealSlotOption: Identifiable {
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("Forma")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        FormaHaptics.tap()
+                        useLb.toggle()
+                    } label: {
+                        FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
+                    }
+                    Button {
+                        FormaHaptics.tap()
+                        darkMode.toggle()
+                    } label: {
+                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                    }
                     Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
                 }
             }
@@ -886,6 +901,8 @@ private struct MealSlotOption: Identifiable {
     @State private var exerciseSearch = ""
     @State private var equipment: Equipment?
     @State private var selectedMuscle: Muscle?
+    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
@@ -1004,7 +1021,19 @@ private struct MealSlotOption: Identifiable {
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("exercise_library")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        FormaHaptics.tap()
+                        useLb.toggle()
+                    } label: {
+                        FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
+                    }
+                    Button {
+                        FormaHaptics.tap()
+                        darkMode.toggle()
+                    } label: {
+                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                    }
                     Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
                 }
             }
@@ -1017,6 +1046,8 @@ private struct MealSlotOption: Identifiable {
     let onOpenBridge: () -> Void
     @State private var selectedSlot = "BREAKFAST"
     @State private var addingMeal = false
+    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
 
@@ -1178,7 +1209,19 @@ private struct MealSlotOption: Identifiable {
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("tab_eat")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        FormaHaptics.tap()
+                        useLb.toggle()
+                    } label: {
+                        FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
+                    }
+                    Button {
+                        FormaHaptics.tap()
+                        darkMode.toggle()
+                    } label: {
+                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                    }
                     Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
                 }
             }
@@ -1237,6 +1280,8 @@ private struct MealSlotOption: Identifiable {
     @State private var weightKg = 75.0
     @State private var initializedWeight = false
     @State private var scrubbedIndex: Int?
+    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage("forma_use_lb") private var useLb = false
 
     var body: some View {
         NavigationStack {
@@ -1248,12 +1293,13 @@ private struct MealSlotOption: Identifiable {
                             Text("body_weight").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                             Spacer()
                             if let latest = store.state.weights.last {
-                                FormaPill(text: "\(latest.weightKg.formatted()) kg")
+                                FormaPill(text: FormaTheme.formatWeight(latest.weightKg, useLb: useLb))
                             }
                         }
                         Stepper(value: $weightKg, in: 20...300, step: 0.5) {
-                            Text("\(weightKg.formatted()) kg")
+                            Text(FormaTheme.formatWeight(weightKg, useLb: useLb))
                                 .font(.title2.weight(.heavy))
+                                .monospacedDigit()
                                 .foregroundStyle(FormaTheme.primary)
                         }
                         Button {
@@ -1276,7 +1322,7 @@ private struct MealSlotOption: Identifiable {
                             Text("weight_trend").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                             Spacer()
                             if let active = activePoint {
-                                FormaPill(text: "\(active.weightKg.formatted()) kg · \(active.date)")
+                                FormaPill(text: "\(FormaTheme.formatWeight(active.weightKg, useLb: useLb)) · \(active.date)")
                             }
                         }
                         if points.count < 2 {
@@ -1381,7 +1427,19 @@ private struct MealSlotOption: Identifiable {
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("tab_progress")
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        FormaHaptics.tap()
+                        useLb.toggle()
+                    } label: {
+                        FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
+                    }
+                    Button {
+                        FormaHaptics.tap()
+                        darkMode.toggle()
+                    } label: {
+                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                    }
                     Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
                 }
             }

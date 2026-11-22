@@ -118,5 +118,8 @@ class DailyWorkflowTest {
         assertFalse(TrainingHistory.isNewPr(snap, Exercise.CHEST_PRESS, 60.0, 8, date))
         assertEquals(2, TrainingHistory.activeWeekStreak(snap, date))
         assertEquals(470.0, TrainingHistory.macroCalories(30.0, 50.0, 16.6667), 0.1)
+        assertEquals(220.5, WeightUnits.fromKg(100.0, WeightUnit.LB), 0.1)
+        assertEquals(100.0, WeightUnits.toKg(220.46226, WeightUnit.LB), 0.01)
+        assertEquals(100.0, WeightUnits.fromKg(100.0, WeightUnit.KG), 0.0001)
     }
 }

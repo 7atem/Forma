@@ -104,3 +104,5 @@
 "workout_summary" = "اكتملت الجلسة";
 "session_muscles_hit" = "العضلات المدربة";
 "toggle_theme" = "تبديل المظهر";
+"unit_kg" = "كجم";
+"unit_lb" = "رطل";

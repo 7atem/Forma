@@ -41,6 +41,8 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     val latestWeight = state.snapshot.measurements.firstOrNull { it.weightKg != null }
     val latestWaist = state.snapshot.measurements.firstOrNull { it.waistCm != null }
     val weeklyVolume = TrainingHistory.weeklyTonnage(state.snapshot, today)
+    val unit = LocalWeightUnit.current
+    val unitStr = stringResource(if (unit == WeightUnit.KG) R.string.kg else R.string.lb)
 
     PageHeading(R.string.progress_title)
 
@@ -48,7 +50,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             latestWeight?.weightKg?.let {
                 MetricTile(
-                    "${number(it)} ${stringResource(R.string.kg)}",
+                    "${number(WeightUnits.fromKg(it, unit), 1)} $unitStr",
                     stringResource(R.string.body_weight),
                     Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.primary,
@@ -64,7 +66,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
             }
             if (weeklyVolume > 0.0) {
                 MetricTile(
-                    number(weeklyVolume, 0),
+                    "${number(WeightUnits.fromKg(weeklyVolume, unit), 0)} $unitStr",
                     stringResource(R.string.weekly_volume_label),
                     Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.secondary,
@@ -98,7 +100,10 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
 
     InfoCard {
         Text(stringResource(R.string.weight_chart), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        HistoryChart(TrainingHistory.weights(state.snapshot, today), stringResource(R.string.kg))
+        HistoryChart(
+            TrainingHistory.weights(state.snapshot, today).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) },
+            unitStr,
+        )
     }
 
     // 7-Day Body Muscle Heat Map

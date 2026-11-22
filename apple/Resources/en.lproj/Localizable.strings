@@ -104,3 +104,5 @@
 "workout_summary" = "Workout complete";
 "session_muscles_hit" = "Muscles trained";
 "toggle_theme" = "Switch theme";
+"unit_kg" = "kg";
+"unit_lb" = "lb";

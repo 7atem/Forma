@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -115,12 +116,17 @@ private val FormaLightColors = lightColorScheme(
     onErrorContainer = Color(0xFF410002),
 )
 
+internal val LocalWeightUnit = compositionLocalOf { WeightUnit.KG }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormaApp(vm: FitnessViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("forma_ui_prefs", android.content.Context.MODE_PRIVATE) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    var darkTheme by rememberSaveable { mutableStateOf(true) }
+    var darkTheme by rememberSaveable { mutableStateOf(prefs.getBoolean("dark_theme", true)) }
+    var weightUnit by rememberSaveable { mutableStateOf(if (prefs.getString("weight_unit", "KG") == "LB") WeightUnit.LB else WeightUnit.KG) }
     var showQuickLog by rememberSaveable { mutableStateOf(false) }
     var editingProfile by rememberSaveable { mutableStateOf(false) }
     var showWatch by rememberSaveable { mutableStateOf(false) }
@@ -140,6 +146,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
         }
     }
     LaunchedEffect(today) { vm.onDayChanged() }
+    CompositionLocalProvider(LocalWeightUnit provides weightUnit) {
     MaterialTheme(
         colorScheme = if (darkTheme) FormaColors else FormaLightColors,
         shapes = Shapes(
@@ -172,7 +179,15 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                     { tab = it },
                     today,
                     darkTheme = darkTheme,
-                    onToggleTheme = { darkTheme = !darkTheme },
+                    onToggleTheme = {
+                        darkTheme = !darkTheme
+                        prefs.edit().putBoolean("dark_theme", darkTheme).apply()
+                    },
+                    weightUnit = weightUnit,
+                    onToggleUnit = {
+                        weightUnit = if (weightUnit == WeightUnit.KG) WeightUnit.LB else WeightUnit.KG
+                        prefs.edit().putString("weight_unit", weightUnit.name).apply()
+                    },
                     snackbarHostState = snackbarHostState,
                     onQuickLog = { showQuickLog = true },
                     onProfile = { editingProfile = true },
@@ -328,6 +343,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
             }
         }
     }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -447,6 +463,8 @@ private fun TodayContent(
     val hasActiveSession = snapshot.sessions.any { it.completedAt == null }
     val weeklyVol = com.formacoach.coach.TrainingHistory.weeklyTonnage(snapshot, today)
     val latestWeight = snapshot.measurements.firstOrNull { it.weightKg != null }?.weightKg
+    val unit = LocalWeightUnit.current
+    val unitStr = stringResource(if (unit == WeightUnit.KG) R.string.kg else R.string.lb)
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
@@ -541,7 +559,7 @@ private fun TodayContent(
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             if (weeklyVol > 0.0) {
                 MetricTile(
-                    number(weeklyVol, 0),
+                    "${number(WeightUnits.fromKg(weeklyVol, unit), 0)} $unitStr",
                     stringResource(R.string.weekly_volume_label),
                     Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.primary,
@@ -549,7 +567,7 @@ private fun TodayContent(
             }
             latestWeight?.let {
                 MetricTile(
-                    "${number(it)} ${stringResource(R.string.kg)}",
+                    "${number(WeightUnits.fromKg(it, unit), 1)} $unitStr",
                     stringResource(R.string.body_weight),
                     Modifier.weight(1f),
                     accent = MaterialTheme.colorScheme.tertiary,

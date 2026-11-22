@@ -199,13 +199,15 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         }
         elapsed = SystemClock.elapsedRealtime()
     }
+    val unit = LocalWeightUnit.current
+    val unitLabel = stringResource(if (unit == WeightUnit.KG) R.string.kg else R.string.lb)
     val remaining = RestTimer.remainingSeconds(deadline, elapsed, timerDuration)
     val candidate = runCatching {
         TrainingSet(
             sessionId = session.id,
             exercise = exercise,
             reps = requireNotNull(NumericInput.integer(reps)),
-            weightKg = requireNotNull(NumericInput.decimal(weight)),
+            weightKg = WeightUnits.toKg(requireNotNull(NumericInput.decimal(weight)), unit),
             kind = if (warmup) SetKind.WARM_UP else SetKind.WORKING,
             rpe = if (rpe.isBlank()) null else requireNotNull(NumericInput.decimal(rpe)),
         )
@@ -421,12 +423,12 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     value = weight,
                     onChange = { weight = it },
                     tag = "set_weight",
-                    step = 2.5,
+                    step = WeightUnits.step(unit),
                     min = 0.0,
-                    max = 1000.0,
+                    max = if (unit == WeightUnit.KG) 1000.0 else 2200.0,
                     integer = false,
-                    error = weight.isNotBlank() && NumericInput.decimal(weight)?.let { it in 0.0..1000.0 } != true,
-                    placeholder = previous?.weightKg?.toString(),
+                    error = weight.isNotBlank() && NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) in 0.0..1000.0 } != true,
+                    placeholder = previous?.let { "${WeightUnits.fromKg(it.weightKg, unit)} $unitLabel" },
                 )
             },
         )
@@ -443,19 +445,20 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     label = { Text("${number(preset.toDouble(), 0)}×", fontWeight = FontWeight.SemiBold) },
                 )
             }
-            listOf(2.5, 5.0, 10.0).forEach { bump ->
+            WeightUnits.quickBumps(unit).forEach { bump ->
                 AssistChip(
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         val cur = NumericInput.decimal(weight) ?: 0.0
-                        val next = (cur + bump).coerceAtMost(1000.0)
+                        val cap = if (unit == WeightUnit.KG) 1000.0 else 2200.0
+                        val next = (cur + bump).coerceAtMost(cap)
                         weight = if (next == next.toLong().toDouble()) next.toLong().toString() else next.toString()
                     },
-                    label = { Text("+${number(bump)} ${stringResource(R.string.kg)}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold) },
+                    label = { Text("+${number(bump)} $unitLabel", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold) },
                 )
             }
         }
-        val parsedWeight = NumericInput.decimal(weight)
+        val parsedWeight = NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) }
         val parsedReps = NumericInput.integer(reps)
         if (!warmup && parsedWeight != null && TrainingHistory.isNewPr(state.snapshot, exercise, parsedWeight, parsedReps, session.date)) {
             PillBadge(

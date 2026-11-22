@@ -14,6 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.formacoach.model.WeightUnit
 import java.time.LocalDate
 
 @Composable
@@ -23,6 +24,8 @@ internal fun FormaScaffold(
     today: LocalDate,
     darkTheme: Boolean,
     onToggleTheme: () -> Unit,
+    weightUnit: WeightUnit,
+    onToggleUnit: () -> Unit,
     snackbarHostState: SnackbarHostState,
     onQuickLog: () -> Unit,
     onProfile: () -> Unit,
@@ -130,6 +133,20 @@ internal fun FormaScaffold(
                                         dateLabel(today),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                Surface(
+                                    onClick = onToggleUnit,
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
+                                ) {
+                                    Text(
+                                        stringResource(if (weightUnit == WeightUnit.KG) R.string.kg else R.string.lb),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
                                     )
                                 }
                                 TopBarAction(if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode, R.string.toggle_theme, onToggleTheme)

@@ -246,4 +246,6 @@
     <string name="set_removed_undo">Set removed</string>
     <string name="undo">Undo</string>
     <string name="session_muscles_hit">Muscles trained this session</string>
+    <string name="lb">lb</string>
+    <string name="weight_unit_toggle">Switch kg or lb</string>
 </resources>

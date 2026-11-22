@@ -246,4 +246,6 @@
     <string name="set_removed_undo">تم حذف المجموعة</string>
     <string name="undo">تراجع</string>
     <string name="session_muscles_hit">العضلات المدربة في هذه الجلسة</string>
+    <string name="lb">رطل</string>
+    <string name="weight_unit_toggle">تبديل كجم أو رطل</string>
 </resources>
