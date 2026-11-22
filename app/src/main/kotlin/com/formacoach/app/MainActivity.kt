@@ -82,6 +82,10 @@ private val FormaColors = darkColorScheme(
     onError = Color(0xFF3B0907),
     errorContainer = Color(0xFF5C1814),
     onErrorContainer = Color(0xFFFFDAD6),
+    // Snackbars use the inverse roles; without these Material falls back to its default purple.
+    inverseSurface = Color(0xFFE3EEE6),
+    inverseOnSurface = Color(0xFF142721),
+    inversePrimary = Color(0xFF2E6B24),
 )
 
 private val FormaLightColors = lightColorScheme(
@@ -114,6 +118,9 @@ private val FormaLightColors = lightColorScheme(
     onError = Color(0xFFFFFFFF),
     errorContainer = Color(0xFFFFDAD6),
     onErrorContainer = Color(0xFF410002),
+    inverseSurface = Color(0xFF1B332B),
+    inverseOnSurface = Color(0xFFEAF3EC),
+    inversePrimary = Color(0xFFC8F57B),
 )
 
 internal val LocalWeightUnit = compositionLocalOf { WeightUnit.KG }
@@ -583,7 +590,7 @@ private fun TodayContent(
                     }
                     CircularProgressRing(
                         progress = review.completedSessions.toFloat() / profile.sessionsPerWeek.coerceAtLeast(1),
-                        valueText = "${number(review.completedSessions.toDouble(), 0)}/${number(profile.sessionsPerWeek.toDouble(), 0)}",
+                        valueText = "\u2066${number(review.completedSessions.toDouble(), 0)}/${number(profile.sessionsPerWeek.toDouble(), 0)}\u2069",
                         labelText = "",
                         size = 86.dp,
                         strokeWidth = 9.dp,

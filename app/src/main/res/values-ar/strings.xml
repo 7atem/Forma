@@ -30,8 +30,8 @@
     <string name="greeting_anonymous">نكمل خطواتنا.</string>
     <string name="today_subtitle">كل مجهودك اليومي في مكان واحد.</string>
     <string name="your_week">آخر 7 أيام</string>
-    <string name="workout_count">%1$s / %2$s تمارين</string>
-    <string name="completed_sessions">تمارين مكتملة · مقارنة بخطتك الأسبوعية</string>
+    <string name="workout_count">⁦%1$s / %2$s⁩ تمارين</string>
+    <string name="completed_sessions">التمارين المسجلة جنب الخطة الأسبوعية اللي حددتها</string>
     <string name="open_training">افتح التمرين</string>
     <string name="food_today">الأكل المسجل النهارده</string>
     <string name="user_calorie_target">الهدف اللي اخترته · %1$s كيلوكالوري</string>
@@ -260,4 +260,8 @@
     <string name="milestones_title">إنجازات مسجلة</string>
     <string name="milestone_first_session">أول تمرين مسجل</string>
     <string name="milestone_sets_count">تم تسجيل %1$s مجموعة عمل</string>
+    <string name="decrease_value">قلّل %1$s</string>
+    <string name="increase_value">زوّد %1$s</string>
+    <string name="day_workout_recorded">%1$s: فيه تمرين مسجل</string>
+    <string name="day_no_workout_recorded">%1$s: مفيش تمرين مسجل</string>
 </resources>

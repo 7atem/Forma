@@ -39,6 +39,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
@@ -221,10 +224,14 @@ internal fun WeeklyActivityStrip(
             days.forEach { day ->
                 val done = day in activeDates
                 val isToday = day == today
+                val dayDescription = stringResource(
+                    if (done) R.string.day_workout_recorded else R.string.day_no_workout_recorded,
+                    day.format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(locale)),
+                )
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).clearAndSetSemantics { contentDescription = dayDescription },
                 ) {
                     Text(
                         day.dayOfWeek.getDisplayName(TextStyle.NARROW, locale),
@@ -365,25 +372,25 @@ internal fun StepperInput(
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             FilledTonalIconButton(
                 onClick = { adjust(-step) },
-                modifier = Modifier.weight(1f).height(36.dp),
+                modifier = Modifier.weight(1f).height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                     contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
             ) {
-                Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.decrease_value, stringResource(label)), modifier = Modifier.size(18.dp))
             }
             FilledTonalIconButton(
                 onClick = { adjust(step) },
-                modifier = Modifier.weight(1f).height(36.dp),
+                modifier = Modifier.weight(1f).height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = IconButtonDefaults.filledTonalIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.primary,
                 ),
             ) {
-                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.increase_value, stringResource(label)), modifier = Modifier.size(18.dp))
             }
         }
     }
@@ -605,13 +612,15 @@ internal fun LivePulseDot(
     color: Color = MaterialTheme.colorScheme.primary,
     modifier: Modifier = Modifier,
 ) {
+    val reduceMotion = rememberReduceMotion()
     val transition = rememberInfiniteTransition(label = "live_pulse")
-    val pulse by transition.animateFloat(
+    val animatedPulse by transition.animateFloat(
         initialValue = 0.45f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(tween(950), RepeatMode.Reverse),
         label = "pulse_alpha",
     )
+    val pulse = if (reduceMotion) 1f else animatedPulse
     Box(modifier.size(14.dp), contentAlignment = Alignment.Center) {
         Box(Modifier.size(14.dp).clip(CircleShape).background(color.copy(alpha = 0.25f * pulse)))
         Box(Modifier.size(8.dp).clip(CircleShape).background(color.copy(alpha = 0.7f + 0.3f * pulse)))
@@ -661,7 +670,7 @@ internal fun ActivityHeatmapGrid(
 @Composable
 internal fun ScopeInfoButton(title: Int, vararg notes: Int, modifier: Modifier = Modifier) {
     var open by remember { mutableStateOf(false) }
-    IconButton(onClick = { open = true }, modifier = modifier.size(32.dp)) {
+    IconButton(onClick = { open = true }, modifier = modifier) {
         Icon(
             Icons.Default.Info,
             contentDescription = stringResource(title),
@@ -713,3 +722,16 @@ internal fun Modifier.bleedToPageEdges(bleed: androidx.compose.ui.unit.Dp = Page
         layout(constraints.maxWidth, placeable.height) { placeable.place(-extra, 0) }
     }
 
+/**
+ * True when the user turned animations off (Settings > Accessibility > Remove animations).
+ * Looping and decorative motion must stop; state changes stay visible without animation.
+ */
+@Composable
+internal fun rememberReduceMotion(): Boolean {
+    val context = LocalContext.current
+    return remember(context) {
+        runCatching {
+            android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
+        }.getOrDefault(false)
+    }
+}

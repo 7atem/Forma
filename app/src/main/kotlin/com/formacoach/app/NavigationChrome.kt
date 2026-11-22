@@ -1,5 +1,7 @@
 package com.formacoach.app
 
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -67,7 +69,7 @@ internal fun FormaScaffold(
                             selected = tab == index,
                             onClick = { onTab(index) },
                             icon = { Icon(icons[index], null) },
-                            label = { Text(stringResource(label), fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal) },
+                            label = { Text(stringResource(label), fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                             colors = NavigationRailItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -106,7 +108,9 @@ internal fun FormaScaffold(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
-                                if (!wide) {
+                                // At large text sizes the decorative logo and date give their space to the title and actions.
+                                val largeText = LocalDensity.current.fontScale >= 1.5f
+                                if (!wide && !largeText) {
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
                                         color = MaterialTheme.colorScheme.primary,
@@ -127,12 +131,18 @@ internal fun FormaScaffold(
                                         stringResource(R.string.app_name),
                                         style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.ExtraBold,
+                                        maxLines = 1,
+                                        softWrap = false,
                                     )
-                                    Text(
-                                        dateLabel(today),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    )
+                                    if (!largeText) {
+                                        Text(
+                                            dateLabel(today),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
                                 }
                                 Surface(
                                     onClick = onToggleUnit,
@@ -174,6 +184,8 @@ internal fun FormaScaffold(
                                             Text(
                                                 stringResource(label),
                                                 fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Medium,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
                                             )
                                         },
                                         colors = NavigationBarItemDefaults.colors(

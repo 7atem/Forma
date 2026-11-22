@@ -30,8 +30,8 @@
     <string name="greeting_anonymous">Let’s keep moving.</string>
     <string name="today_subtitle">One place for your everyday effort.</string>
     <string name="your_week">YOUR LAST 7 DAYS</string>
-    <string name="workout_count">%1$s / %2$s sessions</string>
-    <string name="completed_sessions">Completed · compared with your weekly plan</string>
+    <string name="workout_count">⁦%1$s / %2$s⁩ sessions</string>
+    <string name="completed_sessions">Workouts recorded, next to the weekly plan you set</string>
     <string name="open_training">Open training</string>
     <string name="food_today">Food logged today</string>
     <string name="user_calorie_target">Your chosen target · %1$s kcal</string>
@@ -260,4 +260,8 @@
     <string name="milestones_title">Recorded milestones</string>
     <string name="milestone_first_session">First workout recorded</string>
     <string name="milestone_sets_count">%1$s working sets logged</string>
+    <string name="decrease_value">Decrease %1$s</string>
+    <string name="increase_value">Increase %1$s</string>
+    <string name="day_workout_recorded">%1$s: workout recorded</string>
+    <string name="day_no_workout_recorded">%1$s: no workout recorded</string>
 </resources>

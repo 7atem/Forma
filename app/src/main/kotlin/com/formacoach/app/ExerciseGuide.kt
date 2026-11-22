@@ -1,7 +1,6 @@
 package com.formacoach.app
 
 import android.graphics.BitmapFactory
-import android.provider.Settings
 import android.util.LruCache
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -128,10 +127,7 @@ internal fun ExerciseGuideSheet(
                 }
             }
             if(tab==0) {
-                val context = LocalContext.current
-                val reduceMotion = remember {
-                    runCatching { Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f }.getOrDefault(false)
-                }
+                val reduceMotion = rememberReduceMotion()
                 var animating by rememberSaveable(exercise) { mutableStateOf(!reduceMotion) }
                 if (animating && !reduceMotion) {
                     AnimatedExerciseIllustration(exercise) { enlarged = true }

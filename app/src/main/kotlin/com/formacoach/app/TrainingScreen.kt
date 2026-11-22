@@ -666,9 +666,10 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         onClick = { vm.finish(session.id, onFinished) },
         enabled = sets.isNotEmpty() && !state.busy,
         shape = RoundedCornerShape(16.dp),
+        // Tonal, so the repeated "Save set" stays the single strongest action on screen.
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         ),
         modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("finish_session"),
     ) {
@@ -899,7 +900,7 @@ private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: Fit
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
                 )
-                IconButton(onClick = { editing = true }, enabled = !busy, modifier = Modifier.size(34.dp).testTag("edit_set")) {
+                IconButton(onClick = { editing = true }, enabled = !busy, modifier = Modifier.testTag("edit_set")) {
                     Icon(Icons.Default.Edit, stringResource(R.string.edit), modifier = Modifier.size(18.dp))
                 }
             }
