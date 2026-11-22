@@ -23,3 +23,17 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild -project apple/FormaApple.xcodeproj -scheme FormaWatch -destination 'generic/platform=watchOS Simulator' -derivedDataPath apple/DerivedData CODE_SIGNING_ALLOWED=NO build 2>&1 | tee /tmp/watch.log || (grep -E "error:" /tmp/watch.log | head -n 20 | sed 's/^/::error::/'; exit 1)
+      - name: Build & Package Unsigned IPA (iOS Device ARM64)
+        run: |
+          set -o pipefail
+          xcodebuild -project apple/FormaApple.xcodeproj -scheme FormaPhone -configuration Release -destination 'generic/platform=iOS' -derivedDataPath apple/DerivedDataDevice CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build 2>&1 | tee /tmp/ipa.log || (grep -E "error:" /tmp/ipa.log | head -n 20 | sed 's/^/::error::/'; exit 1)
+          mkdir -p apple/ipa/Payload
+          cp -R apple/DerivedDataDevice/Build/Products/Release-iphoneos/FormaPhone.app apple/ipa/Payload/
+          (cd apple/ipa && zip -r -y ../FormaPhone-unsigned.ipa Payload)
+          ls -lh apple/FormaPhone-unsigned.ipa
+      - name: Upload Unsigned IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FormaPhone-unsigned-ipa
+          path: apple/FormaPhone-unsigned.ipa
+          if-no-files-found: error
