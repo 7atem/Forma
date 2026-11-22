@@ -1,5 +1,39 @@
 import SwiftUI
+import UIKit
 import FormaCore
+
+final class ExerciseImageCache {
+    static let shared = NSCache<NSString, UIImage>()
+    static func load(_ asset: String) -> UIImage? {
+        if let cached = shared.object(forKey: asset as NSString) { return cached }
+        let url = Bundle.main.url(forResource: asset, withExtension: "png", subdirectory: "drawable-nodpi")
+            ?? Bundle.main.url(forResource: asset, withExtension: "png")
+        let img = url.flatMap { UIImage(contentsOfFile: $0.path) } ?? UIImage(named: asset)
+        if let img { shared.setObject(img, forKey: asset as NSString) }
+        return img
+    }
+}
+
+struct FormaExerciseImage: View {
+    let asset: String
+    var contentMode: ContentMode = .fit
+
+    var body: some View {
+        if let uiImage = ExerciseImageCache.load(asset) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .aspectRatio(contentMode: contentMode)
+        } else {
+            ZStack {
+                FormaTheme.surfaceHigh
+                Image(systemName: "figure.strengthtraining.traditional")
+                    .font(.title2)
+                    .foregroundStyle(FormaTheme.primary.opacity(0.7))
+            }
+            .aspectRatio(1.5, contentMode: .fit)
+        }
+    }
+}
 
 enum FormaTheme {
     static let background = Color(red: 0.043, green: 0.090, blue: 0.075)        // #0B1713

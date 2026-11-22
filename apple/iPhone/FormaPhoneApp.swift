@@ -270,9 +270,7 @@ private struct MealSlotOption: Identifiable {
                             FormaCard {
                                 HStack(spacing: 12) {
                                     if let first = program.exercises.first {
-                                        Image(ExerciseGuides.of(first, arabic: false).asset)
-                                            .resizable()
-                                            .scaledToFit()
+                                        FormaExerciseImage(asset: ExerciseGuides.of(first, arabic: false).asset)
                                             .frame(width: 84)
                                             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                     }
@@ -513,9 +511,7 @@ private struct MealSlotOption: Identifiable {
             FormaCard {
                 NavigationLink { ExerciseDetail(exercise: exercise) } label: {
                     HStack(spacing: 12) {
-                        Image(ExerciseGuides.of(exercise, arabic: false).asset)
-                            .resizable()
-                            .scaledToFit()
+                        FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
                             .frame(width: 80)
                             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                         VStack(alignment: .leading, spacing: 3) {
@@ -814,14 +810,25 @@ private struct MealSlotOption: Identifiable {
     let onOpenBridge: () -> Void
     @State private var exerciseSearch = ""
     @State private var equipment: Equipment?
+    @State private var selectedMuscle: Muscle?
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
 
+    private var mainMuscles: [Muscle] {
+        Muscle.allCases.filter { m in
+            Exercise.allCases.contains { ExerciseMuscles.of($0).primary.first == m }
+        }
+    }
+
     var body: some View {
         let filtered = Exercise.allCases.filter { exercise in
-            (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) &&
+            (selectedMuscle == nil || ExerciseMuscles.of(exercise).primary.first == selectedMuscle) &&
+                (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) &&
                 (exerciseSearch.isEmpty || (exercise.label(arabic: false) + " " + exercise.label(arabic: true)).localizedStandardContains(exerciseSearch))
+        }
+        let groupedMuscles = mainMuscles.filter { m in
+            filtered.contains { ExerciseMuscles.of($0).primary.first == m }
         }
         NavigationStack {
             ScrollView {
@@ -831,12 +838,36 @@ private struct MealSlotOption: Identifiable {
                         .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.border, lineWidth: 1))
 
+                    // Main Muscle Category Chips
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            Button { selectedMuscle = nil } label: {
+                                FormaPill(
+                                    text: String(localized: "all_muscles"),
+                                    background: selectedMuscle == nil ? FormaTheme.primary : FormaTheme.surface,
+                                    foreground: selectedMuscle == nil ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                )
+                            }
+                            ForEach(mainMuscles, id: \.self) { m in
+                                let count = Exercise.allCases.filter { ExerciseMuscles.of($0).primary.first == m }.count
+                                Button { selectedMuscle = m } label: {
+                                    FormaPill(
+                                        text: "\(m.label(arabic: arabic)) (\(count))",
+                                        background: selectedMuscle == m ? FormaTheme.primary : FormaTheme.surface,
+                                        foreground: selectedMuscle == m ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Equipment Filter Chips
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             Button { equipment = nil } label: {
                                 FormaPill(
                                     text: String(localized: "all_equipment"),
-                                    background: equipment == nil ? FormaTheme.primary : FormaTheme.surface,
+                                    background: equipment == nil ? FormaTheme.secondary : FormaTheme.surface,
                                     foreground: equipment == nil ? FormaTheme.onPrimary : FormaTheme.textMuted
                                 )
                             }
@@ -844,7 +875,7 @@ private struct MealSlotOption: Identifiable {
                                 Button { equipment = item } label: {
                                     FormaPill(
                                         text: item.label(arabic: arabic),
-                                        background: equipment == item ? FormaTheme.primary : FormaTheme.surface,
+                                        background: equipment == item ? FormaTheme.secondary : FormaTheme.surface,
                                         foreground: equipment == item ? FormaTheme.onPrimary : FormaTheme.textMuted
                                     )
                                 }
@@ -852,28 +883,43 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(filtered, id: \.self) { exercise in
-                            NavigationLink { ExerciseDetail(exercise: exercise) } label: {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Image(ExerciseGuides.of(exercise, arabic: false).asset)
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(maxWidth: .infinity)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                    Text(exercise.label(arabic: arabic))
-                                        .font(.subheadline.weight(.bold))
-                                        .foregroundStyle(FormaTheme.textPrimary)
-                                        .lineLimit(2)
-                                        .multilineTextAlignment(.leading)
-                                    if let primary = ExerciseMuscles.of(exercise).primary.first {
-                                        FormaPill(text: primary.label(arabic: arabic))
+                    // Categorized by Main Muscle
+                    ForEach(groupedMuscles, id: \.self) { groupMuscle in
+                        let items = filtered.filter { ExerciseMuscles.of($0).primary.first == groupMuscle }
+                        HStack(spacing: 8) {
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(FormaTheme.primary)
+                                .frame(width: 4, height: 18)
+                            Text(groupMuscle.label(arabic: arabic))
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(FormaTheme.textPrimary)
+                            Spacer()
+                            FormaPill(text: "\(items.count)")
+                        }
+                        .padding(.top, 4)
+
+                        LazyVGrid(columns: columns, spacing: 12) {
+                            ForEach(items, id: \.self) { exercise in
+                                NavigationLink { ExerciseDetail(exercise: exercise) } label: {
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
+                                            .frame(maxWidth: .infinity)
+                                            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                        Text(exercise.label(arabic: arabic))
+                                            .font(.subheadline.weight(.bold))
+                                            .foregroundStyle(FormaTheme.textPrimary)
+                                            .lineLimit(2)
+                                            .multilineTextAlignment(.leading)
+                                        Text(ExerciseCatalog.of(exercise).equipment.map { $0.label(arabic: arabic) }.joined(separator: " · "))
+                                            .font(.caption2)
+                                            .foregroundStyle(FormaTheme.textMuted)
+                                            .lineLimit(1)
                                     }
+                                    .padding(10)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                                    .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(FormaTheme.border.opacity(0.75), lineWidth: 1))
                                 }
-                                .padding(10)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(FormaTheme.border.opacity(0.75), lineWidth: 1))
                             }
                         }
                     }

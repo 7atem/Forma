@@ -67,9 +67,7 @@ struct ExerciseDetail: View {
                     #endif
                     GeometryReader { geo in
                         let width = geo.size.width
-                        Image(guide.asset)
-                            .resizable()
-                            .scaledToFill()
+                        FormaExerciseImage(asset: guide.asset, contentMode: .fill)
                             .frame(width: phase == 0 ? width : width * 2, height: width / 1.5, alignment: phase == 2 ? .trailing : .leading)
                             .clipped()
                     }
