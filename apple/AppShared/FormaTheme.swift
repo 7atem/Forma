@@ -70,7 +70,11 @@ struct FormaPill: View {
 }
 
 struct FormaCard<Content: View>: View {
-    @ViewBuilder let content: Content
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
