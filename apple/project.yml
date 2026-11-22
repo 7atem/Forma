@@ -31,10 +31,17 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.formacoach.apple
         TARGETED_DEVICE_FAMILY: "1,2"
+    # Read-only Apple Health import (workouts, body mass). No write/share permission is requested.
+    entitlements:
+      path: Generated/FormaPhone.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
     info:
       path: Generated/Phone-Info.plist
       properties:
         CFBundleDisplayName: Forma
+        NSHealthShareUsageDescription: Forma reads the workouts and body weight you choose to share, to show them next to your own logs. Forma never writes to Apple Health.
         UILaunchScreen: {}
         LSSupportsOpeningDocumentsInPlace: true
         UTExportedTypeDeclarations:

@@ -47,6 +47,7 @@ struct TransferDocument: FileDocument {
     @State private var deleting: String?
     @State private var showBridge = false
     @State private var selectedTab = 0
+    @StateObject private var health = HealthImporter()
 
     var body: some View {
         Group {
@@ -75,7 +76,8 @@ struct TransferDocument: FileDocument {
                                 exporting = true
                             }
                         },
-                        onDelete: { deleting = $0 }
+                        onDelete: { deleting = $0 },
+                        onOpenProgress: { selectedTab = 3 }
                     )
                     .tabItem { Label("tab_train", systemImage: "dumbbell.fill") }
                     .tag(1)
@@ -84,7 +86,7 @@ struct TransferDocument: FileDocument {
                         .tabItem { Label("tab_eat", systemImage: "fork.knife") }
                         .tag(2)
 
-                    PhoneProgressTab(store: store, onOpenBridge: { showBridge = true })
+                    PhoneProgressTab(store: store, health: health, onOpenBridge: { showBridge = true })
                         .tabItem { Label("tab_progress", systemImage: "chart.xyaxis.line") }
                         .tag(3)
                 }
@@ -154,6 +156,7 @@ private struct MealSlotOption: Identifiable {
     let onOpenBridge: () -> Void
     let onExport: (WatchWorkout) -> Void
     let onDelete: (String) -> Void
+    let onOpenProgress: () -> Void
     @State private var creatingProgram = false
     @State private var finishedSummary: WatchWorkout?
     @AppStorage("forma_dark_mode") private var darkMode = true
@@ -170,6 +173,22 @@ private struct MealSlotOption: Identifiable {
                             finishedSummary = completed
                         }
                     } else {
+                        if store.state.workouts.isEmpty && store.state.healthLastSync == nil && HealthImporter.isAvailable {
+                            FormaCard {
+                                HStack(spacing: 10) {
+                                    Image(systemName: "heart.fill").foregroundStyle(.pink)
+                                    Text("health_first_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                                }
+                                Text("health_first_body").font(.caption).foregroundStyle(FormaTheme.textMuted)
+                                Button { onOpenProgress() } label: {
+                                    Text("health_connect").fontWeight(.bold)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.vertical, 12)
+                                        .background(FormaTheme.primaryContainer, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                        .foregroundStyle(FormaTheme.primary)
+                                }
+                            }
+                        }
                         let workoutDates = Set(store.state.workouts.map(\.date))
                         let recentCount = min(store.state.workouts.count, 3)
                         let totalVolume = store.state.workouts.suffix(7).reduce(0.0) { $0 + FormaTheme.workingTonnage($1.sets) }
@@ -1422,6 +1441,7 @@ private struct MealSlotOption: Identifiable {
 
 @MainActor private struct PhoneProgressTab: View {
     @ObservedObject var store: LocalStore
+    @ObservedObject var health: HealthImporter
     let onOpenBridge: () -> Void
     @State private var weightKg = 75.0
     @State private var initializedWeight = false
@@ -1433,12 +1453,15 @@ private struct MealSlotOption: Identifiable {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    PhoneHealthCard(store: store, importer: health)
+                    PhoneHealthActivityCard(records: store.state.healthWorkouts)
+
                     // Quick Weight Logger Card
                     FormaCard {
                         HStack {
                             Text("body_weight").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                             Spacer()
-                            if let latest = store.state.weights.last {
+                            if let latest = store.combinedWeights.last {
                                 FormaPill(text: FormaTheme.formatWeight(latest.weightKg, useLb: useLb))
                             }
                         }
@@ -1462,13 +1485,13 @@ private struct MealSlotOption: Identifiable {
 
                     // Interactive Scrubbable Gradient Weight Trend Chart
                     FormaCard {
-                        let points = Array(store.state.weights.suffix(30))
+                        let points = Array(store.combinedWeights.suffix(30))
                         let activePoint = scrubbedIndex.flatMap { $0 < points.count ? points[$0] : nil }
                         HStack {
                             Text("weight_trend").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                             Spacer()
                             if let active = activePoint {
-                                FormaPill(text: "\(FormaTheme.formatWeight(active.weightKg, useLb: useLb)) · \(active.date)")
+                                FormaPill(text: "\(FormaTheme.formatWeight(active.weightKg, useLb: useLb)) · \(active.date)" + (active.fromHealth ? " · \(String(localized: "health_source_short"))" : ""))
                             }
                         }
                         if points.count < 2 {
@@ -1514,8 +1537,10 @@ private struct MealSlotOption: Identifiable {
 
                                     ForEach(0..<coords.count, id: \.self) { idx in
                                         let isSel = idx == highlight
+                                        // Hollow dots mark days that came from Apple Health.
                                         Circle()
-                                            .fill(FormaTheme.primary)
+                                            .fill(points[idx].fromHealth ? FormaTheme.surface : FormaTheme.primary)
+                                            .overlay(Circle().stroke(FormaTheme.primary, lineWidth: 2))
                                             .frame(width: isSel ? 10 : 6, height: isSel ? 10 : 6)
                                             .position(coords[idx])
                                     }
@@ -1589,8 +1614,9 @@ private struct MealSlotOption: Identifiable {
                     Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
                 }
             }
+            .task { await health.refreshIfConnected(store) }
             .onAppear {
-                if !initializedWeight, let latest = store.state.weights.last {
+                if !initializedWeight, let latest = store.combinedWeights.last {
                     weightKg = latest.weightKg
                     initializedWeight = true
                 }

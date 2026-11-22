@@ -24,7 +24,8 @@ No store upload, public repository push, recruitment, billing setup or external 
 - [ ] Run native Swift package tests and compile both Xcode simulator targets on macOS. CI configuration alone is not a result.
 - [ ] Validate actual paired iPhone/watch delivery, durable ACK/retry, delayed/stale libraries, duplicates/conflicts, capacity, relaunch and file-provider failures.
 - [ ] Review OS-protected Apple storage, backup/recovery, export/deletion, VoiceOver/Arabic layout and foreground timer limitations.
-- [ ] Define and review a HealthKit lifecycle/privacy implementation before recording sensors or writing Apple Health. Current source is a manual logger.
+- [ ] Physical-iPhone check of the read-only Apple Health import: permission prompt (EN/AR), allow/deny/partial access, first one-year sync, re-sync, removal, and that nothing is written to Health. Requires a paid Developer team (HealthKit entitlement) and a privacy policy for TestFlight/App Store.
+- [ ] Define and review a HealthKit lifecycle/privacy implementation before recording sensors or writing Apple Health. The watch is still a manual logger.
 - [ ] Obtain qualified review of all 40 simplified muscle mappings, representative variants and generated poses/cues. No measured activation/recovery claim.
 - [ ] Prepare original Apple icons/store assets, choose owner signing credentials and review final platform disclosures before distribution.
 

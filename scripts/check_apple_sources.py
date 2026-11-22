@@ -32,5 +32,19 @@ for folder in ['AppShared', 'iPhone', 'Watch']:
 project = (root / 'apple/project.yml').read_text()
 assert 'WKCompanionAppBundleIdentifier: com.formacoach.apple' in project
 assert 'watchOS: "10.0"' in project and 'iOS: "17.0"' in project
-assert 'HealthKit' not in project, 'HealthKit is not implemented in this logging-only build'
+# Apple Health is read-only: the iPhone may read after explicit permission; nothing writes, shares or records sensors.
+assert 'com.apple.developer.healthkit: true' in project and 'NSHealthShareUsageDescription' in project
+assert 'NSHealthUpdateUsageDescription' not in project, 'Forma never writes to Apple Health'
+for lang in ['en', 'ar']:
+    plist = (root / f'apple/Resources/{lang}.lproj/InfoPlist.strings').read_text(encoding='utf-8')
+    assert '"NSHealthShareUsageDescription"' in plist, f'Missing {lang} Health permission text'
+health_files = []
+for file in (root / 'apple').rglob('*.swift'):
+    source = file.read_text(encoding='utf-8')
+    if 'import HealthKit' in source:
+        health_files.append(file.relative_to(root / 'apple').as_posix())
+    for banned in ['HKWorkoutSession', 'HKLiveWorkoutBuilder', 'HKWorkoutBuilder', 'healthStore.save', 'healthStore.delete']:
+        assert banned not in source, (file, banned)
+    assert not re.search(r'toShare:\s*\[\s*[^\]\s]', source), (file, 'Apple Health share/write permission requested')
+assert health_files == ['iPhone/HealthImporter.swift'], health_files
 print(f'Apple static consistency: fixture, target IDs and {len(en)} EN/AR keys match. Swift/Xcode build NOT checked.')

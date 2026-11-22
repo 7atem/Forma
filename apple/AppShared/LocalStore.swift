@@ -40,6 +40,10 @@ struct SavedState: Codable {
     var weights: [PhoneWeight] = []
     var calorieTarget: Int?
     var proteinTarget: Double?
+    /// Read-only copies imported from Apple Health; kept apart from Forma-logged workouts and weights.
+    var healthWorkouts: [HealthWorkoutRecord] = []
+    var healthWeights: [HealthWeightRecord] = []
+    var healthLastSync: Date?
 
     init() {}
 
@@ -57,6 +61,9 @@ struct SavedState: Codable {
         weights = try c.decodeIfPresent([PhoneWeight].self, forKey: .weights) ?? []
         calorieTarget = try c.decodeIfPresent(Int.self, forKey: .calorieTarget)
         proteinTarget = try c.decodeIfPresent(Double.self, forKey: .proteinTarget)
+        healthWorkouts = try c.decodeIfPresent([HealthWorkoutRecord].self, forKey: .healthWorkouts) ?? []
+        healthWeights = try c.decodeIfPresent([HealthWeightRecord].self, forKey: .healthWeights) ?? []
+        healthLastSync = try c.decodeIfPresent(Date.self, forKey: .healthLastSync)
     }
 }
 
@@ -92,7 +99,12 @@ struct SavedState: Codable {
               state.meals.count <= 5000, state.weights.count <= 2000,
               Set(state.programs.map(\.id)).count == state.programs.count,
               Set(state.workouts.map(\.id)).count == state.workouts.count,
-              Set(state.pendingIDs).isSubset(of: Set(state.workouts.map(\.id))) else { throw TransferError.invalid }
+              Set(state.pendingIDs).isSubset(of: Set(state.workouts.map(\.id))),
+              state.healthWorkouts.count <= HealthMerge.maximumWorkouts, state.healthWeights.count <= HealthMerge.maximumWeights,
+              Set(state.healthWorkouts.map(\.id)).count == state.healthWorkouts.count,
+              Set(state.healthWeights.map(\.date)).count == state.healthWeights.count else { throw TransferError.invalid }
+        try state.healthWorkouts.forEach { try $0.validate() }
+        try state.healthWeights.forEach { try $0.validate() }
         try state.programs.forEach { try $0.validate() }
         try state.workouts.forEach { try $0.validate() }
         if let draft = state.draft {
@@ -267,6 +279,35 @@ struct SavedState: Codable {
         try commit {
             $0.calorieTarget = calories
             $0.proteinTarget = protein
+        }
+    }
+
+    /// Body-weight trend from both sources; the user's own entry wins for its day.
+    var combinedWeights: [WeightPoint] {
+        HealthMerge.combinedWeights(user: state.weights.map { (date: $0.date, weightKg: $0.weightKg) }, health: state.healthWeights)
+    }
+
+    /// Stores newly read Apple Health samples. Never touches Forma workouts, sets, meals or user weights.
+    @discardableResult
+    func mergeHealth(workouts: [HealthWorkoutRecord], weights: [HealthWeightRecord], syncedAt: Date) throws -> (workouts: Int, weights: Int) {
+        var added = (workouts: 0, weights: 0)
+        try commit { state in
+            let w = HealthMerge.workouts(existing: state.healthWorkouts, incoming: workouts)
+            let b = HealthMerge.weights(existing: state.healthWeights, incoming: weights)
+            state.healthWorkouts = w.records
+            state.healthWeights = b.records
+            state.healthLastSync = syncedAt
+            added = (w.added, b.added)
+        }
+        return added
+    }
+
+    /// Removes only the imported copies; Apple Health itself is unchanged.
+    func removeHealthData() throws {
+        try commit {
+            $0.healthWorkouts = []
+            $0.healthWeights = []
+            $0.healthLastSync = nil
         }
     }
 

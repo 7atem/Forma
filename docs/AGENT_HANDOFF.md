@@ -83,7 +83,7 @@
    - Always load 3D PNGs via `FormaExerciseImage` (`drawable-nodpi/` subdirectory), never bare `Image(asset)`.
    - Verify CI via `Invoke-RestMethod "https://api.github.com/repos/7atem/Forma/actions/runs?per_page=6"`.
 4. **Hard Product Rules (`AGENTS.md`):**
-   - No `INTERNET` permission, no cloud provider, no HealthKit entitlement in `apple/project.yml`.
+   - No `INTERNET` permission, no cloud provider. Apple Health is **read-only** on iPhone (`HealthImporter.swift` only); no share/write permission, `HKWorkoutSession` or sensor recording — `check_apple_sources.py` enforces this.
    - No automated diet/exercise prescription; missing logs are unknown, never nonadherence.
    - Never mirror exercise demonstration left/right phase order in RTL.
    - Never hand-edit generated Kotlin/Swift/XML catalog or guide files.

@@ -56,6 +56,8 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [x] Native phone/watch source: offline logging/editing, muscles, rest countdown, persisted drafts/outbox and explicit Android file bridge.
 - [ ] Compile/test native apps on macOS and validate paired WatchConnectivity on physical devices.
 - [ ] Verify VoiceOver/RTL, interruptions/recovery, capacity, stale program delivery, background timers and file errors on Apple hardware.
+- [x] Read-only Apple Health import on iPhone (workouts, body mass), labelled and kept separate from Forma logs. Device validation pending.
+- [ ] Android Health Connect import with the same read-only rules.
 - [ ] Add reviewed HealthKit lifecycle/sensors as a separate permission/product change. Current watch app is a manual logger.
 - [x] Add equipment-specific exercise variants and searchable selection in alpha05.
 - [ ] Qualified exercise review; evaluate supersets/custom exercises against actual study findings.
