@@ -58,7 +58,7 @@ struct ExerciseDetail: View {
                                 FormaPill(
                                     text: String(localized: String.LocalizationValue(key)),
                                     background: phase == idx ? FormaTheme.primary : FormaTheme.surface,
-                                    foreground: phase == idx ? FormaTheme.onPrimary : FormaTheme.textMuted,
+                                    foreground: phase == idx ? FormaTheme.onPrimary : FormaTheme.textMuted
                                 )
                             }
                         }

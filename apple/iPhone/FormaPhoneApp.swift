@@ -65,7 +65,7 @@ struct TransferDocument: FileDocument {
                                 exporting = true
                             }
                         },
-                        onDelete: { deleting = $0 },
+                        onDelete: { deleting = $0 }
                     )
                     .tabItem { Label("tab_train", systemImage: "dumbbell.fill") }
 
@@ -165,7 +165,7 @@ struct TransferDocument: FileDocument {
                                     valueText: "\(recentCount)/3",
                                     size: 76,
                                     lineWidth: 8,
-                                    color: FormaTheme.primary,
+                                    color: FormaTheme.primary
                                 )
                             }
                         }
@@ -223,7 +223,7 @@ struct TransferDocument: FileDocument {
                                                 FormaPill(
                                                     text: "\(String(localized: "best_e1rm")) \(Int(est.rounded()))",
                                                     background: FormaTheme.tertiary.opacity(0.2),
-                                                    foreground: FormaTheme.tertiary,
+                                                    foreground: FormaTheme.tertiary
                                                 )
                                             }
                                         }
@@ -565,7 +565,7 @@ struct TransferDocument: FileDocument {
                                         FormaPill(
                                             text: "\(step.weightKg.formatted()) kg × \(step.reps)",
                                             background: FormaTheme.surfaceHigh,
-                                            foreground: FormaTheme.textMuted,
+                                            foreground: FormaTheme.textMuted
                                         )
                                     }
                                 }
@@ -588,7 +588,7 @@ struct TransferDocument: FileDocument {
                         reps: reps,
                         weightKg: kg,
                         kind: warmup ? .warmUp : .working,
-                        rpe: hasRpe ? rpe : nil,
+                        rpe: hasRpe ? rpe : nil
                     )
                     store.attempt {
                         try store.add(item)
@@ -621,7 +621,7 @@ struct TransferDocument: FileDocument {
                                 valueText: "\(remaining)s",
                                 size: 68,
                                 lineWidth: 7,
-                                color: FormaTheme.primary,
+                                color: FormaTheme.primary
                             )
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("\(String(localized: "rest")) · \(remaining)s")
@@ -661,7 +661,7 @@ struct TransferDocument: FileDocument {
                                     FormaPill(
                                         text: set.kind == .warmUp ? String(localized: "warmup") : String(localized: "working"),
                                         background: set.kind == .warmUp ? FormaTheme.secondary.opacity(0.2) : FormaTheme.primaryContainer,
-                                        foreground: set.kind == .warmUp ? FormaTheme.secondary : FormaTheme.primary,
+                                        foreground: set.kind == .warmUp ? FormaTheme.secondary : FormaTheme.primary
                                     )
                                     if let r = set.rpe {
                                         FormaPill(text: "RPE \(r.formatted())", background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
@@ -785,7 +785,7 @@ struct TransferDocument: FileDocument {
                                 FormaPill(
                                     text: String(localized: "all_equipment"),
                                     background: equipment == nil ? FormaTheme.primary : FormaTheme.surface,
-                                    foreground: equipment == nil ? FormaTheme.onPrimary : FormaTheme.textMuted,
+                                    foreground: equipment == nil ? FormaTheme.onPrimary : FormaTheme.textMuted
                                 )
                             }
                             ForEach(Equipment.allCases, id: \.self) { item in
@@ -793,7 +793,7 @@ struct TransferDocument: FileDocument {
                                     FormaPill(
                                         text: item.label(arabic: arabic),
                                         background: equipment == item ? FormaTheme.primary : FormaTheme.surface,
-                                        foreground: equipment == item ? FormaTheme.onPrimary : FormaTheme.textMuted,
+                                        foreground: equipment == item ? FormaTheme.onPrimary : FormaTheme.textMuted
                                     )
                                 }
                             }
@@ -885,7 +885,7 @@ struct TransferDocument: FileDocument {
                                     labelText: "kcal",
                                     size: 92,
                                     lineWidth: 9,
-                                    color: FormaTheme.primary,
+                                    color: FormaTheme.primary
                                 )
                                 Text("calories_label").font(.caption).foregroundStyle(FormaTheme.textMuted)
                             }
@@ -897,7 +897,7 @@ struct TransferDocument: FileDocument {
                                     labelText: "/ \(Int(proGoal))g",
                                     size: 92,
                                     lineWidth: 9,
-                                    color: FormaTheme.secondary,
+                                    color: FormaTheme.secondary
                                 )
                                 Text("protein_label").font(.caption).foregroundStyle(FormaTheme.textMuted)
                             }
@@ -929,7 +929,7 @@ struct TransferDocument: FileDocument {
                                     FormaPill(
                                         text: String(localized: String.LocalizationValue(key)),
                                         background: active ? FormaTheme.primary : FormaTheme.surface,
-                                        foreground: active ? FormaTheme.onPrimary : FormaTheme.textMuted,
+                                        foreground: active ? FormaTheme.onPrimary : FormaTheme.textMuted
                                     )
                                 }
                             }
@@ -950,7 +950,7 @@ struct TransferDocument: FileDocument {
                                             protein: item.p,
                                             carbs: item.c,
                                             fat: item.f,
-                                            slot: selectedSlot,
+                                            slot: selectedSlot
                                         ))
                                     }
                                 } label: {
@@ -1176,7 +1176,7 @@ struct TransferDocument: FileDocument {
                         FormaPill(
                             text: bridge.activated ? String(localized: "watch_connected") : String(localized: "watch_disconnected"),
                             background: bridge.activated ? FormaTheme.primaryContainer : FormaTheme.surfaceHigh,
-                            foreground: bridge.activated ? FormaTheme.primary : FormaTheme.textMuted,
+                            foreground: bridge.activated ? FormaTheme.primary : FormaTheme.textMuted
                         )
                         Text("phone_bridge_note")
                             .font(.subheadline)

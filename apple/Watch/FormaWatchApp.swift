@@ -133,7 +133,7 @@ import FormaCore
                             labelText: String(localized: "rest"),
                             size: 72,
                             lineWidth: 7,
-                            color: FormaTheme.primary,
+                            color: FormaTheme.primary
                         )
                         .onChange(of: remaining) { _, value in
                             if value == 0 { WKInterfaceDevice.current().play(.notification) }
@@ -165,7 +165,7 @@ import FormaCore
                             valueText: "\(count)/\(target)",
                             size: 48,
                             lineWidth: 5,
-                            color: FormaTheme.primary,
+                            color: FormaTheme.primary
                         )
                     }
                     VStack(alignment: .leading, spacing: 3) {
@@ -294,7 +294,7 @@ import FormaCore
                     reps: reps,
                     weightKg: kg,
                     kind: warmup ? .warmUp : .working,
-                    rpe: hasRpe ? rpe : nil,
+                    rpe: hasRpe ? rpe : nil
                 ))
             }
             if onDelete != nil { Button("delete", role: .destructive) { deleting = true } }
