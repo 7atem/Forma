@@ -237,6 +237,6 @@
     <string name="workout_complete_banner">تم حفظ الجلسة</string>
     <string name="new_pr_badge">رقم قياسي جديد!</string>
     <string name="activity_heatmap_title">شبكة تدريب 12 أسبوع</string>
-    <string name="week_streak_badge">سلسلة %1$s أسابيع</string>
+    <string name="week_streak_badge">%1$s أسابيع مسجلة</string>
     <string name="calc_from_macros">احسب السعرات</string>
 </resources>

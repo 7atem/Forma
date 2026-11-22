@@ -4,7 +4,14 @@ import json
 import sys
 import xml.etree.ElementTree as ET
 
-root = Path(__file__).resolve().parents[1]
+
+def android_text(text):
+    """Escape aapt2 string syntax; ElementTree already escapes XML entities."""
+    text = text.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"')
+    return '\\' + text if text[:1] in ('@', '?') else text
+
+
+root =Path(__file__).resolve().parents[1]
 data = json.loads((root/'catalog/exercise-guides.json').read_text(encoding='utf-8'))['exercises']
 catalog = json.loads((root/'catalog/exercise-muscles.json').read_text(encoding='utf-8'))['exercises']
 assert [x['id'] for x in data] == [x['id'] for x in catalog]
@@ -27,8 +34,8 @@ for folder,lang in [('values','en'),('values-ar','ar')]:
     xml=ET.Element('resources')
     for x in data:
         key=x['id'].lower()
-        ET.SubElement(xml,'string',name=f'guide_{key}_variant').text=x['variant'][lang]
-        for i,cue in enumerate(x['cues'][lang]):ET.SubElement(xml,'string',name=f'guide_{key}_{i}').text=cue
+        ET.SubElement(xml,'string',name=f'guide_{key}_variant').text=android_text(x['variant'][lang])
+        for i,cue in enumerate(x['cues'][lang]):ET.SubElement(xml,'string',name=f'guide_{key}_{i}').text=android_text(cue)
     ET.indent(xml,space='    ')
     outputs[root/f'app/src/main/res/{folder}/exercise_guides.xml']='<?xml version="1.0" encoding="utf-8"?>\n'+ET.tostring(xml,encoding='unicode')+'\n'
 for path,content in outputs.items():

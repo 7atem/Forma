@@ -454,7 +454,8 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             }
         }
         val parsedWeight = NumericInput.decimal(weight)
-        if (!warmup && parsedWeight != null && TrainingHistory.isNewWeightPr(state.snapshot, exercise, parsedWeight, session.date)) {
+        val parsedReps = NumericInput.integer(reps)
+        if (!warmup && parsedWeight != null && TrainingHistory.isNewPr(state.snapshot, exercise, parsedWeight, parsedReps, session.date)) {
             PillBadge(
                 text = "★ " + stringResource(R.string.new_pr_badge),
                 containerColor = MaterialTheme.colorScheme.secondaryContainer,

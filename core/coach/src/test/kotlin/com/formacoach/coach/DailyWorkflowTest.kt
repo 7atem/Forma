@@ -112,8 +112,10 @@ class DailyWorkflowTest {
             TrainingSet(sessionId = "w1", exercise = Exercise.CHEST_PRESS, reps = 5, weightKg = 90.0, kind = SetKind.WARM_UP),
         )
         val snap = FitnessSnapshot(sessions = sessions, sets = sets)
-        assertTrue(TrainingHistory.isNewWeightPr(snap, Exercise.CHEST_PRESS, 62.5, date))
-        assertFalse(TrainingHistory.isNewWeightPr(snap, Exercise.CHEST_PRESS, 60.0, date))
+        assertFalse(TrainingHistory.isNewPr(FitnessSnapshot(), Exercise.CHEST_PRESS, 60.0, 8, date))
+        assertTrue(TrainingHistory.isNewPr(snap, Exercise.CHEST_PRESS, 62.5, 8, date))
+        assertTrue(TrainingHistory.isNewPr(snap, Exercise.CHEST_PRESS, 60.0, 10, date))
+        assertFalse(TrainingHistory.isNewPr(snap, Exercise.CHEST_PRESS, 60.0, 8, date))
         assertEquals(2, TrainingHistory.activeWeekStreak(snap, date))
         assertEquals(470.0, TrainingHistory.macroCalories(30.0, 50.0, 16.6667), 0.1)
     }

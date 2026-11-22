@@ -8,7 +8,14 @@ import math
 import sys
 import xml.etree.ElementTree as ET
 
-ROOT = Path(__file__).resolve().parents[1]
+
+def android_text(text):
+    """Escape aapt2 string syntax; ElementTree already escapes XML entities."""
+    text = text.replace('\\', '\\\\').replace("'", "\\'").replace('"', '\\"')
+    return '\\' + text if text[:1] in ('@', '?') else text
+
+
+ROOT =Path(__file__).resolve().parents[1]
 data = json.loads((ROOT / 'catalog/exercise-muscles.json').read_text(encoding='utf-8'))
 quote = lambda text: json.dumps(text, ensure_ascii=False)
 muscles = data['muscles']
@@ -119,9 +126,9 @@ outputs = {
 for folder, language in [('values', 'en'), ('values-ar', 'ar')]:
     resources = ET.Element('resources')
     for item in muscles:
-        ET.SubElement(resources, 'string', name='muscle_' + item['id'].lower()).text = item[language]
+        ET.SubElement(resources, 'string', name='muscle_' + item['id'].lower()).text = android_text(item[language])
     for item in exercises:
-        ET.SubElement(resources,'string',name='catalog_exercise_'+item['id'].lower()).text=item[language]
+        ET.SubElement(resources,'string',name='catalog_exercise_'+item['id'].lower()).text=android_text(item[language])
     ET.indent(resources, space='    ')
     outputs[ROOT/f'app/src/main/res/{folder}/muscles.xml'] = '<?xml version="1.0" encoding="utf-8"?>\n' + ET.tostring(resources, encoding='unicode') + '\n'
 for path, content in outputs.items():

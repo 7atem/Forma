@@ -91,10 +91,10 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     var generation by rememberSaveable { mutableIntStateOf(0) }
     val pageState = key(generation) { rememberSaveableStateHolder() }
     // Re-evaluate calendar totals if the app remains open over local midnight.
-    var today by remember { mutableStateOf(LocalDate.now()) }
+    var today by remember { mutableStateOf(LocalDate.now(vm.clock)) }
     LaunchedEffect(Unit) {
         while (true) {
-            today = LocalDate.now()
+            today = LocalDate.now(vm.clock)
             kotlinx.coroutines.delay(30_000)
         }
     }

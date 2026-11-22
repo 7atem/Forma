@@ -43,14 +43,17 @@ object TrainingHistory {
         return sessionTonnage(data.sets.filter { it.sessionId in completedIds })
     }
 
-    /** True when weightKg strictly beats all prior completed working sets for this exercise. */
-    fun isNewWeightPr(data: FitnessSnapshot, exercise: Exercise, weightKg: Double, asOf: LocalDate): Boolean {
+    /** True when there is prior completed history for this exercise and the set beats prior best weight or e1RM. */
+    fun isNewPr(data: FitnessSnapshot, exercise: Exercise, weightKg: Double, reps: Int?, asOf: LocalDate): Boolean {
         if (!weightKg.isFinite() || weightKg <= 0.0) return false
         val completedIds = data.sessions.filter { it.completedAt != null && it.date <= asOf }.map { it.id }.toSet()
-        val priorBest = data.sets
-            .filter { it.exercise == exercise && it.kind == SetKind.WORKING && it.sessionId in completedIds }
-            .maxOfOrNull { it.weightKg } ?: return true
-        return weightKg > priorBest
+        val prior = data.sets.filter { it.exercise == exercise && it.kind == SetKind.WORKING && it.sessionId in completedIds }
+        if (prior.isEmpty()) return false
+        val priorBestWeight = prior.maxOf { it.weightKg }
+        if (weightKg > priorBestWeight) return true
+        val candidateE1rm = reps?.let { estimatedOneRepMax(weightKg, it) } ?: return false
+        val priorBestE1rm = prior.mapNotNull { estimatedOneRepMax(it.weightKg, it.reps) }.maxOrNull() ?: return false
+        return candidateE1rm > priorBestE1rm + 0.01
     }
 
     /** Consecutive 7-day rolling windows ending at asOf with at least one completed workout. */

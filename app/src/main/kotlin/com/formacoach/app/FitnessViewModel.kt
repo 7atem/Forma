@@ -7,13 +7,17 @@ import com.formacoach.coach.*
 import com.formacoach.data.FitnessRepository
 import com.formacoach.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.Clock
 import java.time.LocalDate
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeoutOrNull
 
 data class AppState(
@@ -29,47 +33,60 @@ data class AppState(
 )
 
 @HiltViewModel
-class FitnessViewModel @Inject constructor(private val repository: FitnessRepository,private val localModel:LocalNanoModel) : ViewModel() {
+class FitnessViewModel @Inject constructor(
+    private val repository: FitnessRepository,
+    private val localModel: LocalNanoModel,
+    val clock: Clock,
+) : ViewModel() {
     private val mutableState = MutableStateFlow(AppState())
     val state = mutableState.asStateFlow()
-    val reviewEngine = WeeklyReviewEngine()
-    private var aiJob:Job?=null
-    private var aiGeneration=0
+    val reviewEngine = WeeklyReviewEngine(clock)
+    private val writeMutex = Mutex()
+    private val pendingWrites = AtomicInteger(0)
+    private var aiJob: Job? = null
+    private var aiGeneration = 0
 
     init {
         viewModelScope.launch {
             repository.snapshot.catch { failure ->
                 if (failure is CancellationException) throw failure
-                mutableState.update { it.copy(loading=false, loadFailed=true) }
-            }.collect { snapshot -> mutableState.update { it.copy(loading=false,snapshot=snapshot,highlights=if(it.snapshot==snapshot) it.highlights else emptyList()) } }
+                mutableState.update { it.copy(loading = false, loadFailed = true) }
+            }.collect { snapshot -> mutableState.update { it.copy(loading = false, snapshot = snapshot, highlights = if (it.snapshot == snapshot) it.highlights else emptyList()) } }
         }
     }
 
-    fun clearError() = mutableState.update { it.copy(error=false) }
+    fun clearError() = mutableState.update { it.copy(error = false) }
 
     internal fun write(onSuccess: () -> Unit = {}, block: suspend () -> Unit) {
-        if (mutableState.value.busy) return
-        mutableState.update { it.copy(busy=true, error=false) }
+        pendingWrites.incrementAndGet()
+        mutableState.update { it.copy(busy = true, error = false) }
         viewModelScope.launch {
             try {
-                block()
-                onSuccess()
-            } catch (failure: CancellationException) { throw failure
-            } catch (_: Exception) { mutableState.update { it.copy(error=true) }
-            } finally { mutableState.update { it.copy(busy=false) } }
+                writeMutex.withLock {
+                    block()
+                    onSuccess()
+                }
+            } catch (failure: CancellationException) {
+                throw failure
+            } catch (_: Exception) {
+                mutableState.update { it.copy(error = true) }
+            } finally {
+                val remaining = pendingWrites.decrementAndGet().coerceAtLeast(0)
+                mutableState.update { it.copy(busy = remaining > 0) }
+            }
         }
     }
 
     fun saveProfile(profile: Profile, done: () -> Unit) = write(done) { repository.saveProfile(profile) }
-    fun start(template: String, date: LocalDate = LocalDate.now()) = write { repository.startSession(template,date) }
-    fun addSet(session: String, exercise: Exercise, reps: Int, kg: Double, kind:SetKind=SetKind.WORKING,rpe:Double?=null,done: () -> Unit) = write(done) {
-        repository.addSet(TrainingSet(sessionId=session, exercise=exercise, reps=reps, weightKg=kg,kind=kind,rpe=rpe))
+    fun start(template: String, date: LocalDate = LocalDate.now(clock)) = write { repository.startSession(template, date) }
+    fun addSet(session: String, exercise: Exercise, reps: Int, kg: Double, kind: SetKind = SetKind.WORKING, rpe: Double? = null, done: () -> Unit) = write(done) {
+        repository.addSet(TrainingSet(sessionId = session, exercise = exercise, reps = reps, weightKg = kg, kind = kind, rpe = rpe))
     }
-    fun finish(id: String,done:()->Unit={}) = write(done) { repository.finishSession(id) }
-    fun logSet(value:TrainingSet,done:(List<TrainingSet>)->Unit)=write {done(repository.logSet(value))}
+    fun finish(id: String, done: () -> Unit = {}) = write(done) { repository.finishSession(id) }
+    fun logSet(value: TrainingSet, done: (List<TrainingSet>) -> Unit) = write { done(repository.logSet(value)) }
     fun removeSet(id: String) = write { repository.removeSet(id) }
     fun addMeal(meal: Meal, done: () -> Unit) = write(done) { repository.addMeal(meal) }
-    fun repeatMeal(meal: Meal) = write { repository.addMeal(meal.copy(id=UUID.randomUUID().toString(), date=LocalDate.now())) }
+    fun repeatMeal(meal: Meal) = write { repository.addMeal(meal.copy(id = UUID.randomUUID().toString(), date = LocalDate.now(clock))) }
     fun removeMeal(id: String) = write { repository.removeMeal(id) }
     fun copyMealDay(expected:List<Meal>,target:LocalDate,done:()->Unit)=write(done) {repository.copyMealDay(expected,target)}
     fun measure(value: Measurement, done: () -> Unit) = write(done) { repository.saveMeasurement(value) }

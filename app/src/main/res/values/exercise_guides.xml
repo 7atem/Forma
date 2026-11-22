@@ -177,7 +177,7 @@
     <string name="guide_conventional_deadlift_1">Brace the trunk and keep the bar close to the shins and thighs as you stand.</string>
     <string name="guide_conventional_deadlift_2">Lock out tall by extending the hips without leaning backward.</string>
     <string name="guide_barbell_row_variant">Bent-over barbell row</string>
-    <string name="guide_barbell_row_0">Hinge forward with a neutral spine and soft knees, holding the bar at arm's length.</string>
+    <string name="guide_barbell_row_0">Hinge forward with a neutral spine and soft knees, holding the bar at arm\'s length.</string>
     <string name="guide_barbell_row_1">Pull the barbell toward the lower ribs while driving the elbows back.</string>
     <string name="guide_barbell_row_2">Lower with control without letting the torso bob up and down.</string>
     <string name="guide_barbell_overhead_press_variant">Standing barbell overhead press</string>

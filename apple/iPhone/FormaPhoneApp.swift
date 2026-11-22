@@ -556,7 +556,7 @@ private struct MealSlotOption: Identifiable {
                     }
                 }
 
-                if !warmup && FormaTheme.isNewWeightPr(workouts: store.state.workouts, exercise: exercise, weightKg: kg) {
+                if !warmup && FormaTheme.isNewPr(workouts: store.state.workouts, exercise: exercise, weightKg: kg, reps: reps) {
                     FormaPill(
                         text: "★ \(String(localized: "new_pr_badge"))",
                         background: FormaTheme.secondary.opacity(0.22),

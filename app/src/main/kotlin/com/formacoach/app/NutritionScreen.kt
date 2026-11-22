@@ -241,7 +241,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
         }
     }
 
-    InfoCard { MealFields(null, date, state.busy, defaultSlot = slot, onSave = { meal, done -> vm.addMeal(meal, done) }) }
+    InfoCard { MealFields(null, date, today, state.busy, defaultSlot = slot, onSave = { meal, done -> vm.addMeal(meal, done) }) }
 
     Text(stringResource(R.string.food_for_date, dateLabel(date)), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
     Input(R.string.search_meals, search, { search = it }, "meal_search", numeric = false)
@@ -339,7 +339,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
             title = { Text(stringResource(R.string.edit_meal), fontWeight = FontWeight.Bold) },
             text = {
                 Column(Modifier.heightIn(max = 500.dp).verticalScroll(rememberScrollState())) {
-                    MealFields(meal, date, state.busy, onSave = { value, done -> vm.addMeal(value) { done(); editing = null } })
+                    MealFields(meal, date, today, state.busy, onSave = { value, done -> vm.addMeal(value) { done(); editing = null } })
                 }
             },
             confirmButton = {},
@@ -349,7 +349,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
 }
 
 @Composable
-private fun MealFields(initial: Meal?, date: LocalDate, busy: Boolean, defaultSlot: MealSlot = MealSlot.UNSPECIFIED, onSave: (Meal, () -> Unit) -> Unit) {
+private fun MealFields(initial: Meal?, date: LocalDate, today: LocalDate, busy: Boolean, defaultSlot: MealSlot = MealSlot.UNSPECIFIED, onSave: (Meal, () -> Unit) -> Unit) {
     var name by rememberSaveable(initial?.id) { mutableStateOf(initial?.name.orEmpty()) }
     var calories by rememberSaveable(initial?.id) { mutableStateOf(initial?.calories?.toString().orEmpty()) }
     var protein by rememberSaveable(initial?.id) { mutableStateOf(initial?.protein?.toString().orEmpty()) }
@@ -373,7 +373,7 @@ private fun MealFields(initial: Meal?, date: LocalDate, busy: Boolean, defaultSl
     }.getOrNull()
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(R.string.manual_meal), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        if (initial != null) DateChoice(LocalDate.ofEpochDay(editedDay), LocalDate.now(), { editedDay = it.toEpochDay() }, "edit_meal_date")
+        if (initial != null) DateChoice(LocalDate.ofEpochDay(editedDay), today, { editedDay = it.toEpochDay() }, "edit_meal_date")
         if (initial != null) MealSlotPicker(editedSlot) { editedSlot = it }
         Text(stringResource(R.string.portion_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Input(R.string.meal_name, name, { name = it }, "meal_name", numeric = false)

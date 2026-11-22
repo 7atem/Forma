@@ -73,15 +73,14 @@ enum FormaTheme {
         }
     }
 
-    static func isNewWeightPr(workouts: [WatchWorkout], exercise: Exercise, weightKg: Double) -> Bool {
+    static func isNewPr(workouts: [WatchWorkout], exercise: Exercise, weightKg: Double, reps: Int) -> Bool {
         guard weightKg.isFinite, weightKg > 0 else { return false }
-        let priorBest = workouts
-            .flatMap(\.sets)
-            .filter { $0.exercise == exercise && $0.kind == .working }
-            .map(\.weightKg)
-            .max()
-        guard let priorBest else { return true }
-        return weightKg > priorBest
+        let prior = workouts.flatMap(\.sets).filter { $0.exercise == exercise && $0.kind == .working }
+        guard !prior.isEmpty else { return false }
+        if let priorBestWeight = prior.map(\.weightKg).max(), weightKg > priorBestWeight { return true }
+        guard let candidateE1rm = estimatedOneRepMax(weightKg: weightKg, reps: reps),
+              let priorBestE1rm = prior.compactMap({ estimatedOneRepMax(weightKg: $0.weightKg, reps: $0.reps) }).max() else { return false }
+        return candidateE1rm > priorBestE1rm + 0.01
     }
 
     static func activeWeekStreak(workouts: [WatchWorkout]) -> Int {
