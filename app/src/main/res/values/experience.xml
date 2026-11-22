@@ -7,7 +7,13 @@
     <string name="training_history">History</string>
     <string name="starter_programs">Starter programs</string>
     <string name="program_exercise_count">%1$s exercises</string>
-    <string name="session_status">%1$s sets logged · %2$s</string>
+    <string name="session_status">Sets logged: %1$s · %2$s</string>
+    <string name="training_title_active">Your workout.</string>
+    <string name="quick_workout">Quick workout</string>
+    <string name="repeated_workout">Repeated workout</string>
+    <string name="workout_generic">Workout</string>
+    <string name="bodyweight_load">bodyweight</string>
+    <string name="weight_unit_question">Weight unit</string>
     <string name="view_form">See how to move</string>
     <string name="technique">Movement</string>
     <string name="exercise_visual_description">3D example: %1$s. Start on the left, movement on the right.</string>

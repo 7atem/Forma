@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -695,3 +696,20 @@ internal fun FormFieldPair(first: @Composable () -> Unit, second: @Composable ()
         }
     }
 }
+
+/** Horizontal page padding shared by the main scroll column and edge-to-edge rows. */
+internal val PageGutter = 18.dp
+
+/**
+ * Lets a horizontally scrolling row run under the page gutter to the screen edges, so chips scroll
+ * off-screen instead of being cut at the padding. Pair with `.padding(horizontal = bleed)` after the scroll.
+ */
+internal fun Modifier.bleedToPageEdges(bleed: androidx.compose.ui.unit.Dp = PageGutter): Modifier =
+    this.layout { measurable, constraints ->
+        val extra = bleed.roundToPx()
+        val placeable = measurable.measure(
+            constraints.copy(minWidth = constraints.minWidth + 2 * extra, maxWidth = constraints.maxWidth + 2 * extra),
+        )
+        layout(constraints.maxWidth, placeable.height) { placeable.place(-extra, 0) }
+    }
+

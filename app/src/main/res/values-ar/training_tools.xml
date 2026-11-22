@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="repeat_limit_note">المسودة الجديدة تدعم حتى ٢٠ تمرينًا مختلفًا. أنشئ برنامجًا بالتمارين التي تريد تكرارها.</string>
+    <string name="repeat_limit_note">المسودة الجديدة تدعم حتى 20 تمرينًا مختلفًا. أنشئ برنامجًا بالتمارين التي تريد تكرارها.</string>
     <string name="restore_exercise_preferences">مفضلة وملاحظات التمارين: %1$s قيد. تستبدل هذه أيضًا تفضيلات التمارين الحالية.</string>
     <string name="copy_meal_day">نسخ وجبات يوم</string>
     <string name="copy_day_note">اختر يوم المصدر وراجع الحصص المسجلة. التأكيد يضيف قيودًا جديدة إلى %1$s ويحافظ على الوجبات الموجودة وبيانات مصادرها.</string>
-    <string name="copy_meal_count">%1$s وجبة للمراجعة · بحد أقصى ٢٠٠</string>
+    <string name="copy_meal_count">%1$s وجبة للمراجعة · بحد أقصى 200</string>
     <string name="review_copy_day">مراجعة هذه الوجبات</string>
     <string name="equipment_bodyweight">وزن الجسم</string>
     <string name="equipment_dumbbells">دمبل</string>
@@ -23,7 +23,7 @@
     <string name="remove_favorite">★ في المفضلة</string>
     <string name="exercise_results">%1$s من %2$s تمرين</string>
     <string name="personal_notes">ملاحظاتي على التمرين</string>
-    <string name="notes_limit">%1$s / ٢٬٠٠٠ حرف</string>
+    <string name="notes_limit">%1$s / 2,000 حرف</string>
     <string name="similar_focus">استكشف تمارين بعضلات مشابهة</string>
     <string name="similar_note">تشترك في عضلة أساسية واحدة على الأقل. تختلف المعدات ومتطلبات الحركة؛ اختيار تمرين هنا لا يغيّر برنامجك.</string>
     <string name="per_side_note">سجّل التكرارات لكل جانب. في تمرين الدمبل بذراع واحدة سجّل وزن ذلك الدمبل.</string>

@@ -43,7 +43,7 @@ internal fun MealSlotPicker(selected: MealSlot, onChange: (MealSlot) -> Unit) {
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.fillMaxWidth().bleedToPageEdges().horizontalScroll(rememberScrollState()).padding(horizontal = PageGutter), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         (listOf(MealSlot.UNSPECIFIED) + MealSlot.entries.filter { it != MealSlot.UNSPECIFIED }).forEach { slot ->
             FilterChip(
                 selected = selected == slot,

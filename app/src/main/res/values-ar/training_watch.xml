@@ -7,15 +7,15 @@
     <string name="muscle_secondary">مساعدة • %1$s</string>
     <string name="muscle_accessibility">%1$s. الأساسية: %2$s. المساعدة: %3$s.</string>
     <string name="muscle_note">رسم مبسط للمجموعات العضلية الرئيسية، وليس قياسًا لنشاط العضلات. المشاركة تتغير حسب الجهاز وطريقة الأداء. ثني الورك يمثل حركة شبيهة بالرفعة الرومانية.</string>
-    <string name="weekly_muscles">العضلات • آخر ٧ أيام</string>
+    <string name="weekly_muscles">العضلات • آخر 7 أيام</string>
     <string name="weekly_muscles_note">مجموعات العمل في الجلسات المكتملة فقط. أعداد المشاركة الأساسية والمساعدة منفصلة، وليست درجات تعافٍ أو حجم تدريب فعّال يُجمع.</string>
     <string name="muscle_set_count">%1$s • %2$s أساسية / %3$s مساعدة</string>
     <string name="best_recorded_load">أعلى حمل عمل مسجل: %1$s × %2$s تكرار · %3$s</string>
     <string name="copy_previous_set">نسخ القيم السابقة</string>
     <string name="warmup_set">مجموعة إحماء</string>
     <string name="working_set">مجموعة عمل</string>
-    <string name="rpe_optional">المجهود (RPE من ٠ إلى ١٠، اختياري)</string>
-    <string name="rpe_note">تقديرك الشخصي للمجهود: ٠ بلا مجهود، و١٠ أقصى مجهود. الإدخال لا يحدد حملًا مقترحًا.</string>
+    <string name="rpe_optional">المجهود (RPE من 0 إلى 10، اختياري)</string>
+    <string name="rpe_note">تقديرك الشخصي للمجهود: 0 بلا مجهود، و10 أقصى مجهود. الإدخال لا يحدد حملًا مقترحًا.</string>
     <string name="rpe_value">المجهود RPE %1$s</string>
     <string name="apple_watch">Apple Watch</string>
     <string name="watch_bridge_note">Apple Watch تحتاج إلى iPhone مقترن. صدّر البرامج هنا وافتح الملف في تطبيق Forma المرافق على iPhone ثم أرسله للساعة. صدّر الجلسات المكتملة من iPhone واستوردها هنا. كود Apple يحتاج إلى بناء واختبار على Mac وأجهزة فعلية قبل التثبيت.</string>
@@ -27,7 +27,7 @@
     <string name="watch_import_note">تُدمج الجلسات المكتملة فقط مع الاحتفاظ بالملف الشخصي والطعام والبرامج الحالية. مصدر الملف غير موثّق تشفيريًا. النبض والطاقة تقديرات اختيارية من الجهاز؛ لا تُضاف السعرات إلى أهداف الطعام.</string>
     <string name="watch_import">تأكيد استيراد الجلسات</string>
     <string name="watch_conflict">رُفض الاستيراد. راجع التواريخ وتعارض معرّفات الجلسات أو المجموعات. لم يُحفظ جزء من الدفعة.</string>
-    <string name="watch_select_programs">اختر حتى ٢٠ برنامجًا للإرسال</string>
+    <string name="watch_select_programs">اختر حتى 20 برنامجًا للإرسال</string>
     <string name="watch_export">تصدير البرامج المختارة</string>
     <string name="watch_open">فتح ملف الجلسات المكتملة</string>
     <string name="watch_record_source">ملف Apple Watch مستورد • نسخة محلية قابلة للتعديل</string>

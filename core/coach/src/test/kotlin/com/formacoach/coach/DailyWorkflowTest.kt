@@ -156,4 +156,9 @@ class DailyWorkflowTest {
         assertEquals(85.0, ladder[8]!!, 0.01)
         assertFalse(10 in ladder)
     }
+
+    @Test fun `profile name is optional but still bounded`() {
+        assertEquals("", Profile("", Goal.BUILD_HABIT, 3).name)
+        assertThrows(IllegalArgumentException::class.java) { Profile("x".repeat(81), Goal.BUILD_HABIT, 3) }
+    }
 }

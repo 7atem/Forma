@@ -146,7 +146,14 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
         }
     }
     LaunchedEffect(today) { vm.onDayChanged() }
-    CompositionLocalProvider(LocalWeightUnit provides weightUnit) {
+    // Numbers and dates use Western digits in every language so they match the app's text resources.
+    val baseConfiguration = LocalConfiguration.current
+    val displayConfiguration = remember(baseConfiguration) {
+        android.content.res.Configuration(baseConfiguration).apply {
+            setLocales(android.os.LocaleList(withWesternDigits(baseConfiguration.locales[0])))
+        }
+    }
+    CompositionLocalProvider(LocalWeightUnit provides weightUnit, LocalConfiguration provides displayConfiguration) {
     MaterialTheme(
         colorScheme = if (darkTheme) FormaColors else FormaLightColors,
         shapes = Shapes(
@@ -171,6 +178,11 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                         onSave = { vm.saveProfile(it) { editingProfile = false } },
                         onCancel = if (state.snapshot.profile == null) null else ({ editingProfile = false }),
                         onBackup = { showBackup = true },
+                        weightUnit = weightUnit,
+                        onWeightUnit = {
+                            weightUnit = it
+                            prefs.edit().putString("weight_unit", it.name).apply()
+                        },
                     )
                 }
             } else {
@@ -202,7 +214,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                     .widthIn(max = 880.dp)
                                     .fillMaxWidth()
                                     .verticalScroll(scrollState)
-                                    .padding(horizontal = 18.dp, vertical = 18.dp),
+                                    .padding(horizontal = PageGutter, vertical = 18.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
                                 if (state.error) {
@@ -245,7 +257,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                             LivePulseDot(MaterialTheme.colorScheme.primary)
                                             Column(Modifier.weight(1f)) {
                                                 Text(
-                                                    liveSession.label.ifBlank { stringResource(R.string.active_session, liveSession.templateId) },
+                                                    stringResource(R.string.active_session, sessionTitle(liveSession, state.snapshot.programs)),
                                                     style = MaterialTheme.typography.titleSmall,
                                                     fontWeight = FontWeight.Bold,
                                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -315,7 +327,8 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                         }
                                     }
                                 }
-                                Spacer(Modifier.height(12.dp))
+                                // Room for the floating quick-log button so it never hides the last item.
+                                Spacer(Modifier.height(88.dp))
                             }
                         }
                     }
@@ -386,6 +399,8 @@ private fun ProfileForm(
     onSave: (Profile) -> Unit,
     onCancel: (() -> Unit)?,
     onBackup: () -> Unit,
+    weightUnit: WeightUnit,
+    onWeightUnit: (WeightUnit) -> Unit,
 ) {
     var name by rememberSaveable { mutableStateOf(profile?.name.orEmpty()) }
     var goal by rememberSaveable { mutableStateOf(profile?.goal ?: Goal.FAT_LOSS) }
@@ -431,6 +446,17 @@ private fun ProfileForm(
                         selected = goal == value,
                         onClick = { goal = value },
                         label = { Text(stringResource(goalLabel(value))) },
+                    )
+                }
+            }
+            Text(stringResource(R.string.weight_unit_question), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                WeightUnit.entries.forEach { value ->
+                    FilterChip(
+                        selected = weightUnit == value,
+                        onClick = { onWeightUnit(value) },
+                        label = { Text(stringResource(if (value == WeightUnit.KG) R.string.kg else R.string.lb), fontWeight = FontWeight.Bold) },
+                        modifier = Modifier.testTag("weight_unit_${value.name}"),
                     )
                 }
             }
@@ -499,7 +525,7 @@ private fun TodayContent(
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
-            stringResource(R.string.greeting, profile.name),
+            if (profile.name.isBlank()) stringResource(R.string.greeting_anonymous) else stringResource(R.string.greeting, profile.name),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.ExtraBold,
         )
@@ -816,6 +842,9 @@ internal fun Input(label: Int, value: String, onChange: (String) -> Unit, tag: S
     )
 }
 
+internal fun withWesternDigits(locale: java.util.Locale): java.util.Locale =
+    java.util.Locale.Builder().setLocale(locale).setUnicodeLocaleKeyword("nu", "latn").build()
+
 @Composable
 internal fun number(value: Double, digits: Int = 2): String {
     val locale = LocalConfiguration.current.locales[0]
@@ -829,6 +858,11 @@ internal fun weightUnitLabel(): String =
 @Composable
 internal fun formatWeight(kg: Double, digits: Int = 2): String =
     "${number(WeightUnits.fromKg(kg, LocalWeightUnit.current), digits)} ${weightUnitLabel()}"
+
+/** Bodyweight exercises recorded with no external load read as "bodyweight", not "0 kg". */
+@Composable
+internal fun formatLoad(kg: Double, exercise: Exercise): String =
+    if (kg == 0.0 && Equipment.BODYWEIGHT in ExerciseCatalog.of(exercise).equipment) stringResource(R.string.bodyweight_load) else formatWeight(kg)
 
 internal fun formatInputNumber(value: Double, locale: java.util.Locale, digits: Int = 2): String =
     NumberFormat.getNumberInstance(locale).apply {

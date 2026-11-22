@@ -8,7 +8,7 @@
     <string name="profile">Profile</string>
     <string name="welcome">Make room for progress.</string>
     <string name="welcome_body">Your training, food and progress, together. Start with a simple personal log.</string>
-    <string name="name">Your name</string>
+    <string name="name">Your name · optional</string>
     <string name="your_goal">What are you working toward?</string>
     <string name="goal_fat_loss">Lose fat and maintain strength</string>
     <string name="goal_strength">Build strength</string>
@@ -27,6 +27,7 @@
     <string name="load_failed">Your log could not be opened. Close and reopen Forma. Your data has not been reset. If the problem continues, keep the app installed while investigating.</string>
     <string name="save_failed">The change could not be saved. Your input is still here; please try again.</string>
     <string name="greeting">Let’s keep moving, %1$s.</string>
+    <string name="greeting_anonymous">Let’s keep moving.</string>
     <string name="today_subtitle">One place for your everyday effort.</string>
     <string name="your_week">YOUR LAST 7 DAYS</string>
     <string name="workout_count">%1$s / %2$s sessions</string>
@@ -46,7 +47,6 @@
     <string name="start_session">Start session</string>
     <string name="recent_sessions">Recent completed sessions</string>
     <string name="no_sessions">Your completed sessions will appear here.</string>
-    <string name="session_summary">Template %1$s · %2$s sets</string>
     <string name="active_session">Active session · %1$s</string>
     <string name="reps">Repetitions</string>
     <string name="weight_kg">External load · kg</string>

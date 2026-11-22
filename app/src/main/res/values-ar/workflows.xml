@@ -7,11 +7,11 @@
     <string name="linked_timing_note">تنتقل المجموعات الأساسية عبر المجموعة المرتبطة. تبدأ الراحة عند اكتمال الجولة؛ الإحماء يبقى على التمرين الحالي.</string>
     <string name="linked_group_value">سوبرسِت / دائرة %1$s</string>
     <string name="user_plan_targets_note">أدخل أهداف برنامجك الذي اخترته أو اتركها فارغة. وقت الراحة الفارغ يستخدم مؤقت البرنامج. الإحماء منفصل عن المجموعات الأساسية.</string>
-    <string name="planned_working_sets">هدف المجموعات الأساسية · اختياري (١–٢٠)</string>
+    <string name="planned_working_sets">هدف المجموعات الأساسية · اختياري (1–20)</string>
     <string name="rep_min">أقل تكرارات · اختياري</string>
     <string name="rep_max">أقصى تكرارات · اختياري</string>
-    <string name="exercise_rest_optional">راحة خاصة · ثانية (١٥–٦٠٠)</string>
-    <string name="program_exercise_notes">ملاحظات البرنامج · اختياري، حتى ١٬٠٠٠ حرف</string>
+    <string name="exercise_rest_optional">راحة خاصة · ثانية (15–600)</string>
+    <string name="program_exercise_notes">ملاحظات البرنامج · اختياري، حتى 1,000 حرف</string>
     <string name="link_previous_exercise">اربطه بالتمرين السابق</string>
     <string name="plan_group_edit_note">تظل التمارين المرتبطة متجاورة. نقل التمارين أو حذفها قد يفصل المجموعة أو يلغي ارتباطها.</string>
     <string name="edit_plan_details">ضبط الأهداف والراحة والملاحظات</string>

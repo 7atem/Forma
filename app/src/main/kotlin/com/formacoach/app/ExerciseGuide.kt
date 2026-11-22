@@ -331,13 +331,13 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
             }
         }
     }
-    Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.fillMaxWidth().bleedToPageEdges().horizontalScroll(rememberScrollState()).padding(horizontal=PageGutter),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         FilterChip(favoritesOnly,{favoritesOnly=!favoritesOnly},label={Text(stringResource(R.string.favorites))},modifier=Modifier.testTag("favorites_filter"))
         FilterChip(recentOnly,{recentOnly=!recentOnly},label={Text(stringResource(R.string.recent_exercises))},modifier=Modifier.testTag("recent_filter"))
         if(search.isNotBlank()||equipment!=null||muscle!=null||favoritesOnly||recentOnly) TextButton(onClick={search="";equipment=null;muscle=null;favoritesOnly=false;recentOnly=false},modifier=Modifier.testTag("clear_exercise_filters")) {Text(stringResource(R.string.clear_filters))}
     }
     val mainMuscles=remember {Muscle.entries.filter {m ->Exercise.entries.any {ExerciseMuscles.of(it).primary.first()==m}}}
-    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+    Row(Modifier.fillMaxWidth().bleedToPageEdges().horizontalScroll(rememberScrollState()).padding(horizontal=PageGutter),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         FilterChip(muscle==null,{muscle=null},label={Text(stringResource(R.string.all_muscles))})
         mainMuscles.forEach {m ->
             val count=Exercise.entries.count {ExerciseMuscles.of(it).primary.first()==m}
@@ -511,7 +511,7 @@ private fun QuickRecordExerciseSheet(
             }
             previous?.let { last ->
                 Text(
-                    stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), formatWeight(last.weightKg)),
+                    stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), formatLoad(last.weightKg, last.exercise)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -17,7 +17,7 @@ data class Profile(
     val proteinTarget: Double? = null,
 ) {
     init {
-        require(name.isNotBlank() && name.length <= 80)
+        require(name.length <= 80) // optional: a blank name only changes the greeting
         require(sessionsPerWeek in 2..4)
         require(caloriesTarget == null || caloriesTarget in 1..20000)
         require(proteinTarget == null || proteinTarget.isFinite() && proteinTarget > 0 && proteinTarget <= 1000)

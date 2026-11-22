@@ -44,7 +44,7 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
     var justFinished by rememberSaveable { mutableStateOf(false) }
     val active = state.snapshot.sessions.firstOrNull { it.completedAt == null }
     if (section == 0) {
-        PageHeading(R.string.training_title, if (active == null) R.string.training_intro else R.string.session_focus)
+        PageHeading(if (active == null) R.string.training_title else R.string.training_title_active, if (active == null) R.string.training_intro else R.string.session_focus)
     } else {
         PageHeading(if (section == 1) R.string.exercise_library else R.string.training_history)
     }
@@ -122,7 +122,13 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
             2 -> TrainingHistoryContent(state, today, vm, showVictory = justFinished, onDismissVictory = { justFinished = false })
         }
     }
-    PlateCalculatorButton()
+    // Plate maths only helps barbell work: show it during a workout only when one is involved.
+    val activeExercises = active?.let { session ->
+        session.plannedExercises + state.snapshot.sets.filter { it.sessionId == session.id }.map { it.exercise }
+    }
+    if (section == 0 && (activeExercises == null || activeExercises.any { Equipment.BARBELL in ExerciseCatalog.of(it).equipment })) {
+        PlateCalculatorButton()
+    }
     if (creating || editor != null) {
         ProgramDialog(editor, state.busy, { creating = false; editorPayload = null }) {
             vm.saveProgram(it) { creating = false; editorPayload = null }
@@ -172,6 +178,7 @@ private fun ProgramCard(
 }
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel, onSetDeleted: (TrainingSet, List<String>) -> Unit = { _, _ -> }, onFinished: () -> Unit) {
     val choices = (session.plannedExercises + Exercise.entries).distinct()
     val sets = state.snapshot.sets.filter { it.sessionId == session.id }
@@ -212,6 +219,24 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             inputUnit = unit
         }
     }
+    // Start from this exercise's last recorded working set (this session first, then history).
+    // Values are only a convenience: nothing is saved until the user taps Save set.
+    LaunchedEffect(session.id, exercise) {
+        if (reps.isBlank() && weight.isBlank()) {
+            val source = sets.lastOrNull { it.exercise == exercise && it.kind == SetKind.WORKING }
+                ?: state.snapshot.sessions
+                    .filter { it.completedAt != null && it.date <= session.date }
+                    .sortedWith(compareByDescending<Session> { it.date }.thenByDescending { it.completedAt })
+                    .firstNotNullOfOrNull { record ->
+                        state.snapshot.sets.lastOrNull { it.sessionId == record.id && it.exercise == exercise && it.kind == SetKind.WORKING }
+                    }
+            source?.let {
+                reps = formatInputNumber(it.reps.toDouble(), locale, 0)
+                weight = formatInputNumber(WeightUnits.fromKg(it.weightKg, unit), locale, 2)
+                inputUnit = unit
+            }
+        }
+    }
     val remaining = RestTimer.remainingSeconds(deadline, elapsed, timerDuration)
     val candidate = runCatching {
         TrainingSet(
@@ -249,7 +274,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    session.label.ifBlank { stringResource(R.string.active_session, session.templateId) },
+                    stringResource(R.string.active_session, sessionTitle(session, state.snapshot.programs)),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -394,7 +419,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
-                        stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), formatWeight(last.weightKg)),
+                        stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), formatLoad(last.weightKg, last.exercise)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
@@ -447,9 +472,10 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
 
         // Quick Rep & Weight Preset Chips + Live Barbell Preview
         val haptics = LocalHapticFeedback.current
-        Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        FlowRow(
+            Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             listOf(5, 8, 10, 12).forEach { preset ->
                 AssistChip(
@@ -810,7 +836,7 @@ private fun SessionHistoryCard(session: Session, state: AppState, vm: FitnessVie
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
-                    session.label.ifBlank { stringResource(R.string.session_summary, session.templateId, number(sets.size.toDouble(), 0)) },
+                    sessionTitle(session, state.snapshot.programs),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
@@ -868,7 +894,7 @@ private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: Fit
         Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    stringResource(R.string.set_summary, stringResource(exerciseLabel(set.exercise)), number(set.reps.toDouble(), 0), formatWeight(set.weightKg)),
+                    stringResource(R.string.set_summary, stringResource(exerciseLabel(set.exercise)), number(set.reps.toDouble(), 0), formatLoad(set.weightKg, set.exercise)),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f),
@@ -1052,5 +1078,17 @@ private fun ProgramDialog(program: TrainingProgram?, busy: Boolean, onDismiss: (
             detailsPayload = Json.encodeToString(details.filter { it.exercise != exercise } + value)
             detailExercise = null
         }
+    }
+}
+
+/** User-facing workout name; internal template IDs are never shown. */
+@Composable
+internal fun sessionTitle(session: Session, programs: List<TrainingProgram>): String = session.label.ifBlank {
+    when (session.templateId) {
+        "A" -> stringResource(R.string.template_a)
+        "B" -> stringResource(R.string.template_b)
+        "quick" -> stringResource(R.string.quick_workout)
+        "repeat" -> stringResource(R.string.repeated_workout)
+        else -> programs.firstOrNull { it.id == session.templateId }?.name ?: stringResource(R.string.workout_generic)
     }
 }
