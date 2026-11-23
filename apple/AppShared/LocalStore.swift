@@ -27,6 +27,12 @@ struct PhoneWeight: Codable, Identifiable, Equatable {
     var weightKg: Double
 }
 
+struct PhoneHydration: Codable, Identifiable, Equatable {
+    var id: String { date }
+    var date: String
+    var milliliters: Int
+}
+
 struct SavedState: Codable {
     var programs: [WatchProgram] = [
         .init(id: "starter-A", name: "A", exercises: [.squat, .chest_press, .row]),
@@ -39,8 +45,10 @@ struct SavedState: Codable {
     var draft: WorkoutDraft?
     var meals: [PhoneMeal] = []
     var weights: [PhoneWeight] = []
+    var hydration: [PhoneHydration] = []
     var calorieTarget: Int?
     var proteinTarget: Double?
+    var waterGoalMl: Int?
     /// Read-only copies imported from Apple Health; kept apart from Forma-logged workouts and weights.
     var healthWorkouts: [HealthWorkoutRecord] = []
     var healthWeights: [HealthWeightRecord] = []
@@ -60,8 +68,10 @@ struct SavedState: Codable {
         draft = try c.decodeIfPresent(WorkoutDraft.self, forKey: .draft)
         meals = try c.decodeIfPresent([PhoneMeal].self, forKey: .meals) ?? []
         weights = try c.decodeIfPresent([PhoneWeight].self, forKey: .weights) ?? []
+        hydration = try c.decodeIfPresent([PhoneHydration].self, forKey: .hydration) ?? []
         calorieTarget = try c.decodeIfPresent(Int.self, forKey: .calorieTarget)
         proteinTarget = try c.decodeIfPresent(Double.self, forKey: .proteinTarget)
+        waterGoalMl = try c.decodeIfPresent(Int.self, forKey: .waterGoalMl)
         healthWorkouts = try c.decodeIfPresent([HealthWorkoutRecord].self, forKey: .healthWorkouts) ?? []
         healthWeights = try c.decodeIfPresent([HealthWeightRecord].self, forKey: .healthWeights) ?? []
         healthLastSync = try c.decodeIfPresent(Date.self, forKey: .healthLastSync)
@@ -309,6 +319,17 @@ struct SavedState: Codable {
             $0.healthWorkouts = []
             $0.healthWeights = []
             $0.healthLastSync = nil
+        }
+    }
+
+    func saveHydration(_ milliliters: Int, date: String = LocalStore.todayString()) throws {
+        guard (0...20000).contains(milliliters) else { throw TransferError.invalid }
+        try commit { state in
+            if let idx = state.hydration.firstIndex(where: { $0.date == date }) {
+                state.hydration[idx] = PhoneHydration(date: date, milliliters: milliliters)
+            } else {
+                state.hydration.append(PhoneHydration(date: date, milliliters: milliliters))
+            }
         }
     }
 

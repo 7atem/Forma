@@ -28,6 +28,30 @@ import org.json.JSONArray
 
 @RunWith(AndroidJUnit4::class)
 class EncryptedStorageTest {
+    @Test fun schemaFiveUpgradeRetainsHistoryAndSupportsHydrationAndExpandedMeasurements()=runBlocking {
+        val helper=createLegacy(5)
+        helper.writableDatabase.execSQL("INSERT INTO profile VALUES(1,'Legacy v5','FAT_LOSS',3,2000,150.0)")
+        helper.writableDatabase.execSQL("INSERT INTO measurements VALUES(20759,82.5,90.0)")
+        helper.close()
+        val repo=repository()
+        val migrated=database!!.dao().readSnapshot()
+        assertEquals("Legacy v5",migrated.profile?.name)
+        assertNull(migrated.profile?.carbsTarget)
+        assertNull(migrated.profile?.waterGoalMl)
+        assertTrue(migrated.hydration.isEmpty())
+        assertEquals(82.5,migrated.measurements.single().weightKg!!,0.001)
+        assertNull(migrated.measurements.single().chestCm)
+        repo.saveProfile(migrated.profile!!.copy(carbsTarget=220.0,fatTarget=65.0,waterGoalMl=2500))
+        repo.saveHydration(Hydration(LocalDate.of(2026,11,3),1750))
+        repo.saveMeasurement(Measurement(LocalDate.of(2026,11,3),82.0,89.5,neckCm=38.0,chestCm=102.0,armsCm=36.5,hipsCm=96.0,thighsCm=58.0))
+        val updated=database!!.dao().readSnapshot()
+        assertEquals(1750,updated.hydration.single().milliliters)
+        assertEquals(102.0,updated.measurements.first {it.date==LocalDate.of(2026,11,3)}.chestCm!!,0.001)
+        val archive=repo.export("schema six backup round trip".toCharArray())
+        repo.removeHydration(LocalDate.of(2026,11,3))
+        repo.restore(repo.previewRestore(archive,"schema six backup round trip".toCharArray()))
+        assertEquals(updated,database!!.dao().readSnapshot())
+    }
     @Test fun schemaFourUpgradeAndGuidedSnapshotsRetainTargetsGroupsNotesAndMealCategories()=runBlocking {
         val helper=createLegacy(4)
         helper.writableDatabase.execSQL("INSERT INTO programs VALUES('legacy-program','Legacy','[\"ROW\"]',90)")

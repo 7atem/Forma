@@ -383,4 +383,16 @@
     <string name="discomfort_region_neck_upper_back">Neck / upper back</string>
     <string name="discomfort_region_shoulders">Shoulders</string>
     <string name="discomfort_region_lower_back">Lower back</string>
+    <string name="carbs_target">Carbs target (g, optional)</string>
+    <string name="fat_target">Fat target (g, optional)</string>
+    <string name="water_goal_ml">Daily water goal (ml, optional)</string>
+    <string name="hydration_title">Water logged</string>
+    <string name="hydration_value">%1$s ml</string>
+    <string name="hydration_goal_progress">%1$s / %2$s ml</string>
+    <string name="more_measurements">More tape measurements</string>
+    <string name="neck_cm">Neck (cm)</string>
+    <string name="chest_cm">Chest (cm)</string>
+    <string name="arms_cm">Arms (cm)</string>
+    <string name="hips_cm">Hips (cm)</string>
+    <string name="thighs_cm">Thighs (cm)</string>
 </resources>

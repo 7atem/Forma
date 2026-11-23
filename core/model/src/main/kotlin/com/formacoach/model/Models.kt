@@ -15,12 +15,18 @@ data class Profile(
     val sessionsPerWeek: Int,
     val caloriesTarget: Int? = null,
     val proteinTarget: Double? = null,
+    val carbsTarget: Double? = null,
+    val fatTarget: Double? = null,
+    val waterGoalMl: Int? = null,
 ) {
     init {
         require(name.length <= 80) // optional: a blank name only changes the greeting
         require(sessionsPerWeek in 2..4)
         require(caloriesTarget == null || caloriesTarget in 1..20000)
         require(proteinTarget == null || proteinTarget.isFinite() && proteinTarget > 0 && proteinTarget <= 1000)
+        require(carbsTarget == null || carbsTarget.isFinite() && carbsTarget > 0 && carbsTarget <= 2000)
+        require(fatTarget == null || fatTarget.isFinite() && fatTarget > 0 && fatTarget <= 1000)
+        require(waterGoalMl == null || waterGoalMl in 250..15000)
     }
 }
 
@@ -115,11 +121,29 @@ data class Meal(
 
 /** One observation per local calendar date; unknown values remain null. */
 @Serializable
-data class Measurement(val date: LocalDate, val weightKg: Double?, val waistCm: Double?) {
+data class Measurement(
+    val date: LocalDate,
+    val weightKg: Double?,
+    val waistCm: Double?,
+    val neckCm: Double? = null,
+    val chestCm: Double? = null,
+    val armsCm: Double? = null,
+    val hipsCm: Double? = null,
+    val thighsCm: Double? = null,
+) {
     init {
-        require(weightKg != null || waistCm != null)
+        val cmValues = listOf(waistCm, neckCm, chestCm, armsCm, hipsCm, thighsCm)
+        require(weightKg != null || cmValues.any { it != null })
         require(weightKg == null || weightKg.isFinite() && weightKg > 0 && weightKg <= 1000)
-        require(waistCm == null || waistCm.isFinite() && waistCm > 0 && waistCm <= 500)
+        require(cmValues.all { it == null || it.isFinite() && it > 0 && it <= 500 })
+    }
+}
+
+/** One daily logged hydration total (in milliliters) per local calendar date. */
+@Serializable
+data class Hydration(val date: LocalDate, val milliliters: Int) {
+    init {
+        require(milliliters in 0..20000)
     }
 }
 
@@ -135,6 +159,7 @@ data class FitnessSnapshot(
     val checkIns: List<WeeklyCheckIn> = emptyList(),
     val proposals: List<PlanProposal> = emptyList(),
     val exercisePreferences: List<ExercisePreference> = emptyList(),
+    val hydration: List<Hydration> = emptyList(),
 )
 
 @Serializable

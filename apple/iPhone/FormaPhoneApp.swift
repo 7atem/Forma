@@ -1463,6 +1463,54 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    // Daily Hydration Card
+                    let waterMl = store.state.hydration.first(where: { $0.date == today })?.milliliters ?? 0
+                    FormaCard {
+                        HStack {
+                            Image(systemName: "drop.fill").foregroundStyle(FormaTheme.tertiary)
+                            Text("hydration_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                            Spacer()
+                            FormaPill(text: "\(waterMl) ml", background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
+                        }
+                        HStack(spacing: 8) {
+                            Button {
+                                FormaHaptics.tap()
+                                store.attempt { try store.saveHydration(min(20000, waterMl + 250), date: today) }
+                            } label: {
+                                Text("+250 ml")
+                                    .font(.caption.weight(.bold))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
+                                    .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .foregroundStyle(FormaTheme.primary)
+                            }
+                            Button {
+                                FormaHaptics.tap()
+                                store.attempt { try store.saveHydration(min(20000, waterMl + 500), date: today) }
+                            } label: {
+                                Text("+500 ml")
+                                    .font(.caption.weight(.bold))
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 8)
+                                    .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                    .foregroundStyle(FormaTheme.primary)
+                            }
+                            if waterMl > 0 {
+                                Button {
+                                    FormaHaptics.tap()
+                                    store.attempt { try store.saveHydration(max(0, waterMl - 250), date: today) }
+                                } label: {
+                                    Image(systemName: "minus")
+                                        .font(.caption.weight(.bold))
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                                        .foregroundStyle(FormaTheme.textMuted)
+                                }
+                            }
+                        }
+                    }
+
                     // Meal slot selector (including Ramadan Suhoor & Iftar)
                     let slotOptions = [
                         MealSlotOption(id: "BREAKFAST", labelKey: "meal_breakfast"),

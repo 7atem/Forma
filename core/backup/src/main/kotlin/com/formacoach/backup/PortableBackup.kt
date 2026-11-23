@@ -85,12 +85,13 @@ object PortableBackup {
     }
 
     fun validate(data: FitnessSnapshot) {
-        val lists=listOf(data.sessions,data.sets,data.meals,data.measurements,data.programs,data.foods,data.checkIns,data.proposals,data.exercisePreferences)
+        val lists=listOf(data.sessions,data.sets,data.meals,data.measurements,data.programs,data.foods,data.checkIns,data.proposals,data.exercisePreferences,data.hydration)
         require(lists.sumOf {it.size.toLong()} <= 100_000)
         fun unique(ids: List<String>) {require(ids.distinct().size==ids.size)}
         unique(data.sessions.map {it.id}); unique(data.sets.map {it.id}); unique(data.meals.map {it.id})
         unique(data.programs.map {it.id}); unique(data.foods.map {it.id}); unique(data.checkIns.map {it.id}); unique(data.proposals.map {it.id})
         require(data.measurements.distinctBy {it.date}.size==data.measurements.size)
+        require(data.hydration.distinctBy {it.date}.size==data.hydration.size)
         require(data.exercisePreferences.distinctBy {it.exercise}.size==data.exercisePreferences.size)
         require(data.sessions.count {it.completedAt==null} <= 1)
         val sessions=data.sessions.associateBy {it.id}
@@ -100,7 +101,7 @@ object PortableBackup {
         require(data.proposals.count {it.status==ProposalStatus.PENDING} <= 1)
         val checkIns=data.checkIns.associateBy {it.id}
         require(data.proposals.all {checkIns[it.checkInId]?.availableSessions == it.proposedSessions})
-        val dates=data.sessions.map {it.date}+data.meals.map {it.date}+data.measurements.map {it.date}+data.checkIns.map {it.date}
+        val dates=data.sessions.map {it.date}+data.meals.map {it.date}+data.measurements.map {it.date}+data.checkIns.map {it.date}+data.hydration.map {it.date}
         require(dates.all {it in LocalDate.of(1970,1,1)..LocalDate.of(2100,12,31)})
     }
 

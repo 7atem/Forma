@@ -49,8 +49,10 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     suspend fun copyMealDay(expected:List<Meal>,target:LocalDate) {
         checkDate(target);expected.forEach {checkDate(it.date)};dao.copyMealDay(expected.map {it.row()},target.toEpochDay())
     }
-    suspend fun saveMeasurement(value:Measurement) {checkDate(value.date);dao.saveMeasurement(MeasurementRow(value.date.toEpochDay(),value.weightKg,value.waistCm))}
+    suspend fun saveMeasurement(value:Measurement) {checkDate(value.date);dao.saveMeasurement(MeasurementRow(value.date.toEpochDay(),value.weightKg,value.waistCm,value.neckCm,value.chestCm,value.armsCm,value.hipsCm,value.thighsCm))}
     suspend fun removeMeasurement(date:LocalDate)=dao.removeMeasurement(date.toEpochDay())
+    suspend fun saveHydration(value:Hydration) {checkDate(value.date);dao.saveHydration(HydrationRow(value.date.toEpochDay(),value.milliliters))}
+    suspend fun removeHydration(date:LocalDate)=dao.removeHydration(date.toEpochDay())
     suspend fun saveProgram(program:TrainingProgram)=dao.saveProgram(program.row())
     suspend fun deleteProgram(id:String)=dao.deleteProgram(id)
     suspend fun favorite(exercise:Exercise,value:Boolean)=dao.favorite(exercise.name,value)

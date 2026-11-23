@@ -471,11 +471,20 @@ private fun ProfileForm(
     var sessions by rememberSaveable { mutableIntStateOf(profile?.sessionsPerWeek ?: 3) }
     var calories by rememberSaveable { mutableStateOf(profile?.caloriesTarget?.toString().orEmpty()) }
     var protein by rememberSaveable { mutableStateOf(profile?.proteinTarget?.toString().orEmpty()) }
+    var carbs by rememberSaveable { mutableStateOf(profile?.carbsTarget?.toString().orEmpty()) }
+    var fat by rememberSaveable { mutableStateOf(profile?.fatTarget?.toString().orEmpty()) }
+    var waterGoal by rememberSaveable { mutableStateOf(profile?.waterGoalMl?.toString().orEmpty()) }
     val nameInvalid = name.length > 80
     val calorieValue = if (calories.isBlank()) null else NumericInput.integer(calories)
     val proteinValue = if (protein.isBlank()) null else NumericInput.decimal(protein)
+    val carbsValue = if (carbs.isBlank()) null else NumericInput.decimal(carbs)
+    val fatValue = if (fat.isBlank()) null else NumericInput.decimal(fat)
+    val waterValue = if (waterGoal.isBlank()) null else NumericInput.integer(waterGoal)
     val caloriesInvalid = calories.isNotBlank() && (calorieValue == null || calorieValue !in 1..20000)
     val proteinInvalid = protein.isNotBlank() && (proteinValue == null || proteinValue !in 0.0001..1000.0)
+    val carbsInvalid = carbs.isNotBlank() && (carbsValue == null || carbsValue !in 0.0001..2000.0)
+    val fatInvalid = fat.isNotBlank() && (fatValue == null || fatValue !in 0.0001..1000.0)
+    val waterInvalid = waterGoal.isNotBlank() && (waterValue == null || waterValue !in 250..15000)
     val candidate = runCatching {
         Profile(
             name.trim(),
@@ -483,6 +492,9 @@ private fun ProfileForm(
             sessions,
             if (calories.isBlank()) null else requireNotNull(calorieValue),
             if (protein.isBlank()) null else requireNotNull(proteinValue),
+            if (carbs.isBlank()) null else requireNotNull(carbsValue),
+            if (fat.isBlank()) null else requireNotNull(fatValue),
+            if (waterGoal.isBlank()) null else requireNotNull(waterValue),
         )
     }.getOrNull()
     Column(
@@ -573,6 +585,33 @@ private fun ProfileForm(
                         supportingText = if (proteinInvalid) stringResource(R.string.protein_target_error) else null,
                     )
                 },
+            )
+            FormFieldPair(
+                first = {
+                    Input(
+                        R.string.carbs_target,
+                        carbs,
+                        { carbs = it },
+                        "profile_carbs",
+                        error = carbsInvalid,
+                    )
+                },
+                second = {
+                    Input(
+                        R.string.fat_target,
+                        fat,
+                        { fat = it },
+                        "profile_fat",
+                        error = fatInvalid,
+                    )
+                },
+            )
+            Input(
+                R.string.water_goal_ml,
+                waterGoal,
+                { waterGoal = it },
+                "profile_water_goal",
+                error = waterInvalid,
             )
         }
         if (error) Text(stringResource(R.string.save_failed), color = MaterialTheme.colorScheme.error)

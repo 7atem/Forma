@@ -383,4 +383,16 @@
     <string name="discomfort_region_neck_upper_back">الرقبة / أعلى الظهر</string>
     <string name="discomfort_region_shoulders">الكتفين</string>
     <string name="discomfort_region_lower_back">أسفل الظهر</string>
+    <string name="carbs_target">هدف الكارب (جم، اختياري)</string>
+    <string name="fat_target">هدف الدهون (جم، اختياري)</string>
+    <string name="water_goal_ml">هدف الماء اليومي (مل، اختياري)</string>
+    <string name="hydration_title">الماء المسجّل</string>
+    <string name="hydration_value">%1$s مل</string>
+    <string name="hydration_goal_progress">%1$s / %2$s مل</string>
+    <string name="more_measurements">قياسات إضافية بالمتر</string>
+    <string name="neck_cm">الرقبة (سم)</string>
+    <string name="chest_cm">الصدر (سم)</string>
+    <string name="arms_cm">الذراع (سم)</string>
+    <string name="hips_cm">الأرداف (سم)</string>
+    <string name="thighs_cm">الفخذ (سم)</string>
 </resources>

@@ -209,4 +209,16 @@ class DailyWorkflowTest {
         assertEquals(2, calSwaps.size)
         assertEquals(165.0, calSwaps.first().matchedNutrients.calories, 0.05)
     }
+
+    @Test fun `hydration expanded measurements and profile macro targets validate bounds`() {
+        val h = Hydration(date, 2250)
+        assertEquals(2250, h.milliliters)
+        assertThrows(IllegalArgumentException::class.java) { Hydration(date, -10) }
+        assertThrows(IllegalArgumentException::class.java) { Hydration(date, 25000) }
+        val m = Measurement(date, weightKg = null, waistCm = null, chestCm = 101.5, armsCm = 36.0)
+        assertEquals(101.5, m.chestCm!!, 0.001)
+        assertThrows(IllegalArgumentException::class.java) { Measurement(date, null, null) }
+        val p = Profile("Tester", Goal.BUILD_STRENGTH, 3, 2400, 160.0, carbsTarget = 250.0, fatTarget = 70.0, waterGoalMl = 3000)
+        assertEquals(3000, p.waterGoalMl)
+    }
 }

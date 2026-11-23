@@ -117,6 +117,7 @@ class FitnessViewModel @Inject constructor(
     fun copyMealDay(expected:List<Meal>,target:LocalDate,done:()->Unit)=write(done) {repository.copyMealDay(expected,target)}
     fun measure(value: Measurement, done: () -> Unit) = write(done) { repository.saveMeasurement(value) }
     fun removeMeasurement(date: LocalDate) = write { repository.removeMeasurement(date) }
+    fun saveHydration(value: Hydration, done: () -> Unit = {}) = write(done) { repository.saveHydration(value) }
     fun correctSet(set: TrainingSet, done: () -> Unit) = write(done) {repository.correctSet(set)}
     fun moveSession(id: String,date: LocalDate) = write {repository.moveSession(id,date)}
     fun deleteSession(id: String) = write {repository.deleteSession(id)}

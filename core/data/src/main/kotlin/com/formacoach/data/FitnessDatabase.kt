@@ -14,7 +14,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import java.time.LocalDate
 
 @Entity(tableName="profile")
-data class ProfileRow(@PrimaryKey val id:Int=1,val name:String,val goal:String,val sessionsPerWeek:Int,val caloriesTarget:Int?,val proteinTarget:Double?)
+data class ProfileRow(@PrimaryKey val id:Int=1,val name:String,val goal:String,val sessionsPerWeek:Int,val caloriesTarget:Int?,val proteinTarget:Double?,val carbsTarget:Double?=null,val fatTarget:Double?=null,val waterGoalMl:Int?=null)
 @Entity(tableName="exercise_preferences")
 data class ExercisePreferenceRow(@PrimaryKey val exercise:String,val favorite:Boolean,val notes:String)
 @Entity(tableName="sessions",indices=[Index("day")])
@@ -33,7 +33,9 @@ data class MealRow(@PrimaryKey val id:String,val day:Long,val name:String,val ca
     val foodId:String?=null,val quantity:Double?=null,val unit:String?=null,@ColumnInfo(defaultValue="''") val source:String="",
     @ColumnInfo(defaultValue="'UNSPECIFIED'") val slot:String="UNSPECIFIED")
 @Entity(tableName="measurements")
-data class MeasurementRow(@PrimaryKey val day:Long,val weightKg:Double?,val waistCm:Double?)
+data class MeasurementRow(@PrimaryKey val day:Long,val weightKg:Double?,val waistCm:Double?,val neckCm:Double?=null,val chestCm:Double?=null,val armsCm:Double?=null,val hipsCm:Double?=null,val thighsCm:Double?=null)
+@Entity(tableName="hydration")
+data class HydrationRow(@PrimaryKey val day:Long,val milliliters:Int)
 @Entity(tableName="programs")
 data class ProgramRow(@PrimaryKey val id:String,val name:String,val exercises:String,val restSeconds:Int,
     @ColumnInfo(defaultValue="'[]'") val prescriptions:String="[]")
@@ -46,7 +48,7 @@ data class ProposalRow(@PrimaryKey val id:String,val checkInId:String,val baseSe
 
 @Dao
 interface FitnessDao {
-    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class])
+    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class])
     fun changes(query:SupportSQLiteQuery):Flow<Int>
     @Query("SELECT * FROM profile WHERE id=1") fun profile():Flow<ProfileRow?>
     @Query("SELECT * FROM meals ORDER BY day DESC,rowid DESC") fun meals():Flow<List<MealRow>>
@@ -61,6 +63,10 @@ interface FitnessDao {
     @Query("SELECT * FROM check_ins ORDER BY day DESC,rowid DESC") suspend fun allCheckIns():List<CheckInRow>
     @Query("SELECT * FROM plan_proposals ORDER BY rowid DESC") suspend fun allProposals():List<ProposalRow>
     @Query("SELECT * FROM exercise_preferences ORDER BY exercise") suspend fun allExercisePreferences():List<ExercisePreferenceRow>
+    @Query("SELECT * FROM hydration ORDER BY day DESC") suspend fun allHydration():List<HydrationRow>
+    @Upsert suspend fun saveHydration(row:HydrationRow)
+    @Query("DELETE FROM hydration WHERE day=:day") suspend fun removeHydration(day:Long)
+    @Query("DELETE FROM hydration") suspend fun clearHydration()
     @Query("SELECT * FROM exercise_preferences WHERE exercise=:exercise") suspend fun exercisePreference(exercise:String):ExercisePreferenceRow?
     @Upsert suspend fun saveExercisePreference(row:ExercisePreferenceRow)
     @Transaction suspend fun favorite(exercise:String,value:Boolean) {
@@ -71,16 +77,17 @@ interface FitnessDao {
     }
     @Transaction
     suspend fun readSnapshot():FitnessSnapshot=FitnessSnapshot(
-        readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget)},
+        readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget,it.carbsTarget,it.fatTarget,it.waterGoalMl)},
         allSessions().map {Session(it.id,LocalDate.ofEpochDay(it.day),it.templateId,it.completedAt,it.label,Json.decodeFromString(it.exerciseOrder),it.restSeconds,SessionSource.valueOf(it.source),it.averageHeartRateBpm,it.activeEnergyKcal,it.healthKitWorkoutId,Json.decodeFromString(it.prescriptions))},
         allSets().map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg,SetKind.valueOf(it.kind),it.rpe)},
         allMeals().map {Meal(it.id,LocalDate.ofEpochDay(it.day),it.name,it.calories,it.protein,it.carbs,it.fat,it.foodId,it.quantity,it.unit?.let(NutritionUnit::valueOf),it.source,MealSlot.valueOf(it.slot))},
-        allMeasurements().map {Measurement(LocalDate.ofEpochDay(it.day),it.weightKg,it.waistCm)},
+        allMeasurements().map {Measurement(LocalDate.ofEpochDay(it.day),it.weightKg,it.waistCm,it.neckCm,it.chestCm,it.armsCm,it.hipsCm,it.thighsCm)},
         allPrograms().map {TrainingProgram(it.id,it.name,Json.decodeFromString(it.exercises),it.restSeconds,Json.decodeFromString(it.prescriptions))},
         allFoods().map {Json.decodeFromString<Food>(it.payload).also {food -> check(food.id==it.id && food.name==it.name)}},
         allCheckIns().map {WeeklyCheckIn(it.id,LocalDate.ofEpochDay(it.day),it.availableSessions,it.foodLogComplete,it.notes)},
         allProposals().map {PlanProposal(it.id,it.checkInId,it.baseSessions,it.proposedSessions,Json.decodeFromString(it.evidence),ProposalStatus.valueOf(it.status))},
         allExercisePreferences().map {ExercisePreference(Exercise.valueOf(it.exercise),it.favorite,it.notes)},
+        allHydration().map {Hydration(LocalDate.ofEpochDay(it.day),it.milliliters)},
     )
     @Upsert suspend fun insertProfile(row:ProfileRow)
     @Transaction suspend fun saveProfile(row:ProfileRow) {insertProfile(row);supersedeMismatched(row.sessionsPerWeek)}
@@ -182,18 +189,19 @@ interface FitnessDao {
     @Query("DELETE FROM exercise_preferences") suspend fun clearExercisePreferences()
     @Insert suspend fun insertMeasurementRows(rows:List<MeasurementRow>)
     @Transaction suspend fun replaceSnapshot(data:FitnessSnapshot) {
-        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods();clearExercisePreferences()
+        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods();clearExercisePreferences();clearHydration()
         data.profile?.let {insertProfile(it.row())}
         data.programs.forEach {saveProgram(it.row())};data.foods.forEach {saveFood(it.row())}
         data.sessions.forEach {insertSession(it.row())};data.sets.forEach {insertSet(it.row())}
         data.meals.forEach {addMeal(it.row())}
-        insertMeasurementRows(data.measurements.map {MeasurementRow(it.date.toEpochDay(),it.weightKg,it.waistCm)})
+        insertMeasurementRows(data.measurements.map {MeasurementRow(it.date.toEpochDay(),it.weightKg,it.waistCm,it.neckCm,it.chestCm,it.armsCm,it.hipsCm,it.thighsCm)})
         data.checkIns.forEach {insertCheckIn(it.row())};data.proposals.forEach {insertProposal(it.row())}
         data.exercisePreferences.forEach {saveExercisePreference(ExercisePreferenceRow(it.exercise.name,it.favorite,it.notes))}
+        data.hydration.forEach {saveHydration(HydrationRow(it.date.toEpochDay(),it.milliliters))}
     }
 }
 
-internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget)
+internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget,carbsTarget=carbsTarget,fatTarget=fatTarget,waterGoalMl=waterGoalMl)
 internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds,source.name,averageHeartRateBpm,activeEnergyKcal,healthKitWorkoutId,Json.encodeToString(prescriptions))
 internal fun TrainingSet.row()=SetRow(id,sessionId,exercise.name,reps,weightKg,kind.name,rpe)
 internal fun Meal.row()=MealRow(id,date.toEpochDay(),name,calories,protein,carbs,fat,foodId,quantity,unit?.name,source,slot.name)
@@ -202,10 +210,23 @@ internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
 internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
 internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
-@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class],version=5,exportSchema=true)
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class],version=6,exportSchema=true)
 abstract class FitnessDatabase:RoomDatabase() {
     abstract fun dao():FitnessDao
     companion object {
+        val MIGRATION_5_6=object:Migration(5,6) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE profile ADD COLUMN carbsTarget REAL")
+                db.execSQL("ALTER TABLE profile ADD COLUMN fatTarget REAL")
+                db.execSQL("ALTER TABLE profile ADD COLUMN waterGoalMl INTEGER")
+                db.execSQL("ALTER TABLE measurements ADD COLUMN neckCm REAL")
+                db.execSQL("ALTER TABLE measurements ADD COLUMN chestCm REAL")
+                db.execSQL("ALTER TABLE measurements ADD COLUMN armsCm REAL")
+                db.execSQL("ALTER TABLE measurements ADD COLUMN hipsCm REAL")
+                db.execSQL("ALTER TABLE measurements ADD COLUMN thighsCm REAL")
+                db.execSQL("CREATE TABLE IF NOT EXISTS hydration (day INTEGER NOT NULL PRIMARY KEY, milliliters INTEGER NOT NULL)")
+            }
+        }
         val MIGRATION_4_5=object:Migration(4,5) {
             override fun migrate(db:SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE programs ADD COLUMN prescriptions TEXT NOT NULL DEFAULT '[]'")
@@ -250,7 +271,7 @@ abstract class FitnessDatabase:RoomDatabase() {
             System.loadLibrary("sqlcipher")
             val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
             return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5).build()
+                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6).build()
         }
     }
 }

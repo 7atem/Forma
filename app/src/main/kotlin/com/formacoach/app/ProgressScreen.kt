@@ -47,15 +47,41 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     var waist by rememberSaveable(day, existing?.waistCm) {
         mutableStateOf(existing?.waistCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
     }
+    var neck by rememberSaveable(day, existing?.neckCm) {
+        mutableStateOf(existing?.neckCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var chest by rememberSaveable(day, existing?.chestCm) {
+        mutableStateOf(existing?.chestCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var arms by rememberSaveable(day, existing?.armsCm) {
+        mutableStateOf(existing?.armsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var hips by rememberSaveable(day, existing?.hipsCm) {
+        mutableStateOf(existing?.hipsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var thighs by rememberSaveable(day, existing?.thighsCm) {
+        mutableStateOf(existing?.thighsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var showMoreTape by rememberSaveable { mutableStateOf(false) }
     val weightKg = if (weight.isBlank()) null else NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) }
     val waistValue = if (waist.isBlank()) null else NumericInput.decimal(waist)
+    val neckValue = if (neck.isBlank()) null else NumericInput.decimal(neck)
+    val chestValue = if (chest.isBlank()) null else NumericInput.decimal(chest)
+    val armsValue = if (arms.isBlank()) null else NumericInput.decimal(arms)
+    val hipsValue = if (hips.isBlank()) null else NumericInput.decimal(hips)
+    val thighsValue = if (thighs.isBlank()) null else NumericInput.decimal(thighs)
     val weightInvalid = weight.isNotBlank() && (weightKg == null || weightKg !in 0.0001..1000.0)
     val waistInvalid = waist.isNotBlank() && (waistValue == null || waistValue !in 0.0001..500.0)
     val measure = runCatching {
         Measurement(
-            date,
-            if (weight.isBlank()) null else requireNotNull(weightKg),
-            if (waist.isBlank()) null else requireNotNull(waistValue),
+            date = date,
+            weightKg = if (weight.isBlank()) null else requireNotNull(weightKg),
+            waistCm = if (waist.isBlank()) null else requireNotNull(waistValue),
+            neckCm = if (neck.isBlank()) null else requireNotNull(neckValue),
+            chestCm = if (chest.isBlank()) null else requireNotNull(chestValue),
+            armsCm = if (arms.isBlank()) null else requireNotNull(armsValue),
+            hipsCm = if (hips.isBlank()) null else requireNotNull(hipsValue),
+            thighsCm = if (thighs.isBlank()) null else requireNotNull(thighsValue),
         )
     }.getOrNull()
     var limit by rememberSaveable { mutableIntStateOf(14) }
@@ -123,6 +149,23 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
                 )
             },
         )
+        FilterChip(
+            selected = showMoreTape,
+            onClick = { showMoreTape = !showMoreTape },
+            label = { Text(stringResource(R.string.more_measurements), fontWeight = FontWeight.SemiBold) },
+            modifier = Modifier.testTag("toggle_more_tape"),
+        )
+        if (showMoreTape) {
+            FormFieldPair(
+                first = { Input(R.string.neck_cm, neck, { neck = it }, "neck_cm") },
+                second = { Input(R.string.chest_cm, chest, { chest = it }, "chest_cm") },
+            )
+            FormFieldPair(
+                first = { Input(R.string.arms_cm, arms, { arms = it }, "arms_cm") },
+                second = { Input(R.string.hips_cm, hips, { hips = it }, "hips_cm") },
+            )
+            Input(R.string.thighs_cm, thighs, { thighs = it }, "thighs_cm")
+        }
         Button(
             onClick = { measure?.let { vm.measure(it) {} } },
             enabled = measure != null && !state.busy,
