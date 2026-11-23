@@ -146,6 +146,7 @@
 "language_english" = "English";
 "language_arabic" = "العربية";
 "appearance_label" = "المظهر";
+"theme_system" = "النظام";
 "theme_dark" = "داكن";
 "theme_light" = "فاتح";
 "units_label" = "وحدة الوزن";
@@ -185,6 +186,8 @@
 "discomfort_filter_explainer" = "إخفاء التمارين اللي بتستهدف منطقة مختارة مباشرة كعضلة أساسية أو مساعدة. دي تفضيلات شخصية للمكتبة، مش موانع طبية. البرامج المحفوظة وسجل التمارين مش بيتغيروا.";
 "discomfort_filter_limits" = "الأحمال غير المباشرة على العضلات المثبتة مش متغطاة بالكامل، والتمارين المتبقية مش مؤكد إنها مناسبة لحالتك. عند وجود ألم أو إصابة، استشر مختصًا طبيًا مؤهلًا.";
 "clear_discomfort_filters" = "امسح فلاتر الانزعاج";
+"no_matching_exercises" = "لا توجد تمارين مطابقة";
+"clear_filters" = "امسح الفلاتر";
 "done" = "تم";
 "discomfort_region_neck_upper_back" = "الرقبة / أعلى الظهر";
 "discomfort_region_shoulders" = "الكتفين";

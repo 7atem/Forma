@@ -400,4 +400,12 @@
     <string name="kcal_unit">kcal</string>
     <string name="kcal_value">%1$s kcal</string>
     <string name="kcal_per_100g">%1$s kcal / 100 g</string>
+    <string name="discomfort_filters">Discomfort filters</string>
+    <string name="discomfort_filter_hint">Choose areas whose directly targeted exercises you want to hide</string>
+    <string name="discomfort_filter_explainer">Hide exercises that directly target a selected area as a primary or supporting muscle. These are personal library preferences, not medical contraindications. Saved programs and workout history are not changed.</string>
+    <string name="discomfort_filter_limits">Indirect stabilizer loads are not fully captured, and the remaining exercises are not confirmed suitable for your condition. For pain or injury, seek advice from a qualified clinician.</string>
+    <string name="clear_discomfort_filters">Clear discomfort filters</string>
+    <string name="discomfort_region_neck_upper_back">Neck / upper back</string>
+    <string name="discomfort_region_shoulders">Shoulders</string>
+    <string name="discomfort_region_lower_back">Lower back</string>
 </resources>

@@ -22,7 +22,7 @@ struct TransferDocument: FileDocument {
 @main @MainActor struct FormaPhoneApp: App {
     @StateObject private var store: LocalStore
     @StateObject private var bridge: WatchBridge
-    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_lang") private var appLang = ""
     init() {
         let storage = LocalStore()
@@ -30,9 +30,10 @@ struct TransferDocument: FileDocument {
         _bridge = StateObject(wrappedValue: WatchBridge(store: storage))
     }
     var body: some Scene {
+        let scheme = FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme
         WindowGroup {
             PhoneRoot(store: store, bridge: bridge)
-                .preferredColorScheme(darkMode ? .dark : .light)
+                .preferredColorScheme(scheme)
                 .environment(\.locale, appLang.isEmpty ? .current : Locale(identifier: appLang))
                 .environment(\.layoutDirection, appLang == "ar" ? .rightToLeft : (appLang == "en" ? .leftToRight : (Locale.current.language.languageCode?.identifier == "ar" ? .rightToLeft : .leftToRight)))
                 .tint(FormaTheme.primary)
@@ -43,7 +44,7 @@ struct TransferDocument: FileDocument {
 @MainActor private struct PhoneRoot: View {
     @ObservedObject var store: LocalStore
     @ObservedObject var bridge: WatchBridge
-    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @State private var importing = false
     @State private var pending: WatchTransfer?
     @State private var document: TransferDocument?
@@ -100,12 +101,12 @@ struct TransferDocument: FileDocument {
         }
         .sheet(isPresented: $showSettings) {
             PhoneSettingsSheet(onOpenBridge: { showBridge = true })
-                .preferredColorScheme(darkMode ? .dark : .light)
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
         }
         .sheet(isPresented: $showBridge) {
             PhoneBridgeTab(store: store, bridge: bridge, onImport: { showBridge = false; importing = true })
-                .preferredColorScheme(darkMode ? .dark : .light)
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
         }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.formaWorkouts, .json, .data]) { result in
@@ -169,7 +170,7 @@ private struct MealSlotOption: Identifiable {
     let onOpenProgress: () -> Void
     @State private var creatingProgram = false
     @State private var finishedSummary: WatchWorkout?
-    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
@@ -334,7 +335,7 @@ private struct MealSlotOption: Identifiable {
                             FormaCard {
                                 HStack(spacing: 12) {
                                     if let first = program.exercises.first {
-                                        FormaExerciseImage(asset: ExerciseGuides.of(first, arabic: false).asset)
+                                        FormaExerciseImage(asset: ExerciseGuides.of(first, arabic: false).asset, maxPixelSize: 320)
                                             .frame(width: 84)
                                             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                     }
@@ -418,11 +419,14 @@ private struct MealSlotOption: Identifiable {
                     }
                     Button {
                         FormaHaptics.tap()
-                        darkMode.toggle()
+                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
+                        themeModeRaw = next.rawValue
                     } label: {
-                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
                     }
-                    Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
+                    .accessibilityLabel(Text("appearance_label"))
+                    Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
+                        .accessibilityLabel(Text("settings_title"))
                 }
             }
             .sheet(isPresented: $creatingProgram) {
@@ -432,12 +436,12 @@ private struct MealSlotOption: Identifiable {
                         creatingProgram = false
                     }
                 }
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
             }
             .sheet(item: $finishedSummary) { summary in
                 PhoneWorkoutSummarySheet(workout: summary)
-                    .preferredColorScheme(.dark)
+                    .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                     .tint(FormaTheme.primary)
             }
         }
@@ -656,7 +660,7 @@ private struct MealSlotOption: Identifiable {
                 HStack(spacing: 8) {
                     NavigationLink { ExerciseDetail(exercise: exercise) } label: {
                         HStack(spacing: 12) {
-                            FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
+                            FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset, maxPixelSize: 320)
                                 .frame(width: 72)
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
                             VStack(alignment: .leading, spacing: 3) {
@@ -878,15 +882,19 @@ private struct MealSlotOption: Identifiable {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("\(String(localized: "rest")) · \(remaining)s")
                                     .font(.headline.weight(.bold))
+                                    .monospacedDigit()
                                     .foregroundStyle(FormaTheme.primary)
                                 HStack(spacing: 8) {
-                                    Button("reduce_rest") { store.attempt { try store.extendRest(seconds: -15) } }
+                                    Button("reduce_rest") { FormaHaptics.tap(); store.attempt { try store.extendRest(seconds: -15) } }
                                         .buttonStyle(.bordered)
-                                    Button("extend_rest") { store.attempt { try store.extendRest(seconds: 15) } }
+                                        .frame(minHeight: 44)
+                                    Button("extend_rest") { FormaHaptics.tap(); store.attempt { try store.extendRest(seconds: 15) } }
                                         .buttonStyle(.bordered)
-                                    Button("stop_rest") { store.attempt { try store.stopRest() } }
-                                        .font(.caption)
+                                        .frame(minHeight: 44)
+                                    Button("stop_rest") { FormaHaptics.tap(); store.attempt { try store.stopRest() } }
+                                        .font(.subheadline.weight(.medium))
                                         .foregroundStyle(FormaTheme.textMuted)
+                                        .frame(minHeight: 44)
                                 }
                             }
                         }
@@ -985,7 +993,7 @@ private struct MealSlotOption: Identifiable {
                         showSwap = false
                     } label: {
                         HStack(spacing: 12) {
-                            FormaExerciseImage(asset: ExerciseGuides.of(alt, arabic: false).asset)
+                            FormaExerciseImage(asset: ExerciseGuides.of(alt, arabic: false).asset, maxPixelSize: 320)
                                 .frame(width: 64)
                                 .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                             Text(alt.label(arabic: arabic))
@@ -1054,7 +1062,7 @@ private struct MealSlotOption: Identifiable {
     @State private var equipment: Equipment?
     @State private var selectedMuscle: Muscle?
     @State private var recordingExercise: Exercise?
-    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
     @AppStorage(ExerciseDiscomfortSelection.storageKey) private var storedDiscomfortRegions = ""
     @Environment(\.locale) private var locale
@@ -1155,6 +1163,26 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    if filtered.isEmpty {
+                        FormaCard {
+                            VStack(spacing: 10) {
+                                Text("no_matching_exercises")
+                                    .font(.headline)
+                                    .foregroundStyle(FormaTheme.textPrimary)
+                                Button("clear_filters") {
+                                    FormaHaptics.tap()
+                                    exerciseSearch = ""
+                                    equipment = nil
+                                    selectedMuscle = nil
+                                    storedDiscomfortRegions = ""
+                                }
+                                .buttonStyle(.bordered)
+                                .frame(minHeight: 44)
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+
                     // Categorized by Main Muscle
                     ForEach(groupedMuscles, id: \.self) { groupMuscle in
                         let items = filtered.filter { ExerciseMuscles.of($0).primary.first == groupMuscle }
@@ -1180,7 +1208,7 @@ private struct MealSlotOption: Identifiable {
                                         )
                                     } label: {
                                         VStack(alignment: .leading, spacing: 6) {
-                                            FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
+                                            FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset, maxPixelSize: 320)
                                                 .frame(maxWidth: .infinity)
                                                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                             Text(exercise.label(arabic: arabic))
@@ -1228,11 +1256,14 @@ private struct MealSlotOption: Identifiable {
                     }
                     Button {
                         FormaHaptics.tap()
-                        darkMode.toggle()
+                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
+                        themeModeRaw = next.rawValue
                     } label: {
-                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
                     }
-                    Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
+                    .accessibilityLabel(Text("appearance_label"))
+                    Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
+                        .accessibilityLabel(Text("settings_title"))
                 }
             }
             .sheet(isPresented: Binding(get: { recordingExercise != nil }, set: { if !$0 { recordingExercise = nil } })) {
@@ -1334,7 +1365,7 @@ private struct MealSlotOption: Identifiable {
     @State private var addingMeal = false
     @State private var showOnlineFood = false
     @State private var showRemaining = false
-    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
@@ -1528,25 +1559,28 @@ private struct MealSlotOption: Identifiable {
                     }
                     Button {
                         FormaHaptics.tap()
-                        darkMode.toggle()
+                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
+                        themeModeRaw = next.rawValue
                     } label: {
-                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
                     }
-                    Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
+                    .accessibilityLabel(Text("appearance_label"))
+                    Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
+                        .accessibilityLabel(Text("settings_title"))
                 }
             }
             .sheet(isPresented: $addingMeal) {
                 PhoneMealEditor(slot: selectedSlot) { meal in
                     store.attempt { try store.addMeal(meal); addingMeal = false }
                 }
-                .preferredColorScheme(darkMode ? .dark : .light)
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
             }
             .sheet(isPresented: $showOnlineFood) {
                 PhoneOnlineFoodSheet(slot: selectedSlot) { meal in
                     store.attempt { try store.addMeal(meal) }
                 }
-                .preferredColorScheme(darkMode ? .dark : .light)
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
             }
         }
@@ -1598,7 +1632,7 @@ private struct MealSlotOption: Identifiable {
     @State private var weightKg = 75.0
     @State private var initializedWeight = false
     @State private var scrubbedIndex: Int?
-    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
 
     var body: some View {
@@ -1779,11 +1813,14 @@ private struct MealSlotOption: Identifiable {
                     }
                     Button {
                         FormaHaptics.tap()
-                        darkMode.toggle()
+                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
+                        themeModeRaw = next.rawValue
                     } label: {
-                        Image(systemName: darkMode ? "sun.max.fill" : "moon.fill")
+                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
                     }
-                    Button { onOpenBridge() } label: { Image(systemName: "applewatch") }
+                    .accessibilityLabel(Text("appearance_label"))
+                    Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
+                        .accessibilityLabel(Text("settings_title"))
                 }
             }
             .task { await health.refreshIfConnected(store) }

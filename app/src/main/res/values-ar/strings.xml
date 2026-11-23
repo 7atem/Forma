@@ -400,4 +400,12 @@
     <string name="kcal_unit">سعر</string>
     <string name="kcal_value">%1$s سعر</string>
     <string name="kcal_per_100g">%1$s سعر / 100 جم</string>
+    <string name="discomfort_filters">فلاتر الانزعاج</string>
+    <string name="discomfort_filter_hint">اختار المناطق اللي عايز تخفي التمارين اللي بتستهدفها مباشرة</string>
+    <string name="discomfort_filter_explainer">إخفاء التمارين اللي بتستهدف منطقة مختارة مباشرة كعضلة أساسية أو مساعدة. دي تفضيلات شخصية للمكتبة، مش موانع طبية. البرامج المحفوظة وسجل التمارين مش بيتغيروا.</string>
+    <string name="discomfort_filter_limits">الأحمال غير المباشرة على العضلات المثبتة مش متغطاة بالكامل، والتمارين المتبقية مش مؤكد إنها مناسبة لحالتك. عند وجود ألم أو إصابة، استشر مختصًا طبيًا مؤهلًا.</string>
+    <string name="clear_discomfort_filters">امسح فلاتر الانزعاج</string>
+    <string name="discomfort_region_neck_upper_back">الرقبة / أعلى الظهر</string>
+    <string name="discomfort_region_shoulders">الكتفين</string>
+    <string name="discomfort_region_lower_back">أسفل الظهر</string>
 </resources>

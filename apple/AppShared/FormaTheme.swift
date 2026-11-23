@@ -1,36 +1,122 @@
 import SwiftUI
 import UIKit
+import ImageIO
 import FormaCore
 
-final class ExerciseImageCache {
-    static let shared = NSCache<NSString, UIImage>()
-    static func load(_ asset: String) -> UIImage? {
-        if let cached = shared.object(forKey: asset as NSString) { return cached }
+enum FormaThemeMode: String, CaseIterable {
+    case system
+    case light
+    case dark
+
+    static let storageKey = "forma_theme_mode"
+    private static let legacyDarkKey = "forma_dark_mode"
+
+    /// Resolves saved mode, preserving an explicit legacy dark/light choice when no mode is stored yet.
+    static func resolved(rawValue: String, defaults: UserDefaults = .standard) -> FormaThemeMode {
+        if let mode = FormaThemeMode(rawValue: rawValue) { return mode }
+        if defaults.object(forKey: legacyDarkKey) != nil {
+            return defaults.bool(forKey: legacyDarkKey) ? .dark : .light
+        }
+        return .system
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+
+    var toolbarIcon: String {
+        switch self {
+        case .system: return "circle.lefthalf.filled"
+        case .light: return "sun.max.fill"
+        case .dark: return "moon.fill"
+        }
+    }
+
+    var next: FormaThemeMode {
+        switch self {
+        case .system: return .light
+        case .light: return .dark
+        case .dark: return .system
+        }
+    }
+}
+
+final class ExerciseImageCache: @unchecked Sendable {
+    static let shared = ExerciseImageCache()
+    private let cache = NSCache<NSString, UIImage>()
+
+    private init() {
+        cache.countLimit = 80
+    }
+
+    func cached(_ asset: String, maxPixelSize: Int? = nil) -> UIImage? {
+        let key = cacheKey(asset, maxPixelSize: maxPixelSize)
+        return cache.object(forKey: key as NSString)
+    }
+
+    func loadAsync(_ asset: String, maxPixelSize: Int? = nil) async -> UIImage? {
+        if let existing = cached(asset, maxPixelSize: maxPixelSize) { return existing }
+        let key = cacheKey(asset, maxPixelSize: maxPixelSize)
         let url = Bundle.main.url(forResource: asset, withExtension: "png", subdirectory: "drawable-nodpi")
             ?? Bundle.main.url(forResource: asset, withExtension: "png")
-        let img = url.flatMap { UIImage(contentsOfFile: $0.path) } ?? UIImage(named: asset)
-        if let img { shared.setObject(img, forKey: asset as NSString) }
-        return img
+        let decoded: UIImage? = await Task.detached(priority: .userInitiated) {
+            if let url {
+                if let maxPx = maxPixelSize, let source = CGImageSourceCreateWithURL(url as CFURL, nil) {
+                    let options: [CFString: Any] = [
+                        kCGImageSourceCreateThumbnailFromImageAlways: true,
+                        kCGImageSourceCreateThumbnailWithTransform: true,
+                        kCGImageSourceShouldCacheImmediately: true,
+                        kCGImageSourceThumbnailMaxPixelSize: maxPx,
+                    ]
+                    if let cg = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) {
+                        return UIImage(cgImage: cg)
+                    }
+                }
+                return UIImage(contentsOfFile: url.path)
+            }
+            return UIImage(named: asset)
+        }.value
+        if let decoded {
+            cache.setObject(decoded, forKey: key as NSString)
+        }
+        return decoded
+    }
+
+    private func cacheKey(_ asset: String, maxPixelSize: Int?) -> String {
+        if let maxPixelSize { return "\(asset)@\(maxPixelSize)" }
+        return asset
     }
 }
 
 struct FormaExerciseImage: View {
     let asset: String
     var contentMode: ContentMode = .fit
+    /// Downsampled pixel budget for library thumbnails; nil loads full resolution for detail guides.
+    var maxPixelSize: Int? = nil
+    @State private var loaded: UIImage?
 
     var body: some View {
-        if let uiImage = ExerciseImageCache.load(asset) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .aspectRatio(contentMode: contentMode)
-        } else {
-            ZStack {
-                FormaTheme.surfaceHigh
-                Image(systemName: "figure.strengthtraining.traditional")
-                    .font(.title2)
-                    .foregroundStyle(FormaTheme.primary.opacity(0.7))
+        Group {
+            if let uiImage = loaded ?? ExerciseImageCache.shared.cached(asset, maxPixelSize: maxPixelSize) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: contentMode)
+            } else {
+                ZStack {
+                    FormaTheme.surfaceHigh
+                    Image(systemName: "figure.strengthtraining.traditional")
+                        .font(.title2)
+                        .foregroundStyle(FormaTheme.primary.opacity(0.55))
+                }
+                .aspectRatio(1.5, contentMode: .fit)
             }
-            .aspectRatio(1.5, contentMode: .fit)
+        }
+        .task(id: "\(asset)-\(maxPixelSize ?? 0)") {
+            loaded = await ExerciseImageCache.shared.loadAsync(asset, maxPixelSize: maxPixelSize)
         }
     }
 }

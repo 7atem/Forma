@@ -2,10 +2,17 @@ import SwiftUI
 
 @MainActor struct PhoneSettingsSheet: View {
     @AppStorage("forma_lang") private var appLang = ""
-    @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
     let onOpenBridge: () -> Void
     @Environment(\.dismiss) private var dismiss
+
+    private var themeSelection: Binding<FormaThemeMode> {
+        Binding(
+            get: { FormaThemeMode.resolved(rawValue: themeModeRaw) },
+            set: { themeModeRaw = $0.rawValue }
+        )
+    }
 
     var body: some View {
         NavigationStack {
@@ -20,9 +27,10 @@ import SwiftUI
                 }
 
                 Section("appearance_label") {
-                    Picker("appearance_label", selection: $darkMode) {
-                        Text("theme_dark").tag(true)
-                        Text("theme_light").tag(false)
+                    Picker("appearance_label", selection: themeSelection) {
+                        Text("theme_system").tag(FormaThemeMode.system)
+                        Text("theme_light").tag(FormaThemeMode.light)
+                        Text("theme_dark").tag(FormaThemeMode.dark)
                     }
                     .pickerStyle(.segmented)
                 }

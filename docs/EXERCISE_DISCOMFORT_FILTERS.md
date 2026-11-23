@@ -2,7 +2,7 @@
 
 ## Product boundary
 
-Forma provides **user-controlled library exclusions**, not diagnosis, treatment, rehabilitation prescriptions, or a medical contraindication engine. The feature is off by default and changes only which exercises are visible in the iPhone exercise library. It never rewrites saved programs, active sessions, logged workouts, transfer files, or history.
+Forma provides **user-controlled library exclusions**, not diagnosis, treatment, rehabilitation prescriptions, or a medical contraindication engine. The feature is off by default and changes only which exercises are visible in the Android and iPhone exercise libraries. It never rewrites saved programs, active sessions, logged workouts, transfer files, or history.
 
 The app does not label exercises or machines as “recommended for pain.” A general exercise association is not enough evidence to recommend a movement for an individual's symptoms. Any future encouragement or rehabilitation rules require qualified clinical review, explicit boundaries, and regression cases before implementation.
 
@@ -18,7 +18,7 @@ A selected region hides exercises where any mapped muscle is either primary or s
 
 These are intentionally simple, deterministic direct-target preferences. The catalog has no distinct neck muscle, so the neck/upper-back choice uses only the existing upper-back association. It is not a claim that upper-back work causes or treats neck pain.
 
-The predicate and stable preference encoding live in `apple/Sources/FormaCore/ExerciseDiscomfort.swift`. The iPhone presentation is in `apple/iPhone/ExerciseDiscomfortFilter.swift`. Selections are stored locally under `forma_discomfort_exclusions`; unknown stored values are ignored.
+The predicate and stable preference encoding live in `apple/Sources/FormaCore/ExerciseDiscomfort.swift` (iPhone presentation in `apple/iPhone/ExerciseDiscomfortFilter.swift`) and `core/model/src/main/kotlin/com/formacoach/model/ExerciseDiscomfort.kt` (Android presentation in `app/src/main/kotlin/com/formacoach/app/ExerciseGuide.kt`). Selections are stored locally under `forma_discomfort_exclusions`; unknown stored values are ignored.
 
 ## Important limitations
 

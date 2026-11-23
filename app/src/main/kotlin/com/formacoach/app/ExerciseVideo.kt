@@ -2,14 +2,18 @@ package com.formacoach.app
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.media.AudioManager
+import android.graphics.SurfaceTexture
+import android.media.MediaPlayer
 import android.net.Uri
-import android.widget.VideoView
+import android.view.Surface
+import android.view.TextureView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,27 +64,21 @@ internal fun ExerciseVideo(exercise: Exercise, playing: Boolean, modifier: Modif
             .fillMaxWidth()
             .aspectRatio(1f)
             .clip(RoundedCornerShape(18.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
             .testTag("exercise_video")
             .semantics { contentDescription = description },
     ) {
         key(resource) {
             AndroidView(
                 factory = { ctx ->
-                    VideoView(ctx).apply {
-                        // Silent demo: never take audio focus away from the user's music or podcast.
-                        setAudioFocusRequest(AudioManager.AUDIOFOCUS_NONE)
+                    SilentLoopTextureView(ctx, Uri.parse("android.resource://${ctx.packageName}/$resource")).apply {
                         importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
-                        setVideoURI(Uri.parse("android.resource://${ctx.packageName}/$resource"))
-                        setOnPreparedListener { player ->
-                            player.isLooping = true
-                            player.setVolume(0f, 0f)
-                            if (play) start() else seekTo(1)
-                        }
+                        setPlaying(play)
                     }
                 },
-                update = { view -> if (play && !view.isPlaying) view.start() else if (!play && view.isPlaying) view.pause() },
-                onRelease = { it.stopPlayback() },
-                modifier = Modifier.matchParentSizeCompat(),
+                update = { view -> view.setPlaying(play) },
+                onRelease = { it.releasePlayer() },
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f),
             )
         }
         if (showMuscleHighlights) {
@@ -89,4 +87,70 @@ internal fun ExerciseVideo(exercise: Exercise, playing: Boolean, modifier: Modif
     }
 }
 
-private fun Modifier.matchParentSizeCompat(): Modifier = this.then(Modifier.fillMaxWidth().aspectRatio(1f))
+/**
+ * TextureView-backed silent looping player so Compose rounded-corner clipping, sheet scrolling,
+ * and muscle overlays work cleanly without SurfaceView z-order punch-through or black flashes.
+ */
+private class SilentLoopTextureView(
+    context: Context,
+    private val uri: Uri,
+) : TextureView(context), TextureView.SurfaceTextureListener {
+    private var player: MediaPlayer? = null
+    private var surface: Surface? = null
+    private var prepared = false
+    private var desiredPlaying = false
+
+    init {
+        isOpaque = false
+        surfaceTextureListener = this
+    }
+
+    fun setPlaying(play: Boolean) {
+        desiredPlaying = play
+        val mp = player ?: return
+        if (!prepared) return
+        if (play && !mp.isPlaying) mp.start() else if (!play && mp.isPlaying) mp.pause()
+    }
+
+    fun releasePlayer() {
+        prepared = false
+        player?.let { mp ->
+            runCatching { mp.stop() }
+            runCatching { mp.release() }
+        }
+        player = null
+        surface?.release()
+        surface = null
+    }
+
+    override fun onSurfaceTextureAvailable(st: SurfaceTexture, width: Int, height: Int) {
+        releasePlayer()
+        val s = Surface(st)
+        surface = s
+        val mp = MediaPlayer()
+        player = mp
+        runCatching {
+            mp.setDataSource(context, uri)
+            mp.setSurface(s)
+            mp.isLooping = true
+            mp.setVolume(0f, 0f)
+            mp.setOnPreparedListener { ready ->
+                prepared = true
+                ready.setVolume(0f, 0f)
+                if (desiredPlaying) ready.start() else ready.seekTo(1)
+            }
+            mp.prepareAsync()
+        }.onFailure {
+            releasePlayer()
+        }
+    }
+
+    override fun onSurfaceTextureSizeChanged(st: SurfaceTexture, width: Int, height: Int) = Unit
+
+    override fun onSurfaceTextureDestroyed(st: SurfaceTexture): Boolean {
+        releasePlayer()
+        return true
+    }
+
+    override fun onSurfaceTextureUpdated(st: SurfaceTexture) = Unit
+}

@@ -146,6 +146,7 @@
 "language_english" = "English";
 "language_arabic" = "العربية";
 "appearance_label" = "Appearance";
+"theme_system" = "System";
 "theme_dark" = "Dark";
 "theme_light" = "Light";
 "units_label" = "Weight unit";
@@ -185,6 +186,8 @@
 "discomfort_filter_explainer" = "Hide exercises that directly target a selected area as a primary or supporting muscle. These are personal library preferences, not medical contraindications. Saved programs and workout history are not changed.";
 "discomfort_filter_limits" = "Indirect stabilizer loads are not fully captured, and the remaining exercises are not confirmed suitable for your condition. For pain or injury, seek advice from a qualified clinician.";
 "clear_discomfort_filters" = "Clear discomfort filters";
+"no_matching_exercises" = "No matching exercises";
+"clear_filters" = "Clear filters";
 "done" = "Done";
 "discomfort_region_neck_upper_back" = "Neck / upper back";
 "discomfort_region_shoulders" = "Shoulders";
