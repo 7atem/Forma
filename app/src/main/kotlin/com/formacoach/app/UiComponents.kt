@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -152,13 +153,18 @@ internal fun ExercisePicker(selected: Exercise, onChange: (Exercise) -> Unit, ch
 }
 
 @Composable
-internal fun HistoryChart(points: List<HistoryPoint>, unit: String) {
+internal fun HistoryChart(
+    points: List<HistoryPoint>,
+    unit: String,
+    trendPoints: List<HistoryPoint> = emptyList(),
+) {
     if (points.isEmpty()) {
         Text(stringResource(R.string.no_chart_data), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
-    val min = points.minOf { it.value }
-    val max = points.maxOf { it.value }
+    val allValues = points.map { it.value } + trendPoints.map { it.value }
+    val min = allValues.min()
+    val max = allValues.max()
     val latest = points.last().value
     val start = points.first().date
     val end = points.last().date
@@ -172,6 +178,7 @@ internal fun HistoryChart(points: List<HistoryPoint>, unit: String) {
         unit,
     )
     val lineColor = MaterialTheme.colorScheme.primary
+    val trendColor = MaterialTheme.colorScheme.tertiary
     val surfaceColor = MaterialTheme.colorScheme.surface
     val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
     var scrubbedIndex by remember(points) { mutableStateOf<Int?>(null) }
@@ -184,6 +191,13 @@ internal fun HistoryChart(points: List<HistoryPoint>, unit: String) {
                 color = if (activePoint != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (trendPoints.size >= 2) {
+                    PillBadge(
+                        stringResource(R.string.weight_trend_7d),
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.tertiary,
+                    )
+                }
                 PillBadge("${number(activePoint?.value ?: latest)} $unit")
                 ScopeInfoButton(R.string.progress_title, R.string.chart_note)
             }
@@ -274,6 +288,29 @@ internal fun HistoryChart(points: List<HistoryPoint>, unit: String) {
                         linePath,
                         color = lineColor,
                         style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+                    )
+                }
+                if (trendPoints.size >= 2) {
+                    val trendCoords = trendPoints.map { point ->
+                        Offset(
+                            pad + ((point.date.toEpochDay() - start.toEpochDay()).toDouble() / days * width).toFloat(),
+                            pad + height - ((if (max == min) 0.5 else (point.value - min) / span) * height).toFloat(),
+                        )
+                    }
+                    val trendPath = Path().apply {
+                        trendCoords.forEachIndexed { index, offset ->
+                            if (index == 0) moveTo(offset.x, offset.y) else lineTo(offset.x, offset.y)
+                        }
+                    }
+                    drawPath(
+                        trendPath,
+                        color = trendColor,
+                        style = Stroke(
+                            width = 2.5.dp.toPx(),
+                            cap = StrokeCap.Round,
+                            join = StrokeJoin.Round,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 8f), 0f),
+                        ),
                     )
                 }
                 val highlightIdx = scrubbedIndex ?: coords.lastIndex

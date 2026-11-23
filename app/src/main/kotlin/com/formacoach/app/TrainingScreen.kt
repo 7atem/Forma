@@ -1,6 +1,12 @@
 package com.formacoach.app
 
+import android.Manifest
+import android.media.AudioManager
+import android.media.RingtoneManager
+import android.os.Build
 import android.os.SystemClock
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
@@ -20,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -81,6 +88,16 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
                         Text(stringResource(R.string.new_program), fontWeight = FontWeight.SemiBold)
                     }
                 }
+                Button(
+                    onClick = { vm.startEmpty(date) },
+                    enabled = !state.busy,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("start_empty_workout"),
+                ) {
+                    Icon(Icons.Default.Bolt, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.freestyle_workout), fontWeight = FontWeight.Bold)
+                }
                 state.snapshot.programs.forEach { program ->
                     ProgramCard(
                         program.name,
@@ -110,7 +127,13 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
                 }
                 StarterTemplates.all.forEach { template ->
                     ProgramCard(
-                        stringResource(if (template.id == "A") R.string.template_a else R.string.template_b),
+                        stringResource(
+                            when (template.id) {
+                                "A" -> R.string.template_a
+                                "B" -> R.string.template_b
+                                else -> R.string.template_home_express
+                            },
+                        ),
                         template.exercises,
                         "start_${template.id}",
                         state.busy,
@@ -178,7 +201,7 @@ private fun ProgramCard(
 }
 
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
 private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel, onSetDeleted: (TrainingSet, List<String>) -> Unit = { _, _ -> }, onFinished: () -> Unit) {
     val choices = (session.plannedExercises + Exercise.entries).distinct()
     val sets = state.snapshot.sets.filter { it.sessionId == session.id }
@@ -195,17 +218,62 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
     var showRpe by rememberSaveable(session.id) { mutableStateOf(false) }
     var rpe by rememberSaveable(session.id) { mutableStateOf("") }
     var guide by rememberSaveable(session.id) { mutableStateOf(false) }
+    var showSwap by rememberSaveable(session.id) { mutableStateOf(false) }
+    var showHistoryPeek by rememberSaveable(session.id) { mutableStateOf(false) }
     var allSets by rememberSaveable(session.id) { mutableStateOf(false) }
     var deadline by rememberSaveable(session.id) { mutableLongStateOf(0) }
     var timerDuration by rememberSaveable(session.id) { mutableIntStateOf(session.restSeconds) }
     var flowNotice by rememberSaveable(session.id) { mutableStateOf<Int?>(null) }
     var elapsed by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
-    LaunchedEffect(deadline) {
-        while (deadline > SystemClock.elapsedRealtime()) {
-            elapsed = SystemClock.elapsedRealtime()
-            delay(1000)
+    val context = LocalContext.current
+    val haptics = LocalHapticFeedback.current
+    val currentExerciseName = stringResource(exerciseLabel(exercise))
+    var hasNotifPerm by remember { mutableStateOf(RestTimerNotification.hasPermission(context)) }
+    val notifPermLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        hasNotifPerm = granted
+        if (granted && deadline > SystemClock.elapsedRealtime()) {
+            val rem = RestTimer.remainingSeconds(deadline, SystemClock.elapsedRealtime(), timerDuration)
+            RestTimerNotification.show(context, currentExerciseName, rem)
         }
-        elapsed = SystemClock.elapsedRealtime()
+    }
+    var wasCountingDown by remember(session.id) { mutableStateOf(false) }
+    DisposableEffect(session.id) {
+        onDispose { RestTimerNotification.cancel(context) }
+    }
+    LaunchedEffect(deadline, currentExerciseName, hasNotifPerm) {
+        val now = SystemClock.elapsedRealtime()
+        if (deadline > now) {
+            val rem = RestTimer.remainingSeconds(deadline, now, timerDuration)
+            RestTimerNotification.show(context, currentExerciseName, rem)
+        } else {
+            RestTimerNotification.cancel(context)
+        }
+    }
+    LaunchedEffect(deadline) {
+        if (deadline > SystemClock.elapsedRealtime()) {
+            wasCountingDown = true
+            while (deadline > SystemClock.elapsedRealtime()) {
+                elapsed = SystemClock.elapsedRealtime()
+                delay(1000)
+            }
+            elapsed = SystemClock.elapsedRealtime()
+            RestTimerNotification.cancel(context)
+            if (wasCountingDown && deadline > 0L) {
+                wasCountingDown = false
+                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                runCatching {
+                    val audio = context.getSystemService(AudioManager::class.java)
+                    if (audio?.ringerMode == AudioManager.RINGER_MODE_NORMAL) {
+                        val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                        RingtoneManager.getRingtone(context, uri)?.play()
+                    }
+                }
+            }
+        } else {
+            wasCountingDown = false
+            elapsed = SystemClock.elapsedRealtime()
+            RestTimerNotification.cancel(context)
+        }
     }
     val unit = LocalWeightUnit.current
     val unitLabel = weightUnitLabel()
@@ -306,6 +374,62 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         }
     }
 
+    // Sticky Compact Rest Timer Banner (immediately visible without scrolling)
+    if (deadline > 0) {
+        Surface(
+            color = MaterialTheme.colorScheme.primaryContainer,
+            shape = RoundedCornerShape(20.dp),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
+            modifier = Modifier.fillMaxWidth().testTag("active_rest_timer"),
+        ) {
+            Row(
+                Modifier.padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                RestCountdownRing(remainingSeconds = remaining, totalSeconds = timerDuration)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        stringResource(R.string.rest_countdown, number(remaining.toDouble(), 0), number(timerDuration.toDouble(), 0)),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        FilledTonalButton(
+                            onClick = {
+                                deadline = (deadline - 15_000L).coerceAtLeast(SystemClock.elapsedRealtime())
+                            },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(10.dp),
+                        ) { Text("-15s", fontWeight = FontWeight.Bold) }
+                        FilledTonalButton(
+                            onClick = {
+                                timerDuration += 15
+                                deadline += 15_000L
+                            },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                            shape = RoundedCornerShape(10.dp),
+                        ) { Text("+15s", fontWeight = FontWeight.Bold) }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = { elapsed = SystemClock.elapsedRealtime(); deadline = elapsed + timerDuration * 1000L }) {
+                            Text(stringResource(R.string.restart_timer))
+                        }
+                        TextButton(onClick = { deadline = 0 }) {
+                            Text(stringResource(R.string.stop_timer))
+                        }
+                        if (!hasNotifPerm && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            TextButton(onClick = { notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }) {
+                                Text(stringResource(R.string.enable_timer_notification), style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // 1-Tap Horizontal Planned Exercise Strip
     if (session.plannedExercises.isNotEmpty()) {
         Row(
@@ -342,7 +466,16 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
 
     // Main Set Logging Card
     InfoCard {
-        ExercisePicker(exercise, ::selectExercise, choices)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.weight(1f)) { ExercisePicker(exercise, ::selectExercise, choices) }
+            OutlinedIconButton(
+                onClick = { showSwap = true },
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.size(48.dp).testTag("swap_exercise"),
+            ) {
+                Icon(Icons.Default.SwapHoriz, contentDescription = stringResource(R.string.swap_exercise))
+            }
+        }
         flowNotice?.let {
             Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -378,27 +511,107 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             Text(stringResource(R.string.linked_timing_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        // Compact Form Guide Banner
-        Surface(
-            onClick = { guide = true },
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.7f),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
-            modifier = Modifier.fillMaxWidth().testTag("session_form_guide"),
-        ) {
-            Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                ExerciseThumbnail(exercise, Modifier.width(96.dp).clip(RoundedCornerShape(10.dp)))
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(stringResource(R.string.view_form), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                    Text(
-                        stringResource(guideResources(exercise).variant),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+        // Compact Form Guide + History Peek Row
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                onClick = { guide = true },
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.7f),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
+                modifier = Modifier.weight(1f).testTag("session_form_guide"),
+            ) {
+                Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ExerciseThumbnail(exercise, Modifier.width(84.dp).clip(RoundedCornerShape(10.dp)))
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(stringResource(R.string.view_form), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text(
+                            stringResource(guideResources(exercise).variant),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            OutlinedButton(
+                onClick = { showHistoryPeek = true },
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
+                modifier = Modifier.testTag("session_exercise_history"),
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.exercise_history_peek), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
+                }
+            }
+        }
+
+        // Current Exercise Set Progress Checklist (glanceable Strong/Hevy-style rows)
+        val currentExSets = sets.filter { it.exercise == exercise }
+        val currentSpec = session.prescriptions.firstOrNull { it.exercise == exercise }
+        val plannedWorkingTarget = currentSpec?.workingSets ?: 0
+        val currentWorkingDone = currentExSets.count { it.kind == SetKind.WORKING }
+        if (currentExSets.isNotEmpty() || plannedWorkingTarget > 0) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shape = RoundedCornerShape(14.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                modifier = Modifier.fillMaxWidth().testTag("current_exercise_checklist"),
+            ) {
+                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        stringResource(R.string.current_exercise_sets),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    var workingNum = 0
+                    currentExSets.forEach { logged ->
+                        val isWarm = logged.kind == SetKind.WARM_UP
+                        if (!isWarm) workingNum++
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = if (isWarm) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                            Text(
+                                if (isWarm) stringResource(R.string.warmup_set) else "#${number(workingNum.toDouble(), 0)}",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isWarm) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                "${formatLoad(logged.weightKg, logged.exercise)} × ${number(logged.reps.toDouble(), 0)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.weight(1f),
+                            )
+                            logged.rpe?.let { rpeVal ->
+                                PillBadge("RPE ${number(rpeVal, 1)}")
+                            }
+                        }
+                    }
+                    if (plannedWorkingTarget > currentWorkingDone) {
+                        val remainingSlots = (currentWorkingDone + 1)..plannedWorkingTarget
+                        remainingSlots.take(4).forEach { slotIndex ->
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Icon(Icons.Default.RadioButtonUnchecked, contentDescription = null, tint = MaterialTheme.colorScheme.outline, modifier = Modifier.size(16.dp))
+                                Text(
+                                    stringResource(R.string.upcoming_set_slot, number(slotIndex.toDouble(), 0)),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -471,7 +684,6 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         )
 
         // Quick Rep & Weight Preset Chips + Live Barbell Preview
-        val haptics = LocalHapticFeedback.current
         FlowRow(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -585,57 +797,6 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             Text(stringResource(R.string.add_set), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
 
-        // Sleek Radial Rest Timer Card
-        if (deadline > 0) {
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
-                shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(
-                    Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    RestCountdownRing(remainingSeconds = remaining, totalSeconds = timerDuration)
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(
-                            stringResource(R.string.rest_countdown, number(remaining.toDouble(), 0), number(timerDuration.toDouble(), 0)),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        )
-                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            FilledTonalButton(
-                                onClick = {
-                                    deadline = (deadline - 15_000L).coerceAtLeast(SystemClock.elapsedRealtime())
-                                },
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                shape = RoundedCornerShape(10.dp),
-                            ) { Text("-15s", fontWeight = FontWeight.Bold) }
-                            FilledTonalButton(
-                                onClick = {
-                                    timerDuration += 15
-                                    deadline += 15_000L
-                                },
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                                shape = RoundedCornerShape(10.dp),
-                            ) { Text("+15s", fontWeight = FontWeight.Bold) }
-                        }
-                        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            TextButton(onClick = { elapsed = SystemClock.elapsedRealtime(); deadline = elapsed + timerDuration * 1000L }) {
-                                Text(stringResource(R.string.restart_timer))
-                            }
-                            TextButton(onClick = { deadline = 0 }) {
-                                Text(stringResource(R.string.stop_timer))
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             val convention = if (Equipment.DUMBBELLS in ExerciseCatalog.of(exercise).equipment) R.string.dumbbell_load_note else R.string.load_convention_note
             Text(stringResource(convention), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f))
@@ -683,6 +844,141 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         }
     }
     if (guide) ExerciseGuideSheet(exercise) { guide = false }
+    if (showSwap) {
+        val primaryMuscles = ExerciseMuscles.of(exercise).primary
+        val alternatives = remember(exercise) {
+            Exercise.entries.filter { it != exercise && ExerciseMuscles.of(it).primary.any { m -> m in primaryMuscles } }
+        }
+        ModalBottomSheet(
+            onDismissRequest = { showSwap = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(stringResource(R.string.swap_exercise_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                if (alternatives.isEmpty()) {
+                    Text(stringResource(R.string.swap_no_alternatives), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    alternatives.forEach { alt ->
+                        Surface(
+                            onClick = { selectExercise(alt); showSwap = false },
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
+                            modifier = Modifier.fillMaxWidth().testTag("swap_option_${alt.name}"),
+                        ) {
+                            Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                ExerciseThumbnail(alt, Modifier.width(72.dp).clip(RoundedCornerShape(10.dp)))
+                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Text(stringResource(exerciseLabel(alt)), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        stringResource(guideResources(alt).variant),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                }
+                                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if (showHistoryPeek) {
+        val bestLoad = remember(state.snapshot, exercise, session.date) { MuscleTraining.best(state.snapshot, exercise, session.date) }
+        val bestE1rm = remember(state.snapshot, exercise, session.date) { TrainingHistory.bestE1rm(state.snapshot, exercise, session.date) }
+        val ladder = remember(state.snapshot, exercise) { TrainingHistory.repMaxLadder(state.snapshot, exercise) }
+        val recentSessions = remember(state.snapshot, exercise) {
+            state.snapshot.sessions
+                .filter { it.completedAt != null }
+                .sortedWith(compareByDescending<Session> { it.date }.thenByDescending { it.completedAt })
+                .mapNotNull { rec ->
+                    val recSets = state.snapshot.sets.filter { it.sessionId == rec.id && it.exercise == exercise }
+                    if (recSets.isEmpty()) null else rec to recSets
+                }
+                .take(3)
+        }
+        ModalBottomSheet(
+            onDismissRequest = { showHistoryPeek = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp)
+                    .navigationBarsPadding()
+                    .padding(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(stringResource(exerciseLabel(exercise)), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                if (bestLoad == null && bestE1rm == null && recentSessions.isEmpty()) {
+                    Text(stringResource(R.string.no_exercise_history), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                } else {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        bestLoad?.let {
+                            MetricTile(
+                                "${formatLoad(it.weightKg, exercise)} × ${number(it.repsAtWeight.toDouble(), 0)}",
+                                dateLabel(it.date),
+                                Modifier.weight(1f),
+                                accent = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                        bestE1rm?.let {
+                            MetricTile(
+                                formatWeight(it.value, 1),
+                                stringResource(R.string.chart_mode_e1rm),
+                                Modifier.weight(1f),
+                                accent = MaterialTheme.colorScheme.tertiary,
+                            )
+                        }
+                    }
+                    if (ladder.isNotEmpty()) {
+                        Text(stringResource(R.string.rep_max_ladder), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            ladder.forEach { (repTarget, kg) ->
+                                PillBadge("${number(repTarget.toDouble(), 0)}RM · ${formatWeight(kg, 1)}")
+                            }
+                        }
+                    }
+                    if (recentSessions.isNotEmpty()) {
+                        Text(stringResource(R.string.recent_exercise_sessions), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        recentSessions.forEach { (rec, recSets) ->
+                            Surface(
+                                shape = RoundedCornerShape(14.dp),
+                                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(dateLabel(rec.date), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                    val setLabels = recSets.map { s ->
+                                        val tag = if (s.kind == SetKind.WARM_UP) " (W)" else ""
+                                        "${formatLoad(s.weightKg, s.exercise)} × ${number(s.reps.toDouble(), 0)}$tag"
+                                    }
+                                    Text(
+                                        setLabels.joinToString("  ·  "),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -695,10 +991,19 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
     if (showVictory) {
         val latest = state.snapshot.sessions.filter { it.completedAt != null }.maxByOrNull { it.completedAt ?: 0L }
         val latestSets = latest?.let { s -> state.snapshot.sets.filter { it.sessionId == s.id } }.orEmpty()
+        val workingSets = latestSets.filter { it.kind == SetKind.WORKING }
         val tonnage = TrainingHistory.sessionTonnage(latestSets)
+        val priorSnapshot = latest?.let { s -> state.snapshot.copy(sessions = state.snapshot.sessions.filter { it.id != s.id }) }
+        val prCount = if (latest != null && priorSnapshot != null) {
+            workingSets.map { it.exercise }.distinct().count { ex ->
+                workingSets.filter { it.exercise == ex }.any { set ->
+                    TrainingHistory.isNewPr(priorSnapshot, ex, set.weightKg, set.reps, latest.date)
+                }
+            }
+        } else 0
         val sessionMuscles = remember(latestSets) {
             val map = mutableMapOf<Muscle, Int>()
-            latestSets.filter { it.kind == SetKind.WORKING }.forEach { set ->
+            workingSets.forEach { set ->
                 val act = ExerciseMuscles.of(set.exercise)
                 (act.primary + act.secondary).forEach { m -> map[m] = (map[m] ?: 0) + 1 }
             }
@@ -721,6 +1026,16 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                     }
                     IconButton(onClick = onDismissVictory) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.dismiss))
+                    }
+                }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PillBadge(stringResource(R.string.session_summary_sets, number(workingSets.size.toDouble(), 0)))
+                    if (prCount > 0) {
+                        PillBadge(
+                            "★ " + stringResource(R.string.session_summary_prs, number(prCount.toDouble(), 0)),
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            contentColor = MaterialTheme.colorScheme.secondary,
+                        )
                     }
                 }
                 if (sessionMuscles.isNotEmpty()) {
@@ -1088,7 +1403,9 @@ internal fun sessionTitle(session: Session, programs: List<TrainingProgram>): St
     when (session.templateId) {
         "A" -> stringResource(R.string.template_a)
         "B" -> stringResource(R.string.template_b)
+        "HOME_EXPRESS" -> stringResource(R.string.template_home_express)
         "quick" -> stringResource(R.string.quick_workout)
+        "freestyle" -> stringResource(R.string.freestyle_session_label)
         "repeat" -> stringResource(R.string.repeated_workout)
         else -> programs.firstOrNull { it.id == session.templateId }?.name ?: stringResource(R.string.workout_generic)
     }

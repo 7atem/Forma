@@ -142,6 +142,32 @@ enum FormaTheme {
         }
         return result
     }
+
+    /// Deterministic rolling mean of recorded weight observations in [date - (windowDays - 1), date].
+    static func rollingWeightTrend(_ points: [(date: String, weightKg: Double)], windowDays: Int = 7) -> [Double] {
+        guard !points.isEmpty, windowDays >= 1 else { return [] }
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .gregorian)
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.dateFormat = "yyyy-MM-dd"
+        let cal = Calendar(identifier: .gregorian)
+        let parsed: [(Date?, Double)] = points.map { (fmt.date(from: $0.date), $0.weightKg) }
+        return parsed.enumerated().map { idx, item in
+            guard let curDate = item.0,
+                  let startDate = cal.date(byAdding: .day, value: -(windowDays - 1), to: curDate) else {
+                return item.1
+            }
+            var sum = 0.0
+            var count = 0
+            for j in 0...idx {
+                if let d = parsed[j].0, d >= startDate && d <= curDate {
+                    sum += parsed[j].1
+                    count += 1
+                }
+            }
+            return count > 0 ? sum / Double(count) : item.1
+        }
+    }
 }
 
 struct FormaPulseDot: View {

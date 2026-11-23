@@ -25,6 +25,11 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
             prescriptions=program?.let {kotlinx.serialization.json.Json.decodeFromString(it.prescriptions)}?:emptyList())
         dao.startSession(session.row());return session.id
     }
+    suspend fun startEmptySession(date:LocalDate=LocalDate.now(clock)):String {
+        checkDate(date)
+        val session=Session(date=date,templateId="freestyle",label="",plannedExercises=emptyList(),restSeconds=90)
+        dao.startSession(session.row());return session.id
+    }
     suspend fun addSet(set:TrainingSet)=dao.addSet(set.row())
     suspend fun quickLogExerciseSet(exercise:Exercise,reps:Int,weightKg:Double,kind:SetKind=SetKind.WORKING,rpe:Double?=null,date:LocalDate=LocalDate.now(clock)) {
         checkDate(date)

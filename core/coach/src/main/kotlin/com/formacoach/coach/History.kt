@@ -75,6 +75,17 @@ object TrainingHistory {
         .filter { it.date in asOf.minusDays(89)..asOf && it.weightKg != null }
         .sortedBy { it.date }.map { HistoryPoint(it.date, it.weightKg!!) }
 
+    /** Deterministic rolling mean of recorded weight observations in [date - (windowDays - 1), date]. */
+    fun rollingWeightTrend(points: List<HistoryPoint>, windowDays: Int = 7): List<HistoryPoint> {
+        if (points.isEmpty() || windowDays < 1) return emptyList()
+        val sorted = points.sortedBy { it.date }
+        return sorted.map { current ->
+            val start = current.date.minusDays((windowDays - 1).toLong())
+            val window = sorted.filter { it.date in start..current.date }
+            HistoryPoint(current.date, window.map { it.value }.average())
+        }
+    }
+
     /** Best recorded working load per rep target (1, 3, 5, 8, 10, 12 reps). Warm-ups excluded. */
     fun repMaxLadder(data: FitnessSnapshot, exercise: Exercise): List<Pair<Int, Double>> {
         val completedIds = data.sessions.filter { it.completedAt != null }.map { it.id }.toSet()

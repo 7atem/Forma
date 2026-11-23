@@ -23,6 +23,7 @@ struct TransferDocument: FileDocument {
     @StateObject private var store: LocalStore
     @StateObject private var bridge: WatchBridge
     @AppStorage("forma_dark_mode") private var darkMode = true
+    @AppStorage("forma_lang") private var appLang = ""
     init() {
         let storage = LocalStore()
         _store = StateObject(wrappedValue: storage)
@@ -32,6 +33,8 @@ struct TransferDocument: FileDocument {
         WindowGroup {
             PhoneRoot(store: store, bridge: bridge)
                 .preferredColorScheme(darkMode ? .dark : .light)
+                .environment(\.locale, appLang.isEmpty ? .current : Locale(identifier: appLang))
+                .environment(\.layoutDirection, appLang == "ar" ? .rightToLeft : (appLang == "en" ? .leftToRight : (Locale.current.language.languageCode?.identifier == "ar" ? .rightToLeft : .leftToRight)))
                 .tint(FormaTheme.primary)
         }
     }
@@ -40,12 +43,14 @@ struct TransferDocument: FileDocument {
 @MainActor private struct PhoneRoot: View {
     @ObservedObject var store: LocalStore
     @ObservedObject var bridge: WatchBridge
+    @AppStorage("forma_dark_mode") private var darkMode = true
     @State private var importing = false
     @State private var pending: WatchTransfer?
     @State private var document: TransferDocument?
     @State private var exporting = false
     @State private var deleting: String?
     @State private var showBridge = false
+    @State private var showSettings = false
     @State private var selectedTab = 0
     @StateObject private var health = HealthImporter()
 
@@ -61,7 +66,7 @@ struct TransferDocument: FileDocument {
                 TabView(selection: $selectedTab) {
                     PhoneExercisesTab(
                         store: store,
-                        onOpenBridge: { showBridge = true },
+                        onOpenBridge: { showSettings = true },
                         onOpenTrain: { selectedTab = 1 }
                     )
                     .tabItem { Label("tab_exercises", systemImage: "figure.strengthtraining.traditional") }
@@ -69,7 +74,7 @@ struct TransferDocument: FileDocument {
 
                     PhoneTrainTab(
                         store: store,
-                        onOpenBridge: { showBridge = true },
+                        onOpenBridge: { showSettings = true },
                         onExport: { workout in
                             store.attempt {
                                 document = TransferDocument(data: try WatchTransferCodec.encode(WatchTransfer(workouts: [workout])))
@@ -82,20 +87,25 @@ struct TransferDocument: FileDocument {
                     .tabItem { Label("tab_train", systemImage: "dumbbell.fill") }
                     .tag(1)
 
-                    PhoneEatTab(store: store, onOpenBridge: { showBridge = true })
+                    PhoneEatTab(store: store, onOpenBridge: { showSettings = true })
                         .tabItem { Label("tab_eat", systemImage: "fork.knife") }
                         .tag(2)
 
-                    PhoneProgressTab(store: store, health: health, onOpenBridge: { showBridge = true })
+                    PhoneProgressTab(store: store, health: health, onOpenBridge: { showSettings = true })
                         .tabItem { Label("tab_progress", systemImage: "chart.xyaxis.line") }
                         .tag(3)
                 }
                 .tint(FormaTheme.primary)
             }
         }
+        .sheet(isPresented: $showSettings) {
+            PhoneSettingsSheet(onOpenBridge: { showBridge = true })
+                .preferredColorScheme(darkMode ? .dark : .light)
+                .tint(FormaTheme.primary)
+        }
         .sheet(isPresented: $showBridge) {
             PhoneBridgeTab(store: store, bridge: bridge, onImport: { showBridge = false; importing = true })
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(darkMode ? .dark : .light)
                 .tint(FormaTheme.primary)
         }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.formaWorkouts, .json, .data]) { result in
@@ -173,6 +183,26 @@ private struct MealSlotOption: Identifiable {
                             finishedSummary = completed
                         }
                     } else {
+                        // Warm Daily Narrative Reflection Card
+                        let todayStr = LocalStore.todayString()
+                        let todayWorkouts = store.state.workouts.filter { $0.date == todayStr }
+                        let todayWorkingSets = todayWorkouts.flatMap(\.sets).filter { $0.kind == .working }.count
+                        let todayKcal = store.state.meals.filter { $0.date == todayStr }.reduce(0.0) { $0 + $1.calories }
+                        let storyKey: String = {
+                            if todayWorkingSets > 0 && todayKcal > 0 { return "daily_story_complete" }
+                            if todayWorkingSets > 0 { return "daily_story_trained" }
+                            if todayKcal > 0 { return "daily_story_fueled" }
+                            return "daily_story_fresh"
+                        }()
+                        FormaCard {
+                            HStack(spacing: 10) {
+                                Image(systemName: "sparkles")
+                                    .foregroundStyle(FormaTheme.secondary)
+                                Text(LocalizedStringKey(storyKey))
+                                    .font(.subheadline)
+                                    .foregroundStyle(FormaTheme.textPrimary)
+                            }
+                        }
                         if store.state.workouts.isEmpty && store.state.healthLastSync == nil && HealthImporter.isAvailable {
                             FormaCard {
                                 HStack(spacing: 10) {
@@ -535,6 +565,7 @@ private struct MealSlotOption: Identifiable {
     @State private var hasRpe = false
     @State private var rpe = 7.0
     @State private var editing: WatchSet?
+    @State private var showSwap = false
     @State private var confirmFinish = false
     @State private var confirmDiscard = false
     @AppStorage("forma_use_lb") private var useLb = false
@@ -622,29 +653,85 @@ private struct MealSlotOption: Identifiable {
 
             // Main Set Logging Card
             FormaCard {
-                NavigationLink { ExerciseDetail(exercise: exercise) } label: {
-                    HStack(spacing: 12) {
-                        FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
-                            .frame(width: 80)
-                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(exercise.label(arabic: arabic))
-                                .font(.headline.weight(.bold))
-                                .foregroundStyle(FormaTheme.textPrimary)
-                            if let plan = draft.program.prescriptions.first(where: { $0.exercise == exercise }) {
-                                if let min = plan.repMin, let max = plan.repMax {
-                                    Text("\(String(localized: "planned_reps")) \(min)–\(max)")
-                                        .font(.caption)
-                                        .foregroundStyle(FormaTheme.primary)
+                HStack(spacing: 8) {
+                    NavigationLink { ExerciseDetail(exercise: exercise) } label: {
+                        HStack(spacing: 12) {
+                            FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset)
+                                .frame(width: 72)
+                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(exercise.label(arabic: arabic))
+                                    .font(.headline.weight(.bold))
+                                    .foregroundStyle(FormaTheme.textPrimary)
+                                if let plan = draft.program.prescriptions.first(where: { $0.exercise == exercise }) {
+                                    if let min = plan.repMin, let max = plan.repMax {
+                                        Text("\(String(localized: "planned_reps")) \(min)–\(max)")
+                                            .font(.caption)
+                                            .foregroundStyle(FormaTheme.primary)
+                                    }
+                                    if !plan.notes.isEmpty {
+                                        Text(plan.notes).font(.caption2).foregroundStyle(FormaTheme.textMuted)
+                                    }
                                 }
-                                if !plan.notes.isEmpty {
-                                    Text(plan.notes).font(.caption2).foregroundStyle(FormaTheme.textMuted)
+                            }
+                            Spacer(minLength: 4)
+                        }
+                    }
+                    Button {
+                        FormaHaptics.tap()
+                        showSwap = true
+                    } label: {
+                        Image(systemName: "arrow.left.arrow.right")
+                            .font(.subheadline.weight(.bold))
+                            .padding(10)
+                            .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .foregroundStyle(FormaTheme.primary)
+                    }
+                    .accessibilityLabel("swap_exercise")
+                }
+
+                // Current Exercise Set Checklist
+                let exSets = draft.sets.filter { $0.exercise == exercise }
+                let exTarget = draft.program.prescriptions.first(where: { $0.exercise == exercise })?.workingSets ?? 0
+                let exWorkingDone = exSets.filter { $0.kind == .working }.count
+                if !exSets.isEmpty || exTarget > 0 {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("current_exercise_sets")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(FormaTheme.textMuted)
+                        ForEach(Array(exSets.enumerated()), id: \.element.id) { idx, logged in
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(logged.kind == .warmUp ? FormaTheme.textMuted : FormaTheme.primary)
+                                Text(logged.kind == .warmUp ? String(localized: "warmup") : "#\(idx + 1)")
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(FormaTheme.textMuted)
+                                Text("\(FormaTheme.formatWeight(logged.weightKg, useLb: useLb)) × \(logged.reps)")
+                                    .font(.subheadline.weight(.bold))
+                                    .monospacedDigit()
+                                    .foregroundStyle(FormaTheme.textPrimary)
+                                Spacer()
+                                if let rpeVal = logged.rpe {
+                                    FormaPill(text: "RPE \(rpeVal.formatted())")
                                 }
                             }
                         }
-                        Spacer()
-                        Image(systemName: "chevron.right").foregroundStyle(FormaTheme.textMuted)
+                        if exTarget > exWorkingDone {
+                            ForEach((exWorkingDone + 1)...min(exTarget, exWorkingDone + 4), id: \.self) { slotNum in
+                                HStack(spacing: 8) {
+                                    Image(systemName: "circle")
+                                        .font(.caption)
+                                        .foregroundStyle(FormaTheme.textMuted)
+                                    Text("\(String(localized: "upcoming_set_prefix")) \(slotNum)")
+                                        .font(.caption)
+                                        .foregroundStyle(FormaTheme.textMuted)
+                                }
+                            }
+                        }
                     }
+                    .padding(10)
+                    .background(FormaTheme.surfaceHigh.opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
 
                 Divider().overlay(FormaTheme.border)
@@ -884,7 +971,36 @@ private struct MealSlotOption: Identifiable {
             }, onDelete: {
                 store.attempt { try store.removeSet(item.id); editing = nil }
             })
-            .preferredColorScheme(.dark)
+            .tint(FormaTheme.primary)
+        }
+        .sheet(isPresented: $showSwap) {
+            let primaries = Set(ExerciseMuscles.of(exercise).primary)
+            let alternatives = Exercise.allCases.filter { $0 != exercise && ExerciseMuscles.of($0).primary.contains(where: { primaries.contains($0) }) }
+            NavigationStack {
+                List(alternatives, id: \.self) { alt in
+                    Button {
+                        exercise = alt
+                        kg = 0.0
+                        warmup = false
+                        showSwap = false
+                    } label: {
+                        HStack(spacing: 12) {
+                            FormaExerciseImage(asset: ExerciseGuides.of(alt, arabic: false).asset)
+                                .frame(width: 64)
+                                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                            Text(alt.label(arabic: arabic))
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(FormaTheme.textPrimary)
+                        }
+                    }
+                }
+                .navigationTitle("swap_exercise_title")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("cancel") { showSwap = false }
+                    }
+                }
+            }
             .tint(FormaTheme.primary)
         }
     }
@@ -1211,6 +1327,9 @@ private struct MealSlotOption: Identifiable {
     let onOpenBridge: () -> Void
     @State private var selectedSlot = "BREAKFAST"
     @State private var addingMeal = false
+    @State private var showOnlineFood = false
+    @State private var showFamilyPot = false
+    @State private var showRemaining = false
     @AppStorage("forma_dark_mode") private var darkMode = true
     @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
@@ -1248,14 +1367,22 @@ private struct MealSlotOption: Identifiable {
                         HStack(spacing: 18) {
                             Spacer()
                             VStack(spacing: 6) {
-                                FormaProgressRing(
-                                    progress: totalKcal / max(1, calGoal),
-                                    valueText: "\(Int(totalKcal.rounded()))",
-                                    labelText: "kcal",
-                                    size: 92,
-                                    lineWidth: 9,
-                                    color: FormaTheme.primary
-                                )
+                                let calDelta = calGoal - totalKcal
+                                let ringValue = showRemaining ? "\(Int(abs(calDelta).rounded()))" : "\(Int(totalKcal.rounded()))"
+                                let ringSub = showRemaining ? (calDelta >= 0 ? String(localized: "kcal_left_short") : String(localized: "kcal_over_short")) : "kcal"
+                                Button {
+                                    FormaHaptics.tap()
+                                    showRemaining.toggle()
+                                } label: {
+                                    FormaProgressRing(
+                                        progress: totalKcal / max(1, calGoal),
+                                        valueText: ringValue,
+                                        labelText: ringSub,
+                                        size: 92,
+                                        lineWidth: 9,
+                                        color: totalKcal > calGoal ? .red : FormaTheme.primary
+                                    )
+                                }
                                 Text("calories_label").font(.caption).foregroundStyle(FormaTheme.textMuted)
                             }
                             Spacer()
@@ -1277,24 +1404,48 @@ private struct MealSlotOption: Identifiable {
                             FormaPill(text: "\(String(localized: "carbs_label")) \(Int(totalC.rounded()))g", background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
                             FormaPill(text: "\(String(localized: "fat_label")) \(Int(totalF.rounded()))g")
                         }
-                        Button { addingMeal = true } label: {
-                            HStack {
-                                Image(systemName: "plus")
-                                Text("log_meal").fontWeight(.bold)
+                        HStack(spacing: 8) {
+                            Button { addingMeal = true } label: {
+                                HStack {
+                                    Image(systemName: "plus")
+                                    Text("log_meal").fontWeight(.bold)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(FormaTheme.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .foregroundStyle(FormaTheme.onPrimary)
                             }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(FormaTheme.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                            .foregroundStyle(FormaTheme.onPrimary)
+                            Button { showOnlineFood = true } label: {
+                                HStack {
+                                    Image(systemName: "globe")
+                                    Text("online_food_search_btn").fontWeight(.semibold)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
+                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .foregroundStyle(FormaTheme.primary)
+                            }
+                            Button { showFamilyPot = true } label: {
+                                HStack {
+                                    Image(systemName: "person.3.fill")
+                                    Text("family_pot_btn").fontWeight(.semibold)
+                                }
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 12)
+                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .foregroundStyle(FormaTheme.secondary)
+                            }
                         }
                     }
 
-                    // Meal slot selector
+                    // Meal slot selector (including Ramadan Suhoor & Iftar)
                     let slotOptions = [
                         MealSlotOption(id: "BREAKFAST", labelKey: "meal_breakfast"),
                         MealSlotOption(id: "LUNCH", labelKey: "meal_lunch"),
                         MealSlotOption(id: "DINNER", labelKey: "meal_dinner"),
                         MealSlotOption(id: "SNACK", labelKey: "meal_snack"),
+                        MealSlotOption(id: "SUHOOR", labelKey: "meal_suhoor"),
+                        MealSlotOption(id: "IFTAR", labelKey: "meal_iftar"),
                     ]
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
@@ -1394,7 +1545,21 @@ private struct MealSlotOption: Identifiable {
                 PhoneMealEditor(slot: selectedSlot) { meal in
                     store.attempt { try store.addMeal(meal); addingMeal = false }
                 }
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(darkMode ? .dark : .light)
+                .tint(FormaTheme.primary)
+            }
+            .sheet(isPresented: $showOnlineFood) {
+                PhoneOnlineFoodSheet(slot: selectedSlot) { meal in
+                    store.attempt { try store.addMeal(meal) }
+                }
+                .preferredColorScheme(darkMode ? .dark : .light)
+                .tint(FormaTheme.primary)
+            }
+            .sheet(isPresented: $showFamilyPot) {
+                PhoneFamilyPotSheet(slot: selectedSlot) { meal in
+                    store.attempt { try store.addMeal(meal) }
+                }
+                .preferredColorScheme(darkMode ? .dark : .light)
                 .tint(FormaTheme.primary)
             }
         }
@@ -1486,10 +1651,14 @@ private struct MealSlotOption: Identifiable {
                     // Interactive Scrubbable Gradient Weight Trend Chart
                     FormaCard {
                         let points = Array(store.combinedWeights.suffix(30))
+                        let trendValues = FormaTheme.rollingWeightTrend(points.map { ($0.date, $0.weightKg) }, windowDays: 7)
                         let activePoint = scrubbedIndex.flatMap { $0 < points.count ? points[$0] : nil }
                         HStack {
                             Text("weight_trend").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                             Spacer()
+                            if trendValues.count >= 2 && activePoint == nil {
+                                FormaPill(text: String(localized: "weight_trend_7d"), background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
+                            }
                             if let active = activePoint {
                                 FormaPill(text: "\(FormaTheme.formatWeight(active.weightKg, useLb: useLb)) · \(active.date)" + (active.fromHealth ? " · \(String(localized: "health_source_short"))" : ""))
                             }
@@ -1497,8 +1666,9 @@ private struct MealSlotOption: Identifiable {
                         if points.count < 2 {
                             Text("no_weights").font(.caption).foregroundStyle(FormaTheme.textMuted)
                         } else {
-                            let minW = points.map(\.weightKg).min() ?? 0
-                            let maxW = points.map(\.weightKg).max() ?? 1
+                            let allW = points.map(\.weightKg) + trendValues
+                            let minW = allW.min() ?? 0
+                            let maxW = allW.max() ?? 1
                             let span = max(0.5, maxW - minW)
                             GeometryReader { geo in
                                 let w = geo.size.width
@@ -1506,6 +1676,12 @@ private struct MealSlotOption: Identifiable {
                                 let coords: [CGPoint] = points.enumerated().map { idx, item in
                                     let x = w * CGFloat(idx) / CGFloat(max(1, points.count - 1))
                                     let norm = CGFloat((item.weightKg - minW) / span)
+                                    let y = h - norm * (h - 20) - 10
+                                    return CGPoint(x: x, y: y)
+                                }
+                                let trendCoords: [CGPoint] = trendValues.enumerated().map { idx, val in
+                                    let x = w * CGFloat(idx) / CGFloat(max(1, points.count - 1))
+                                    let norm = CGFloat((val - minW) / span)
                                     let y = h - norm * (h - 20) - 10
                                     return CGPoint(x: x, y: y)
                                 }
@@ -1526,6 +1702,15 @@ private struct MealSlotOption: Identifiable {
                                         }
                                     }
                                     .stroke(FormaTheme.primary, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+
+                                    if trendCoords.count >= 2 {
+                                        Path { p in
+                                            trendCoords.enumerated().forEach { idx, pt in
+                                                if idx == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
+                                            }
+                                        }
+                                        .stroke(FormaTheme.tertiary, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round, dash: [6, 4]))
+                                    }
 
                                     if let selIdx = scrubbedIndex, selIdx < coords.count {
                                         Path { p in

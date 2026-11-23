@@ -304,10 +304,11 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     var recording by rememberSaveable {mutableStateOf<Exercise?>(null)}
     var equipment by rememberSaveable {mutableStateOf<Equipment?>(null)}
     var muscle by rememberSaveable {mutableStateOf<Muscle?>(null)}
+    var homeOnly by rememberSaveable {mutableStateOf(false)}
     var favoritesOnly by rememberSaveable {mutableStateOf(false)}
     var recentOnly by rememberSaveable {mutableStateOf(false)}
     var limit by rememberSaveable {mutableIntStateOf(12)}
-    LaunchedEffect(search,equipment,muscle,favoritesOnly,recentOnly) {limit=12}
+    LaunchedEffect(search,equipment,muscle,homeOnly,favoritesOnly,recentOnly) {limit=12}
     Input(R.string.search_exercises,search,{search=it},"exercise_search",numeric=false)
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         Box(Modifier.weight(1f)) {
@@ -328,9 +329,11 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
         }
     }
     Row(Modifier.fillMaxWidth().bleedToPageEdges().horizontalScroll(rememberScrollState()).padding(horizontal=PageGutter),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+        FilterChip(homeOnly,{homeOnly=!homeOnly;if(homeOnly) equipment=null},label={Text(stringResource(R.string.preset_home_filter))},modifier=Modifier.testTag("home_filter"))
+        FilterChip(!homeOnly && equipment==null,{homeOnly=false;equipment=null},label={Text(stringResource(R.string.preset_gym_filter))},modifier=Modifier.testTag("gym_filter"))
         FilterChip(favoritesOnly,{favoritesOnly=!favoritesOnly},label={Text(stringResource(R.string.favorites))},modifier=Modifier.testTag("favorites_filter"))
         FilterChip(recentOnly,{recentOnly=!recentOnly},label={Text(stringResource(R.string.recent_exercises))},modifier=Modifier.testTag("recent_filter"))
-        if(search.isNotBlank()||equipment!=null||muscle!=null||favoritesOnly||recentOnly) TextButton(onClick={search="";equipment=null;muscle=null;favoritesOnly=false;recentOnly=false},modifier=Modifier.testTag("clear_exercise_filters")) {Text(stringResource(R.string.clear_filters))}
+        if(search.isNotBlank()||equipment!=null||muscle!=null||homeOnly||favoritesOnly||recentOnly) TextButton(onClick={search="";equipment=null;muscle=null;homeOnly=false;favoritesOnly=false;recentOnly=false},modifier=Modifier.testTag("clear_exercise_filters")) {Text(stringResource(R.string.clear_filters))}
     }
     val mainMuscles=remember {Muscle.entries.filter {m ->Exercise.entries.any {ExerciseMuscles.of(it).primary.first()==m}}}
     Row(Modifier.fillMaxWidth().bleedToPageEdges().horizontalScroll(rememberScrollState()).padding(horizontal=PageGutter),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
@@ -344,7 +347,8 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     val completed=state.snapshot.sessions.filter {it.completedAt!=null}.map {it.id}.toSet()
     val recent=state.snapshot.sets.filter {it.sessionId in completed}.map {it.exercise}.toSet()
     val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
-    val matches=Exercise.entries.filter {(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
+    val homeEquipment = remember { setOf(Equipment.BODYWEIGHT, Equipment.DUMBBELLS, Equipment.BENCH, Equipment.BOX, Equipment.PULL_UP_BAR) }
+    val matches=Exercise.entries.filter {(!homeOnly||ExerciseCatalog.of(it).equipment.all {eq -> eq in homeEquipment})&&(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
     Text(stringResource(R.string.exercise_results,number(matches.size.toDouble(),0),number(Exercise.entries.size.toDouble(),0)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
     if(matches.isEmpty()) EmptyState(R.string.no_matching_exercises,R.string.exercise_search_hint)
     val visible=matches.take(limit)

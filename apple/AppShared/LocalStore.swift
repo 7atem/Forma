@@ -31,6 +31,7 @@ struct SavedState: Codable {
     var programs: [WatchProgram] = [
         .init(id: "starter-A", name: "A", exercises: [.squat, .chest_press, .row]),
         .init(id: "starter-B", name: "B", exercises: [.leg_press, .lat_pulldown, .hip_hinge]),
+        .init(id: "starter-home", name: "15-Min Home Express", exercises: [.squat, .push_up, .glute_bridge, .dead_bug]),
     ]
     var workouts: [WatchWorkout] = []
     var pendingIDs: [String] = []

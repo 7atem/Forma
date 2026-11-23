@@ -4,6 +4,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.DinnerDining
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material.icons.filled.Restaurant
@@ -25,6 +27,8 @@ internal fun mealSlotLabel(value: MealSlot): Int = when (value) {
     MealSlot.LUNCH -> R.string.meal_slot_lunch
     MealSlot.DINNER -> R.string.meal_slot_dinner
     MealSlot.SNACK -> R.string.meal_slot_snack
+    MealSlot.SUHOOR -> R.string.meal_slot_suhoor
+    MealSlot.IFTAR -> R.string.meal_slot_iftar
 }
 
 internal fun mealSlotIcon(value: MealSlot): ImageVector = when (value) {
@@ -33,6 +37,8 @@ internal fun mealSlotIcon(value: MealSlot): ImageVector = when (value) {
     MealSlot.LUNCH -> Icons.Default.WbSunny
     MealSlot.DINNER -> Icons.Default.NightsStay
     MealSlot.SNACK -> Icons.Default.LocalCafe
+    MealSlot.SUHOOR -> Icons.Default.Bedtime
+    MealSlot.IFTAR -> Icons.Default.DinnerDining
 }
 
 @Composable

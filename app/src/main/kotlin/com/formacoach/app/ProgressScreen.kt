@@ -115,10 +115,13 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
 
     InfoCard {
         Text(stringResource(R.string.weight_chart), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-        HistoryChart(
-            TrainingHistory.weights(state.snapshot, today).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) },
-            unitStr,
-        )
+        val weightPoints = remember(state.snapshot, today, unit) {
+            TrainingHistory.weights(state.snapshot, today).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) }
+        }
+        val trendPoints = remember(weightPoints) {
+            TrainingHistory.rollingWeightTrend(weightPoints, windowDays = 7)
+        }
+        HistoryChart(weightPoints, unitStr, trendPoints = trendPoints)
     }
 
     // 7-Day Body Muscle Heat Map

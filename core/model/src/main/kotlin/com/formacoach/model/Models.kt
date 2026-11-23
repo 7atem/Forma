@@ -33,6 +33,7 @@ object StarterTemplates {
     val all = listOf(
         TrainingTemplate("A", listOf(Exercise.SQUAT, Exercise.CHEST_PRESS, Exercise.ROW)),
         TrainingTemplate("B", listOf(Exercise.LEG_PRESS, Exercise.LAT_PULLDOWN, Exercise.HIP_HINGE)),
+        TrainingTemplate("HOME_EXPRESS", listOf(Exercise.SQUAT, Exercise.PUSH_UP, Exercise.GLUTE_BRIDGE, Exercise.DEAD_BUG)),
     )
 }
 
@@ -83,7 +84,7 @@ data class TrainingSet(
 }
 
 /** All nutrient numbers describe the whole logged portion, explicitly supplied by the user. */
-enum class MealSlot { BREAKFAST, LUNCH, DINNER, SNACK, UNSPECIFIED }
+enum class MealSlot { BREAKFAST, LUNCH, DINNER, SNACK, SUHOOR, IFTAR, UNSPECIFIED }
 
 @Serializable
 data class Meal(

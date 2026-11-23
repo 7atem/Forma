@@ -25,9 +25,9 @@ internal fun WatchTransferDialog(vm:FitnessViewModel,state:AppState,onDismiss:()
     var message by remember {mutableStateOf<Int?>(null)}
     var pending by remember {mutableStateOf<ByteArray?>(null)}
     var selected by remember {mutableStateOf(setOf<String>())}
-    val a=stringResource(R.string.template_a);val b=stringResource(R.string.template_b)
+    val starterNames=StarterTemplates.all.associate {it.id to stringResource(starterTemplateLabel(it.id))}
     val programs=state.snapshot.programs.map {WatchProgram(it.id,it.name,it.exercises,it.restSeconds,it.prescriptions)}+
-        StarterTemplates.all.map {WatchProgram("starter-${it.id}",if(it.id=="A") a else b,it.exercises,90)}
+        StarterTemplates.all.map {WatchProgram("starter-${it.id}",starterNames.getValue(it.id),it.exercises,90)}
     DisposableEffect(Unit) {onDispose {pending?.fill(0)}}
     val create=rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) {uri ->
         val bytes=pending;pending=null

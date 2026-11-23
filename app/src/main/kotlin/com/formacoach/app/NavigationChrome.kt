@@ -6,7 +6,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -16,7 +15,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.formacoach.model.WeightUnit
 import java.time.LocalDate
 
 @Composable
@@ -24,23 +22,18 @@ internal fun FormaScaffold(
     tab: Int,
     onTab: (Int) -> Unit,
     today: LocalDate,
-    darkTheme: Boolean,
-    onToggleTheme: () -> Unit,
-    weightUnit: WeightUnit,
-    onToggleUnit: () -> Unit,
     snackbarHostState: SnackbarHostState,
     onQuickLog: () -> Unit,
     onProfile: () -> Unit,
-    onWatch: () -> Unit,
-    onBackup: () -> Unit,
+    onSettings: () -> Unit,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    val labels = listOf(R.string.exercises_tab, R.string.train, R.string.eat, R.string.you_tab)
+    val labels = listOf(R.string.today, R.string.train, R.string.eat, R.string.progress)
     val icons = listOf(
-        Icons.Default.AccessibilityNew,
+        Icons.Default.Today,
         Icons.Default.FitnessCenter,
         Icons.Default.Restaurant,
-        Icons.Default.Person,
+        Icons.Default.Insights,
     )
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val wide = maxWidth >= 840.dp
@@ -93,6 +86,7 @@ internal fun FormaScaffold(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                         shape = RoundedCornerShape(18.dp),
+                        modifier = Modifier.testTag("quick_log_fab"),
                     ) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(R.string.quick_log))
                     }
@@ -144,24 +138,8 @@ internal fun FormaScaffold(
                                         )
                                     }
                                 }
-                                Surface(
-                                    onClick = onToggleUnit,
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)),
-                                ) {
-                                    Text(
-                                        stringResource(if (weightUnit == WeightUnit.KG) R.string.kg else R.string.lb),
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
-                                    )
-                                }
-                                TopBarAction(if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode, R.string.toggle_theme, onToggleTheme)
-                                TopBarAction(Icons.Default.Watch, R.string.apple_watch, onWatch, Modifier.testTag("watch_settings"))
                                 TopBarAction(Icons.Default.AccountCircle, R.string.profile, onProfile)
-                                TopBarAction(Icons.Default.SaveAlt, R.string.backup, onBackup, Modifier.testTag("backup_settings"))
+                                TopBarAction(Icons.Default.Settings, R.string.settings_title, onSettings, Modifier.testTag("open_settings"))
                             }
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
                         }

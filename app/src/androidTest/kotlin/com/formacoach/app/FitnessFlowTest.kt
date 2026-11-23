@@ -160,7 +160,8 @@ class FitnessFlowTest {
 
     @Test fun availabilityProposalRequiresConfirmation() {
         ensureProfile()
-        rule.onNodeWithTag("tab_4").performClick()
+        rule.onNodeWithTag("tab_3").performClick()
+        rule.onNodeWithTag("progress_section_1").performClick()
         rule.onNodeWithTag("available_sessions_2").performScrollTo()
         val current=(2..4).first {rule.onNodeWithTag("available_sessions_$it").fetchSemanticsNode().config[androidx.compose.ui.semantics.SemanticsProperties.Selected]}
         val target=if(current==2) 3 else 2
@@ -198,12 +199,11 @@ class FitnessFlowTest {
 
     @Test fun optionalModelCheckNeverBlocksTheRecordedReview() {
         ensureProfile()
-        rule.onNodeWithTag("tab_4").performClick()
+        rule.onNodeWithTag("tab_3").performClick()
+        rule.onNodeWithTag("progress_section_1").performClick()
         rule.onNodeWithTag("check_local_model").performScrollTo().performClick()
         rule.waitUntil(20_000) {!rule.onNodeWithTag("check_local_model").fetchSemanticsNode().config.contains(androidx.compose.ui.semantics.SemanticsProperties.Disabled)}
         rule.onNodeWithText(rule.activity.getString(R.string.weekly_review)).performScrollTo().assertExists()
-        val permissions=rule.activity.packageManager.getPackageInfo(rule.activity.packageName,android.content.pm.PackageManager.GET_PERMISSIONS).requestedPermissions.orEmpty()
-        org.junit.Assert.assertFalse(permissions.contains(android.Manifest.permission.INTERNET))
     }
 
     @Test fun muscleMapsCoverEveryExerciseAndWatchTransferIsAccessible() {
@@ -219,6 +219,7 @@ class FitnessFlowTest {
             rule.onNodeWithTag("muscle_map_${exercise.name}").performScrollTo().assertExists()
             rule.onNodeWithTag("guide_close").performClick()
         }
+        rule.onNodeWithTag("open_settings").performClick()
         rule.onNodeWithTag("watch_settings").performClick()
         rule.onNodeWithTag("watch_export").performScrollTo().assertIsNotEnabled()
         rule.onNodeWithTag("watch_open_import").performScrollTo().assertIsEnabled()

@@ -161,4 +161,67 @@ class DailyWorkflowTest {
         assertEquals("", Profile("", Goal.BUILD_HABIT, 3).name)
         assertThrows(IllegalArgumentException::class.java) { Profile("x".repeat(81), Goal.BUILD_HABIT, 3) }
     }
+
+    @Test fun `rolling weight trend averages recorded days in window without inventing missing days`() {
+        assertTrue(TrainingHistory.rollingWeightTrend(emptyList()).isEmpty())
+        val single = listOf(HistoryPoint(date, 80.0))
+        assertEquals(single, TrainingHistory.rollingWeightTrend(single))
+        val sparse = listOf(
+            HistoryPoint(date.minusDays(10), 84.0),
+            HistoryPoint(date.minusDays(4), 82.0),
+            HistoryPoint(date.minusDays(2), 80.0),
+            HistoryPoint(date, 81.0),
+        )
+        val trend = TrainingHistory.rollingWeightTrend(sparse, windowDays = 7)
+        assertEquals(4, trend.size)
+        assertEquals(84.0, trend[0].value, 0.0001)
+        assertEquals(83.0, trend[1].value, 0.0001)
+        assertEquals(81.0, trend[2].value, 0.0001)
+        assertEquals(81.0, trend[3].value, 0.0001)
+    }
+
+    @Test fun `ramadan meal slots and combo recipe preserve immutable snapshots`() {
+        val suhoor = food.portion(100.0, date).copy(slot = MealSlot.SUHOOR)
+        val iftar = food.portion(200.0, date).copy(slot = MealSlot.IFTAR)
+        assertEquals(MealSlot.SUHOOR, suhoor.slot)
+        assertEquals(MealSlot.IFTAR, iftar.slot)
+        val combo = Food.recipe(
+            name = "Suhoor combo",
+            servings = 1.0,
+            source = "Manual",
+            ingredients = listOf(suhoor, iftar).map { m ->
+                IngredientSnapshot(m.name, m.quantity ?: 1.0, m.unit ?: NutritionUnit.SERVING, Nutrients(m.calories, m.protein, m.carbs, m.fat), m.source)
+            },
+        )
+        assertEquals(600.0, combo.nutrients.calories, 0.0001)
+        assertEquals(30.0, combo.nutrients.protein, 0.0001)
+        assertEquals(2, combo.ingredients.size)
+    }
+
+    @Test fun `food swap calculator matches protein and calories accurately`() {
+        val chicken = Food(id = "f1", name = "Chicken", referenceAmount = 100.0, unit = NutritionUnit.GRAMS, nutrients = Nutrients(165.0, 31.0, 0.0, 3.6), source = "USDA")
+        val tuna = Food(id = "f2", name = "Tuna", referenceAmount = 100.0, unit = NutritionUnit.GRAMS, nutrients = Nutrients(116.0, 25.5, 0.0, 0.8), source = "USDA")
+        val rice = Food(id = "f3", name = "Rice", referenceAmount = 100.0, unit = NutritionUnit.GRAMS, nutrients = Nutrients(130.0, 2.7, 28.2, 0.3), source = "USDA")
+        val proteinSwaps = FoodSwapCalculator.findSwaps(chicken, 100.0, listOf(chicken, tuna, rice), SwapMatchBy.PROTEIN)
+        assertEquals("f2", proteinSwaps.first().food.id)
+        assertEquals(31.0, proteinSwaps.first().matchedNutrients.protein, 0.05)
+        val calSwaps = FoodSwapCalculator.findSwaps(chicken, 100.0, listOf(chicken, tuna, rice), SwapMatchBy.CALORIES)
+        assertEquals(2, calSwaps.size)
+        assertEquals(165.0, calSwaps.first().matchedNutrients.calories, 0.05)
+    }
+
+    @Test fun `family pot calculator scales shared meals by cooked weight or family shares`() {
+        val pot = Nutrients(calories = 2000.0, protein = 120.0, carbs = 200.0, fat = 60.0)
+        val byWeight = FamilyPotCalculator.byCookedWeight(pot, totalCookedGrams = 1600.0, myBowlGrams = 400.0)!!
+        assertEquals(25, byWeight.percent)
+        assertEquals(500.0, byWeight.portionNutrients.calories, 0.01)
+        assertEquals(30.0, byWeight.portionNutrients.protein, 0.01)
+
+        val byShares = FamilyPotCalculator.byFamilyShares(pot, totalShares = 4.0, myShares = 1.0)!!
+        assertEquals(25, byShares.percent)
+        assertEquals(500.0, byShares.portionNutrients.calories, 0.01)
+
+        assertNull(FamilyPotCalculator.byCookedWeight(pot, totalCookedGrams = 1000.0, myBowlGrams = 1200.0))
+        assertNull(FamilyPotCalculator.byFamilyShares(pot, totalShares = 0.0, myShares = 1.0))
+    }
 }

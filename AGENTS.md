@@ -8,7 +8,7 @@ Independent Android project, working name Forma / فورمة. Nemory is a separa
 - All Android strings in matching `values/*.xml` and `values-ar/*.xml`; Apple strings in `apple/Resources/en.lproj` and `ar.lproj`. Support RTL and localized numeric input.
 - Core logging and deterministic reports work without an LLM or network. Missing logs are unknown, not evidence of nonadherence.
 - Calculations use typed records, local calendar dates and an injected clock. Foods/recipes and logged portions retain source snapshots; edits never silently rewrite history.
-- Optional Gemini Nano only selects known computed fact IDs, capped at 64 tokens / 15 seconds, foreground-only. Never render raw model prose. Application INTERNET permission stays removed; no cloud provider.
+- Optional Gemini Nano only selects known computed fact IDs, capped at 64 tokens / 15 seconds, foreground-only. Never render raw model prose. Application INTERNET permission is scoped strictly to free, public, keyless food lookup APIs (Open Food Facts, ODbL); no paid cloud provider or user-data telemetry.
 - No automated diet or exercise prescription until reviewed rules, boundaries and regression cases exist. User-entered goals are explicit user inputs.
 - No health diagnosis, injury treatment, automatic calorie changes or silent plan writes. Future coach proposals need confirmation and source evidence.
 - All external APIs must be free, public and keyless. Review data licensing, attribution, coverage and rate limits before integration.

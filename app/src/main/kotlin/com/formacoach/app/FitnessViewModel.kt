@@ -79,6 +79,7 @@ class FitnessViewModel @Inject constructor(
 
     fun saveProfile(profile: Profile, done: () -> Unit) = write(done) { repository.saveProfile(profile) }
     fun start(template: String, date: LocalDate = LocalDate.now(clock)) = write { repository.startSession(template, date) }
+    fun startEmpty(date: LocalDate = LocalDate.now(clock)) = write { repository.startEmptySession(date) }
     fun addSet(session: String, exercise: Exercise, reps: Int, kg: Double, kind: SetKind = SetKind.WORKING, rpe: Double? = null, done: () -> Unit) = write(done) {
         repository.addSet(TrainingSet(sessionId = session, exercise = exercise, reps = reps, weightKg = kg, kind = kind, rpe = rpe))
     }

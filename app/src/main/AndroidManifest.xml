@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <!-- Keep application-UID outbound traffic disabled, including SDK telemetry.
-         AICore and user-selected document providers manage their own downloads. -->
-    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <!-- Used strictly for free, public, keyless Open Food Facts lookup; core logging works offline. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Opt-in lock-screen countdown for active workout rest timers on Android 13+. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:name=".FormaApplication"
         android:allowBackup="false"
@@ -22,5 +23,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver
+            android:name=".FormaWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/forma_widget_info" />
+        </receiver>
     </application>
 </manifest>

@@ -46,82 +46,15 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(AppLocaleHelper.wrapContext(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { FormaApp() }
     }
 }
-
-private val FormaColors = darkColorScheme(
-    primary = Color(0xFFC8F57B),
-    onPrimary = Color(0xFF102412),
-    primaryContainer = Color(0xFF233D29),
-    onPrimaryContainer = Color(0xFFE3FAC6),
-    secondary = Color(0xFFFFBE7B),
-    onSecondary = Color(0xFF2D1905),
-    secondaryContainer = Color(0xFF3E2D1B),
-    onSecondaryContainer = Color(0xFFFFE4C4),
-    tertiary = Color(0xFF6EE7B7),
-    onTertiary = Color(0xFF06281C),
-    tertiaryContainer = Color(0xFF153B2E),
-    onTertiaryContainer = Color(0xFFA7F3D0),
-    background = Color(0xFF0B1713),
-    onBackground = Color(0xFFF3F8F1),
-    surface = Color(0xFF13251F),
-    onSurface = Color(0xFFF3F8F1),
-    surfaceVariant = Color(0xFF1E372E),
-    onSurfaceVariant = Color(0xFFB3C7BA),
-    surfaceContainerLowest = Color(0xFF08110E),
-    surfaceContainerLow = Color(0xFF101F1A),
-    surfaceContainer = Color(0xFF142721),
-    surfaceContainerHigh = Color(0xFF1B332B),
-    surfaceContainerHighest = Color(0xFF234036),
-    outline = Color(0xFF567363),
-    outlineVariant = Color(0xFF264338),
-    error = Color(0xFFFF8A80),
-    onError = Color(0xFF3B0907),
-    errorContainer = Color(0xFF5C1814),
-    onErrorContainer = Color(0xFFFFDAD6),
-    // Snackbars use the inverse roles; without these Material falls back to its default purple.
-    inverseSurface = Color(0xFFE3EEE6),
-    inverseOnSurface = Color(0xFF142721),
-    inversePrimary = Color(0xFF2E6B24),
-)
-
-private val FormaLightColors = lightColorScheme(
-    primary = Color(0xFF2E6B24),
-    onPrimary = Color(0xFFFFFFFF),
-    primaryContainer = Color(0xFFD9F5C8),
-    onPrimaryContainer = Color(0xFF0E2909),
-    secondary = Color(0xFFB35B12),
-    onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFFFE4C7),
-    onSecondaryContainer = Color(0xFF361902),
-    tertiary = Color(0xFF0F766E),
-    onTertiary = Color(0xFFFFFFFF),
-    tertiaryContainer = Color(0xFFCCFBF1),
-    onTertiaryContainer = Color(0xFF042F2E),
-    background = Color(0xFFF3F7F3),
-    onBackground = Color(0xFF112018),
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF112018),
-    surfaceVariant = Color(0xFFE3ECE5),
-    onSurfaceVariant = Color(0xFF42594B),
-    surfaceContainerLowest = Color(0xFFFFFFFF),
-    surfaceContainerLow = Color(0xFFF7FAF7),
-    surfaceContainer = Color(0xFFEDF3EE),
-    surfaceContainerHigh = Color(0xFFE4EDE6),
-    surfaceContainerHighest = Color(0xFFDAE6DD),
-    outline = Color(0xFF708778),
-    outlineVariant = Color(0xFFCAD8CE),
-    error = Color(0xFFBA1A1A),
-    onError = Color(0xFFFFFFFF),
-    errorContainer = Color(0xFFFFDAD6),
-    onErrorContainer = Color(0xFF410002),
-    inverseSurface = Color(0xFF1B332B),
-    inverseOnSurface = Color(0xFFEAF3EC),
-    inversePrimary = Color(0xFFC8F57B),
-)
 
 internal val LocalWeightUnit = compositionLocalOf { WeightUnit.KG }
 
@@ -135,14 +68,17 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     var darkTheme by rememberSaveable { mutableStateOf(prefs.getBoolean("dark_theme", true)) }
     var weightUnit by rememberSaveable { mutableStateOf(if (prefs.getString("weight_unit", "KG") == "LB") WeightUnit.LB else WeightUnit.KG) }
     var showQuickLog by rememberSaveable { mutableStateOf(false) }
+    var showSettings by rememberSaveable { mutableStateOf(false) }
     var editingProfile by rememberSaveable { mutableStateOf(false) }
     var showWatch by rememberSaveable { mutableStateOf(false) }
     var showBackup by rememberSaveable { mutableStateOf(false) }
+    var language by remember { mutableStateOf(AppLocaleHelper.current(context)) }
     var generation by rememberSaveable { mutableIntStateOf(0) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val setRemovedMsg = stringResource(R.string.set_removed_undo)
     val undoLabel = stringResource(R.string.undo)
+    val weightSavedMsg = stringResource(R.string.quick_weight_saved)
     val pageState = key(generation) { rememberSaveableStateHolder() }
     // Re-evaluate calendar totals if the app remains open over local midnight.
     var today by remember { mutableStateOf(LocalDate.now(vm.clock)) }
@@ -153,6 +89,11 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
         }
     }
     LaunchedEffect(today) { vm.onDayChanged() }
+    LaunchedEffect(state.snapshot, today) {
+        if (!state.loading && !state.loadFailed) {
+            FormaWidgetProvider.updateSummary(context, state.snapshot, today)
+        }
+    }
     // Numbers and dates use Western digits in every language so they match the app's text resources.
     val baseConfiguration = LocalConfiguration.current
     val displayConfiguration = remember(baseConfiguration) {
@@ -163,11 +104,8 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     CompositionLocalProvider(LocalWeightUnit provides weightUnit, LocalConfiguration provides displayConfiguration) {
     MaterialTheme(
         colorScheme = if (darkTheme) FormaColors else FormaLightColors,
-        shapes = Shapes(
-            small = RoundedCornerShape(12.dp),
-            medium = RoundedCornerShape(16.dp),
-            large = RoundedCornerShape(24.dp),
-        ),
+        typography = FormaTypography,
+        shapes = FormaShapes,
     ) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             if (state.loading) {
@@ -194,24 +132,13 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                 }
             } else {
                 FormaScaffold(
-                    tab,
-                    { tab = it },
-                    today,
-                    darkTheme = darkTheme,
-                    onToggleTheme = {
-                        darkTheme = !darkTheme
-                        prefs.edit().putBoolean("dark_theme", darkTheme).apply()
-                    },
-                    weightUnit = weightUnit,
-                    onToggleUnit = {
-                        weightUnit = if (weightUnit == WeightUnit.KG) WeightUnit.LB else WeightUnit.KG
-                        prefs.edit().putString("weight_unit", weightUnit.name).apply()
-                    },
+                    tab = tab,
+                    onTab = { tab = it },
+                    today = today,
                     snackbarHostState = snackbarHostState,
                     onQuickLog = { showQuickLog = true },
                     onProfile = { editingProfile = true },
-                    onWatch = { showWatch = true },
-                    onBackup = { showBackup = true },
+                    onSettings = { showSettings = true },
                 ) { padding ->
                     Box(Modifier.fillMaxSize().padding(padding).imePadding(), contentAlignment = Alignment.TopCenter) {
                         pageState.SaveableStateProvider(tab) {
@@ -279,22 +206,19 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                         }
                                     }
                                 }
-                                val setLoggedMsg = stringResource(R.string.set_logged_toast)
-                                val openSessionLabel = stringResource(R.string.open_session)
-                                var youSection by rememberSaveable { mutableIntStateOf(0) }
+                                var progressSection by rememberSaveable { mutableIntStateOf(0) }
                                 when (tab) {
                                     0 -> {
-                                        PageHeading(R.string.exercise_library)
-                                        ExerciseLibrary(state, vm, today) {
-                                            scope.launch {
-                                                val res = snackbarHostState.showSnackbar(
-                                                    message = setLoggedMsg,
-                                                    actionLabel = openSessionLabel,
-                                                    duration = SnackbarDuration.Short,
-                                                )
-                                                if (res == SnackbarResult.ActionPerformed) tab = 1
-                                            }
-                                        }
+                                        TodayContent(
+                                            state.snapshot,
+                                            today,
+                                            vm,
+                                            busy = state.busy,
+                                            onTrain = { tab = 1 },
+                                            onEat = { tab = 2 },
+                                            onStartProgram = { id -> vm.start(id, today); tab = 1 },
+                                        )
+                                        MilestonesCard(state.snapshot)
                                     }
                                     1 -> TrainContent(state, today, vm, scrollState) { deletedSet, originalIds ->
                                         scope.launch {
@@ -311,25 +235,13 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                     2 -> EatContent(state, today, vm)
                                     3 -> {
                                         SegmentedTabs(
-                                            selectedIndex = youSection,
-                                            labels = listOf(R.string.today, R.string.progress, R.string.coach),
-                                            onSelect = { youSection = it },
-                                            tagPrefix = "you_section",
+                                            selectedIndex = progressSection,
+                                            labels = listOf(R.string.stats_section, R.string.coach),
+                                            onSelect = { progressSection = it },
+                                            tagPrefix = "progress_section",
                                         )
-                                        when (youSection) {
-                                            0 -> {
-                                                TodayContent(
-                                                    state.snapshot,
-                                                    today,
-                                                    vm,
-                                                    busy = state.busy,
-                                                    onTrain = { tab = 1 },
-                                                    onEat = { tab = 2 },
-                                                    onStartProgram = { id -> vm.start(id, today); tab = 1 },
-                                                )
-                                                MilestonesCard(state.snapshot)
-                                            }
-                                            1 -> ProgressContent(state, today, vm)
+                                        when (progressSection) {
+                                            0 -> ProgressContent(state, today, vm)
                                             else -> CoachContent(state, today, vm)
                                         }
                                     }
@@ -346,7 +258,21 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                     onDismissRequest = { showQuickLog = false },
                     containerColor = MaterialTheme.colorScheme.surface,
                 ) {
-                    Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    val todayMeasure = state.snapshot.measurements.firstOrNull { it.date == today }
+                    var quickWeight by rememberSaveable(today) {
+                        mutableStateOf(todayMeasure?.weightKg?.let { formatInputNumber(WeightUnits.fromKg(it, weightUnit), displayConfiguration.locales[0], 2) }.orEmpty())
+                    }
+                    val parsedQuickWeight = NumericInput.decimal(quickWeight)?.let { WeightUnits.toKg(it, weightUnit) }?.takeIf { it in 20.0..400.0 }
+                    val recentMeals = state.snapshot.meals.distinctBy { listOf(it.name, it.calories, it.protein, it.carbs, it.fat, it.source) }.take(4)
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 20.dp)
+                            .navigationBarsPadding()
+                            .padding(bottom = 24.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
                         Text(stringResource(R.string.quick_log), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                         Button(
                             onClick = { showQuickLog = false; tab = 1 },
@@ -357,7 +283,54 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(if (state.snapshot.sessions.any { it.completedAt == null }) R.string.resume_session else R.string.open_training), fontWeight = FontWeight.Bold)
                         }
-                        FilledTonalButton(
+                        // Inline Quick Weight Log
+                        Text(stringResource(R.string.quick_log_weight), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.weight(1f)) {
+                                Input(
+                                    if (weightUnit == WeightUnit.KG) R.string.body_weight else R.string.body_weight_lb,
+                                    quickWeight,
+                                    { quickWeight = it },
+                                    "quick_weight_input",
+                                )
+                            }
+                            FilledTonalButton(
+                                onClick = {
+                                    parsedQuickWeight?.let { kg ->
+                                        vm.measure(Measurement(today, kg, todayMeasure?.waistCm)) {
+                                            showQuickLog = false
+                                            scope.launch { snackbarHostState.showSnackbar(weightSavedMsg, duration = SnackbarDuration.Short) }
+                                        }
+                                    }
+                                },
+                                enabled = parsedQuickWeight != null && !state.busy,
+                                shape = RoundedCornerShape(14.dp),
+                                modifier = Modifier.heightIn(min = 52.dp).testTag("quick_weight_save"),
+                            ) {
+                                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(4.dp))
+                                Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        if (recentMeals.isNotEmpty()) {
+                            Text(stringResource(R.string.quick_repeat_meal), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                recentMeals.forEach { recent ->
+                                    AssistChip(
+                                        onClick = {
+                                            vm.addMeal(recent.copy(id = java.util.UUID.randomUUID().toString(), date = today)) {
+                                                showQuickLog = false
+                                                tab = 2
+                                            }
+                                        },
+                                        enabled = !state.busy,
+                                        leadingIcon = { Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(15.dp)) },
+                                        label = { Text("${recent.name} · ${number(recent.calories, 0)}", maxLines = 1) },
+                                    )
+                                }
+                            }
+                        }
+                        OutlinedButton(
                             onClick = { showQuickLog = false; tab = 2 },
                             shape = RoundedCornerShape(14.dp),
                             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
@@ -366,17 +339,32 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                             Spacer(Modifier.width(8.dp))
                             Text(stringResource(R.string.add_meal), fontWeight = FontWeight.SemiBold)
                         }
-                        FilledTonalButton(
-                            onClick = { showQuickLog = false; tab = 3 },
-                            shape = RoundedCornerShape(14.dp),
-                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
-                        ) {
-                            Icon(Icons.Default.MonitorWeight, null, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.save_measurement), fontWeight = FontWeight.SemiBold)
-                        }
                     }
                 }
+            }
+            if (showSettings) {
+                SettingsSheet(
+                    language = language,
+                    onLanguage = { next ->
+                        language = next
+                        showSettings = false
+                        AppLocaleHelper.apply(context, next)
+                    },
+                    darkTheme = darkTheme,
+                    onDarkTheme = {
+                        darkTheme = it
+                        prefs.edit().putBoolean("dark_theme", it).apply()
+                    },
+                    weightUnit = weightUnit,
+                    onWeightUnit = {
+                        weightUnit = it
+                        prefs.edit().putString("weight_unit", it.name).apply()
+                    },
+                    onProfile = { editingProfile = true },
+                    onWatch = { showWatch = true },
+                    onBackup = { showBackup = true },
+                    onDismiss = { showSettings = false },
+                )
             }
             if (showWatch) WatchTransferDialog(vm, state) { showWatch = false }
             if (showBackup) {
@@ -543,6 +531,36 @@ private fun TodayContent(
         )
     }
 
+    // Warm, honest daily narrative reflection (deterministic, never shames rest days)
+    val todayCompletedIds = snapshot.sessions.filter { it.completedAt != null && it.date == today }.map { it.id }.toSet()
+    val todayWorkingSets = snapshot.sets.count { it.sessionId in todayCompletedIds && it.kind == SetKind.WORKING }
+    val todayKcal = meals.sumOf { it.calories }
+    val storyText = when {
+        todayWorkingSets > 0 && todayKcal > 0 -> stringResource(
+            R.string.daily_story_complete,
+            number(todayWorkingSets.toDouble(), 0),
+            number(todayKcal, 0),
+        )
+        todayWorkingSets > 0 -> stringResource(R.string.daily_story_trained, number(todayWorkingSets.toDouble(), 0))
+        todayKcal > 0 -> stringResource(R.string.daily_story_fueled, number(todayKcal, 0))
+        else -> stringResource(R.string.daily_story_fresh)
+    }
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
+        modifier = Modifier.fillMaxWidth().testTag("daily_narrative_card"),
+    ) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
+            Text(storyText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+        }
+    }
+
     WeeklyActivityStrip(today = today, activeDates = activeDates)
 
     // Hero Weekly Training Card
@@ -557,8 +575,8 @@ private fun TodayContent(
                 .background(
                     Brush.linearGradient(
                         listOf(
-                            Color(0xFF1D3827),
-                            Color(0xFF13261E),
+                            MaterialTheme.colorScheme.primaryContainer,
+                            MaterialTheme.colorScheme.surfaceContainerHigh,
                         ),
                     ),
                 )
@@ -645,7 +663,7 @@ private fun TodayContent(
             snapshot.programs.map { Triple(it.id, it.name, it.exercises) }
         } else {
             StarterTemplates.all.map {
-                Triple(it.id, stringResource(if (it.id == "A") R.string.template_a else R.string.template_b), it.exercises)
+                Triple(it.id, stringResource(starterTemplateLabel(it.id)), it.exercises)
             }
         }
         Row(
@@ -888,6 +906,14 @@ internal fun formatWeightInput(kg: Double): String =
 @Composable
 internal fun dateLabel(date: LocalDate): String =
     date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(LocalConfiguration.current.locales[0]))
+
+/** Display name for a built-in starter template; every new starter ID must be listed here. */
+internal fun starterTemplateLabel(id: String): Int = when (id) {
+    "A" -> R.string.template_a
+    "B" -> R.string.template_b
+    "HOME_EXPRESS" -> R.string.template_home_express
+    else -> R.string.workout_generic
+}
 
 internal fun goalLabel(goal: Goal): Int = when (goal) {
     Goal.FAT_LOSS -> R.string.goal_fat_loss
