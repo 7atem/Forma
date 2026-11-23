@@ -193,3 +193,6 @@
 "motion_photos" = "Photos";
 "motion_drag_hint" = "Drag sideways to rotate. Glowing areas show the working muscles; brighter means main muscles. Illustrative demo, not personal form coaching.";
 "motion_3d_a11y" = "%@, rotatable 3D motion demo. Working muscles: %@";
+"motion_video" = "Video";
+"motion_video_note" = "AI-generated example video. Highlighted muscles come from the Forma muscle catalog. Not personal form coaching.";
+"motion_video_a11y" = "%@, looping demonstration video. Working muscles: %@";

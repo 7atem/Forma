@@ -359,4 +359,7 @@
     <string name="motion_photos">صور</string>
     <string name="motion_drag_hint">اسحب يمين وشمال للتدوير. الأجزاء المضيئة بتوضح العضلات الشغالة، والأفتح هي الأساسية. عرض توضيحي، مش تقييم شخصي لأدائك.</string>
     <string name="motion_3d_description">%1$s، عرض حركة ثلاثي الأبعاد قابل للتدوير. العضلات الشغالة: %2$s</string>
+    <string name="motion_video">فيديو</string>
+    <string name="motion_video_note">فيديو توضيحي مولّد بالذكاء الاصطناعي. العضلات المضيئة من دليل عضلات فورمة. مش تقييم شخصي لأدائك.</string>
+    <string name="motion_video_description">%1$s، فيديو توضيحي متكرر. العضلات الشغالة: %2$s</string>
 </resources>

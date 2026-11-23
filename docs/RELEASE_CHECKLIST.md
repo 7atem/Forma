@@ -30,3 +30,4 @@ No store upload, public repository push, recruitment, billing setup or external 
 - [ ] Prepare original Apple icons/store assets, choose owner signing credentials and review final platform disclosures before distribution.
 
 - [ ] Review every generated demonstration pose, named equipment variant and translated cue with qualified reviewers; verify beginners understand the two still phases and can obtain individual form feedback. These are not motion capture or personal technique assessments.
+- [ ] Every bundled exercise video passes `python scripts/check_exercise_video.py --release` (qualified pose review recorded in the manifest).

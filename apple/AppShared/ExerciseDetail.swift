@@ -8,7 +8,8 @@ struct ExerciseDetail: View {
     @State private var phase = 0
     @State private var animating = true
     @State private var showSecondPhase = false
-    @State private var showMotion = true
+    /// 0 = 3D motion, 1 = video, 2 = photos; nil picks the richest available.
+    @State private var mode: Int?
     @Environment(\.locale) private var locale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
@@ -75,27 +76,31 @@ struct ExerciseDetail: View {
                 } else {
                     #if os(iOS)
                     let hasMotion = ExerciseMotionCatalog.of(exercise) != nil
-                    let showPhotos = !(hasMotion && showMotion)
+                    let hasVideo = ExerciseVideoLibrary.url(exercise) != nil
+                    let modes = [hasMotion ? 0 : nil, hasVideo ? 1 : nil, 2].compactMap { $0 }
+                    let current = mode ?? modes[0]
+                    let showPhotos = current == 2
                     #else
                     let showPhotos = true
                     #endif
                     #if os(iOS)
-                    if hasMotion {
+                    if modes.count > 1 {
                         HStack(spacing: 6) {
-                            Button { showMotion = true } label: {
-                                FormaPill(text: String(localized: "motion_3d"),
-                                          background: showMotion ? FormaTheme.primary : FormaTheme.surface,
-                                          foreground: showMotion ? FormaTheme.onPrimary : FormaTheme.textMuted)
-                            }
-                            Button { showMotion = false } label: {
-                                FormaPill(text: String(localized: "motion_photos"),
-                                          background: !showMotion ? FormaTheme.primary : FormaTheme.surface,
-                                          foreground: !showMotion ? FormaTheme.onPrimary : FormaTheme.textMuted)
+                            ForEach(modes, id: \.self) { option in
+                                Button { mode = option } label: {
+                                    FormaPill(text: String(localized: String.LocalizationValue(option == 0 ? "motion_3d" : option == 1 ? "motion_video" : "motion_photos")),
+                                              background: current == option ? FormaTheme.primary : FormaTheme.surface,
+                                              foreground: current == option ? FormaTheme.onPrimary : FormaTheme.textMuted)
+                                }
                             }
                             Spacer()
                         }
                     }
-                    if hasMotion && showMotion {
+                    if current == 1 {
+                        ExerciseVideoView(exercise: exercise, playing: animating)
+                        Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
+                    }
+                    if current == 0 {
                         ExerciseMotion3DView(exercise: exercise, playing: animating)
                             .background(FormaTheme.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))

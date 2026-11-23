@@ -1,0 +1,18 @@
+{
+  "note": "Bundled AI exercise videos. Written by scripts/finalize_exercise_video.py; reviewed=true only after qualified pose review.",
+  "videos": [
+    {
+      "id": "SQUAT",
+      "file": "assets/exercises/res/raw/exercise_video_squat.mp4",
+      "bytes": 225578,
+      "sha256": "b653ee14204a8abcf982aca71c99110eb4f4e41162d5f8580ef8d2f7d7259b65",
+      "seconds": 7.2,
+      "width": 720,
+      "height": 720,
+      "tool": "Veo (Gemini)",
+      "looped": "source",
+      "reviewed": false,
+      "reviewNote": ""
+    }
+  ]
+}

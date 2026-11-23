@@ -129,28 +129,36 @@ internal fun ExerciseGuideSheet(
             if(tab==0) {
                 val reduceMotion = rememberReduceMotion()
                 var animating by rememberSaveable(exercise) { mutableStateOf(!reduceMotion) }
+                val context = LocalContext.current
                 val hasMotion = remember(exercise) { ExerciseMotionCatalog.of(exercise) != null }
-                var showMotion by rememberSaveable(exercise) { mutableStateOf(hasMotion) }
-                if (hasMotion) {
+                val hasVideo = remember(exercise) { exerciseVideoResource(context, exercise) != 0 }
+                // 0 = 3D motion, 1 = video, 2 = photos. Only offer what exists for this exercise.
+                val modes = remember(exercise) { listOfNotNull(0.takeIf { hasMotion }, 1.takeIf { hasVideo }, 2) }
+                var mode by rememberSaveable(exercise) { mutableIntStateOf(modes.first()) }
+                if (modes.size > 1) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FilterChip(
-                            selected = showMotion,
-                            onClick = { showMotion = true },
-                            label = { Text(stringResource(R.string.motion_3d)) },
-                            modifier = Modifier.testTag("guide_mode_3d"),
-                        )
-                        FilterChip(
-                            selected = !showMotion,
-                            onClick = { showMotion = false },
-                            label = { Text(stringResource(R.string.motion_photos)) },
-                            modifier = Modifier.testTag("guide_mode_photos"),
-                        )
+                        modes.forEach { option ->
+                            FilterChip(
+                                selected = mode == option,
+                                onClick = { mode = option },
+                                label = { Text(stringResource(when (option) { 0 -> R.string.motion_3d; 1 -> R.string.motion_video; else -> R.string.motion_photos })) },
+                                modifier = Modifier.testTag(when (option) { 0 -> "guide_mode_3d"; 1 -> "guide_mode_video"; else -> "guide_mode_photos" }),
+                            )
+                        }
                     }
                 }
-                if (hasMotion && showMotion) {
+                val showMotion = mode != 2
+                if (mode == 0) {
                     ExerciseMotion3D(exercise, playing = animating)
                     Text(
                         stringResource(R.string.motion_drag_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (mode == 1) {
+                    ExerciseVideo(exercise, playing = animating)
+                    Text(
+                        stringResource(R.string.motion_video_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -160,7 +168,7 @@ internal fun ExerciseGuideSheet(
                     ExerciseIllustration(exercise) { enlarged = true }
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    if ((!animating || reduceMotion) && !(hasMotion && showMotion)) {
+                    if ((!animating || reduceMotion) && !showMotion) {
                         Box(Modifier.weight(1f)) { PhaseLabels() }
                     } else {
                         Spacer(Modifier.weight(1f))

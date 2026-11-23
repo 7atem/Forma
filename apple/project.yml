@@ -23,6 +23,10 @@ targets:
       - Resources
       - path: ../assets/exercises/res/drawable-nodpi
         buildPhase: resources
+      # Reviewed AI exercise videos (optional until the first clip is added).
+      - path: ../assets/exercises/res/raw
+        buildPhase: resources
+        optional: true
     dependencies:
       - package: FormaCore
       - target: FormaWatch

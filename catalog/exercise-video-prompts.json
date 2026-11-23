@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "purpose": "AI video pilot: realistic motion between each exercise's existing start and movement stills. Generated outside the app by the maintainer in their own Gemini (Veo), Kling or Sora account; the app stays offline and bundles reviewed files only. Muscle highlighting is drawn by the app from catalog/exercise-muscles.json, never baked into the video.",
+  "workflow": "Run scripts/prepare_video_keyframes.py, upload start.png as the FIRST frame and end.png as the LAST frame (image-to-video with start/end frames), 4 seconds, 1:1, no audio. Then run scripts/finalize_exercise_video.py <ID> <download.mp4> --tool <tool> to build the forward+reverse loop and update the manifest. A qualified reviewer must approve each clip before release.",
+  "style": "Photorealistic 3D render matching the provided frames exactly: the same smooth grey adult mannequin-style athlete in a green t-shirt and black shorts, the same equipment and dark green studio background with soft top light. Camera locked off on a tripod at the same side three-quarter angle as the frames: no pan, zoom, cut or shake. One continuous, controlled, slow-tempo repetition. Realistic human joint angles. No text, numbers, logos, watermark or music.",
+  "negative": "camera movement, zoom, cut, extra limbs, extra fingers, merged or missing hands, knees or elbows bending backwards, bar passing through the body, plates changing size or detaching, equipment morphing, body morphing, face distortion, flicker, text, watermark, logo, music",
+  "clips": [
+    {
+      "id": "SQUAT",
+      "seconds": 4,
+      "motion": "Bodyweight squat from standing to the bottom. Hips move back and down while the knees travel forward in line with the toes, chest stays proud, arms reach straight forward for balance, heels stay flat on the floor, and the athlete pauses briefly at the bottom with thighs about parallel to the floor."
+    },
+    {
+      "id": "BARBELL_BENCH_PRESS",
+      "seconds": 4,
+      "motion": "Barbell bench press lowering phase. Lying on a flat bench with feet flat on the floor, the athlete lowers the loaded barbell under control from straight arms above the shoulders to touch the lower chest, elbows angled about 45 degrees from the torso, wrists straight, shoulder blades pinned to the bench. Hands never leave the bar and the bar stays level."
+    },
+    {
+      "id": "BARBELL_ROW",
+      "seconds": 4,
+      "motion": "Bent-over barbell row pulling phase. Hinged forward about 45 degrees with a flat back and soft knees, the athlete pulls the barbell from arm's length up to the lower ribs by driving the elbows back, without the torso rising or the hips moving. Hands never leave the bar and the bar stays level."
+    },
+    {
+      "id": "CONVENTIONAL_DEADLIFT",
+      "seconds": 4,
+      "motion": "Conventional deadlift lift from the floor to lockout. With a flat back and the bar close to the shins, the athlete pushes the floor away, the bar travels straight up close to the legs, hips and knees extend together, and the athlete finishes standing tall without leaning back. Plates start resting on the floor. Hands never leave the bar and the bar stays level."
+    },
+    {
+      "id": "BARBELL_OVERHEAD_PRESS",
+      "seconds": 4,
+      "motion": "Standing barbell overhead press pressing phase. From the front rack at the upper chest, the athlete presses the barbell straight up past the face to full lockout overhead, head moving slightly back and then through, ribs down, glutes tight, legs straight. Hands never leave the bar and the bar stays level."
+    }
+  ],
+  "spec": {
+    "output": "assets/exercises/res/raw/exercise_video_<id lowercase>.mp4",
+    "container": "MP4 (H.264 Main, yuv420p, faststart), no audio track",
+    "size": "720x720",
+    "fps": 30,
+    "loopSeconds": "4-8 (generated clip forward, then reversed)",
+    "maxBytes": 1600000
+  }
+}
