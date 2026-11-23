@@ -37,6 +37,9 @@ jobs:
           done
           codesign --force --sign - --timestamp=none --entitlements apple/Generated/FormaPhone.entitlements "$APP"
           codesign -d --entitlements :- "$APP" 2>/dev/null | grep -q "com.apple.developer.healthkit" || { echo "::error::HealthKit entitlement missing from IPA"; exit 1; }
+          # Include the non-secret entitlement declarations so an owner-controlled re-signing flow can preserve them.
+          codesign -d --entitlements apple/FormaPhone.entitlements.plist "$APP"
+          grep -q "com.apple.developer.healthkit" apple/FormaPhone.entitlements.plist || { echo "::error::Exportable HealthKit entitlements missing"; exit 1; }
           # The paired-watch install needs the watch app embedded under Watch/; fail loudly if it is not.
           test -f "$APP/Watch/FormaWatch.app/Info.plist" || { echo "::error::FormaWatch.app is not embedded in the IPA"; exit 1; }
           {
@@ -44,6 +47,7 @@ jobs:
             echo "- iPhone app: \`$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")\`"
             echo "- Watch app: \`$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Watch/FormaWatch.app/Info.plist")\` (companion \`$(/usr/libexec/PlistBuddy -c 'Print :WKCompanionAppBundleIdentifier' "$APP/Watch/FormaWatch.app/Info.plist")\`)"
             echo "- HealthKit entitlement embedded: yes"
+            echo "- Re-signing still requires an owner-controlled provisioning profile with HealthKit enabled."
           } >> "$GITHUB_STEP_SUMMARY"
           mkdir -p apple/ipa/Payload
           cp -R "$APP" apple/ipa/Payload/
@@ -53,5 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: FormaPhone-unsigned-ipa
-          path: apple/FormaPhone-unsigned.ipa
+          path: |
+            apple/FormaPhone-unsigned.ipa
+            apple/FormaPhone.entitlements.plist
           if-no-files-found: error

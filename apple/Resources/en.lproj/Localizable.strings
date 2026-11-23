@@ -119,6 +119,8 @@
 "health_sync" = "Sync now";
 "health_result_format" = "Added %ld workouts and %ld weight entries.";
 "health_failed" = "Couldn't read Apple Health. Please try again.";
+"health_signing_failed" = "This installed copy is missing its HealthKit entitlement.";
+"health_signing_help" = "Reinstall through Xcode or TestFlight with a development profile that enables HealthKit. If you re-sign the IPA, preserve com.apple.developer.healthkit; changing the bundle ID or signing without that capability will block Apple Health.";
 "health_nothing_found" = "Nothing found. If you didn't allow access, you can change it in Settings › Health › Data Access & Devices › Forma.";
 "health_unavailable" = "Apple Health isn't available on this device.";
 "health_remove" = "Remove imported data";
@@ -171,9 +173,10 @@
 "watch_app_missing" = "Forma is not installed on your Apple Watch";
 "watch_app_missing_help" = "On iPhone open the Watch app › My Watch › scroll to Available Apps › Forma › Install. If Forma is not listed, this build was installed without its watch app (common with re-signed IPAs); install through Xcode or TestFlight.";
 "motion_3d" = "3D motion";
-"motion_photos" = "Photos";
+"motion_photos" = "Photo stills";
+"motion_photos_note" = "Start and movement stills with a crossfade—not a continuous video. Video appears only when a real clip is bundled for this exercise.";
 "motion_drag_hint" = "Drag sideways to rotate. Glowing areas show the working muscles; brighter means main muscles. Illustrative demo, not personal form coaching.";
 "motion_3d_a11y" = "%@, rotatable 3D motion demo. Working muscles: %@";
-"motion_video" = "Video";
-"motion_video_note" = "AI-generated example video. Highlighted muscles come from the Forma muscle catalog. Not personal form coaching.";
+"motion_video" = "Video clip";
+"motion_video_note" = "Continuous looping AI-generated video. Highlighted muscles come from the Forma muscle catalog. Not personal form coaching.";
 "motion_video_a11y" = "%@, looping demonstration video. Working muscles: %@";

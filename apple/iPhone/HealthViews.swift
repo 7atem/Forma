@@ -42,7 +42,11 @@ import FormaCore
                         .font(.caption.weight(.semibold)).foregroundStyle(FormaTheme.primary)
                 }
                 if importer.failed {
-                    Text("health_failed").font(.caption.weight(.semibold)).foregroundStyle(.red)
+                    Text(importer.signingFailed ? String(localized: "health_signing_failed") : String(localized: "health_failed"))
+                        .font(.caption.weight(.semibold)).foregroundStyle(.red)
+                    if importer.signingFailed {
+                        Text("health_signing_help").font(.caption).foregroundStyle(FormaTheme.textPrimary)
+                    }
                     if let detail = importer.failureDetail {
                         Text(verbatim: detail).font(.caption2).foregroundStyle(FormaTheme.textMuted)
                     }

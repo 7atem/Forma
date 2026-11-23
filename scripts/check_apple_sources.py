@@ -53,7 +53,8 @@ detail = (root / 'apple/AppShared/ExerciseDetail.swift').read_text(encoding='utf
 for required in [
     '@AppStorage private var showMuscleHighlights',
     'exercise_muscle_highlights_',
-    'Toggle("muscle_highlights", isOn: $showMuscleHighlights)',
+    'Toggle("muscle_highlights", isOn: $isOn)',
+    'MuscleHighlightControl(isOn: $showMuscleHighlights)',
     'ExerciseVideoView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)',
     'ExerciseMotion3DView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)',
     'if showMuscleHighlights',
@@ -69,8 +70,19 @@ assert 'FormaTheme.musclePrimary' in motion and 'FormaTheme.muscleSupporting' in
 assert 'exercise_motion_3d_' in motion
 # The five generated clips open directly in the iPhone guide; photos/video remain explicit alternatives.
 assert 'let modes = [hasMotion ? 0 : nil, hasVideo ? 1 : nil, 2].compactMap { $0 }' in detail
-assert 'let current = mode ?? modes[0]' in detail
+assert 'let current = mode.flatMap { modes.contains($0) ? $0 : nil } ?? modes[0]' in detail
 assert 'exercise_motion_mode_' in detail
+assert 'motion_photos_note' in detail and 'AVQueuePlayer' in video and 'AVPlayerLooper' in video
+scene = (root / 'apple/iPhone/ExerciseMotionSceneView.swift').read_text(encoding='utf-8')
+for required in ['UIViewRepresentable', 'SCNView', 'SCNCapsule', 'SCNCamera', 'castsShadow = true',
+                 'MotionEngine.pose', 'FormaTheme.musclePrimary', 'FormaTheme.muscleSupporting']:
+    assert required in scene, ('Native 3D scene', required)
+assert 'ExerciseMotionSceneView(exerciseID: exercise.rawValue' in motion
+health = (root / 'apple/iPhone/HealthImporter.swift').read_text(encoding='utf-8')
+assert 'signingFailed' in health and 'com.apple.developer.healthkit' in health
+workflow = (root / '.github/workflows/apple.yml').read_text(encoding='utf-8')
+assert 'apple/FormaPhone.entitlements.plist' in workflow
+assert 'grep -q "com.apple.developer.healthkit"' in workflow
 motion_catalog = json.loads((root / 'catalog/exercise-motion.json').read_text(encoding='utf-8'))
 pilot_ids = {entry['id'] for entry in motion_catalog['exercises']}
 assert {'SQUAT', 'BARBELL_BENCH_PRESS', 'BARBELL_ROW', 'CONVENTIONAL_DEADLIFT', 'BARBELL_OVERHEAD_PRESS'} <= pilot_ids

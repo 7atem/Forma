@@ -10,6 +10,8 @@ import FormaCore
     @Published private(set) var syncing = false
     @Published private(set) var lastResult: Result?
     @Published private(set) var failed = false
+    /// Re-signing an IPA without its HealthKit entitlement cannot be repaired by requesting permission again.
+    @Published private(set) var signingFailed = false
     /// The system's own reason (e.g. a missing HealthKit entitlement in a re-signed build), shown under the message.
     @Published private(set) var failureDetail: String?
 
@@ -26,6 +28,7 @@ import FormaCore
         guard Self.isAvailable, !syncing else { return }
         syncing = true
         failed = false
+        signingFailed = false
         failureDetail = nil
         defer { syncing = false }
         do {
@@ -39,7 +42,10 @@ import FormaCore
             lastResult = Result(workouts: added.workouts, weights: added.weights)
         } catch {
             failed = true
-            failureDetail = error.localizedDescription
+            let detail = error.localizedDescription
+            signingFailed = detail.localizedCaseInsensitiveContains("entitlement")
+                || detail.localizedCaseInsensitiveContains("com.apple.developer.healthkit")
+            failureDetail = detail
         }
     }
 

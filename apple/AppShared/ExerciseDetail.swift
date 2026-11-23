@@ -85,7 +85,7 @@ struct ExerciseDetail: View {
                     let hasMotion = ExerciseMotionCatalog.of(exercise) != nil
                     let hasVideo = ExerciseVideoLibrary.url(exercise) != nil
                     let modes = [hasMotion ? 0 : nil, hasVideo ? 1 : nil, 2].compactMap { $0 }
-                    let current = mode ?? modes[0]
+                    let current = mode.flatMap { modes.contains($0) ? $0 : nil } ?? modes[0]
                     let showPhotos = current == 2
                     #else
                     let showPhotos = true
@@ -104,17 +104,19 @@ struct ExerciseDetail: View {
                             Spacer()
                         }
                     }
-                    Toggle("muscle_highlights", isOn: $showMuscleHighlights)
-                        .tint(FormaTheme.primary)
-                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
-                        .accessibilityIdentifier("muscle_highlights_toggle")
                     if current == 1 {
                         ExerciseVideoView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)
+                            .overlay(alignment: .bottomTrailing) {
+                                MuscleHighlightControl(isOn: $showMuscleHighlights).padding(10)
+                            }
                         Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
                     }
                     if current == 0 {
                         ExerciseMotion3DView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)
                             .background(FormaTheme.surface)
+                            .overlay(alignment: .bottomTrailing) {
+                                MuscleHighlightControl(isOn: $showMuscleHighlights).padding(10)
+                            }
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         HStack {
                             Text("motion_drag_hint").font(.caption).foregroundStyle(FormaTheme.textMuted)
@@ -185,6 +187,11 @@ struct ExerciseDetail: View {
                     .frame(maxWidth: .infinity)
                     .aspectRatio(singlePanel ? 1.0 : 1.5, contentMode: .fit)
                     .background(FormaTheme.surface)
+                    #if os(iOS)
+                    .overlay(alignment: .bottomTrailing) {
+                        MuscleHighlightControl(isOn: $showMuscleHighlights).padding(10)
+                    }
+                    #endif
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .environment(\.layoutDirection, .leftToRight)
                     .accessibilityLabel(guide.variant)
@@ -208,6 +215,9 @@ struct ExerciseDetail: View {
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(FormaTheme.primary)
                         .environment(\.layoutDirection, .leftToRight)
+                        #if os(iOS)
+                        Text("motion_photos_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
+                        #endif
                     }
 
                     ForEach(Array(guide.cues.enumerated()), id: \.offset) { index, cue in
@@ -252,5 +262,22 @@ struct ExercisePhasePanel: View {
                 .frame(width: geo.size.width, height: height)
                 .mask(Rectangle().frame(width: min(geo.size.width, height * 0.75), height: height))
         }
+    }
+}
+
+/// Compact media-overlay control shared by photos, real video clips and the 3D scene.
+private struct MuscleHighlightControl: View {
+    @Binding var isOn: Bool
+
+    var body: some View {
+        Toggle("muscle_highlights", isOn: $isOn)
+            .font(.caption.weight(.semibold))
+            .tint(FormaTheme.primary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(.ultraThinMaterial, in: Capsule())
+            .overlay(Capsule().stroke(FormaTheme.border.opacity(0.7), lineWidth: 1))
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("muscle_highlights_toggle")
     }
 }

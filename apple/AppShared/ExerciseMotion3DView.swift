@@ -24,10 +24,15 @@ struct ExerciseMotion3DView: View {
                 let phase = animate
                     ? (timeline.date.timeIntervalSince(startDate) / clip.cycleSeconds).truncatingRemainder(dividingBy: 1)
                     : clip.keys[1].t
+                #if os(iOS)
+                ExerciseMotionSceneView(exerciseID: exercise.rawValue, clip: clip, phase: phase,
+                                        yaw: currentYaw, highlights: highlights)
+                #else
                 Canvas { context, size in
                     MotionRenderer.draw(clip: clip, phase: phase, highlights: highlights, bounds: bounds,
                                         yaw: currentYaw, size: size, context: &context)
                 }
+                #endif
             }
             .aspectRatio(1, contentMode: .fit)
             .contentShape(Rectangle())
