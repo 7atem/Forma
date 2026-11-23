@@ -209,19 +209,4 @@ class DailyWorkflowTest {
         assertEquals(2, calSwaps.size)
         assertEquals(165.0, calSwaps.first().matchedNutrients.calories, 0.05)
     }
-
-    @Test fun `family pot calculator scales shared meals by cooked weight or family shares`() {
-        val pot = Nutrients(calories = 2000.0, protein = 120.0, carbs = 200.0, fat = 60.0)
-        val byWeight = FamilyPotCalculator.byCookedWeight(pot, totalCookedGrams = 1600.0, myBowlGrams = 400.0)!!
-        assertEquals(25, byWeight.percent)
-        assertEquals(500.0, byWeight.portionNutrients.calories, 0.01)
-        assertEquals(30.0, byWeight.portionNutrients.protein, 0.01)
-
-        val byShares = FamilyPotCalculator.byFamilyShares(pot, totalShares = 4.0, myShares = 1.0)!!
-        assertEquals(25, byShares.percent)
-        assertEquals(500.0, byShares.portionNutrients.calories, 0.01)
-
-        assertNull(FamilyPotCalculator.byCookedWeight(pot, totalCookedGrams = 1000.0, myBowlGrams = 1200.0))
-        assertNull(FamilyPotCalculator.byFamilyShares(pot, totalShares = 0.0, myShares = 1.0))
-    }
 }

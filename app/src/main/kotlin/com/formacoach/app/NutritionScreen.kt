@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -35,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.formacoach.coach.ExerciseSearch
-import com.formacoach.coach.FamilyPotCalculator
 import com.formacoach.coach.FoodSwapCalculator
 import com.formacoach.coach.SwapMatchBy
 import com.formacoach.model.*
@@ -53,7 +51,6 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
     var library by rememberSaveable { mutableStateOf(false) }
     var showOnlineSearch by rememberSaveable { mutableStateOf(false) }
     var showFoodSwap by rememberSaveable { mutableStateOf(false) }
-    var showFamilyPot by rememberSaveable { mutableStateOf(false) }
     var search by rememberSaveable { mutableStateOf("") }
     var editing by remember { mutableStateOf<Meal?>(null) }
     var foodId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -113,12 +110,6 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
                     leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
                     onClick = { moreActions = false; showCopyDay = true },
                     modifier = Modifier.testTag("copy_meal_day"),
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.family_pot_btn)) },
-                    leadingIcon = { Icon(Icons.Default.Groups, contentDescription = null) },
-                    onClick = { moreActions = false; showFamilyPot = true },
-                    modifier = Modifier.testTag("family_pot_btn"),
                 )
             }
         }
@@ -565,284 +556,6 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
             },
             onDismiss = { showFoodSwap = false },
         )
-    }
-    if (showFamilyPot) {
-        FamilyPotSheet(
-            date = date,
-            slot = slot,
-            recipes = state.snapshot.foods.filter { it.sourceKind == NutritionSource.RECIPE },
-            busy = state.busy,
-            onSave = { meal -> vm.addMeal(meal) { showFamilyPot = false } },
-            onDismiss = { showFamilyPot = false },
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FamilyPotSheet(
-    date: LocalDate,
-    slot: MealSlot,
-    recipes: List<Food>,
-    busy: Boolean,
-    onSave: (Meal) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val context = LocalContext.current
-    val prefs = remember { context.getSharedPreferences("forma_ui_prefs", android.content.Context.MODE_PRIVATE) }
-    val savedLeftoverName = remember { prefs.getString("last_pot_name", "").orEmpty() }
-    var mode by rememberSaveable { mutableIntStateOf(0) } // 0 = weight, 1 = shares, 2 = quick ballpark plate
-    var dishName by rememberSaveable { mutableStateOf("") }
-    var potKcal by rememberSaveable { mutableStateOf("") }
-    var potProtein by rememberSaveable { mutableStateOf("") }
-    var potCarbs by rememberSaveable { mutableStateOf("") }
-    var potFat by rememberSaveable { mutableStateOf("") }
-    var totalGrams by rememberSaveable { mutableStateOf("1200") }
-    var myGrams by rememberSaveable { mutableStateOf("300") }
-    var totalShares by rememberSaveable { mutableStateOf("4") }
-    var myShares by rememberSaveable { mutableStateOf("1") }
-    var plateSize by rememberSaveable { mutableIntStateOf(1) } // 0 = light, 1 = medium, 2 = full
-    var addOilBuffer by rememberSaveable { mutableStateOf(false) }
-
-    val potNutrients = runCatching {
-        Nutrients(
-            calories = requireNotNull(NumericInput.decimal(potKcal)),
-            protein = NumericInput.decimal(potProtein) ?: 0.0,
-            carbs = NumericInput.decimal(potCarbs) ?: 0.0,
-            fat = NumericInput.decimal(potFat) ?: 0.0,
-        )
-    }.getOrNull()
-
-    val share = if (mode != 2) {
-        potNutrients?.let { n ->
-            if (mode == 0) {
-                val tg = NumericInput.decimal(totalGrams) ?: 0.0
-                val mg = NumericInput.decimal(myGrams) ?: 0.0
-                FamilyPotCalculator.byCookedWeight(n, tg, mg)
-            } else {
-                val ts = NumericInput.decimal(totalShares) ?: 0.0
-                val ms = NumericInput.decimal(myShares) ?: 0.0
-                FamilyPotCalculator.byFamilyShares(n, ts, ms)
-            }
-        }
-    } else null
-
-    val sourceLabel = stringResource(if (mode == 2) R.string.family_plate_source else R.string.family_pot_source)
-    val defaultPlateName = stringResource(R.string.family_plate_default_name)
-    val ballparkNutrients = remember(plateSize, addOilBuffer) {
-        val base = when (plateSize) {
-            0 -> Nutrients(450.0, 25.0, 50.0, 15.0)
-            2 -> Nutrients(950.0, 48.0, 105.0, 34.0)
-            else -> Nutrients(700.0, 35.0, 78.0, 24.0)
-        }
-        if (addOilBuffer) base + Nutrients(120.0, 0.0, 0.0, 13.5) else base
-    }
-    val mealCandidate = if (mode == 2) {
-        runCatching {
-            Meal(
-                date = date,
-                name = dishName.trim().ifBlank { defaultPlateName },
-                calories = ballparkNutrients.calories,
-                protein = ballparkNutrients.protein,
-                carbs = ballparkNutrients.carbs,
-                fat = ballparkNutrients.fat,
-                quantity = 1.0,
-                unit = NutritionUnit.SERVING,
-                source = sourceLabel,
-                slot = slot,
-            )
-        }.getOrNull()
-    } else if (dishName.isNotBlank() && share != null) {
-        runCatching {
-            Meal(
-                date = date,
-                name = dishName.trim(),
-                calories = share.portionNutrients.calories,
-                protein = share.portionNutrients.protein,
-                carbs = share.portionNutrients.carbs,
-                fat = share.portionNutrients.fat,
-                quantity = if (mode == 0) NumericInput.decimal(myGrams) else NumericInput.decimal(myShares),
-                unit = if (mode == 0) NutritionUnit.GRAMS else NutritionUnit.SERVING,
-                source = sourceLabel,
-                slot = slot,
-            )
-        }.getOrNull()
-    } else null
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-    ) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .navigationBarsPadding()
-                .padding(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(stringResource(R.string.family_pot_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.family_pot_intro), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-
-            // 1-Tap Leftovers + Saved Recipes
-            if (savedLeftoverName.isNotBlank() || recipes.isNotEmpty()) {
-                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (savedLeftoverName.isNotBlank()) {
-                        AssistChip(
-                            onClick = {
-                                mode = prefs.getInt("last_pot_mode", 0).coerceIn(0, 1)
-                                dishName = savedLeftoverName
-                                potKcal = prefs.getString("last_pot_kcal", "").orEmpty()
-                                potProtein = prefs.getString("last_pot_pro", "").orEmpty()
-                                potCarbs = prefs.getString("last_pot_carbs", "").orEmpty()
-                                potFat = prefs.getString("last_pot_fat", "").orEmpty()
-                                totalGrams = prefs.getString("last_pot_tg", "1200").orEmpty()
-                                totalShares = prefs.getString("last_pot_ts", "4").orEmpty()
-                            },
-                            leadingIcon = { Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(15.dp)) },
-                            label = { Text(stringResource(R.string.family_pot_leftovers_chip, savedLeftoverName), maxLines = 1) },
-                        )
-                    }
-                    recipes.take(6).forEach { r ->
-                        AssistChip(
-                            onClick = {
-                                if (mode == 2) mode = 0
-                                dishName = r.name
-                                potKcal = r.nutrients.calories.toInt().toString()
-                                potProtein = r.nutrients.protein.toInt().toString()
-                                potCarbs = r.nutrients.carbs.toInt().toString()
-                                potFat = r.nutrients.fat.toInt().toString()
-                            },
-                            label = { Text(r.name, maxLines = 1) },
-                        )
-                    }
-                }
-            }
-
-            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(
-                    selected = mode == 0,
-                    onClick = { mode = 0 },
-                    label = { Text(stringResource(R.string.family_pot_by_weight), fontWeight = FontWeight.SemiBold) },
-                )
-                FilterChip(
-                    selected = mode == 1,
-                    onClick = { mode = 1 },
-                    label = { Text(stringResource(R.string.family_pot_by_shares), fontWeight = FontWeight.SemiBold) },
-                )
-                FilterChip(
-                    selected = mode == 2,
-                    onClick = { mode = 2 },
-                    label = { Text(stringResource(R.string.family_pot_ballpark), fontWeight = FontWeight.SemiBold) },
-                )
-            }
-
-            Input(R.string.family_pot_name, dishName, { dishName = it }, "family_pot_name", numeric = false)
-
-            if (mode == 2) {
-                Text(stringResource(R.string.family_pot_ballpark_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf(R.string.plate_light, R.string.plate_medium, R.string.plate_full).forEachIndexed { idx, labelRes ->
-                        FilterChip(
-                            selected = plateSize == idx,
-                            onClick = { plateSize = idx },
-                            label = { Text(stringResource(labelRes), fontWeight = FontWeight.SemiBold) },
-                        )
-                    }
-                }
-                FilterChip(
-                    selected = addOilBuffer,
-                    onClick = { addOilBuffer = !addOilBuffer },
-                    label = { Text(stringResource(R.string.plate_oil_buffer)) },
-                )
-                Surface(
-                    color = MaterialTheme.colorScheme.accentContainer.copy(alpha = 0.55f),
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(sourceLabel, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
-                        NutrientSummary(ballparkNutrients.calories, ballparkNutrients.protein, ballparkNutrients.carbs, ballparkNutrients.fat)
-                    }
-                }
-            } else {
-                FormFieldPair(
-                    first = { Input(R.string.family_pot_total_kcal, potKcal, { potKcal = it }, "family_pot_kcal") },
-                    second = { Input(R.string.family_pot_total_protein, potProtein, { potProtein = it }, "family_pot_protein") },
-                )
-                FormFieldPair(
-                    first = { Input(R.string.family_pot_total_carbs, potCarbs, { potCarbs = it }, "family_pot_carbs") },
-                    second = { Input(R.string.family_pot_total_fat, potFat, { potFat = it }, "family_pot_fat") },
-                )
-                if (mode == 0) {
-                    FormFieldPair(
-                        first = { Input(R.string.family_pot_total_grams, totalGrams, { totalGrams = it }, "family_pot_total_g") },
-                        second = { Input(R.string.family_pot_my_grams, myGrams, { myGrams = it }, "family_pot_my_g") },
-                    )
-                } else {
-                    FormFieldPair(
-                        first = { Input(R.string.family_pot_total_shares, totalShares, { totalShares = it }, "family_pot_total_s") },
-                        second = { Input(R.string.family_pot_my_shares, myShares, { myShares = it }, "family_pot_my_s") },
-                    )
-                }
-
-                share?.let { s ->
-                    Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
-                        shape = RoundedCornerShape(16.dp),
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(
-                                stringResource(R.string.family_pot_share_summary, number(s.percent.toDouble(), 0)),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                            LinearProgressIndicator(
-                                progress = { s.fraction.toFloat().coerceIn(0f, 1f) },
-                                modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(999.dp)),
-                                drawStopIndicator = {},
-                            )
-                            NutrientSummary(
-                                s.portionNutrients.calories,
-                                s.portionNutrients.protein,
-                                s.portionNutrients.carbs,
-                                s.portionNutrients.fat,
-                            )
-                        }
-                    }
-                }
-            }
-
-            Button(
-                onClick = {
-                    mealCandidate?.let { saved ->
-                        if (mode != 2) {
-                            prefs.edit()
-                                .putInt("last_pot_mode", mode)
-                                .putString("last_pot_name", dishName.trim())
-                                .putString("last_pot_kcal", potKcal)
-                                .putString("last_pot_pro", potProtein)
-                                .putString("last_pot_carbs", potCarbs)
-                                .putString("last_pot_fat", potFat)
-                                .putString("last_pot_tg", totalGrams)
-                                .putString("last_pot_ts", totalShares)
-                                .apply()
-                        }
-                        onSave(saved)
-                    }
-                },
-                enabled = mealCandidate != null && !busy,
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("save_family_pot"),
-            ) {
-                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(6.dp))
-                Text(stringResource(R.string.save_meal), fontWeight = FontWeight.Bold)
-            }
-        }
     }
 }
 

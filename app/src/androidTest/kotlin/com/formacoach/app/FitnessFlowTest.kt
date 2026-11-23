@@ -60,7 +60,7 @@ class FitnessFlowTest {
         ensureProfile();rule.onNodeWithTag("tab_2").performClick()
         rule.onNodeWithContentDescription(rule.activity.getString(R.string.more_food_actions))
             .assertHeightIsAtLeast(48.dp).performClick()
-        rule.onNodeWithTag("family_pot_btn").assertExists()
+        rule.onNodeWithTag("family_pot_btn").assertDoesNotExist()
         rule.onNodeWithTag("copy_meal_day").performClick()
         rule.onNodeWithTag("confirm_copy_day").assertExists()
         rule.onNodeWithText(rule.activity.getString(R.string.cancel)).performClick()
@@ -317,6 +317,9 @@ class FitnessFlowTest {
         rule.onNodeWithTag("exercise_search").performScrollTo().performTextInput("Romanian")
         rule.onNodeWithTag("exercise_search").performImeAction()
         rule.onNodeWithTag("library_HIP_HINGE").performScrollTo().performClick()
+        if (rule.onAllNodesWithTag("guide_mode_photos").fetchSemanticsNodes().isNotEmpty()) {
+            rule.onNodeWithTag("guide_mode_photos").performClick()
+        }
         rule.onNodeWithTag("open_illustration").performScrollTo().performClick()
         rule.onNodeWithTag("image_phase_2").performClick().assertIsSelected()
         rule.activityRule.scenario.recreate()
