@@ -161,3 +161,14 @@ internal object AppLocaleHelper {
         return base.createConfigurationContext(config)
     }
 }
+
+/** User appearance choice; SYSTEM follows the device's dark-mode setting. */
+internal enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+/** Reads the saved choice, keeping an explicit legacy light/dark choice when no mode is stored yet. */
+internal fun readThemeMode(prefs: android.content.SharedPreferences): ThemeMode =
+    prefs.getString("theme_mode", null)?.let { saved -> ThemeMode.entries.firstOrNull { it.name == saved } }
+        ?: when {
+            prefs.contains("dark_theme") -> if (prefs.getBoolean("dark_theme", true)) ThemeMode.DARK else ThemeMode.LIGHT
+            else -> ThemeMode.SYSTEM
+        }

@@ -24,8 +24,8 @@ import com.formacoach.model.WeightUnit
 internal fun SettingsSheet(
     language: AppLanguage,
     onLanguage: (AppLanguage) -> Unit,
-    darkTheme: Boolean,
-    onDarkTheme: (Boolean) -> Unit,
+    themeMode: ThemeMode,
+    onThemeMode: (ThemeMode) -> Unit,
     weightUnit: WeightUnit,
     onWeightUnit: (WeightUnit) -> Unit,
     onProfile: () -> Unit,
@@ -107,18 +107,18 @@ internal fun SettingsSheet(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            FilterChip(
-                                selected = darkTheme,
-                                onClick = { onDarkTheme(true) },
-                                label = { Text(stringResource(R.string.theme_dark), fontWeight = FontWeight.SemiBold) },
-                                modifier = Modifier.weight(1f).testTag("settings_theme_dark"),
-                            )
-                            FilterChip(
-                                selected = !darkTheme,
-                                onClick = { onDarkTheme(false) },
-                                label = { Text(stringResource(R.string.theme_light), fontWeight = FontWeight.SemiBold) },
-                                modifier = Modifier.weight(1f).testTag("settings_theme_light"),
-                            )
+                            listOf(
+                                ThemeMode.SYSTEM to R.string.theme_system,
+                                ThemeMode.LIGHT to R.string.theme_light,
+                                ThemeMode.DARK to R.string.theme_dark,
+                            ).forEach { (mode, label) ->
+                                FilterChip(
+                                    selected = themeMode == mode,
+                                    onClick = { onThemeMode(mode) },
+                                    label = { Text(stringResource(label), fontWeight = FontWeight.SemiBold, maxLines = 1) },
+                                    modifier = Modifier.weight(1f).testTag("settings_theme_${mode.name.lowercase()}"),
+                                )
+                            }
                         }
                     }
                 },

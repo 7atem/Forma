@@ -11,6 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Public
@@ -65,6 +67,8 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
     val totalCarbs = logged.sumOf { it.carbs }
     val totalFat = logged.sumOf { it.fat }
 
+    var showCopyDay by rememberSaveable { mutableStateOf(false) }
+    if (showCopyDay) CopyMealDay(state, date, today, vm) { showCopyDay = false }
     PageHeading(R.string.eat_title)
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
@@ -92,16 +96,31 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
             Spacer(Modifier.width(6.dp))
             Text(stringResource(if (library) R.string.close_library else R.string.food_library), fontWeight = FontWeight.SemiBold)
         }
-        CopyMealDay(state, date, today, vm)
-        FilledTonalButton(
-            onClick = { showFamilyPot = true },
-            enabled = !state.busy,
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.testTag("family_pot_btn"),
-        ) {
-            Icon(Icons.Default.Groups, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.family_pot_btn), fontWeight = FontWeight.SemiBold)
+        // Less frequent actions live in one overflow menu so the toolbar stays scannable.
+        var moreActions by remember { mutableStateOf(false) }
+        Box {
+            OutlinedIconButton(
+                onClick = { moreActions = true },
+                enabled = !state.busy,
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.size(48.dp).testTag("food_more_actions"),
+            ) {
+                Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.more_food_actions))
+            }
+            DropdownMenu(expanded = moreActions, onDismissRequest = { moreActions = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.copy_meal_day)) },
+                    leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = null) },
+                    onClick = { moreActions = false; showCopyDay = true },
+                    modifier = Modifier.testTag("copy_meal_day"),
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.family_pot_btn)) },
+                    leadingIcon = { Icon(Icons.Default.Groups, contentDescription = null) },
+                    onClick = { moreActions = false; showFamilyPot = true },
+                    modifier = Modifier.testTag("family_pot_btn"),
+                )
+            }
         }
     }
 

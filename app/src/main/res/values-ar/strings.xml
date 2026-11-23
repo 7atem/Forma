@@ -272,6 +272,8 @@
     <string name="appearance_label">المظهر</string>
     <string name="theme_dark">داكن</string>
     <string name="theme_light">فاتح</string>
+    <string name="theme_system">النظام</string>
+    <string name="more_food_actions">مزيد من إجراءات الطعام</string>
     <string name="units_label">وحدة الوزن</string>
     <string name="freestyle_workout">تمرين حر</string>
     <string name="freestyle_session_label">تمرين حر</string>

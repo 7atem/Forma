@@ -2,6 +2,7 @@ package com.formacoach.app
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -54,6 +55,27 @@ class FitnessFlowTest {
         rule.onNodeWithTag("calendar_day_${java.time.LocalDate.now()}").performScrollTo().performClick()
         rule.onNodeWithTag("workout_date_filter").assertExists()
         rule.onNodeWithText("UI guided workflow").performScrollTo().assertExists()
+    }
+    @Test fun foodOverflowOpensCopyDayAndThemeChoiceSurvivesRecreation() {
+        ensureProfile();rule.onNodeWithTag("tab_2").performClick()
+        rule.onNodeWithContentDescription(rule.activity.getString(R.string.more_food_actions))
+            .assertHeightIsAtLeast(48.dp).performClick()
+        rule.onNodeWithTag("family_pot_btn").assertExists()
+        rule.onNodeWithTag("copy_meal_day").performClick()
+        rule.onNodeWithTag("confirm_copy_day").assertExists()
+        rule.onNodeWithText(rule.activity.getString(R.string.cancel)).performClick()
+        rule.onNodeWithTag("confirm_copy_day").assertDoesNotExist()
+        rule.onNodeWithTag("open_settings").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("settings_theme_light").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("settings_theme_system").performScrollTo().assertIsSelected()
+        rule.onNodeWithTag("settings_theme_light").performClick().assertIsSelected()
+        rule.onNodeWithTag("settings_theme_system").assertIsNotSelected()
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("tab_0").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("open_settings").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("settings_theme_light").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("settings_theme_light").performScrollTo().assertIsSelected()
+        rule.onNodeWithTag("settings_theme_system").performClick().assertIsSelected()
     }
     @Test fun ArabicExerciseSearchWorksInEnglishInterface() {
         ensureProfile();rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_1").performClick()

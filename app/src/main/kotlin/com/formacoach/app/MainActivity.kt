@@ -67,7 +67,12 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("forma_ui_prefs", android.content.Context.MODE_PRIVATE) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    var darkTheme by rememberSaveable { mutableStateOf(prefs.getBoolean("dark_theme", true)) }
+    var themeMode by rememberSaveable { mutableStateOf(readThemeMode(prefs)) }
+    val darkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+    }
     val activity = context as? ComponentActivity
     LaunchedEffect(activity, darkTheme) {
         activity?.enableEdgeToEdge(
@@ -358,10 +363,10 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                         showSettings = false
                         AppLocaleHelper.apply(context, next)
                     },
-                    darkTheme = darkTheme,
-                    onDarkTheme = {
-                        darkTheme = it
-                        prefs.edit().putBoolean("dark_theme", it).apply()
+                    themeMode = themeMode,
+                    onThemeMode = {
+                        themeMode = it
+                        prefs.edit().putString("theme_mode", it.name).apply()
                     },
                     weightUnit = weightUnit,
                     onWeightUnit = {

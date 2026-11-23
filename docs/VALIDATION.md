@@ -19,7 +19,7 @@ Updated 23 November 2026. Application `com.formacoach.app`, encrypted Room schem
 
 The IPA is ad-hoc/unsigned for distribution purposes and requires owner-controlled provisioning. Its embedded HealthKit declaration does not by itself authorize Apple Health on a device. See `APPLE_WATCH.md`.
 
-## Android UX/accessibility pass (23 November 2026, uncommitted working tree)
+## Android UX/accessibility pass (23 November 2026, commit 7a6b918 plus follow-up)
 
 Emulator review on API 35 `Medium_Tablet` (Arabic/RTL, light) and a `Pixel_9_Pro` phone image (English, dark). Changes:
 quick-log button hidden during an active workout on Train (it covered set steppers and *Discard*); bodyweight-only
@@ -37,6 +37,7 @@ macro shares, set numbers) moved to EN/AR resources.
 | JVM unit tests, debug/release builds, lint (`--max-workers=1`) | **60 passed, 0 failed**; builds pass; lint 0 errors |
 | Muscle detail upgrade (same working tree) | 20 detailed regions over the unchanged 14 groups, exact roll-up enforced by the generator and by new Kotlin/Swift tests; redrawn original geometry with shaded rendering on Android and iPhone. Android checked visually on the phone emulator (dark and light). **iPhone rendering is source-only until macOS CI/simulator runs.** |
 | Full `:app:connectedDebugAndroidTest` on `Medium_Tablet` API 35 | **37 passed, 0 failed** (14 encrypted storage + 23 UI, including 3 new tests for these changes) |
+| Follow-up: appearance and Eat toolbar | Appearance offers **System / Light / Dark**; new installs follow the device setting, while an existing saved light/dark choice is kept. *Copy a day of meals* and *Family pot* moved into a 48 dp "More food actions" menu so the Eat toolbar is two rows. Re-run: **834 EN/AR keys**, builds and lint pass (0 errors), **38 passed, 0 failed** on `Medium_Tablet` API 35 (new test covers the menu, theme choice and recreation). Phone emulator checked: legacy Light kept, System follows device dark mode, menu layout, and the 7-day heat map with recorded squat sets. **iPhone still offers only Light/Dark.** |
 | `Pixel_9_Pro` image (Android 17 preview) | Instrumented tests cannot run: Espresso's `InputManager.getInstance` reflection is absent on that image; used for manual review only |
 
 ## Previous Android verification (22 November 2026)
