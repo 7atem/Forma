@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.formacoach.model.WeightUnit
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun SettingsSheet(
     language: AppLanguage,
@@ -52,14 +52,18 @@ internal fun SettingsSheet(
                 fontWeight = FontWeight.Bold,
             )
 
-            // Language switcher
+            // Choices wrap instead of compressing translated labels at large text sizes.
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     stringResource(R.string.language_label),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
                     listOf(
                         AppLanguage.SYSTEM to R.string.language_system,
                         AppLanguage.EN to R.string.language_english,
@@ -69,53 +73,56 @@ internal fun SettingsSheet(
                             selected = language == option,
                             onClick = { onLanguage(option) },
                             label = { Text(stringResource(label), fontWeight = FontWeight.SemiBold) },
-                            modifier = Modifier.weight(1f).testTag("lang_${option.name}"),
+                            modifier = Modifier.testTag("lang_${option.name}"),
                         )
                     }
                 }
             }
 
-            // Weight unit & Appearance side by side
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        stringResource(R.string.units_label),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        WeightUnit.entries.forEach { u ->
+            FormFieldPair(
+                first = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            stringResource(R.string.units_label),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            WeightUnit.entries.forEach { u ->
+                                FilterChip(
+                                    selected = weightUnit == u,
+                                    onClick = { onWeightUnit(u) },
+                                    label = { Text(stringResource(if (u == WeightUnit.KG) R.string.kg else R.string.lb), fontWeight = FontWeight.Bold) },
+                                    modifier = Modifier.weight(1f).testTag("settings_unit_${u.name}"),
+                                )
+                            }
+                        }
+                    }
+                },
+                second = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            stringResource(R.string.appearance_label),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             FilterChip(
-                                selected = weightUnit == u,
-                                onClick = { onWeightUnit(u) },
-                                label = { Text(stringResource(if (u == WeightUnit.KG) R.string.kg else R.string.lb), fontWeight = FontWeight.Bold) },
-                                modifier = Modifier.weight(1f).testTag("settings_unit_${u.name}"),
+                                selected = darkTheme,
+                                onClick = { onDarkTheme(true) },
+                                label = { Text(stringResource(R.string.theme_dark), fontWeight = FontWeight.SemiBold) },
+                                modifier = Modifier.weight(1f).testTag("settings_theme_dark"),
+                            )
+                            FilterChip(
+                                selected = !darkTheme,
+                                onClick = { onDarkTheme(false) },
+                                label = { Text(stringResource(R.string.theme_light), fontWeight = FontWeight.SemiBold) },
+                                modifier = Modifier.weight(1f).testTag("settings_theme_light"),
                             )
                         }
                     }
-                }
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        stringResource(R.string.appearance_label),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        FilterChip(
-                            selected = darkTheme,
-                            onClick = { onDarkTheme(true) },
-                            label = { Text(stringResource(R.string.theme_dark), fontWeight = FontWeight.SemiBold) },
-                            modifier = Modifier.weight(1f).testTag("settings_theme_dark"),
-                        )
-                        FilterChip(
-                            selected = !darkTheme,
-                            onClick = { onDarkTheme(false) },
-                            label = { Text(stringResource(R.string.theme_light), fontWeight = FontWeight.SemiBold) },
-                            modifier = Modifier.weight(1f).testTag("settings_theme_light"),
-                        )
-                    }
-                }
-            }
+                },
+            )
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 

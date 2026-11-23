@@ -40,7 +40,7 @@ import kotlin.math.sqrt
  * Drawn with Compose primitives: no 3D library, model files or network.
  */
 @Composable
-internal fun ExerciseMotion3D(exercise: Exercise, playing: Boolean, modifier: Modifier = Modifier) {
+internal fun ExerciseMotion3D(exercise: Exercise, playing: Boolean, modifier: Modifier = Modifier, showMuscleHighlights: Boolean = true) {
     val clip = remember(exercise) { ExerciseMotionCatalog.of(exercise) } ?: return
     val reduceMotion = rememberReduceMotion()
     val animate = playing && !reduceMotion
@@ -58,14 +58,16 @@ internal fun ExerciseMotion3D(exercise: Exercise, playing: Boolean, modifier: Mo
         }
     }
     val bounds = remember(clip) { MotionBounds.of(clip) }
-    val highlights = remember(exercise) { MotionEngine.highlights(exercise) }
+    val highlights = remember(exercise, showMuscleHighlights) {
+        if (showMuscleHighlights) MotionEngine.highlights(exercise) else emptyMap()
+    }
     val colors = MaterialTheme.colorScheme
     val palette = MotionPalette(
         body = lerp(colors.onSurfaceVariant, colors.surface, 0.15f),
         bodyFar = lerp(colors.onSurfaceVariant, colors.surface, 0.55f),
         sheen = colors.onSurface,
-        primary = colors.primary,
-        secondary = colors.secondary,
+        primary = primaryMuscleColor(),
+        secondary = supportingMuscleColor(),
         metal = lerp(colors.onSurface, colors.surface, 0.35f),
         plate = lerp(colors.onSurface, colors.surface, 0.7f),
         bench = lerp(colors.surfaceVariant, colors.onSurface, 0.15f),

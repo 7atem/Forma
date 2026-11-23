@@ -44,15 +44,36 @@ class FitnessViewModel @Inject constructor(
     private val writeMutex = Mutex()
     private val pendingWrites = AtomicInteger(0)
     private var aiJob: Job? = null
+    private var snapshotJob: Job? = null
     private var aiGeneration = 0
 
     init {
-        viewModelScope.launch {
+        observeSnapshot()
+    }
+
+    private fun observeSnapshot() {
+        snapshotJob?.cancel()
+        snapshotJob = viewModelScope.launch {
             repository.snapshot.catch { failure ->
                 if (failure is CancellationException) throw failure
                 mutableState.update { it.copy(loading = false, loadFailed = true) }
-            }.collect { snapshot -> mutableState.update { it.copy(loading = false, snapshot = snapshot, highlights = if (it.snapshot == snapshot) it.highlights else emptyList()) } }
+            }.collect { snapshot ->
+                mutableState.update {
+                    it.copy(
+                        loading = false,
+                        loadFailed = false,
+                        snapshot = snapshot,
+                        highlights = if (it.snapshot == snapshot) it.highlights else emptyList(),
+                    )
+                }
+            }
         }
+    }
+
+    /** Re-subscribe without deleting, replacing or resetting any persisted data. */
+    fun retryLoad() {
+        mutableState.update { it.copy(loading = true, loadFailed = false) }
+        observeSnapshot()
     }
 
     fun clearError() = mutableState.update { it.copy(error = false) }

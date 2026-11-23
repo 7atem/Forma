@@ -55,4 +55,17 @@ final class WorkoutTransferTests: XCTestCase {
             for muscle in mapping.primary+mapping.secondary {XCTAssertTrue(ExerciseMuscles.regions.contains {$0.muscle==muscle})}
         }
     }
+    func testDetailedRegionsRollUpToBroadGroups() {
+        XCTAssertEqual(MuscleDetail.allCases.count,20)
+        for detail in MuscleDetail.allCases {XCTAssertTrue(ExerciseMuscles.regions.contains {$0.detail==detail})}
+        for exercise in Exercise.allCases {
+            let mapping=ExerciseMuscles.of(exercise)
+            XCTAssertFalse(mapping.primaryDetail.isEmpty)
+            XCTAssertTrue(Set(mapping.primaryDetail).isDisjoint(with:mapping.secondaryDetail))
+            XCTAssertEqual(Set(mapping.primaryDetail.map {$0.group}),Set(mapping.primary))
+            XCTAssertEqual(Set(mapping.secondaryDetail.map {$0.group}).subtracting(mapping.primary),Set(mapping.secondary))
+        }
+        XCTAssertEqual(ExerciseMuscles.of(.incline_barbell_press).primaryDetail,[.upper_chest])
+        XCTAssertEqual(ExerciseMuscles.of(.seated_calf_raise).primaryDetail,[.soleus])
+    }
 }

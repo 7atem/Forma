@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -70,25 +71,35 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
                 SessionForm(active, state, vm, onSetDeleted = onSetDeleted) { justFinished = true; section = 2 }
             } else {
                 val date = LocalDate.ofEpochDay(day)
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    DateChoice(date, today, { day = it.toEpochDay() }, "training_date")
-                    Spacer(Modifier.weight(1f))
+                val newProgramButton: @Composable (Modifier) -> Unit = { modifier ->
                     FilledTonalButton(
                         onClick = { creating = true },
                         enabled = !state.busy,
                         shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.testTag("new_program"),
+                        modifier = modifier.heightIn(min = 48.dp).testTag("new_program"),
                     ) {
                         Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
                         Text(stringResource(R.string.new_program), fontWeight = FontWeight.SemiBold)
                     }
                 }
-                Button(
+                if (LocalDensity.current.fontScale > 1.25f) {
+                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        DateChoice(date, today, { day = it.toEpochDay() }, "training_date")
+                        newProgramButton(Modifier.fillMaxWidth())
+                    }
+                } else {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        DateChoice(date, today, { day = it.toEpochDay() }, "training_date")
+                        Spacer(Modifier.weight(1f))
+                        newProgramButton(Modifier)
+                    }
+                }
+                FilledTonalButton(
                     onClick = { vm.startEmpty(date) },
                     enabled = !state.busy,
                     shape = RoundedCornerShape(16.dp),
@@ -306,12 +317,16 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         }
     }
     val remaining = RestTimer.remainingSeconds(deadline, elapsed, timerDuration)
+    // Bodyweight-only movements record external load; leaving it blank means none was added.
+    val bodyweightOnly = ExerciseCatalog.of(exercise).equipment.let { gear ->
+        Equipment.BODYWEIGHT in gear && gear.none { it in setOf(Equipment.DUMBBELLS, Equipment.BARBELL, Equipment.CABLE, Equipment.MACHINE) }
+    }
     val candidate = runCatching {
         TrainingSet(
             sessionId = session.id,
             exercise = exercise,
             reps = requireNotNull(NumericInput.integer(reps)),
-            weightKg = WeightUnits.toKg(requireNotNull(NumericInput.decimal(weight)), unit),
+            weightKg = WeightUnits.toKg(if (bodyweightOnly && weight.isBlank()) 0.0 else requireNotNull(NumericInput.decimal(weight)), unit),
             kind = if (warmup) SetKind.WARM_UP else SetKind.WORKING,
             rpe = if (rpe.isBlank()) null else requireNotNull(NumericInput.decimal(rpe)),
         )
@@ -365,7 +380,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     LivePulseDot(MaterialTheme.colorScheme.primary)
                     PillBadge(
-                        text = "${number(remaining.toDouble(), 0)}s",
+                        text = stringResource(R.string.seconds_short, number(remaining.toDouble(), 0)),
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
                     )
@@ -402,7 +417,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                             },
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                             shape = RoundedCornerShape(10.dp),
-                        ) { Text("-15s", fontWeight = FontWeight.Bold) }
+                        ) { Text(stringResource(R.string.rest_minus_15), fontWeight = FontWeight.Bold) }
                         FilledTonalButton(
                             onClick = {
                                 timerDuration += 15
@@ -410,7 +425,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                             },
                             contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                             shape = RoundedCornerShape(10.dp),
-                        ) { Text("+15s", fontWeight = FontWeight.Bold) }
+                        ) { Text(stringResource(R.string.rest_plus_15), fontWeight = FontWeight.Bold) }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                         TextButton(onClick = { elapsed = SystemClock.elapsedRealtime(); deadline = elapsed + timerDuration * 1000L }) {
@@ -578,7 +593,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                         ) {
                             Icon(Icons.Default.CheckCircle, contentDescription = null, tint = if (isWarm) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
                             Text(
-                                if (isWarm) stringResource(R.string.warmup_set) else "#${number(workingNum.toDouble(), 0)}",
+                                if (isWarm) stringResource(R.string.warmup_set) else stringResource(R.string.working_set_number, number(workingNum.toDouble(), 0)),
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = if (isWarm) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
@@ -590,7 +605,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                                 modifier = Modifier.weight(1f),
                             )
                             logged.rpe?.let { rpeVal ->
-                                PillBadge("RPE ${number(rpeVal, 1)}")
+                                PillBadge(stringResource(R.string.rpe_value, number(rpeVal, 1)))
                             }
                         }
                     }
@@ -678,7 +693,8 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     max = if (unit == WeightUnit.KG) 1000.0 else 2200.0,
                     integer = false,
                     error = weight.isNotBlank() && NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) in 0.0..1000.0 } != true,
-                    placeholder = previous?.let { formatWeight(it.weightKg) },
+                    placeholder = previous?.let { formatLoad(it.weightKg, it.exercise) }
+                        ?: if (bodyweightOnly) stringResource(R.string.bodyweight_load) else null,
                 )
             },
         )
@@ -713,7 +729,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         if (!warmup && parsedWeight != null && TrainingHistory.isNewPr(state.snapshot, exercise, parsedWeight, parsedReps, session.date)) {
             PillBadge(
                 text = "★ " + stringResource(R.string.new_pr_badge),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                containerColor = MaterialTheme.colorScheme.accentContainer,
                 contentColor = MaterialTheme.colorScheme.secondary,
             )
         }
@@ -739,11 +755,12 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         }
         if (showRpe) {
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf("7" to "3 RIR", "8" to "2 RIR", "9" to "1 RIR", "10" to "0 RIR").forEach { (valStr, rir) ->
+                listOf(7 to 3, 8 to 2, 9 to 1, 10 to 0).forEach { (rpeValue, rir) ->
+                    val valStr = formatInputNumber(rpeValue.toDouble(), locale, 0)
                     FilterChip(
                         selected = rpe == valStr,
                         onClick = { rpe = valStr },
-                        label = { Text("RPE $valStr · $rir") },
+                        label = { Text(stringResource(R.string.rpe_rir_chip, number(rpeValue.toDouble(), 0), number(rir.toDouble(), 0))) },
                     )
                 }
             }
@@ -795,6 +812,21 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
             Text(stringResource(R.string.add_set), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
+        if (candidate == null) {
+            // Say what is missing instead of leaving a silently disabled button.
+            val hint = when {
+                NumericInput.integer(reps)?.let { it in 1..1000 } != true && !bodyweightOnly && NumericInput.decimal(weight) == null -> R.string.set_needs_reps_and_load
+                NumericInput.integer(reps)?.let { it in 1..1000 } != true -> R.string.set_needs_reps
+                rpe.isNotBlank() && NumericInput.decimal(rpe) == null -> R.string.set_needs_valid_rpe
+                else -> R.string.set_needs_load
+            }
+            Text(
+                stringResource(hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().testTag("set_save_hint"),
+            )
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -1033,7 +1065,7 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                     if (prCount > 0) {
                         PillBadge(
                             "★ " + stringResource(R.string.session_summary_prs, number(prCount.toDouble(), 0)),
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            containerColor = MaterialTheme.colorScheme.accentContainer,
                             contentColor = MaterialTheme.colorScheme.secondary,
                         )
                     }
@@ -1222,7 +1254,7 @@ private fun SetCard(set: TrainingSet, busy: Boolean, canRemove: Boolean, vm: Fit
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 PillBadge(
                     text = stringResource(if (set.kind == SetKind.WARM_UP) R.string.warmup_set else R.string.working_set),
-                    containerColor = if (set.kind == SetKind.WARM_UP) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = if (set.kind == SetKind.WARM_UP) MaterialTheme.colorScheme.accentContainer else MaterialTheme.colorScheme.primaryContainer,
                     contentColor = if (set.kind == SetKind.WARM_UP) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary,
                 )
                 set.rpe?.let {

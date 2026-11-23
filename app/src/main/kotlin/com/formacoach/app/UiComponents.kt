@@ -88,11 +88,12 @@ internal fun ConfirmButton(label: Int, description: String, enabled: Boolean = t
             title = { Text(stringResource(label), fontWeight = FontWeight.Bold) },
             text = { Text(description) },
             confirmButton = {
-                TextButton(onClick = { open = false; onConfirm() }) {
-                    Text(stringResource(R.string.confirm), color = MaterialTheme.colorScheme.error)
+                // The confirm button repeats the action ("Remove", "Discard…") so the outcome is unambiguous.
+                TextButton(onClick = { open = false; onConfirm() }, modifier = Modifier.heightIn(min = 48.dp).testTag("confirm_destructive")) {
+                    Text(stringResource(label), color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
                 }
             },
-            dismissButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.cancel)) } },
+            dismissButton = { TextButton(onClick = { open = false }, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.cancel)) } },
         )
     }
 }
@@ -124,15 +125,24 @@ internal fun ExercisePicker(selected: Exercise, onChange: (Exercise) -> Unit, ch
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Input(R.string.search_exercises, search, { search = it }, "picker_exercise_search", numeric = false)
                     Column(Modifier.heightIn(max = 360.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        choices.filter {
+                        val matches = choices.filter {
                             com.formacoach.coach.ExerciseSearch.matches(search, labels.getValue(it) + " " + com.formacoach.model.ExerciseCatalog.searchText(it))
-                        }.forEach { value ->
+                        }
+                        if (matches.isEmpty()) {
+                            Text(
+                                stringResource(R.string.no_matching_exercises),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(12.dp).testTag("picker_no_results"),
+                            )
+                        }
+                        matches.forEach { value ->
                             val isSelected = value == selected
                             Surface(
+                                selected = isSelected,
                                 onClick = { onChange(value); expanded = false },
                                 shape = RoundedCornerShape(12.dp),
                                 color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                                modifier = Modifier.fillMaxWidth().testTag("exercise_${value.name}"),
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("exercise_${value.name}"),
                             ) {
                                 Text(
                                     labels.getValue(value),

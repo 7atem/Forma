@@ -40,14 +40,14 @@ internal fun exerciseVideoResource(context: Context, exercise: Exercise): Int =
     context.resources.getIdentifier("exercise_video_${exercise.name.lowercase()}", "raw", context.packageName)
 
 @Composable
-internal fun ExerciseVideo(exercise: Exercise, playing: Boolean, modifier: Modifier = Modifier) {
+internal fun ExerciseVideo(exercise: Exercise, playing: Boolean, modifier: Modifier = Modifier, showMuscleHighlights: Boolean = true) {
     val context = LocalContext.current
     val resource = remember(exercise) { exerciseVideoResource(context, exercise) }
     if (resource == 0) return
     val play = playing && !rememberReduceMotion()
     var pulse by remember { mutableStateOf(false) }
-    LaunchedEffect(play) {
-        while (play) {
+    LaunchedEffect(play, showMuscleHighlights) {
+        while (play && showMuscleHighlights) {
             delay(1300)
             pulse = !pulse
         }
@@ -83,7 +83,9 @@ internal fun ExerciseVideo(exercise: Exercise, playing: Boolean, modifier: Modif
                 modifier = Modifier.matchParentSizeCompat(),
             )
         }
-        CompactMuscleOverlay(exercise, pulsePeak = pulse, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
+        if (showMuscleHighlights) {
+            CompactMuscleOverlay(exercise, pulsePeak = pulse, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
+        }
     }
 }
 

@@ -26,6 +26,7 @@ internal fun FormaScaffold(
     onQuickLog: () -> Unit,
     onProfile: () -> Unit,
     onSettings: () -> Unit,
+    showQuickLog: Boolean = true,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val labels = listOf(R.string.today, R.string.train, R.string.eat, R.string.progress)
@@ -81,7 +82,8 @@ internal fun FormaScaffold(
                 containerColor = MaterialTheme.colorScheme.background,
                 snackbarHost = { SnackbarHost(snackbarHostState) },
                 floatingActionButton = {
-                    FloatingActionButton(
+                    // Hidden during an active workout on Train, where it would cover set controls.
+                    if (showQuickLog) FloatingActionButton(
                         onClick = onQuickLog,
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -198,12 +200,12 @@ private fun TopBarAction(
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
     ) {
-        IconButton(onClick = onClick, modifier = modifier.size(40.dp)) {
+        IconButton(onClick = onClick, modifier = modifier.size(48.dp)) {
             Icon(
                 icon,
                 contentDescription = stringResource(description),
                 tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(22.dp),
             )
         }
     }

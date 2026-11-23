@@ -3,7 +3,8 @@ import FormaCore
 
 /// Looping, rotatable 3D mannequin for the exercise guide (mirror of Android ExerciseMotion3D.kt).
 /// Body parts carrying the exercise's catalogued muscles glow on their front or back side,
-/// strongest during the working phase. Drawn with Canvas: no 3D library, model files or network.
+/// strongest during the working phase. iPhone uses SceneKit; the shared fallback uses Canvas.
+/// Geometry comes from the shared motion catalog: no downloaded model files or network.
 struct ExerciseMotion3DView: View {
     let exercise: Exercise
     var playing: Bool = true

@@ -19,6 +19,29 @@ internal fun muscleLabel(muscle: Muscle): Int = when(muscle) {
     Muscle.ADDUCTORS -> R.string.muscle_adductors
 }
 
+internal fun muscleDetailLabel(detail: com.formacoach.model.MuscleDetail): Int = when(detail) {
+    com.formacoach.model.MuscleDetail.UPPER_CHEST -> R.string.muscle_detail_upper_chest
+    com.formacoach.model.MuscleDetail.MID_LOWER_CHEST -> R.string.muscle_detail_mid_lower_chest
+    com.formacoach.model.MuscleDetail.FRONT_DELT -> R.string.muscle_detail_front_delt
+    com.formacoach.model.MuscleDetail.SIDE_DELT -> R.string.muscle_detail_side_delt
+    com.formacoach.model.MuscleDetail.REAR_DELT -> R.string.muscle_detail_rear_delt
+    com.formacoach.model.MuscleDetail.UPPER_TRAPS -> R.string.muscle_detail_upper_traps
+    com.formacoach.model.MuscleDetail.MID_BACK -> R.string.muscle_detail_mid_back
+    com.formacoach.model.MuscleDetail.LATS -> R.string.muscle_detail_lats
+    com.formacoach.model.MuscleDetail.BICEPS -> R.string.muscle_detail_biceps
+    com.formacoach.model.MuscleDetail.TRICEPS -> R.string.muscle_detail_triceps
+    com.formacoach.model.MuscleDetail.RECTUS_ABDOMINIS -> R.string.muscle_detail_rectus_abdominis
+    com.formacoach.model.MuscleDetail.OBLIQUES -> R.string.muscle_detail_obliques
+    com.formacoach.model.MuscleDetail.SPINAL_ERECTORS -> R.string.muscle_detail_spinal_erectors
+    com.formacoach.model.MuscleDetail.GLUTE_MAX -> R.string.muscle_detail_glute_max
+    com.formacoach.model.MuscleDetail.GLUTE_MED -> R.string.muscle_detail_glute_med
+    com.formacoach.model.MuscleDetail.QUADRICEPS -> R.string.muscle_detail_quadriceps
+    com.formacoach.model.MuscleDetail.HAMSTRINGS -> R.string.muscle_detail_hamstrings
+    com.formacoach.model.MuscleDetail.ADDUCTORS -> R.string.muscle_detail_adductors
+    com.formacoach.model.MuscleDetail.GASTROCNEMIUS -> R.string.muscle_detail_gastrocnemius
+    com.formacoach.model.MuscleDetail.SOLEUS -> R.string.muscle_detail_soleus
+}
+
 internal fun exerciseLabel(exercise:com.formacoach.model.Exercise):Int=when(exercise) {
     com.formacoach.model.Exercise.SQUAT->R.string.catalog_exercise_squat
     com.formacoach.model.Exercise.LEG_PRESS->R.string.catalog_exercise_leg_press

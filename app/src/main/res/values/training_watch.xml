@@ -3,10 +3,11 @@
     <string name="muscles_working">Muscles working</string>
     <string name="body_front">Front</string>
     <string name="body_back">Back</string>
+    <string name="muscle_highlights">Muscle highlights</string>
     <string name="muscle_primary">Primary • %1$s</string>
     <string name="muscle_secondary">Supporting • %1$s</string>
     <string name="muscle_accessibility">%1$s. Primary: %2$s. Supporting: %3$s.</string>
-    <string name="muscle_note">Simplified major muscle groups, not measured activation. Equipment and technique change involvement. Hip hinge represents a Romanian-deadlift-style movement.</string>
+    <string name="muscle_note">Simplified muscle regions for orientation, not measured activation. Shading is illustrative. Equipment and technique change involvement. Hip hinge represents a Romanian-deadlift-style movement.</string>
     <string name="weekly_muscles">Muscles • last 7 days</string>
     <string name="weekly_muscles_note">Completed working sets only. Primary and supporting counts are separate associations, not recovery scores or additive effective volume.</string>
     <string name="muscle_set_count">%1$s • %2$s primary / %3$s supporting</string>

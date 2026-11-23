@@ -7,11 +7,13 @@ import android.content.res.Configuration
 import android.os.Build
 import android.os.LocaleList
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,8 +27,10 @@ internal val FormaColors = darkColorScheme(
     onPrimaryContainer = Color(0xFFE3FAC6),
     secondary = Color(0xFFFFBE7B),
     onSecondary = Color(0xFF2D1905),
-    secondaryContainer = Color(0xFF3E2D1B),
-    onSecondaryContainer = Color(0xFFFFE4C4),
+    // Material maps tonal buttons and selected chips to secondaryContainer, so it stays on-brand.
+    // Amber is reserved for explicit accents (protein, records, warm-ups) via accentContainer.
+    secondaryContainer = Color(0xFF2A4733),
+    onSecondaryContainer = Color(0xFFE3FAC6),
     tertiary = Color(0xFF6EE7B7),
     onTertiary = Color(0xFF06281C),
     tertiaryContainer = Color(0xFF153B2E),
@@ -61,8 +65,8 @@ internal val FormaLightColors = lightColorScheme(
     onPrimaryContainer = Color(0xFF0E2909),
     secondary = Color(0xFFB35B12),
     onSecondary = Color(0xFFFFFFFF),
-    secondaryContainer = Color(0xFFFFE4C7),
-    onSecondaryContainer = Color(0xFF361902),
+    secondaryContainer = Color(0xFFD5EBCB),
+    onSecondaryContainer = Color(0xFF12301A),
     tertiary = Color(0xFF0F766E),
     onTertiary = Color(0xFFFFFFFF),
     tertiaryContainer = Color(0xFFCCFBF1),
@@ -88,6 +92,10 @@ internal val FormaLightColors = lightColorScheme(
     inverseOnSurface = Color(0xFFEAF3EC),
     inversePrimary = Color(0xFFC8F57B),
 )
+
+/** Amber container for achievement, record and warm-up accents; pair with colorScheme.secondary text. */
+internal val ColorScheme.accentContainer: Color
+    get() = if (background.luminance() < 0.5f) Color(0xFF3E2D1B) else Color(0xFFFFE4C7)
 
 internal val FormaShapes = Shapes(
     small = RoundedCornerShape(12.dp),

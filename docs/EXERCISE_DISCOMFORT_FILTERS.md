@@ -44,4 +44,5 @@ These references informed the safety boundary; they are not represented as clini
 
 - `ExerciseDiscomfortTests.swift` covers default-off behavior, primary and supporting associations, combined regions, unrelated exercises, deterministic persistence, and unknown stored values.
 - `scripts/check_apple_sources.py` checks the region mapping, library wiring, localization, and safety copy.
-- Swift tests and iPhone/watchOS compilation run in macOS CI. Portable source checks are not a substitute for Xcode, simulator, device, accessibility, or qualified clinical review.
+- GitHub Actions run [`45191884998`](https://github.com/7atem/Forma/actions/runs/45191884998), job `137752084876`, passed on commit `ff9cd48`: Swift tests, iPhone Simulator build, watchOS Simulator build and unsigned ARM64 IPA packaging. The portable source suite also passed with 191 matched EN/AR keys.
+- No visual simulator/device interaction or qualified clinical review has occurred. Compilation validates source compatibility, not the filter's medical suitability, accessibility or real-device presentation. Any future encouragement/rehabilitation rules remain blocked pending qualified clinical rules and regression cases.

@@ -214,80 +214,183 @@ public enum Muscle: String, Codable, CaseIterable, Sendable {
         }
     }
 }
-public struct MuscleRegion: Sendable { public let muscle: Muscle; public let front: Bool; public let path: String }
-public struct MuscleActivation: Sendable { public let primary: [Muscle]; public let secondary: [Muscle]; public let reference: String }
+public enum MuscleDetail: String, Codable, CaseIterable, Sendable {
+    case upper_chest = "UPPER_CHEST"
+    case mid_lower_chest = "MID_LOWER_CHEST"
+    case front_delt = "FRONT_DELT"
+    case side_delt = "SIDE_DELT"
+    case rear_delt = "REAR_DELT"
+    case upper_traps = "UPPER_TRAPS"
+    case mid_back = "MID_BACK"
+    case lats = "LATS"
+    case biceps = "BICEPS"
+    case triceps = "TRICEPS"
+    case rectus_abdominis = "RECTUS_ABDOMINIS"
+    case obliques = "OBLIQUES"
+    case spinal_erectors = "SPINAL_ERECTORS"
+    case glute_max = "GLUTE_MAX"
+    case glute_med = "GLUTE_MED"
+    case quadriceps = "QUADRICEPS"
+    case hamstrings = "HAMSTRINGS"
+    case adductors = "ADDUCTORS"
+    case gastrocnemius = "GASTROCNEMIUS"
+    case soleus = "SOLEUS"
+    public var group: Muscle {
+        switch self {
+        case .upper_chest: return .chest
+        case .mid_lower_chest: return .chest
+        case .front_delt: return .front_delts
+        case .side_delt: return .front_delts
+        case .rear_delt: return .rear_delts
+        case .upper_traps: return .upper_back
+        case .mid_back: return .upper_back
+        case .lats: return .lats
+        case .biceps: return .biceps
+        case .triceps: return .triceps
+        case .rectus_abdominis: return .core
+        case .obliques: return .core
+        case .spinal_erectors: return .erectors
+        case .glute_max: return .glutes
+        case .glute_med: return .glutes
+        case .quadriceps: return .quadriceps
+        case .hamstrings: return .hamstrings
+        case .adductors: return .adductors
+        case .gastrocnemius: return .calves
+        case .soleus: return .calves
+        }
+    }
+    public func label(arabic: Bool) -> String {
+        switch self {
+        case .upper_chest: return arabic ? "أعلى الصدر" : "Upper chest"
+        case .mid_lower_chest: return arabic ? "وسط وأسفل الصدر" : "Mid and lower chest"
+        case .front_delt: return arabic ? "الكتف الأمامي" : "Front shoulder"
+        case .side_delt: return arabic ? "الكتف الجانبي" : "Side shoulder"
+        case .rear_delt: return arabic ? "الكتف الخلفي" : "Rear shoulder"
+        case .upper_traps: return arabic ? "أعلى العضلة شبه المنحرفة" : "Upper trapezius"
+        case .mid_back: return arabic ? "وسط شبه المنحرفة والمعينية" : "Mid trapezius and rhomboids"
+        case .lats: return arabic ? "العضلات الظهرية العريضة" : "Lats"
+        case .biceps: return arabic ? "العضلة ذات الرأسين" : "Biceps"
+        case .triceps: return arabic ? "العضلة ثلاثية الرؤوس" : "Triceps"
+        case .rectus_abdominis: return arabic ? "عضلات البطن الأمامية" : "Front abdominals"
+        case .obliques: return arabic ? "العضلات المائلة" : "Obliques"
+        case .spinal_erectors: return arabic ? "العضلات الناصبة للعمود الفقري" : "Spinal erectors"
+        case .glute_max: return arabic ? "الألوية الكبرى" : "Gluteus maximus"
+        case .glute_med: return arabic ? "الألوية الوسطى" : "Gluteus medius"
+        case .quadriceps: return arabic ? "عضلات الفخذ الأمامية" : "Quadriceps"
+        case .hamstrings: return arabic ? "عضلات الفخذ الخلفية" : "Hamstrings"
+        case .adductors: return arabic ? "عضلات الفخذ الداخلية" : "Hip adductors"
+        case .gastrocnemius: return arabic ? "عضلة السمانة (أعلى الساق)" : "Gastrocnemius (upper calf)"
+        case .soleus: return arabic ? "العضلة النعلية (أسفل الساق)" : "Soleus (lower calf)"
+        }
+    }
+}
+public struct MuscleRegion: Sendable { public let detail: MuscleDetail; public let front: Bool; public let fiber: Double; public let path: String; public var muscle: Muscle { detail.group } }
+public struct MuscleActivation: Sendable { public let primary: [Muscle]; public let secondary: [Muscle]; public let primaryDetail: [MuscleDetail]; public let secondaryDetail: [MuscleDetail]; public let reference: String }
 public enum ExerciseMuscles {
     public static let version = 1
-    public static let outline = "M 50 2 C 37 2 37 23 50 23 C 63 23 63 2 50 2 Z M 43 25 L 35 28 C 29 29 25 33 23 41 L 15 73 L 11 86 L 14 91 L 19 88 L 24 73 L 31 51 L 34 79 L 32 98 L 31 119 L 33 153 L 33 185 L 29 204 L 30 208 L 43 208 L 45 186 L 47 154 L 50 122 L 53 154 L 55 186 L 57 208 L 70 208 L 71 204 L 67 185 L 67 153 L 69 119 L 68 98 L 66 79 L 69 51 L 76 73 L 81 88 L 86 91 L 89 86 L 85 73 L 77 41 C 75 33 71 29 65 28 L 57 25 Z"
+    public static let outline = "M 50 2 C 54.4 2 58 6.5 58 12 C 58 17.5 54.4 22 50 22 C 45.6 22 42 17.5 42 12 C 42 6.5 45.6 2 50 2 Z M 45 21 C 43 21.8 44.5 24.8 43 26 C 41.5 27.2 38.3 27.3 36 28 C 33.7 28.7 31 29 29 30 C 27 31 25.2 32.2 24 34 C 22.8 35.8 22.4 38.3 22 41 C 21.6 43.7 21.8 46.5 21.5 50 C 21.2 53.5 20.8 58.7 20.5 62 C 20.2 65.3 20 67 19.5 70 C 19 73 18.2 76.3 17.5 80 C 16.8 83.7 15.8 88.8 15 92 C 14.2 95.2 13.1 97 13 99 C 12.9 101 13.8 103.5 14.5 104 C 15.2 104.5 16.8 103.5 17.5 102 C 18.2 100.5 18.2 98.3 19 95 C 19.8 91.7 21.6 85.8 22.5 82 C 23.4 78.2 23.8 75.7 24.5 72 C 25.2 68.3 26.1 63.8 27 60 C 27.9 56.2 29.1 49.7 30 49 C 30.9 48.3 31.8 53.2 32.5 56 C 33.2 58.8 33.4 62 34 66 C 34.6 70 35.8 75.7 36 80 C 36.2 84.3 36 88.3 35.5 92 C 35 95.7 33.6 98.3 33 102 C 32.4 105.7 32.1 109.3 32 114 C 31.9 118.7 32.2 124.3 32.5 130 C 32.8 135.7 33.9 143 34 148 C 34.1 153 33.1 156 33 160 C 32.9 164 32.9 167 33.5 172 C 34.1 177 35.9 185.5 36.5 190 C 37.1 194.5 37.6 196.5 37 199 C 36.4 201.5 33.4 203.3 33 205 C 32.6 206.7 32.5 208.3 34.5 209 C 36.5 209.7 43.2 210.5 45 209 C 46.8 207.5 45.6 203.5 45.5 200 C 45.4 196.5 44.7 193 44.5 188 C 44.3 183 44.3 175.5 44.5 170 C 44.7 164.5 45.1 160 45.5 155 C 45.9 150 46.5 144.8 47 140 C 47.5 135.2 48 129.2 48.5 126 C 49 122.8 49.5 121 50 121 C 50.5 121 51 122.8 51.5 126 C 52 129.2 52.5 135.2 53 140 C 53.5 144.8 54.1 150 54.5 155 C 54.9 160 55.3 164.5 55.5 170 C 55.7 175.5 55.7 183 55.5 188 C 55.3 193 54.6 196.5 54.5 200 C 54.4 203.5 53.2 207.5 55 209 C 56.8 210.5 63.5 209.7 65.5 209 C 67.5 208.3 67.4 206.7 67 205 C 66.6 203.3 63.6 201.5 63 199 C 62.4 196.5 62.9 194.5 63.5 190 C 64.1 185.5 65.9 177 66.5 172 C 67.1 167 67.1 164 67 160 C 66.9 156 65.9 153 66 148 C 66.1 143 67.2 135.7 67.5 130 C 67.8 124.3 68.1 118.7 68 114 C 67.9 109.3 67.6 105.7 67 102 C 66.4 98.3 65 95.7 64.5 92 C 64 88.3 63.8 84.3 64 80 C 64.2 75.7 65.4 70 66 66 C 66.6 62 66.8 58.8 67.5 56 C 68.2 53.2 69.1 48.3 70 49 C 70.9 49.7 72.1 56.2 73 60 C 73.9 63.8 74.8 68.3 75.5 72 C 76.2 75.7 76.6 78.2 77.5 82 C 78.4 85.8 80.2 91.7 81 95 C 81.8 98.3 81.8 100.5 82.5 102 C 83.2 103.5 84.8 104.5 85.5 104 C 86.2 103.5 87.1 101 87 99 C 86.9 97 85.8 95.2 85 92 C 84.2 88.8 83.2 83.7 82.5 80 C 81.8 76.3 81 73 80.5 70 C 80 67 79.8 65.3 79.5 62 C 79.2 58.7 78.8 53.5 78.5 50 C 78.2 46.5 78.4 43.7 78 41 C 77.6 38.3 77.2 35.8 76 34 C 74.8 32.2 73 31 71 30 C 69 29 66.3 28.7 64 28 C 61.7 27.3 58.5 27.2 57 26 C 55.5 24.8 57 21.8 55 21 C 53 20.2 47 20.2 45 21 Z"
     public static let regions: [MuscleRegion] = [
-        .init(muscle: .chest, front: true, path: "M 35 39 C 39 35 45 36 49 38 L 49 56 C 42 59 35 55 34 49 Z M 65 39 C 61 35 55 36 51 38 L 51 56 C 58 59 65 55 66 49 Z"),
-        .init(muscle: .front_delts, front: true, path: "M 34 31 C 28 33 25 38 25 44 L 32 47 L 36 37 Z M 66 31 C 72 33 75 38 75 44 L 68 47 L 64 37 Z"),
-        .init(muscle: .rear_delts, front: false, path: "M 34 31 C 28 33 25 38 25 44 L 32 47 L 36 37 Z M 66 31 C 72 33 75 38 75 44 L 68 47 L 64 37 Z"),
-        .init(muscle: .biceps, front: true, path: "M 25 47 L 31 50 L 27 68 L 22 69 L 21 64 Z M 75 47 L 69 50 L 73 68 L 78 69 L 79 64 Z"),
-        .init(muscle: .triceps, front: false, path: "M 25 47 L 31 50 L 27 68 L 22 69 L 21 64 Z M 75 47 L 69 50 L 73 68 L 78 69 L 79 64 Z"),
-        .init(muscle: .core, front: true, path: "M 40 62 L 49 61 L 49 94 L 42 97 L 37 78 Z M 60 62 L 51 61 L 51 94 L 58 97 L 63 78 Z"),
-        .init(muscle: .quadriceps, front: true, path: "M 34 107 L 44 111 L 44 135 L 41 153 L 35 150 L 33 127 Z M 66 107 L 56 111 L 56 135 L 59 153 L 65 150 L 67 127 Z"),
-        .init(muscle: .adductors, front: true, path: "M 45 108 L 49 115 L 46 140 L 43 135 Z M 55 108 L 51 115 L 54 140 L 57 135 Z"),
-        .init(muscle: .calves, front: true, path: "M 35 159 L 42 159 L 41 183 L 36 189 L 34 178 Z M 65 159 L 58 159 L 59 183 L 64 189 L 66 178 Z"),
-        .init(muscle: .upper_back, front: false, path: "M 43 27 L 49 28 L 49 55 L 37 48 L 34 37 Z M 57 27 L 51 28 L 51 55 L 63 48 L 66 37 Z"),
-        .init(muscle: .lats, front: false, path: "M 34 51 L 44 58 L 44 85 L 37 77 Z M 66 51 L 56 58 L 56 85 L 63 77 Z"),
-        .init(muscle: .erectors, front: false, path: "M 46 57 L 49 59 L 49 92 L 45 94 Z M 54 57 L 51 59 L 51 92 L 55 94 Z"),
-        .init(muscle: .glutes, front: false, path: "M 34 94 C 39 91 45 93 49 98 L 49 112 C 42 117 35 114 33 107 Z M 66 94 C 61 91 55 93 51 98 L 51 112 C 58 117 65 114 67 107 Z"),
-        .init(muscle: .hamstrings, front: false, path: "M 34 117 L 46 118 L 43 151 L 35 153 L 33 133 Z M 66 117 L 54 118 L 57 151 L 65 153 L 67 133 Z"),
-        .init(muscle: .calves, front: false, path: "M 35 159 L 43 158 L 43 176 L 39 188 L 35 182 Z M 65 159 L 57 158 L 57 176 L 61 188 L 65 182 Z"),
+        .init(detail: .upper_chest, front: true, fiber: 170, path: "M 49 33 C 48 31.6 45 32.4 43 32.5 C 41 32.6 38.6 32.8 37 33.5 C 35.4 34.2 33.7 35.8 33.5 37 C 33.3 38.2 34.5 40 36 40.5 C 37.5 41 40.3 39.9 42.5 40 C 44.7 40.1 47.9 42.2 49 41 C 50.1 39.8 50 34.4 49 33 Z"),
+        .init(detail: .upper_chest, front: true, fiber: 10, path: "M 51 33 C 52 31.6 55 32.4 57 32.5 C 59 32.6 61.4 32.8 63 33.5 C 64.6 34.2 66.3 35.8 66.5 37 C 66.7 38.2 65.5 40 64 40.5 C 62.5 41 59.7 39.9 57.5 40 C 55.3 40.1 52.1 42.2 51 41 C 49.9 39.8 50 34.4 51 33 Z"),
+        .init(detail: .mid_lower_chest, front: true, fiber: 200, path: "M 49 42.5 C 47.9 40.3 44.7 41.6 42.5 41.5 C 40.3 41.4 37.6 41.3 36 42 C 34.4 42.7 33.2 43.9 33 45.5 C 32.8 47.1 33.4 49.8 34.5 51.5 C 35.6 53.2 37.8 54.8 39.5 55.5 C 41.2 56.2 43.4 56.2 45 56 C 46.6 55.8 48.3 56.8 49 54.5 C 49.7 52.2 50.1 44.7 49 42.5 Z"),
+        .init(detail: .mid_lower_chest, front: true, fiber: 340, path: "M 51 42.5 C 52.1 40.3 55.3 41.6 57.5 41.5 C 59.7 41.4 62.4 41.3 64 42 C 65.6 42.7 66.8 43.9 67 45.5 C 67.2 47.1 66.6 49.8 65.5 51.5 C 64.4 53.2 62.2 54.8 60.5 55.5 C 58.8 56.2 56.6 56.2 55 56 C 53.4 55.8 51.7 56.8 51 54.5 C 50.3 52.2 49.9 44.7 51 42.5 Z"),
+        .init(detail: .front_delt, front: true, fiber: 105, path: "M 34 30.5 C 33.4 29.4 31.1 30.3 30 31 C 28.9 31.7 27.9 32.8 27.5 34.5 C 27.1 36.2 27.2 39 27.5 41 C 27.8 43 28.8 46.2 29.5 46.5 C 30.2 46.8 30.8 44.5 31.5 43 C 32.2 41.5 33.1 39.6 33.5 37.5 C 33.9 35.4 34.6 31.6 34 30.5 Z"),
+        .init(detail: .front_delt, front: true, fiber: 75, path: "M 66 30.5 C 66.6 29.4 68.9 30.3 70 31 C 71.1 31.7 72.1 32.8 72.5 34.5 C 72.9 36.2 72.8 39 72.5 41 C 72.2 43 71.2 46.2 70.5 46.5 C 69.8 46.8 69.2 44.5 68.5 43 C 67.8 41.5 66.9 39.6 66.5 37.5 C 66.1 35.4 65.4 31.6 66 30.5 Z"),
+        .init(detail: .side_delt, front: true, fiber: 95, path: "M 28 31.5 C 27.6 31.5 25.6 33.1 24.8 34.5 C 24 35.9 23.2 38.1 23 40 C 22.8 41.9 23 44.8 23.5 46 C 24 47.2 25.5 48.5 26 47.5 C 26.5 46.5 26.4 42.2 26.6 40 C 26.8 37.8 27.1 35.9 27.3 34.5 C 27.5 33.1 28.4 31.5 28 31.5 Z"),
+        .init(detail: .side_delt, front: true, fiber: 85, path: "M 72 31.5 C 72.4 31.5 74.4 33.1 75.2 34.5 C 76 35.9 76.8 38.1 77 40 C 77.2 41.9 77 44.8 76.5 46 C 76 47.2 74.5 48.5 74 47.5 C 73.5 46.5 73.6 42.2 73.4 40 C 73.2 37.8 72.9 35.9 72.7 34.5 C 72.5 33.1 71.6 31.5 72 31.5 Z"),
+        .init(detail: .biceps, front: true, fiber: 95, path: "M 29.3 48.5 C 28.9 47 27 48.1 26 49 C 25 49.9 24 51.8 23.5 54 C 23 56.2 22.9 59.5 23 62 C 23.1 64.5 23.6 68.2 24.2 69 C 24.8 69.8 25.8 68.8 26.5 67 C 27.2 65.2 28 61.1 28.5 58 C 29 54.9 29.7 50 29.3 48.5 Z"),
+        .init(detail: .biceps, front: true, fiber: 85, path: "M 70.7 48.5 C 71.1 47 73 48.1 74 49 C 75 49.9 76 51.8 76.5 54 C 77 56.2 77.1 59.5 77 62 C 76.9 64.5 76.4 68.2 75.8 69 C 75.2 69.8 74.2 68.8 73.5 67 C 72.8 65.2 72 61.1 71.5 58 C 71 54.9 70.3 50 70.7 48.5 Z"),
+        .init(detail: .rectus_abdominis, front: true, fiber: 90, path: "M 49 59 C 48.3 52.2 46 58.2 45 59 C 44 59.8 43.4 61.2 43 64 C 42.6 66.8 42.7 72 42.8 76 C 42.9 80 43 84.7 43.5 88 C 44 91.3 44.6 94 45.5 96 C 46.4 98 48.4 106.2 49 100 C 49.6 93.8 49.7 65.8 49 59 Z"),
+        .init(detail: .rectus_abdominis, front: true, fiber: 90, path: "M 51 59 C 51.7 52.2 54 58.2 55 59 C 56 59.8 56.6 61.2 57 64 C 57.4 66.8 57.3 72 57.2 76 C 57.1 80 57 84.7 56.5 88 C 56 91.3 55.4 94 54.5 96 C 53.6 98 51.6 106.2 51 100 C 50.4 93.8 50.3 65.8 51 59 Z"),
+        .init(detail: .obliques, front: true, fiber: 50, path: "M 41.8 60.5 C 41 59.2 38.2 60.4 37.2 62 C 36.2 63.6 35.6 66.7 35.5 70 C 35.4 73.3 36 78.2 36.5 82 C 37 85.8 37.7 90.7 38.5 93 C 39.3 95.3 40.9 97.5 41.5 96 C 42.1 94.5 42 88.3 42 84 C 42 79.7 41.7 73.9 41.7 70 C 41.7 66.1 42.5 61.8 41.8 60.5 Z"),
+        .init(detail: .obliques, front: true, fiber: 130, path: "M 58.2 60.5 C 59 59.2 61.8 60.4 62.8 62 C 63.8 63.6 64.4 66.7 64.5 70 C 64.6 73.3 64 78.2 63.5 82 C 63 85.8 62.3 90.7 61.5 93 C 60.7 95.3 59.1 97.5 58.5 96 C 57.9 94.5 58 88.3 58 84 C 58 79.7 58.3 73.9 58.3 70 C 58.3 66.1 57.5 61.8 58.2 60.5 Z"),
+        .init(detail: .quadriceps, front: true, fiber: 95, path: "M 36 105 C 34.8 106.2 33.9 110.8 33.5 115 C 33.1 119.2 33.2 124.8 33.5 130 C 33.8 135.2 34.4 142.6 35.3 146 C 36.2 149.4 37.8 150.3 39 150.5 C 40.2 150.7 41.5 149.9 42.5 147 C 43.5 144.1 44.4 137.8 44.8 133 C 45.2 128.2 45.6 122.2 45 118 C 44.4 113.8 42.5 110.2 41 108 C 39.5 105.8 37.2 103.8 36 105 Z"),
+        .init(detail: .quadriceps, front: true, fiber: 85, path: "M 64 105 C 65.2 106.2 66.1 110.8 66.5 115 C 66.9 119.2 66.8 124.8 66.5 130 C 66.2 135.2 65.6 142.6 64.7 146 C 63.8 149.4 62.2 150.3 61 150.5 C 59.8 150.7 58.5 149.9 57.5 147 C 56.5 144.1 55.6 137.8 55.2 133 C 54.8 128.2 54.4 122.2 55 118 C 55.6 113.8 57.5 110.2 59 108 C 60.5 105.8 62.8 103.8 64 105 Z"),
+        .init(detail: .adductors, front: true, fiber: 110, path: "M 46.8 112 C 46.2 112 45.6 116.5 45.5 120 C 45.4 123.5 45.7 130.2 46 133 C 46.3 135.8 47 138.2 47.4 137 C 47.8 135.8 48.3 128.8 48.6 126 C 48.9 123.2 49.5 122.3 49.2 120 C 48.9 117.7 47.4 112 46.8 112 Z"),
+        .init(detail: .adductors, front: true, fiber: 70, path: "M 53.2 112 C 53.8 112 54.4 116.5 54.5 120 C 54.6 123.5 54.3 130.2 54 133 C 53.7 135.8 53 138.2 52.6 137 C 52.2 135.8 51.7 128.8 51.4 126 C 51.1 123.2 50.5 122.3 50.8 120 C 51.1 117.7 52.6 112 53.2 112 Z"),
+        .init(detail: .gastrocnemius, front: true, fiber: 90, path: "M 44.5 158 C 44.1 156.5 42.8 160.3 42.5 163 C 42.2 165.7 42.6 171.2 42.8 174 C 43 176.8 43.6 180.3 43.9 180 C 44.2 179.7 44.5 175.7 44.6 172 C 44.7 168.3 44.9 159.5 44.5 158 Z"),
+        .init(detail: .gastrocnemius, front: true, fiber: 90, path: "M 55.5 158 C 55.9 156.5 57.2 160.3 57.5 163 C 57.8 165.7 57.4 171.2 57.2 174 C 57 176.8 56.4 180.3 56.1 180 C 55.8 179.7 55.5 175.7 55.4 172 C 55.3 168.3 55.1 159.5 55.5 158 Z"),
+        .init(detail: .soleus, front: true, fiber: 90, path: "M 34.5 165 C 34.2 165.8 34.2 171.3 34.5 175 C 34.8 178.7 35.7 185.8 36.2 187 C 36.7 188.2 37.5 184.8 37.5 182 C 37.5 179.2 37 172.8 36.5 170 C 36 167.2 34.8 164.2 34.5 165 Z"),
+        .init(detail: .soleus, front: true, fiber: 90, path: "M 65.5 165 C 65.8 165.8 65.8 171.3 65.5 175 C 65.2 178.7 64.3 185.8 63.8 187 C 63.3 188.2 62.5 184.8 62.5 182 C 62.5 179.2 63 172.8 63.5 170 C 64 167.2 65.2 164.2 65.5 165 Z"),
+        .init(detail: .upper_traps, front: false, fiber: 155, path: "M 49 21.5 C 48.4 19.7 46.7 22.1 45.5 23 C 44.3 23.9 43.6 25.9 42 27 C 40.4 28.1 37.8 28.8 36 29.5 C 34.2 30.2 30.8 30.5 31 31 C 31.2 31.5 34.8 32.3 37 32.5 C 39.2 32.7 42 31.8 44 32 C 46 32.2 48.2 35.8 49 34 C 49.8 32.2 49.6 23.3 49 21.5 Z"),
+        .init(detail: .upper_traps, front: false, fiber: 25, path: "M 51 21.5 C 51.6 19.7 53.3 22.1 54.5 23 C 55.7 23.9 56.4 25.9 58 27 C 59.6 28.1 62.2 28.8 64 29.5 C 65.8 30.2 69.2 30.5 69 31 C 68.8 31.5 65.2 32.3 63 32.5 C 60.8 32.7 58 31.8 56 32 C 54 32.2 51.8 35.8 51 34 C 50.2 32.2 50.4 23.3 51 21.5 Z"),
+        .init(detail: .mid_back, front: false, fiber: 165, path: "M 49 35 C 48.1 30.9 45.4 33.6 43.5 33.5 C 41.6 33.4 38.8 33.6 37.5 34.5 C 36.2 35.4 35.2 37.2 35.5 39 C 35.8 40.8 37.5 42.8 39 45 C 40.5 47.2 42.8 49.8 44.5 52 C 46.2 54.2 48.2 60.8 49 58 C 49.8 55.2 49.9 39.1 49 35 Z"),
+        .init(detail: .mid_back, front: false, fiber: 15, path: "M 51 35 C 51.9 30.9 54.6 33.6 56.5 33.5 C 58.4 33.4 61.2 33.6 62.5 34.5 C 63.8 35.4 64.8 37.2 64.5 39 C 64.2 40.8 62.5 42.8 61 45 C 59.5 47.2 57.2 49.8 55.5 52 C 53.8 54.2 51.8 60.8 51 58 C 50.2 55.2 50.1 39.1 51 35 Z"),
+        .init(detail: .rear_delt, front: false, fiber: 75, path: "M 33 31 C 32.2 30.4 30.1 30.8 29 31.5 C 27.9 32.2 26.8 33.3 26.5 35 C 26.2 36.7 26.5 39.9 27 41.5 C 27.5 43.1 28.7 44.8 29.5 44.5 C 30.3 44.2 31.2 41.6 32 40 C 32.8 38.4 33.8 36.5 34 35 C 34.2 33.5 33.8 31.6 33 31 Z"),
+        .init(detail: .rear_delt, front: false, fiber: 105, path: "M 67 31 C 67.8 30.4 69.9 30.8 71 31.5 C 72.1 32.2 73.2 33.3 73.5 35 C 73.8 36.7 73.5 39.9 73 41.5 C 72.5 43.1 71.3 44.8 70.5 44.5 C 69.7 44.2 68.8 41.6 68 40 C 67.2 38.4 66.2 36.5 66 35 C 65.8 33.5 66.2 31.6 67 31 Z"),
+        .init(detail: .side_delt, front: false, fiber: 95, path: "M 28 31.5 C 27.6 31.5 25.6 33.1 24.8 34.5 C 24 35.9 23.2 38.1 23 40 C 22.8 41.9 23 44.8 23.5 46 C 24 47.2 25.5 48.5 26 47.5 C 26.5 46.5 26.4 42.2 26.6 40 C 26.8 37.8 27.1 35.9 27.3 34.5 C 27.5 33.1 28.4 31.5 28 31.5 Z"),
+        .init(detail: .side_delt, front: false, fiber: 85, path: "M 72 31.5 C 72.4 31.5 74.4 33.1 75.2 34.5 C 76 35.9 76.8 38.1 77 40 C 77.2 41.9 77 44.8 76.5 46 C 76 47.2 74.5 48.5 74 47.5 C 73.5 46.5 73.6 42.2 73.4 40 C 73.2 37.8 72.9 35.9 72.7 34.5 C 72.5 33.1 71.6 31.5 72 31.5 Z"),
+        .init(detail: .triceps, front: false, fiber: 95, path: "M 29.3 47 C 28.7 45.4 26.6 46.3 25.5 47.5 C 24.4 48.7 23.1 51.4 22.6 54 C 22.1 56.6 22.1 60.3 22.3 63 C 22.5 65.7 23.2 69.3 24 70 C 24.8 70.7 26.2 69.2 27 67 C 27.8 64.8 28.6 60.3 29 57 C 29.4 53.7 29.9 48.6 29.3 47 Z"),
+        .init(detail: .triceps, front: false, fiber: 85, path: "M 70.7 47 C 71.3 45.4 73.4 46.3 74.5 47.5 C 75.6 48.7 76.9 51.4 77.4 54 C 77.9 56.6 77.9 60.3 77.7 63 C 77.5 65.7 76.8 69.3 76 70 C 75.2 70.7 73.8 69.2 73 67 C 72.2 64.8 71.4 60.3 71 57 C 70.6 53.7 70.1 48.6 70.7 47 Z"),
+        .init(detail: .lats, front: false, fiber: 239, path: "M 35.6 41 C 34.4 40.7 33.4 45.7 33.2 49 C 33 52.3 33.7 57 34.3 61 C 34.9 65 35.8 69.2 37 73 C 38.2 76.8 40.5 83.2 41.5 84 C 42.5 84.8 42.9 81.5 43.2 78 C 43.5 74.5 43.7 67.5 43.2 63 C 42.8 58.5 41.8 54.7 40.5 51 C 39.2 47.3 36.8 41.3 35.6 41 Z"),
+        .init(detail: .lats, front: false, fiber: 301, path: "M 64.4 41 C 65.6 40.7 66.6 45.7 66.8 49 C 67 52.3 66.3 57 65.7 61 C 65.1 65 64.2 69.2 63 73 C 61.8 76.8 59.5 83.2 58.5 84 C 57.5 84.8 57.1 81.5 56.8 78 C 56.5 74.5 56.3 67.5 56.8 63 C 57.2 58.5 58.2 54.7 59.5 51 C 60.8 47.3 63.2 41.3 64.4 41 Z"),
+        .init(detail: .spinal_erectors, front: false, fiber: 90, path: "M 48.6 58 C 48 56 46.3 59.2 45.6 62 C 44.9 64.8 44.7 70.5 44.6 75 C 44.5 79.5 44.5 85.3 44.8 89 C 45.1 92.7 45.8 95.8 46.5 97 C 47.2 98.2 48.6 99.8 49 96 C 49.4 92.2 49.1 80.3 49 74 C 48.9 67.7 49.2 60 48.6 58 Z"),
+        .init(detail: .spinal_erectors, front: false, fiber: 90, path: "M 51.4 58 C 52 56 53.7 59.2 54.4 62 C 55.1 64.8 55.3 70.5 55.4 75 C 55.5 79.5 55.5 85.3 55.2 89 C 54.9 92.7 54.2 95.8 53.5 97 C 52.8 98.2 51.4 99.8 51 96 C 50.6 92.2 50.9 80.3 51 74 C 51.1 67.7 50.8 60 51.4 58 Z"),
+        .init(detail: .glute_med, front: false, fiber: 160, path: "M 42.5 95 C 41.5 94.3 38.5 95.2 37 96 C 35.5 96.8 34.1 98.3 33.6 100 C 33.1 101.7 33.3 105.4 34 106 C 34.7 106.6 36.5 104.5 38 103.5 C 39.5 102.5 42.2 101.4 43 100 C 43.8 98.6 43.5 95.7 42.5 95 Z"),
+        .init(detail: .glute_med, front: false, fiber: 20, path: "M 57.5 95 C 58.5 94.3 61.5 95.2 63 96 C 64.5 96.8 65.9 98.3 66.4 100 C 66.9 101.7 66.7 105.4 66 106 C 65.3 106.6 63.5 104.5 62 103.5 C 60.5 102.5 57.8 101.4 57 100 C 56.2 98.6 56.5 95.7 57.5 95 Z"),
+        .init(detail: .glute_max, front: false, fiber: 149, path: "M 48.5 100 C 47.5 97.6 44.8 99.8 43 100.5 C 41.2 101.2 39 102.6 37.5 104 C 36 105.4 34.5 106.9 34.2 109 C 33.9 111.1 34.4 114.6 35.5 116.5 C 36.6 118.4 39 119.8 41 120.5 C 43 121.2 46.1 121.4 47.5 120.5 C 48.9 119.6 49 118.4 49.2 115 C 49.4 111.6 49.5 102.4 48.5 100 Z"),
+        .init(detail: .glute_max, front: false, fiber: 31, path: "M 51.5 100 C 52.5 97.6 55.2 99.8 57 100.5 C 58.8 101.2 61 102.6 62.5 104 C 64 105.4 65.5 106.9 65.8 109 C 66.1 111.1 65.6 114.6 64.5 116.5 C 63.4 118.4 61 119.8 59 120.5 C 57 121.2 53.9 121.4 52.5 120.5 C 51.1 119.6 51 118.4 50.8 115 C 50.6 111.6 50.5 102.4 51.5 100 Z"),
+        .init(detail: .adductors, front: false, fiber: 100, path: "M 47.8 124 C 47.4 124.3 46.6 129.3 46.6 132 C 46.6 134.7 47.2 140.3 47.6 140 C 48 139.7 48.8 132.7 48.8 130 C 48.8 127.3 48.2 123.7 47.8 124 Z"),
+        .init(detail: .adductors, front: false, fiber: 80, path: "M 52.2 124 C 52.6 124.3 53.4 129.3 53.4 132 C 53.4 134.7 52.8 140.3 52.4 140 C 52 139.7 51.2 132.7 51.2 130 C 51.2 127.3 51.8 123.7 52.2 124 Z"),
+        .init(detail: .hamstrings, front: false, fiber: 90, path: "M 35 122 C 33.6 123.8 33.5 128.2 33.4 132 C 33.3 135.8 33.8 141.8 34.6 145 C 35.4 148.2 36.7 150.2 38 151 C 39.3 151.8 41.3 151.8 42.6 149.5 C 43.9 147.2 45 141.1 45.6 137 C 46.2 132.9 46.9 127.6 46.2 125 C 45.5 122.4 43.4 122 41.5 121.5 C 39.6 121 36.4 120.2 35 122 Z"),
+        .init(detail: .hamstrings, front: false, fiber: 90, path: "M 65 122 C 66.3 123.8 66.5 128.2 66.6 132 C 66.7 135.8 66.2 141.8 65.4 145 C 64.6 148.2 63.3 150.2 62 151 C 60.7 151.8 58.7 151.8 57.4 149.5 C 56.1 147.2 55 141.1 54.4 137 C 53.8 132.9 53.1 127.6 53.8 125 C 54.5 122.4 56.6 122 58.5 121.5 C 60.4 121 63.6 120.2 65 122 Z"),
+        .init(detail: .gastrocnemius, front: false, fiber: 90, path: "M 40 154 C 38.5 153.7 36.5 155.2 35.5 157 C 34.5 158.8 33.9 162.2 33.8 165 C 33.7 167.8 34.2 171.8 35 174 C 35.8 176.2 37.4 178 38.5 178.5 C 39.6 179 40.5 178.8 41.5 177 C 42.5 175.2 43.7 171 44.2 168 C 44.7 165 45 161.3 44.3 159 C 43.6 156.7 41.5 154.3 40 154 Z"),
+        .init(detail: .gastrocnemius, front: false, fiber: 90, path: "M 60 154 C 61.5 153.7 63.5 155.2 64.5 157 C 65.5 158.8 66.1 162.2 66.2 165 C 66.3 167.8 65.8 171.8 65 174 C 64.2 176.2 62.6 178 61.5 178.5 C 60.4 179 59.5 178.8 58.5 177 C 57.5 175.2 56.3 171 55.8 168 C 55.3 165 55 161.3 55.7 159 C 56.4 156.7 58.5 154.3 60 154 Z"),
+        .init(detail: .soleus, front: false, fiber: 90, path: "M 35.6 176 C 35 177 35.9 182.9 36.3 186 C 36.7 189.1 37.3 193 38.2 194.5 C 39.1 196 40.6 196.4 41.5 195 C 42.4 193.6 43.1 189.3 43.5 186 C 43.9 182.7 44.4 176 43.8 175 C 43.2 174 41.4 179.8 40 180 C 38.6 180.2 36.2 175 35.6 176 Z"),
+        .init(detail: .soleus, front: false, fiber: 90, path: "M 64.4 176 C 65 177 64.1 182.9 63.7 186 C 63.3 189.1 62.7 193 61.8 194.5 C 60.9 196 59.4 196.4 58.5 195 C 57.6 193.6 56.9 189.3 56.5 186 C 56.1 182.7 55.6 176 56.2 175 C 56.8 174 58.6 179.8 60 180 C 61.4 180.2 63.8 175 64.4 176 Z"),
     ]
     public static func of(_ exercise: Exercise) -> MuscleActivation {
         switch exercise {
-        case .squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .core], reference: "https://www.nasm.org/workout-exercise-guidance")
-        case .leg_press: return .init(primary: [.quadriceps], secondary: [.glutes, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/leg-press")
-        case .chest_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/")
-        case .row: return .init(primary: [.lats, .upper_back], secondary: [.biceps, .rear_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/")
-        case .lat_pulldown: return .init(primary: [.lats], secondary: [.biceps, .upper_back], reference: "https://www.acefitness.org/resources/pros/expert-articles/8944/a-back-to-school-program-an-evidence-based-approach-to-training-the-back/")
-        case .hip_hinge: return .init(primary: [.glutes, .hamstrings], secondary: [.erectors, .core], reference: "https://www.nasm.org/workout-exercise-guidance")
-        case .shoulder_press: return .init(primary: [.front_delts], secondary: [.triceps, .upper_back], reference: "https://www.nasm.org/workout-exercise-guidance")
-        case .split_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .core], reference: "https://www.nasm.org/workout-exercise-guidance")
-        case .goblet_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/goblet-squat")
-        case .barbell_back_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .erectors, .adductors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .reverse_lunge: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .adductors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .step_up: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .calves], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .leg_extension: return .init(primary: [.quadriceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .seated_leg_curl: return .init(primary: [.hamstrings], secondary: [.calves], reference: "https://www.nasm.org/resource-center/exercise-library/seated-leg-curl")
-        case .standing_calf_raise: return .init(primary: [.calves], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .seated_calf_raise: return .init(primary: [.calves], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .barbell_hip_thrust: return .init(primary: [.glutes], secondary: [.hamstrings, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .glute_bridge: return .init(primary: [.glutes], secondary: [.hamstrings, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .barbell_romanian_deadlift: return .init(primary: [.hamstrings, .glutes], secondary: [.erectors, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .dumbbell_bench_press: return .init(primary: [.chest], secondary: [.triceps, .front_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .incline_dumbbell_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .push_up: return .init(primary: [.chest], secondary: [.triceps, .front_delts, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .knee_push_up: return .init(primary: [.chest], secondary: [.triceps, .front_delts, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .cable_chest_fly: return .init(primary: [.chest], secondary: [.front_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .single_arm_dumbbell_row: return .init(primary: [.lats, .upper_back], secondary: [.biceps, .rear_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .chest_supported_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .pull_up: return .init(primary: [.lats], secondary: [.biceps, .upper_back, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .face_pull: return .init(primary: [.rear_delts, .upper_back], secondary: [.biceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .dumbbell_shoulder_press: return .init(primary: [.front_delts], secondary: [.triceps, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .rear_delt_fly: return .init(primary: [.rear_delts], secondary: [.upper_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .dumbbell_shrug: return .init(primary: [.upper_back], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .dumbbell_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .hammer_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .machine_preacher_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .triceps_pushdown: return .init(primary: [.triceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .overhead_triceps_extension: return .init(primary: [.triceps], secondary: [.core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .dead_bug: return .init(primary: [.core], secondary: [], reference: "https://hw.qld.gov.au/physical-activity/dead-bugs/")
-        case .reverse_crunch: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .cable_crunch: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .barbell_bench_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .incline_barbell_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .dip: return .init(primary: [.chest, .triceps], secondary: [.front_delts], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .conventional_deadlift: return .init(primary: [.hamstrings, .glutes], secondary: [.erectors, .upper_back, .quadriceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .barbell_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts, .erectors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .barbell_overhead_press: return .init(primary: [.front_delts], secondary: [.triceps, .core], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .cable_lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .barbell_curl: return .init(primary: [.biceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .skull_crusher: return .init(primary: [.triceps], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .hanging_leg_raise: return .init(primary: [.core], secondary: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .core], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.adductors, .rectus_abdominis, .obliques], reference: "https://www.nasm.org/workout-exercise-guidance")
+        case .leg_press: return .init(primary: [.quadriceps], secondary: [.glutes, .adductors], primaryDetail: [.quadriceps], secondaryDetail: [.glute_max, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/leg-press")
+        case .chest_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], primaryDetail: [.mid_lower_chest], secondaryDetail: [.front_delt, .triceps, .upper_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/")
+        case .row: return .init(primary: [.lats, .upper_back], secondary: [.biceps, .rear_delts], primaryDetail: [.lats, .mid_back], secondaryDetail: [.biceps, .rear_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/48/seated-row/")
+        case .lat_pulldown: return .init(primary: [.lats], secondary: [.biceps, .upper_back], primaryDetail: [.lats], secondaryDetail: [.biceps, .mid_back], reference: "https://www.acefitness.org/resources/pros/expert-articles/8944/a-back-to-school-program-an-evidence-based-approach-to-training-the-back/")
+        case .hip_hinge: return .init(primary: [.glutes, .hamstrings], secondary: [.erectors, .core], primaryDetail: [.glute_max, .hamstrings], secondaryDetail: [.spinal_erectors, .rectus_abdominis, .obliques], reference: "https://www.nasm.org/workout-exercise-guidance")
+        case .shoulder_press: return .init(primary: [.front_delts], secondary: [.triceps, .upper_back], primaryDetail: [.front_delt], secondaryDetail: [.triceps, .upper_traps, .side_delt], reference: "https://www.nasm.org/workout-exercise-guidance")
+        case .split_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .core], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.adductors, .rectus_abdominis, .obliques, .glute_med], reference: "https://www.nasm.org/workout-exercise-guidance")
+        case .goblet_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .adductors], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.rectus_abdominis, .obliques, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/goblet-squat")
+        case .barbell_back_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .erectors, .adductors], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.rectus_abdominis, .obliques, .spinal_erectors, .adductors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .reverse_lunge: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .adductors], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.rectus_abdominis, .obliques, .adductors, .glute_med], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .step_up: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .calves], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.rectus_abdominis, .obliques, .gastrocnemius, .glute_med], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .leg_extension: return .init(primary: [.quadriceps], secondary: [], primaryDetail: [.quadriceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .seated_leg_curl: return .init(primary: [.hamstrings], secondary: [.calves], primaryDetail: [.hamstrings], secondaryDetail: [.gastrocnemius], reference: "https://www.nasm.org/resource-center/exercise-library/seated-leg-curl")
+        case .standing_calf_raise: return .init(primary: [.calves], secondary: [], primaryDetail: [.gastrocnemius], secondaryDetail: [.soleus], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .seated_calf_raise: return .init(primary: [.calves], secondary: [], primaryDetail: [.soleus], secondaryDetail: [.gastrocnemius], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_hip_thrust: return .init(primary: [.glutes], secondary: [.hamstrings, .core], primaryDetail: [.glute_max], secondaryDetail: [.hamstrings, .rectus_abdominis, .glute_med], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .glute_bridge: return .init(primary: [.glutes], secondary: [.hamstrings, .core], primaryDetail: [.glute_max], secondaryDetail: [.hamstrings, .rectus_abdominis, .glute_med], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_romanian_deadlift: return .init(primary: [.hamstrings, .glutes], secondary: [.erectors, .core], primaryDetail: [.hamstrings, .glute_max], secondaryDetail: [.spinal_erectors, .rectus_abdominis, .obliques], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_bench_press: return .init(primary: [.chest], secondary: [.triceps, .front_delts], primaryDetail: [.mid_lower_chest], secondaryDetail: [.triceps, .front_delt, .upper_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .incline_dumbbell_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], primaryDetail: [.upper_chest], secondaryDetail: [.front_delt, .triceps, .mid_lower_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .push_up: return .init(primary: [.chest], secondary: [.triceps, .front_delts, .core], primaryDetail: [.mid_lower_chest], secondaryDetail: [.triceps, .front_delt, .rectus_abdominis, .obliques, .upper_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .knee_push_up: return .init(primary: [.chest], secondary: [.triceps, .front_delts, .core], primaryDetail: [.mid_lower_chest], secondaryDetail: [.triceps, .front_delt, .rectus_abdominis, .obliques, .upper_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .cable_chest_fly: return .init(primary: [.chest], secondary: [.front_delts], primaryDetail: [.mid_lower_chest], secondaryDetail: [.front_delt, .upper_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .single_arm_dumbbell_row: return .init(primary: [.lats, .upper_back], secondary: [.biceps, .rear_delts], primaryDetail: [.lats, .mid_back], secondaryDetail: [.biceps, .rear_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .chest_supported_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts], primaryDetail: [.mid_back, .lats], secondaryDetail: [.biceps, .rear_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .pull_up: return .init(primary: [.lats], secondary: [.biceps, .upper_back, .core], primaryDetail: [.lats], secondaryDetail: [.biceps, .mid_back, .rectus_abdominis], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .face_pull: return .init(primary: [.rear_delts, .upper_back], secondary: [.biceps], primaryDetail: [.rear_delt, .mid_back], secondaryDetail: [.biceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_shoulder_press: return .init(primary: [.front_delts], secondary: [.triceps, .core], primaryDetail: [.front_delt], secondaryDetail: [.triceps, .rectus_abdominis, .obliques, .side_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back], primaryDetail: [.side_delt], secondaryDetail: [.upper_traps, .front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .rear_delt_fly: return .init(primary: [.rear_delts], secondary: [.upper_back], primaryDetail: [.rear_delt], secondaryDetail: [.mid_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_shrug: return .init(primary: [.upper_back], secondary: [], primaryDetail: [.upper_traps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .hammer_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .machine_preacher_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .triceps_pushdown: return .init(primary: [.triceps], secondary: [], primaryDetail: [.triceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .overhead_triceps_extension: return .init(primary: [.triceps], secondary: [.core], primaryDetail: [.triceps], secondaryDetail: [.rectus_abdominis], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dead_bug: return .init(primary: [.core], secondary: [], primaryDetail: [.rectus_abdominis], secondaryDetail: [.obliques], reference: "https://hw.qld.gov.au/physical-activity/dead-bugs/")
+        case .reverse_crunch: return .init(primary: [.core], secondary: [], primaryDetail: [.rectus_abdominis], secondaryDetail: [.obliques], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .cable_crunch: return .init(primary: [.core], secondary: [], primaryDetail: [.rectus_abdominis], secondaryDetail: [.obliques], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_bench_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], primaryDetail: [.mid_lower_chest], secondaryDetail: [.front_delt, .triceps, .upper_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .incline_barbell_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], primaryDetail: [.upper_chest], secondaryDetail: [.front_delt, .triceps, .mid_lower_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dip: return .init(primary: [.chest, .triceps], secondary: [.front_delts], primaryDetail: [.mid_lower_chest, .triceps], secondaryDetail: [.front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .conventional_deadlift: return .init(primary: [.hamstrings, .glutes], secondary: [.erectors, .upper_back, .quadriceps], primaryDetail: [.hamstrings, .glute_max], secondaryDetail: [.spinal_erectors, .upper_traps, .mid_back, .quadriceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts, .erectors], primaryDetail: [.mid_back, .lats], secondaryDetail: [.biceps, .rear_delt, .spinal_erectors], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_overhead_press: return .init(primary: [.front_delts], secondary: [.triceps, .core], primaryDetail: [.front_delt], secondaryDetail: [.triceps, .rectus_abdominis, .obliques, .side_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .cable_lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back], primaryDetail: [.side_delt], secondaryDetail: [.upper_traps, .front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .barbell_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .skull_crusher: return .init(primary: [.triceps], secondary: [], primaryDetail: [.triceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .hanging_leg_raise: return .init(primary: [.core], secondary: [], primaryDetail: [.rectus_abdominis], secondaryDetail: [.obliques], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         }
     }
 }

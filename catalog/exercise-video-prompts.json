@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "purpose": "AI video pilot: realistic motion between each exercise's existing start and movement stills. Generated outside the app by the maintainer in their own Gemini (Veo), Kling or Sora account; the app stays offline and bundles reviewed files only. Muscle highlighting is drawn by the app from catalog/exercise-muscles.json, never baked into the video.",
+  "version": 2,
+  "purpose": "AI exercise video library: realistic motion between each exercise's existing start and movement stills. Generated outside the app with a compatible start/end-frame image-to-video tool; the app stays offline and bundles reviewed files only. Muscle highlighting is drawn by the app from catalog/exercise-muscles.json, never baked into the video.",
   "workflow": "Run scripts/prepare_video_keyframes.py, upload start.png as the FIRST frame and end.png as the LAST frame (image-to-video with start/end frames), 4 seconds, 1:1, no audio. Then run scripts/finalize_exercise_video.py <ID> <download.mp4> --tool <tool> to build the forward+reverse loop and update the manifest. A qualified reviewer must approve each clip before release.",
   "style": "Photorealistic 3D render matching the provided frames exactly: the same smooth grey adult mannequin-style athlete in a green t-shirt and black shorts, the same equipment and dark green studio background with soft top light. Camera locked off on a tripod at the same side three-quarter angle as the frames: no pan, zoom, cut or shake. One continuous, controlled, slow-tempo repetition. Realistic human joint angles. No text, numbers, logos, watermark or music.",
   "negative": "camera movement, zoom, cut, extra limbs, extra fingers, merged or missing hands, knees or elbows bending backwards, bar passing through the body, plates changing size or detaching, equipment morphing, body morphing, face distortion, flicker, text, watermark, logo, music",
@@ -11,14 +11,214 @@
       "motion": "Bodyweight squat from standing to the bottom. Hips move back and down while the knees travel forward in line with the toes, chest stays proud, arms reach straight forward for balance, heels stay flat on the floor, and the athlete pauses briefly at the bottom with thighs about parallel to the floor."
     },
     {
+      "id": "LEG_PRESS",
+      "seconds": 4,
+      "motion": "45° sled leg press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Support your back and place feet flat on the plate. Press smoothly without locking the knees. Lower with control; keep your hips on the seat."
+    },
+    {
+      "id": "CHEST_PRESS",
+      "seconds": 4,
+      "motion": "Seated machine chest press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Adjust handles to mid-chest; support your back. Press forward with straight wrists and relaxed shoulders. Return slowly without letting the handles pull behind your chest."
+    },
+    {
+      "id": "ROW",
+      "seconds": 4,
+      "motion": "Seated low cable row. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Brace your feet and sit tall with soft knees. Pull the handle toward your abdomen, elbows close. Reach forward with control; keep your torso still."
+    },
+    {
+      "id": "LAT_PULLDOWN",
+      "seconds": 4,
+      "motion": "Front lat pulldown. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Secure thighs under the pad and plant your feet. Bring elbows down as the bar approaches your upper chest. Return slowly; keep the bar in front of your head."
+    },
+    {
+      "id": "HIP_HINGE",
+      "seconds": 4,
+      "motion": "Dumbbell Romanian deadlift. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand tall with dumbbells close and knees slightly bent. Push hips back, keeping a long, neutral spine. Keep weights close; stand by bringing hips forward."
+    },
+    {
+      "id": "SHOULDER_PRESS",
+      "seconds": 4,
+      "motion": "Seated machine shoulder press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Support your back; start with handles near shoulder height. Press overhead with wrists aligned above elbows. Lower slowly without arching your back."
+    },
+    {
+      "id": "SPLIT_SQUAT",
+      "seconds": 4,
+      "motion": "Bodyweight Bulgarian split squat. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Rest the rear foot on a stable bench; plant the front foot. Lower with control, keeping the front knee tracking your toes."
+    },
+    {
+      "id": "GOBLET_SQUAT",
+      "seconds": 4,
+      "motion": "Goblet squat. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Hold one dumbbell close to the chest. Keep heels planted as hips and knees bend. Stand up without rounding the back."
+    },
+    {
+      "id": "BARBELL_BACK_SQUAT",
+      "seconds": 4,
+      "motion": "Barbell back squat. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Set the bar on the upper back, clear of the neck. Brace and bend hips and knees with feet planted. Rise with the bar balanced over the mid-foot."
+    },
+    {
+      "id": "REVERSE_LUNGE",
+      "seconds": 4,
+      "motion": "Reverse lunge. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Step one foot back from a stable stance. Lower the rear knee toward the floor with the front heel down. Push through the front foot to return; log reps per side."
+    },
+    {
+      "id": "STEP_UP",
+      "seconds": 4,
+      "motion": "Step-up. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Place the whole lead foot on a stable low box. Rise using the lead leg without springing off the trailing foot. Step down with control; log reps per side."
+    },
+    {
+      "id": "LEG_EXTENSION",
+      "seconds": 4,
+      "motion": "Leg extension. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Align the machine pivot with the knee. Keep hips and back against the pads. Extend and lower the knees smoothly without swinging."
+    },
+    {
+      "id": "SEATED_LEG_CURL",
+      "seconds": 4,
+      "motion": "Seated leg curl. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Adjust the knee pivot and secure the thigh pad. Start with legs extended without locking the knees. Curl the heels under the seat and return slowly."
+    },
+    {
+      "id": "STANDING_CALF_RAISE",
+      "seconds": 4,
+      "motion": "Standing calf raise. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand with feet parallel and use light support for balance. Lift both heels while keeping the knees softly straight. Lower the heels with control."
+    },
+    {
+      "id": "SEATED_CALF_RAISE",
+      "seconds": 4,
+      "motion": "Seated calf raise. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Sit with forefeet on the platform and thigh pads secure. Raise the heels while keeping knees bent. Lower smoothly through a comfortable range."
+    },
+    {
+      "id": "BARBELL_HIP_THRUST",
+      "seconds": 4,
+      "motion": "Barbell hip thrust. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Support the upper back on a stable bench and pad the bar. Keep feet planted and lift the hips until trunk and thighs align. Lower without overextending the lower back."
+    },
+    {
+      "id": "GLUTE_BRIDGE",
+      "seconds": 4,
+      "motion": "Glute bridge. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Lie on the back with knees bent and feet planted. Lift the hips while keeping the ribs down. Lower slowly without pushing through the neck."
+    },
+    {
+      "id": "BARBELL_ROMANIAN_DEADLIFT",
+      "seconds": 4,
+      "motion": "Barbell Romanian deadlift. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Hold the bar close to the thighs with knees slightly bent. Send the hips back while the bar travels close to the legs. Stand by extending the hips without leaning back."
+    },
+    {
+      "id": "DUMBBELL_BENCH_PRESS",
+      "seconds": 4,
+      "motion": "Dumbbell bench press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Lie on a stable flat bench with feet planted. Lower the dumbbells beside the chest with forearms upright. Press upward without bouncing or striking the dumbbells."
+    },
+    {
+      "id": "INCLINE_DUMBBELL_PRESS",
+      "seconds": 4,
+      "motion": "Incline dumbbell press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Set a moderate incline and keep back and feet supported. Lower the dumbbells beside the upper chest. Press up with wrists stacked over elbows."
+    },
+    {
+      "id": "PUSH_UP",
+      "seconds": 4,
+      "motion": "Push-up. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Place hands under or slightly wider than the shoulders. Keep shoulders, hips and heels in one line as the chest lowers. Push back up without letting the hips sag."
+    },
+    {
+      "id": "KNEE_PUSH_UP",
+      "seconds": 4,
+      "motion": "Knee push-up. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Rest knees on a mat and set hands near shoulder width. Keep shoulders, hips and knees aligned while lowering. Press back up without bending at the waist."
+    },
+    {
+      "id": "CABLE_CHEST_FLY",
+      "seconds": 4,
+      "motion": "Cable chest fly. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand balanced between pulleys with a slight elbow bend. Bring the handles together in front of the chest. Return slowly without letting the shoulders roll forward."
+    },
+    {
+      "id": "SINGLE_ARM_DUMBBELL_ROW",
+      "seconds": 4,
+      "motion": "Single-arm dumbbell row. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Support one hand and knee on a stable bench. Pull the dumbbell toward the hip without twisting the torso. Lower under control; log reps and dumbbell load per side."
+    },
+    {
+      "id": "CHEST_SUPPORTED_ROW",
+      "seconds": 4,
+      "motion": "Chest-supported dumbbell row. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Rest the chest against an inclined bench with feet stable. Pull the dumbbells toward the lower ribs. Lower smoothly while keeping the chest supported."
+    },
+    {
+      "id": "PULL_UP",
+      "seconds": 4,
+      "motion": "Pull-up. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Use an overhand grip and hang with controlled shoulders. Pull the chest toward the bar without swinging. Lower steadily; log external added load only."
+    },
+    {
+      "id": "FACE_PULL",
+      "seconds": 4,
+      "motion": "Cable face pull. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Set a rope pulley around face height and stand balanced. Pull the rope toward the face while separating the hands. Return with control without shrugging the shoulders."
+    },
+    {
+      "id": "DUMBBELL_SHOULDER_PRESS",
+      "seconds": 4,
+      "motion": "Dumbbell shoulder press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Sit with the back supported and feet planted. Start with dumbbells near the shoulders and wrists over elbows. Press overhead without arching the lower back."
+    },
+    {
+      "id": "LATERAL_RAISE",
+      "seconds": 4,
+      "motion": "Dumbbell lateral raise. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand tall with a slight bend in the elbows. Raise the arms out to the sides to about shoulder height. Lower slowly without swinging or shrugging."
+    },
+    {
+      "id": "REAR_DELT_FLY",
+      "seconds": 4,
+      "motion": "Bent-over rear delt fly. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Hinge at the hips with a neutral back and softly bent knees. Open the arms to the sides with a slight elbow bend. Lower the dumbbells without moving the torso."
+    },
+    {
+      "id": "DUMBBELL_SHRUG",
+      "seconds": 4,
+      "motion": "Dumbbell shrug. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Hold dumbbells at the sides with arms straight. Lift the shoulders toward the ears without rolling them. Lower smoothly while keeping the neck neutral."
+    },
+    {
+      "id": "DUMBBELL_CURL",
+      "seconds": 4,
+      "motion": "Dumbbell curl. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand tall with palms facing forward and elbows near the sides. Bend the elbows without swinging the upper arms. Lower slowly; log the load of one dumbbell."
+    },
+    {
+      "id": "HAMMER_CURL",
+      "seconds": 4,
+      "motion": "Hammer curl. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Hold the dumbbells with palms facing inward. Curl while keeping elbows near the sides and wrists neutral. Lower with control; log the load of one dumbbell."
+    },
+    {
+      "id": "MACHINE_PREACHER_CURL",
+      "seconds": 4,
+      "motion": "Machine preacher curl. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Adjust the seat so upper arms rest fully on the pad. Curl the handles without lifting the arms off the support. Return slowly without locking the elbows."
+    },
+    {
+      "id": "TRICEPS_PUSHDOWN",
+      "seconds": 4,
+      "motion": "Cable triceps pushdown. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Use a high pulley and keep elbows near the sides. Straighten the elbows without leaning body weight onto the handle. Return slowly while upper arms stay still."
+    },
+    {
+      "id": "OVERHEAD_TRICEPS_EXTENSION",
+      "seconds": 4,
+      "motion": "Overhead dumbbell extension. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Sit supported and hold one dumbbell with both hands overhead. Bend the elbows to lower the weight behind the head. Extend the elbows without arching the back."
+    },
+    {
+      "id": "DEAD_BUG",
+      "seconds": 4,
+      "motion": "Dead bug. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Lie on the back with hips and knees bent and arms up. Extend the opposite arm and leg while keeping the lower back stable. Return and switch sides; log reps per side."
+    },
+    {
+      "id": "REVERSE_CRUNCH",
+      "seconds": 4,
+      "motion": "Reverse crunch. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Lie on the back with bent knees and arms resting at the sides. Curl the pelvis toward the ribs with a small controlled lift. Lower slowly without swinging the legs."
+    },
+    {
+      "id": "CABLE_CRUNCH",
+      "seconds": 4,
+      "motion": "Kneeling cable crunch. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Kneel facing a high pulley with the rope held beside the head. Curl the ribs toward the pelvis rather than pulling with the arms. Return with control while keeping hips relatively still."
+    },
+    {
       "id": "BARBELL_BENCH_PRESS",
       "seconds": 4,
       "motion": "Barbell bench press lowering phase. Lying on a flat bench with feet flat on the floor, the athlete lowers the loaded barbell under control from straight arms above the shoulders to touch the lower chest, elbows angled about 45 degrees from the torso, wrists straight, shoulder blades pinned to the bench. Hands never leave the bar and the bar stays level."
     },
     {
-      "id": "BARBELL_ROW",
+      "id": "INCLINE_BARBELL_PRESS",
       "seconds": 4,
-      "motion": "Bent-over barbell row pulling phase. Hinged forward about 45 degrees with a flat back and soft knees, the athlete pulls the barbell from arm's length up to the lower ribs by driving the elbows back, without the torso rising or the hips moving. Hands never leave the bar and the bar stays level."
+      "motion": "Incline barbell bench press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Set a moderate incline and keep upper back and feet firmly supported. Lower the barbell to the upper chest with vertical forearms. Press smoothly upward without bouncing off the chest."
+    },
+    {
+      "id": "DIP",
+      "seconds": 4,
+      "motion": "Parallel bar dip. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Start on straight arms with shoulders depressed and a slight forward lean. Lower under control until upper arms are roughly parallel to the floor. Press back up without shrugging the shoulders."
     },
     {
       "id": "CONVENTIONAL_DEADLIFT",
@@ -26,9 +226,34 @@
       "motion": "Conventional deadlift lift from the floor to lockout. With a flat back and the bar close to the shins, the athlete pushes the floor away, the bar travels straight up close to the legs, hips and knees extend together, and the athlete finishes standing tall without leaning back. Plates start resting on the floor. Hands never leave the bar and the bar stays level."
     },
     {
+      "id": "BARBELL_ROW",
+      "seconds": 4,
+      "motion": "Bent-over barbell row pulling phase. Hinged forward about 45 degrees with a flat back and soft knees, the athlete pulls the barbell from arm's length up to the lower ribs by driving the elbows back, without the torso rising or the hips moving. Hands never leave the bar and the bar stays level."
+    },
+    {
       "id": "BARBELL_OVERHEAD_PRESS",
       "seconds": 4,
       "motion": "Standing barbell overhead press pressing phase. From the front rack at the upper chest, the athlete presses the barbell straight up past the face to full lockout overhead, head moving slightly back and then through, ribs down, glutes tight, legs straight. Hands never leave the bar and the bar stays level."
+    },
+    {
+      "id": "CABLE_LATERAL_RAISE",
+      "seconds": 4,
+      "motion": "Single-arm cable lateral raise. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand tall beside a low pulley and hold the handle with a slight elbow bend. Raise the arm smoothly out to shoulder height without shrugging. Lower with control and log repetitions per side."
+    },
+    {
+      "id": "BARBELL_CURL",
+      "seconds": 4,
+      "motion": "Standing barbell biceps curl. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand tall with an underhand shoulder-width grip and elbows close to your sides. Curl the bar smoothly toward the shoulders without swinging the torso. Lower under control to full comfortable extension."
+    },
+    {
+      "id": "SKULL_CRUSHER",
+      "seconds": 4,
+      "motion": "Lying barbell triceps extension. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Lie flat on a bench holding the bar above your shoulders with straight arms. Bend only at the elbows to lower the bar smoothly above or behind the forehead. Extend the elbows back to the start while keeping upper arms steady."
+    },
+    {
+      "id": "HANGING_LEG_RAISE",
+      "seconds": 4,
+      "motion": "Hanging leg raise. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Hang steadily from a pull-up bar with engaged shoulders and legs straight. Raise the legs forward to roughly horizontal using your core. Lower slowly without swinging your body."
     }
   ],
   "spec": {

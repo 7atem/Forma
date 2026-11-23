@@ -41,4 +41,72 @@ class AccessibilityTest {
         rule.onAllNodesWithContentDescription(": workout recorded", substring = true).assertCountEquals(1)
         rule.onAllNodesWithContentDescription("no workout recorded", substring = true).assertCountEquals(6)
     }
+
+    @Test fun segmentedTabsExposeSelectionAndAccessibleTargets() {
+        rule.setContent {
+            MaterialTheme {
+                var selected by remember { mutableStateOf(0) }
+                SegmentedTabs(
+                    selectedIndex = selected,
+                    labels = listOf(R.string.stats_section, R.string.coach),
+                    onSelect = { selected = it },
+                    tagPrefix = "accessibility_tabs",
+                )
+            }
+        }
+        rule.onNodeWithTag("accessibility_tabs_0").assertIsSelected().assertHeightIsAtLeast(48.dp)
+        rule.onNodeWithTag("accessibility_tabs_1").assertHeightIsAtLeast(48.dp).performClick().assertIsSelected()
+        rule.onNodeWithTag("accessibility_tabs_0").assertIsNotSelected()
+    }
+
+    @Test fun headerActionsMeetMinimumTouchTarget() {
+        rule.setContent {
+            MaterialTheme {
+                FormaScaffold(
+                    tab = 0,
+                    onTab = {},
+                    today = LocalDate.of(2026, 11, 23),
+                    snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() },
+                    onQuickLog = {},
+                    onProfile = {},
+                    onSettings = {},
+                    content = {},
+                )
+            }
+        }
+        rule.onNodeWithContentDescription("Profile").assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp)
+        rule.onNodeWithContentDescription("Settings & data").assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp)
+    }
+
+    @Test fun chartsHaveTextEquivalentsBeyondColor() {
+        val today = LocalDate.of(2026, 11, 23)
+        rule.setContent {
+            MaterialTheme {
+                androidx.compose.foundation.layout.Column {
+                    ActivityHeatmapGrid(
+                        today = today,
+                        countsByDate = mapOf(today to 2, today.minusDays(1) to 1),
+                    )
+                    MacroBreakdownBar(protein = 20.0, carbs = 30.0, fat = 10.0)
+                }
+            }
+        }
+        rule.onNodeWithContentDescription("3 recorded workouts across 2 active days", substring = true).assertExists()
+        rule.onNodeWithText("No recorded workout").assertExists()
+        rule.onNodeWithText("1 recorded workout").assertExists()
+        rule.onNodeWithText("2 or more recorded workouts").assertExists()
+        rule.onNodeWithContentDescription("20 g protein, 30 g carbohydrates, 10 g fat", substring = true).assertExists()
+    }
+
+    @Test fun destructiveConfirmationNamesTheAction() {
+        var removed = false
+        rule.setContent {
+            MaterialTheme {
+                ConfirmButton(R.string.remove, "Removes this entry.", tag = "remove_entry") { removed = true }
+            }
+        }
+        rule.onNodeWithTag("remove_entry").performClick()
+        rule.onNodeWithTag("confirm_destructive").assertTextEquals("Remove").assertHeightIsAtLeast(48.dp).performClick()
+        rule.runOnIdle { check(removed) }
+    }
 }

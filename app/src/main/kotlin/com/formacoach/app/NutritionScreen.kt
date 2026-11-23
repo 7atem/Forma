@@ -43,9 +43,9 @@ import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import java.time.LocalDate
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel) {
+internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel, onMealLogged: (Meal) -> Unit = {}) {
     var day by rememberSaveable { mutableLongStateOf(today.toEpochDay()) }
     val date = LocalDate.ofEpochDay(day)
     var library by rememberSaveable { mutableStateOf(false) }
@@ -66,13 +66,12 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
     val totalFat = logged.sumOf { it.fat }
 
     PageHeading(R.string.eat_title)
-    Row(
-        Modifier.fillMaxWidth(),
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         DateChoice(date, today, { day = it.toEpochDay() }, "food_date")
-        Spacer(Modifier.weight(1f))
         OutlinedButton(
             onClick = { showOnlineSearch = true },
             shape = RoundedCornerShape(14.dp),
@@ -93,8 +92,6 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
             Spacer(Modifier.width(6.dp))
             Text(stringResource(if (library) R.string.close_library else R.string.food_library), fontWeight = FontWeight.SemiBold)
         }
-    }
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         CopyMealDay(state, date, today, vm)
         FilledTonalButton(
             onClick = { showFamilyPot = true },
@@ -135,10 +132,11 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
                     calTarget != null && showRemaining && delta != null -> number(kotlin.math.abs(delta), 0)
                     else -> number(totalKcal, 0)
                 }
+                val kcalUnit = stringResource(R.string.kcal_unit)
                 val ringSub = when {
                     calTarget != null && showRemaining && delta != null -> if (delta >= 0) stringResource(R.string.kcal_remaining, "") else stringResource(R.string.kcal_over, "")
                     calTarget != null -> "/ ${number(calTarget.toDouble(), 0)}"
-                    else -> "kcal"
+                    else -> kcalUnit
                 }.trim()
                 CircularProgressRing(
                     progress = if (calTarget != null) (totalKcal / calTarget).toFloat() else if (totalKcal > 0) 1f else 0f,
@@ -211,8 +209,13 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
         Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             quickRepeats.forEach { recent ->
                 AssistChip(
-                    onClick = { vm.addMeal(recent.copy(id = java.util.UUID.randomUUID().toString(), date = date, slot = slot)) {} },
+                    onClick = {
+                        // One tap logs immediately, so confirm it and offer Undo instead of failing silently.
+                        val repeated = recent.copy(id = java.util.UUID.randomUUID().toString(), date = date, slot = slot)
+                        vm.addMeal(repeated) { onMealLogged(repeated) }
+                    },
                     enabled = !state.busy,
+                    modifier = Modifier.testTag("quick_repeat_${recent.name}"),
                     leadingIcon = { Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(15.dp)) },
                     label = { Text("${recent.name} · ${number(recent.calories, 0)}", maxLines = 1) },
                 )
@@ -330,7 +333,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
                                                 overflow = TextOverflow.Ellipsis,
                                             )
                                         }
-                                        PillBadge("${number(item.nutrients.calories, 0)} kcal")
+                                        PillBadge(stringResource(R.string.kcal_value, number(item.nutrients.calories, 0)))
                                     }
                                 }
                             }
@@ -401,7 +404,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
                                 )
                             }
                         }
-                        PillBadge("${number(meal.calories, 0)} kcal")
+                        PillBadge(stringResource(R.string.kcal_value, number(meal.calories, 0)))
                     }
                     NutrientSummary(meal.calories, meal.protein, meal.carbs, meal.fat)
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -429,11 +432,14 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel)
             InfoCard {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(meal.name, Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    PillBadge("${number(meal.calories, 0)} kcal")
+                    PillBadge(stringResource(R.string.kcal_value, number(meal.calories, 0)))
                 }
                 NutrientSummary(meal.calories, meal.protein, meal.carbs, meal.fat)
                 OutlinedButton(
-                    onClick = { vm.addMeal(meal.copy(id = java.util.UUID.randomUUID().toString(), date = date, slot = slot)) {} },
+                    onClick = {
+                        val repeated = meal.copy(id = java.util.UUID.randomUUID().toString(), date = date, slot = slot)
+                        vm.addMeal(repeated) { onMealLogged(repeated) }
+                    },
                     enabled = !state.busy,
                     shape = RoundedCornerShape(12.dp),
                 ) {
@@ -732,7 +738,7 @@ private fun FamilyPotSheet(
                     label = { Text(stringResource(R.string.plate_oil_buffer)) },
                 )
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.55f),
+                    color = MaterialTheme.colorScheme.accentContainer.copy(alpha = 0.55f),
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
@@ -939,7 +945,7 @@ private fun OnlineFoodSearchSheet(
                                         Text(item.brand, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                                     }
                                 }
-                                PillBadge("${number(item.nutrientsPer100g.calories, 0)} kcal / 100g")
+                                PillBadge(stringResource(R.string.kcal_per_100g, number(item.nutrientsPer100g.calories, 0)))
                             }
                             NutrientSummary(
                                 item.nutrientsPer100g.calories,
@@ -1048,15 +1054,26 @@ private fun MealFields(initial: Meal?, date: LocalDate, today: LocalDate, busy: 
     var source by rememberSaveable(initial?.id) { mutableStateOf(initial?.source.orEmpty()) }
     var editedDay by rememberSaveable(initial?.id) { mutableLongStateOf((initial?.date ?: date).toEpochDay()) }
     var editedSlot by rememberSaveable(initial?.id) { mutableStateOf(initial?.slot ?: defaultSlot) }
+    val nameTooLong = name.trim().length > 120
+    var nameTouched by rememberSaveable(initial?.id) { mutableStateOf(initial != null) }
+    val nameInvalid = nameTooLong || (nameTouched && name.isBlank())
+    val calorieValue = NumericInput.decimal(calories)
+    val proteinValue = NumericInput.decimal(protein)
+    val carbsValue = NumericInput.decimal(carbs)
+    val fatValue = NumericInput.decimal(fat)
+    val caloriesInvalid = calories.isNotBlank() && (calorieValue == null || calorieValue !in 0.0..20000.0)
+    val proteinInvalid = protein.isNotBlank() && (proteinValue == null || proteinValue !in 0.0..2000.0)
+    val carbsInvalid = carbs.isNotBlank() && (carbsValue == null || carbsValue !in 0.0..2000.0)
+    val fatInvalid = fat.isNotBlank() && (fatValue == null || fatValue !in 0.0..2000.0)
     val meal = runCatching {
         Meal(
             id = initial?.id ?: java.util.UUID.randomUUID().toString(),
             date = if (initial != null) LocalDate.ofEpochDay(editedDay) else date,
             name = name.trim(),
-            calories = requireNotNull(NumericInput.decimal(calories)),
-            protein = requireNotNull(NumericInput.decimal(protein)),
-            carbs = requireNotNull(NumericInput.decimal(carbs)),
-            fat = requireNotNull(NumericInput.decimal(fat)),
+            calories = requireNotNull(calorieValue),
+            protein = requireNotNull(proteinValue),
+            carbs = requireNotNull(carbsValue),
+            fat = requireNotNull(fatValue),
             source = source.trim(),
             slot = if (initial == null) defaultSlot else editedSlot,
         )
@@ -1066,20 +1083,61 @@ private fun MealFields(initial: Meal?, date: LocalDate, today: LocalDate, busy: 
         if (initial != null) DateChoice(LocalDate.ofEpochDay(editedDay), today, { editedDay = it.toEpochDay() }, "edit_meal_date")
         if (initial != null) MealSlotPicker(editedSlot) { editedSlot = it }
         Text(stringResource(R.string.portion_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Input(R.string.meal_name, name, { name = it }, "meal_name", numeric = false)
-        FormFieldPair(
-            first = { Input(R.string.calories, calories, { calories = it }, "meal_calories") },
-            second = { Input(R.string.protein, protein, { protein = it }, "meal_protein") },
+        Input(
+            R.string.meal_name,
+            name,
+            { name = it; nameTouched = true },
+            "meal_name",
+            numeric = false,
+            error = nameInvalid,
+            supportingText = if (nameInvalid) stringResource(R.string.meal_name_error) else null,
         )
         FormFieldPair(
-            first = { Input(R.string.carbs, carbs, { carbs = it }, "meal_carbs") },
-            second = { Input(R.string.fat, fat, { fat = it }, "meal_fat") },
+            first = {
+                Input(
+                    R.string.calories,
+                    calories,
+                    { calories = it },
+                    "meal_calories",
+                    error = caloriesInvalid,
+                    supportingText = if (caloriesInvalid) stringResource(R.string.calories_error) else null,
+                )
+            },
+            second = {
+                Input(
+                    R.string.protein,
+                    protein,
+                    { protein = it },
+                    "meal_protein",
+                    error = proteinInvalid,
+                    supportingText = if (proteinInvalid) stringResource(R.string.macro_error) else null,
+                )
+            },
         )
-        val pVal = NumericInput.decimal(protein)
-        val cVal = NumericInput.decimal(carbs)
-        val fVal = NumericInput.decimal(fat)
-        if (pVal != null && cVal != null && fVal != null) {
-            val computed = kotlin.math.round(com.formacoach.coach.TrainingHistory.macroCalories(pVal, cVal, fVal)).toInt()
+        FormFieldPair(
+            first = {
+                Input(
+                    R.string.carbs,
+                    carbs,
+                    { carbs = it },
+                    "meal_carbs",
+                    error = carbsInvalid,
+                    supportingText = if (carbsInvalid) stringResource(R.string.macro_error) else null,
+                )
+            },
+            second = {
+                Input(
+                    R.string.fat,
+                    fat,
+                    { fat = it },
+                    "meal_fat",
+                    error = fatInvalid,
+                    supportingText = if (fatInvalid) stringResource(R.string.macro_error) else null,
+                )
+            },
+        )
+        if (proteinValue != null && carbsValue != null && fatValue != null) {
+            val computed = kotlin.math.round(com.formacoach.coach.TrainingHistory.macroCalories(proteinValue, carbsValue, fatValue)).toInt()
             OutlinedButton(
                 onClick = { calories = computed.toString() },
                 shape = RoundedCornerShape(12.dp),
@@ -1095,6 +1153,7 @@ private fun MealFields(initial: Meal?, date: LocalDate, today: LocalDate, busy: 
                     onSave(it) {
                         if (initial == null) {
                             name = ""
+                            nameTouched = false
                             calories = ""
                             protein = ""
                             carbs = ""

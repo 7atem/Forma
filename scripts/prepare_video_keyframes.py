@@ -1,6 +1,6 @@
-"""Prepare start/end keyframes and prompts for the AI video pilot (developer tool, not run in CI).
+"""Prepare start/end keyframes and prompts for catalog AI videos (developer tool, not run in CI).
 
-Splits each pilot exercise's canonical two-panel PNG into its start (left) and movement (right)
+Splits each catalog exercise's canonical two-panel PNG into its start (left) and movement (right)
 panels, centres each on a 1080x1080 canvas filled with the panel's own background colour, and
 writes the prompt to paste. Output goes to the ignored artifacts/ folder:
 
@@ -19,7 +19,7 @@ spec = json.loads((ROOT / 'catalog/exercise-video-prompts.json').read_text(encod
 clips = {clip['id']: clip for clip in spec['clips']}
 wanted = sys.argv[1:] or list(clips)
 unknown = set(wanted) - set(clips)
-assert not unknown, f'Not in the video pilot: {sorted(unknown)}'
+assert not unknown, f'Not in the exercise video catalog: {sorted(unknown)}'
 SIZE = 1080
 
 

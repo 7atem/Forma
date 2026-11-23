@@ -8,6 +8,7 @@ plugins {
 android {
     namespace = "com.formacoach.app"
     compileSdk = 36
+    buildToolsVersion = "36.0.0"
     defaultConfig {
         applicationId = "com.formacoach.app"
         minSdk = 29

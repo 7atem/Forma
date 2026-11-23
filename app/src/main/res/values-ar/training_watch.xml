@@ -3,10 +3,11 @@
     <string name="muscles_working">العضلات المشاركة</string>
     <string name="body_front">أمام</string>
     <string name="body_back">خلف</string>
+    <string name="muscle_highlights">إبراز العضلات</string>
     <string name="muscle_primary">أساسية • %1$s</string>
     <string name="muscle_secondary">مساعدة • %1$s</string>
     <string name="muscle_accessibility">%1$s. الأساسية: %2$s. المساعدة: %3$s.</string>
-    <string name="muscle_note">رسم مبسط للمجموعات العضلية الرئيسية، وليس قياسًا لنشاط العضلات. المشاركة تتغير حسب الجهاز وطريقة الأداء. ثني الورك يمثل حركة شبيهة بالرفعة الرومانية.</string>
+    <string name="muscle_note">رسم مبسط لمناطق العضلات للتوضيح، وليس قياسًا لنشاط العضلات. التظليل توضيحي فقط. المشاركة تتغير حسب الجهاز وطريقة الأداء. ثني الورك يمثل حركة شبيهة بالرفعة الرومانية.</string>
     <string name="weekly_muscles">العضلات • آخر 7 أيام</string>
     <string name="weekly_muscles_note">مجموعات العمل في الجلسات المكتملة فقط. أعداد المشاركة الأساسية والمساعدة منفصلة، وليست درجات تعافٍ أو حجم تدريب فعّال يُجمع.</string>
     <string name="muscle_set_count">%1$s • %2$s أساسية / %3$s مساعدة</string>

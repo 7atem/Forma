@@ -31,7 +31,7 @@ struct ExerciseDetail: View {
                         .font(.headline.weight(.bold))
                         .foregroundStyle(FormaTheme.textPrimary)
                     HStack(spacing: 6) {
-                        if let primary = activation.primary.first {
+                        if let primary = activation.primaryDetail.first {
                             FormaPill(text: primary.label(arabic: arabic))
                         }
                         Text(ExerciseCatalog.of(exercise).equipment.map { $0.label(arabic: arabic) }.joined(separator: " · "))

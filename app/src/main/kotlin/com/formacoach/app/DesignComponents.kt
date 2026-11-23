@@ -5,12 +5,13 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -149,12 +150,20 @@ internal fun CircularProgressRing(
     color: Color = MaterialTheme.colorScheme.primary,
     trackColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
 ) {
+    val reduceMotion = rememberReduceMotion()
     val animated by animateFloatAsState(
         targetValue = progress.coerceIn(0f, 1f),
-        animationSpec = tween(durationMillis = 550),
+        animationSpec = if (reduceMotion) snap() else tween(durationMillis = 550),
         label = "ring_progress",
     )
-    Box(modifier = modifier.size(size), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = modifier.size(size).clearAndSetSemantics {
+            contentDescription = listOf(valueText, labelText).filter { it.isNotBlank() }.joinToString(" ")
+            this[androidx.compose.ui.semantics.SemanticsProperties.ProgressBarRangeInfo] =
+                androidx.compose.ui.semantics.ProgressBarRangeInfo(progress.coerceIn(0f, 1f), 0f..1f)
+        },
+        contentAlignment = Alignment.Center,
+    ) {
         Canvas(Modifier.fillMaxSize()) {
             val stroke = Stroke(width = strokeWidth.toPx(), cap = StrokeCap.Round)
             val inset = strokeWidth.toPx() / 2f
@@ -298,11 +307,15 @@ internal fun SegmentedTabs(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(12.dp))
-                        .clickable { onSelect(index) }
+                        .selectable(
+                            selected = selected,
+                            role = androidx.compose.ui.semantics.Role.Tab,
+                            onClick = { onSelect(index) },
+                        )
                         .testTag("${tagPrefix}_$index"),
                 ) {
                     Box(
-                        Modifier.padding(vertical = 10.dp, horizontal = 6.dp),
+                        Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(vertical = 8.dp, horizontal = 6.dp),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -310,7 +323,7 @@ internal fun SegmentedTabs(
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
                             color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
+                            maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
@@ -408,12 +421,19 @@ internal fun MacroBreakdownBar(
     val fCal = (fat * 9.0).coerceAtLeast(0.0)
     val total = pCal + cCal + fCal
     if (total <= 0.0) return
+    val description = stringResource(
+        R.string.macro_chart_description,
+        number(protein),
+        number(carbs),
+        number(fat),
+    )
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(8.dp)
             .clip(RoundedCornerShape(999.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+            .clearAndSetSemantics { contentDescription = description },
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         if (pCal > 0) Box(Modifier.weight(pCal.toFloat()).fillMaxHeight().background(MaterialTheme.colorScheme.secondary))
@@ -498,11 +518,11 @@ internal fun RestCountdownRing(
     val progress = (remainingSeconds.toFloat() / safeTotal).coerceIn(0f, 1f)
     val mins = remainingSeconds / 60
     val secs = remainingSeconds % 60
-    val formatted = if (mins > 0) "%d:%02d".format(mins, secs) else "${secs}s"
+    val formatted = if (mins > 0) "%d:%02d".format(java.util.Locale.ROOT, mins, secs) else stringResource(R.string.seconds_short, number(secs.toDouble(), 0))
     CircularProgressRing(
         progress = progress,
         valueText = formatted,
-        labelText = "${safeTotal}s",
+        labelText = stringResource(R.string.seconds_short, number(safeTotal.toDouble(), 0)),
         size = 86.dp,
         strokeWidth = 8.dp,
         color = MaterialTheme.colorScheme.primary,
@@ -520,8 +540,10 @@ internal fun MuscleVolumeBar(
     detailText: String,
 ) {
     val denom = maxSets.coerceAtLeast(1).toFloat()
-    val pFrac by animateFloatAsState((primarySets / denom).coerceIn(0f, 1f), tween(500), label = "muscle_p")
-    val sFrac by animateFloatAsState((secondarySets / denom).coerceIn(0f, 1f), tween(500), label = "muscle_s")
+    val reduceMotion = rememberReduceMotion()
+    val animation: androidx.compose.animation.core.AnimationSpec<Float> = if (reduceMotion) snap() else tween(500)
+    val pFrac by animateFloatAsState((primarySets / denom).coerceIn(0f, 1f), animation, label = "muscle_p")
+    val sFrac by animateFloatAsState((secondarySets / denom).coerceIn(0f, 1f), animation, label = "muscle_s")
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
         shape = RoundedCornerShape(14.dp),
@@ -594,14 +616,15 @@ internal fun MacroDonutRing(
                     drawArc(fColor, angle, fFrac * 360f, false, Offset(inset, inset), arcSize, style = stroke)
                 }
             }
-            Text("${kotlin.math.round(pFrac * 100).toInt()}% P", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = pColor)
+            // Percent only: the labelled pills beside the ring name each macro, and a word would not fit in Arabic.
+            Text(number((pFrac * 100.0).toDouble(), 0) + "%", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = pColor)
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(stringResource(R.string.macro_split_title), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                PillBadge("P ${kotlin.math.round(pFrac * 100).toInt()}%", containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = pColor)
-                PillBadge("C ${kotlin.math.round(cFrac * 100).toInt()}%", containerColor = MaterialTheme.colorScheme.tertiaryContainer, contentColor = cColor)
-                PillBadge("F ${kotlin.math.round(fFrac * 100).toInt()}%", containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = fColor)
+                PillBadge(stringResource(R.string.macro_share_protein, number((pFrac * 100.0).toDouble(), 0)), containerColor = MaterialTheme.colorScheme.accentContainer, contentColor = pColor)
+                PillBadge(stringResource(R.string.macro_share_carbs, number((cFrac * 100.0).toDouble(), 0)), containerColor = MaterialTheme.colorScheme.tertiaryContainer, contentColor = cColor)
+                PillBadge(stringResource(R.string.macro_share_fat, number((fFrac * 100.0).toDouble(), 0)), containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = fColor)
             }
         }
     }
@@ -636,30 +659,60 @@ internal fun ActivityHeatmapGrid(
     val weeks = 12
     val totalDays = weeks * 7
     val start = today.minusDays((totalDays - 1).toLong())
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        repeat(weeks) { col ->
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                repeat(7) { row ->
-                    val day = start.plusDays((col * 7 + row).toLong())
-                    val count = countsByDate[day] ?: 0
-                    val color = when {
-                        count >= 2 -> MaterialTheme.colorScheme.primary
-                        count == 1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.62f)
-                        day == today -> MaterialTheme.colorScheme.primaryContainer
-                        else -> MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+    val rangeCounts = countsByDate.filterKeys { it in start..today }
+    val description = stringResource(
+        R.string.activity_heatmap_summary,
+        number(rangeCounts.values.sum().toDouble(), 0),
+        number(rangeCounts.values.count { it > 0 }.toDouble(), 0),
+        dateLabel(start),
+        dateLabel(today),
+    )
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = description },
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            repeat(weeks) { col ->
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    repeat(7) { row ->
+                        val day = start.plusDays((col * 7 + row).toLong())
+                        val count = countsByDate[day] ?: 0
+                        val color = when {
+                            count >= 2 -> MaterialTheme.colorScheme.primary
+                            count == 1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.62f)
+                            day == today -> MaterialTheme.colorScheme.primaryContainer
+                            else -> MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+                        }
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(color),
+                        )
                     }
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(color),
+                }
+            }
+        }
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(
+                MaterialTheme.colorScheme.surfaceContainerHigh to R.string.heatmap_legend_none,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.62f) to R.string.heatmap_legend_one,
+                MaterialTheme.colorScheme.primary to R.string.heatmap_legend_multiple,
+            ).forEach { (color, label) ->
+                Row(
+                    Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                ) {
+                    Box(Modifier.size(10.dp).clip(RoundedCornerShape(3.dp)).background(color))
+                    Text(
+                        stringResource(label),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

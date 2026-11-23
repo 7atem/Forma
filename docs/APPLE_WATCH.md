@@ -1,6 +1,9 @@
-# Apple Watch companion — alpha06 source
+# Apple Watch companion — post-alpha06 source
 
-Native SwiftUI iPhone and watchOS application source now lives in `apple/`. It is **not yet a compiled, installed or device-validated Apple release**. This Windows machine has neither Swift nor Xcode; portable catalog/fixture/localization checks do not establish that the native applications build. A macOS workflow is prepared but has not run remotely.
+Native SwiftUI iPhone and watchOS application source lives in `apple/`. This Windows host cannot run
+Swift, Xcode or Apple simulators. The committed source is compiled and tested remotely by the
+`macos-15` GitHub Actions workflow; that does not replace visual simulator, physical-device,
+WatchConnectivity, HealthKit-signing or accessibility acceptance.
 
 ## User workflow
 
@@ -16,7 +19,9 @@ Apple Watch uses a paired iPhone; it does not pair with Forma Android. See [Appl
 ## Implemented boundaries
 
 - iOS 17 / watchOS 10 minimum targets; local Foundation Swift package; XcodeGen target configuration, EN/AR strings and shared original schematic geometry.
-- All 40 catalog exercises with shared equipment metadata and 3D guides, kg external load, reps, optional subjective RPE 0–10 and warm-up/working types. A watch workout has at most 300 sets. The kg stepper increments by 0.5 kg, preserving imported/copied fractional values. iPhone library source adds name search and equipment filtering.
+- All 50 catalog exercises with shared equipment metadata and photo guides, kg external load, reps, optional subjective RPE 0–10 and warm-up/working types. A watch workout has at most 300 sets. The kg stepper increments by 0.5 kg, preserving imported/copied fractional values. The iPhone library supports name search, equipment filters, favorites and optional discomfort-based exclusions. The exclusions affect only library visibility and are not medical suitability rules; see `EXERCISE_DISCOMFORT_FILTERS.md`.
+- iPhone exercise details expose available modes among **3D motion · Video · Photos**. The five-clip 3D pilot uses native SceneKit on iPhone. One per-exercise muscle-highlight toggle applies to all three modes. Photo mode shows either both panels or the selected start/movement panel; it is not represented as continuous video. Only bundled MP4s appear as Video. See `EXERCISE_MOTION.md` and `EXERCISE_VIDEO.md`.
+- The former iPhone family-pot feature was removed. Nutrition remains local to the iPhone and is not a shared/cloud family workflow.
 - Atomic native state file, OS file protection until first unlock, fail-closed unreadable state and explicit deletion. This is **not** Android SQLCipher encryption and is not a password-encrypted Apple backup. Device/OS backup policy and Apple recovery/export UX still need review.
 - Persist-before-ACK; matching workout IDs deduplicate, conflicting IDs reject. Up to 500 completed workouts are retained; capacity errors preserve the draft/outbox instead of silently deleting history. Phone exports one workout at a time.
 - Rest countdown uses a persisted deadline. Foreground haptic on expiry only; background notifications, workout-process runtime, reboot/clock-change timer guarantees and active HealthKit session recovery are not implemented.
@@ -39,6 +44,10 @@ Program transfer uses `WCSession.transferFile`; completed workouts use bounded `
 
 ```sh
 python3 scripts/generate_exercise_catalog.py --check
+python3 scripts/generate_exercise_guides.py --check
+python3 scripts/check_exercise_art.py
+python3 scripts/generate_exercise_motion.py --check
+python3 scripts/check_exercise_video.py
 python3 scripts/check_apple_sources.py
 swift test --package-path apple
 cd apple
@@ -48,21 +57,14 @@ xcodebuild -project FormaApple.xcodeproj -scheme FormaPhone -destination 'generi
 xcodebuild -project FormaApple.xcodeproj -scheme FormaWatch -destination 'generic/platform=watchOS Simulator' -derivedDataPath DerivedData CODE_SIGNING_ALLOWED=NO build
 ```
 
+GitHub Actions run [`45191884998`](https://github.com/7atem/Forma/actions/runs/45191884998), job `137752084876`, passed on commit `ff9cd48`: Swift tests, iPhone/watchOS Simulator builds, unsigned ARM64 device build, IPA packaging and artifact upload. The workflow also verifies the embedded HealthKit entitlement declaration and paired-watch app in the packaged app. This is compilation/package evidence, not visual or physical-device acceptance.
+
 Open the generated project on a Mac, select an owner-controlled development team and paired devices. No team ID, signing key, certificate or provisioning profile is included. App icons, distribution metadata and signing/store review are pending. No paid service was introduced; App Store distribution itself is an owner release decision.
 
-**Apple Health signing:** the source target and CI-packaged app include `com.apple.developer.healthkit`, but an ad-hoc signature alone does not authorize HealthKit on a physical iPhone. Install through Xcode/TestFlight with an owner-controlled provisioning profile that has HealthKit enabled for `com.formacoach.apple`. If a third-party installer re-signs the IPA, it must preserve that entitlement and use a matching HealthKit-enabled profile; otherwise Apple's `Missing com.apple.developer.healthkit entitlement` error is expected. The Actions artifact includes `FormaPhone.entitlements.plist` as a non-secret reference for that re-signing flow. Changing the bundle ID requires registering and configuring the new ID as well. Never replace the entitlement with a usage-description string or treat a successful IPA installation as proof of HealthKit access.
+**Apple Health signing:** the source target and CI-packaged app include `com.apple.developer.healthkit`, but an ad-hoc signature alone does not authorize HealthKit on a physical iPhone. Install through Xcode/TestFlight with an owner-controlled provisioning profile that has HealthKit enabled for `com.formacoach.apple`. If a third-party installer re-signs the IPA, it must preserve that entitlement and use a matching HealthKit-enabled profile; otherwise Apple's `Missing com.apple.developer.healthkit entitlement` error is expected. The Actions artifact includes `FormaPhone.entitlements.plist` as a non-secret reference for that re-signing flow. The iPhone error UI surfaces entitlement-related failures instead of suggesting that repeatedly requesting permission will fix signing. Changing the bundle ID requires registering and configuring the new ID as well. Never replace the entitlement with a usage-description string or treat a successful IPA installation as proof of HealthKit access.
 
-Physical acceptance gates: first pairing/install, EN/AR layout and VoiceOver, all muscle maps, offline log/relaunch, explicit finish/discard, edits and fractional loads, denied/unavailable transfer, delayed/repeated/reordered delivery, phone storage failures, missing/corrupt files, durable ACK/outbox retry, background/foreground timers, capacity handling, program update during a draft, conflict rollback and a full watch→iPhone→Android round trip. Add sensor recording only through a separately reviewed HealthKit lifecycle/privacy implementation.
+Physical acceptance gates: first pairing/install, EN/AR layout and VoiceOver, all muscle maps, 3D lighting/rotation/animation, real-video playback and reduced-motion behavior, offline log/relaunch, explicit finish/discard, edits and fractional loads, denied/unavailable transfer, delayed/repeated/reordered delivery, phone storage failures, missing/corrupt files, durable ACK/outbox retry, background/foreground timers, capacity handling, program update during a draft, conflict rollback and a full watch→iPhone→Android round trip. HealthKit permission and import require a correctly provisioned physical device. Add sensor recording only through a separately reviewed HealthKit lifecycle/privacy implementation.
 
+Alpha04 added shared original 3D still assets, generated named variations/cues and an exercise detail view to the native source. Android and XcodeGen reference the same PNG directory; no duplicated image files or cloud image fetch. Full-screen individual-phase viewing is available on Android and iPhone; the Watch remains a simpler guide. See `EXERCISE_DEMOS_AND_UX.md` for generation provenance and qualified-review boundaries.
 
-Alpha04 adds shared original 3D still assets, generated named variations/cues and an exercise detail view to the native source. Android and XcodeGen reference the same PNG directory; no duplicated image files or cloud image fetch. These Apple UI additions remain uncompiled/device-unverified on this Windows host. Full-screen individual-phase viewing is currently Android only. See `EXERCISE_DEMOS_AND_UX.md` for generation provenance and qualified-review boundaries.
-
-
-Alpha06 adds optional manual working-set/rep targets, per-exercise rest and notes,
-linked groups and actual-count navigation to the shared native source. A program
-snapshot stays attached to its completed workout. Warm-ups do not consume working-set
-targets; automatic exercise changes clear entered reps/load. Both readers accept v1
-and v2; current exports use v2, and v1 encoding refuses nonempty plan details. Install
-the matching companion before transferring new packets. Six Swift tests are written,
-but none were executed on this Windows host. Static source checks are not a native
-build or WatchConnectivity/device validation.
+Alpha06 added optional manual working-set/rep targets, per-exercise rest and notes, linked groups and actual-count navigation to the shared native source. A program snapshot stays attached to its completed workout. Warm-ups do not consume working-set targets; automatic exercise changes clear entered reps/load. Both readers accept v1 and v2; current exports use v2, and v1 encoding refuses nonempty plan details. Install the matching companion before transferring new packets. Native tests and builds now run in CI; static source checks are not WatchConnectivity/device validation.

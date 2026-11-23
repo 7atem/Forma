@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -74,13 +75,13 @@ internal fun ExerciseThumbnail(exercise:Exercise,modifier:Modifier=Modifier) {
 }
 
 @Composable
-internal fun ExerciseIllustration(exercise:Exercise,onOpen:(()->Unit)?=null) {
+internal fun ExerciseIllustration(exercise:Exercise,onOpen:(()->Unit)?=null,showMuscleHighlights:Boolean=true) {
     val guide=guideResources(exercise)
     val description=stringResource(R.string.exercise_visual_description,stringResource(guide.variant))
     Box(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).then(if(onOpen!=null) Modifier.clickable(onClick=onOpen).testTag("open_illustration") else Modifier)) {
         Image(painterResource(guide.image),contentDescription=description,contentScale=ContentScale.Fit,
             modifier=Modifier.fillMaxWidth().aspectRatio(1.5f).testTag("exercise_art_${exercise.name}"))
-        CompactMuscleOverlay(exercise, pulsePeak = false, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
+        if(showMuscleHighlights) CompactMuscleOverlay(exercise, pulsePeak = false, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp))
         if(onOpen!=null) Icon(Icons.Default.OpenInFull,contentDescription=stringResource(R.string.enlarge_image),modifier=Modifier.align(Alignment.BottomEnd).padding(12.dp).size(20.dp),tint=MaterialTheme.colorScheme.primary)
     }
 }
@@ -135,6 +136,7 @@ internal fun ExerciseGuideSheet(
                 // 0 = 3D motion, 1 = video, 2 = photos. Only offer what exists for this exercise.
                 val modes = remember(exercise) { listOfNotNull(0.takeIf { hasMotion }, 1.takeIf { hasVideo }, 2) }
                 var mode by rememberSaveable(exercise) { mutableIntStateOf(modes.first()) }
+                var showMuscleHighlights by rememberSaveable(exercise) { mutableStateOf(true) }
                 if (modes.size > 1) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         modes.forEach { option ->
@@ -147,25 +149,36 @@ internal fun ExerciseGuideSheet(
                         }
                     }
                 }
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("muscle_highlights_toggle").toggleable(
+                        value = showMuscleHighlights,
+                        role = androidx.compose.ui.semantics.Role.Switch,
+                        onValueChange = { showMuscleHighlights = it },
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(stringResource(R.string.muscle_highlights), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+                    Switch(checked = showMuscleHighlights, onCheckedChange = null)
+                }
                 val showMotion = mode != 2
                 if (mode == 0) {
-                    ExerciseMotion3D(exercise, playing = animating)
+                    ExerciseMotion3D(exercise, playing = animating, showMuscleHighlights = showMuscleHighlights)
                     Text(
                         stringResource(R.string.motion_drag_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else if (mode == 1) {
-                    ExerciseVideo(exercise, playing = animating)
+                    ExerciseVideo(exercise, playing = animating, showMuscleHighlights = showMuscleHighlights)
                     Text(
                         stringResource(R.string.motion_video_note),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else if (animating && !reduceMotion) {
-                    AnimatedExerciseIllustration(exercise) { enlarged = true }
+                    AnimatedExerciseIllustration(exercise, showMuscleHighlights = showMuscleHighlights) { enlarged = true }
                 } else {
-                    ExerciseIllustration(exercise) { enlarged = true }
+                    ExerciseIllustration(exercise, onOpen = { enlarged = true }, showMuscleHighlights = showMuscleHighlights)
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     if ((!animating || reduceMotion) && !showMotion) {
@@ -182,23 +195,7 @@ internal fun ExerciseGuideSheet(
                         )
                     }
                 }
-                // Live Affected Muscles Summary Chips right under the moving demo
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    activation.primary.forEach { m ->
-                        PillBadge(
-                            text = stringResource(muscleLabel(m)),
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                    activation.secondary.forEach { m ->
-                        PillBadge(
-                            text = stringResource(muscleLabel(m)),
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.secondary,
-                        )
-                    }
-                }
+                MuscleDemoLegend(exercise)
                 // Per-Exercise Rep-Max Ladder
                 if (snapshot != null) {
                     val ladder = remember(snapshot, exercise) { TrainingHistory.repMaxLadder(snapshot, exercise) }
@@ -236,7 +233,7 @@ internal fun ExerciseGuideSheet(
 }
 
 @Composable
-private fun AnimatedExerciseIllustration(exercise: Exercise, onOpen: () -> Unit) {
+private fun AnimatedExerciseIllustration(exercise: Exercise, showMuscleHighlights: Boolean, onOpen: () -> Unit) {
     val guide = guideResources(exercise)
     val bitmap = ImageBitmap.imageResource(guide.image)
     var showSecond by remember(exercise) { mutableStateOf(false) }
@@ -262,7 +259,7 @@ private fun AnimatedExerciseIllustration(exercise: Exercise, onOpen: () -> Unit)
             drawImage(bitmap, srcOffset = IntOffset(0, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = 1f - progress)
             drawImage(bitmap, srcOffset = IntOffset(halfW, 0), srcSize = IntSize(halfW, bitmap.height), dstOffset = IntOffset(dx, dy), dstSize = IntSize(w, h), alpha = progress)
         }
-        CompactMuscleOverlay(
+        if (showMuscleHighlights) CompactMuscleOverlay(
             exercise = exercise,
             pulsePeak = showSecond,
             modifier = Modifier.align(Alignment.TopEnd).padding(10.dp),
@@ -379,7 +376,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     val favorites=state.snapshot.exercisePreferences.filter {it.favorite}.map {it.exercise}.toSet()
     val completed=state.snapshot.sessions.filter {it.completedAt!=null}.map {it.id}.toSet()
     val recent=state.snapshot.sets.filter {it.sessionId in completed}.map {it.exercise}.toSet()
-    val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
+    val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseMuscles.of(it).primaryDetail.map {d ->stringResource(muscleDetailLabel(d))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
     val homeEquipment = remember { setOf(Equipment.BODYWEIGHT, Equipment.DUMBBELLS, Equipment.BENCH, Equipment.BOX, Equipment.PULL_UP_BAR) }
     val matches=Exercise.entries.filter {(!homeOnly||ExerciseCatalog.of(it).equipment.all {eq -> eq in homeEquipment})&&(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
     Text(stringResource(R.string.exercise_results,number(matches.size.toDouble(),0),number(Exercise.entries.size.toDouble(),0)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
@@ -431,7 +428,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
                         maxLines=2,
                         overflow=TextOverflow.Ellipsis,
                     )
-                    PillBadge(stringResource(muscleLabel(ExerciseMuscles.of(exercise).primary.first())))
+                    PillBadge(stringResource(muscleDetailLabel(ExerciseMuscles.of(exercise).primaryDetail.first())))
                     Text(
                         ExerciseCatalog.of(exercise).equipment.map {stringResource(equipmentLabel(it))}.joinToString(" · "),
                         style=MaterialTheme.typography.labelSmall,
@@ -538,7 +535,7 @@ private fun QuickRecordExerciseSheet(
                 ExerciseThumbnail(exercise, Modifier.width(68.dp).clip(RoundedCornerShape(10.dp)))
                 Column(Modifier.weight(1f)) {
                     Text(stringResource(exerciseLabel(exercise)), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    PillBadge(stringResource(muscleLabel(ExerciseMuscles.of(exercise).primary.first())))
+                    PillBadge(stringResource(muscleDetailLabel(ExerciseMuscles.of(exercise).primaryDetail.first())))
                 }
                 IconButton(onClick = onDismiss) { Icon(Icons.Default.Close, stringResource(R.string.close)) }
             }

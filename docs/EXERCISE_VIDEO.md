@@ -1,20 +1,20 @@
-# AI exercise video pilot
+# AI exercise videos
 
-Goal: realistic, impressive motion for the 3D-pilot exercises (squat, barbell bench press, barbell row,
-conventional deadlift, barbell overhead press) by generating short clips **between each exercise's
-existing start and movement stills**. Working muscles are **not** baked into the video: both apps draw
-them from `catalog/exercise-muscles.json` in a corner overlay, so they are always correct and in sync.
+Goal: realistic, impressive motion across the exercise catalog by generating short clips **between each
+exercise's existing start and movement stills**. Working muscles are **not** baked into the video: both apps
+draw them from `catalog/exercise-muscles.json` in a corner overlay, so they are always correct and in sync.
 
 The apps stay offline. Videos are made by the maintainer in their own Gemini (Veo), Kling or Sora account,
-checked, reviewed and bundled like the photos. Each exercise guide then offers **3D motion · Video · Photos**
-(Video appears only when a clip exists).
+checked, reviewed and bundled like the photos. Each exercise guide offers the available modes among **3D
+motion · Video · Photos** (3D motion and Video appear only when those assets exist).
 
 ## 1. Prepare keyframes and prompts
 ```powershell
 python scripts/prepare_video_keyframes.py
 ```
 Writes `artifacts/video-keyframes/<ID>/start.png`, `end.png` (1080×1080, seamless background) and
-`prompt.txt` (prompt, negative prompt, settings) for each pilot exercise. `artifacts/` is git-ignored.
+`prompt.txt` (prompt, negative prompt, settings) for every exercise in the video catalog. `artifacts/` is
+git-ignored.
 
 ## 2. Generate (per exercise)
 Use **image-to-video with a start frame and an end frame**:
@@ -49,11 +49,11 @@ short `"reviewNote"` in the manifest. `check_exercise_video.py --release` refuse
 python scripts/check_exercise_video.py
 ```
 CI runs this on every push: files and manifest must match 1:1, hashes and sizes must match, each clip
-must be a silent 720×720 MP4 of 3–9 s within the budget, for a pilot exercise.
+must be a silent 720×720 MP4 of 3–9 s within the budget, for an exercise in the video catalog.
 
 ## Notes
-- Budget: about 0.2–1.6 MB per clip; five clips add at most about 8 MB to each app.
+- Budget: about 0.2–1.6 MB per clip; 50 clips add at most about 80 MB to each app.
 - Android plays with `VideoView` (no new dependency, never takes audio focus); iPhone uses a muted
   `AVPlayerLooper` with an ambient, mix-with-others audio session, so music and podcasts keep playing.
 - Reduced motion pauses on the first frame. Clips are never mirrored in Arabic.
-- To add more exercises later, add them to `catalog/exercise-video-prompts.json` first.
+- To change a generation brief, edit `catalog/exercise-video-prompts.json` and regenerate its keyframes.

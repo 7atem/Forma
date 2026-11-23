@@ -1,22 +1,54 @@
 # Validation record — current branch (post-alpha06)
 
-Updated 22 November 2026. Application `com.formacoach.app`, encrypted Room schema 5. Development candidate; public-release, physical paired-device Apple testing, and qualified exercise approval remain pending.
+Updated 23 November 2026. Application `com.formacoach.app`, encrypted Room schema 5. Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise approval remain pending.
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
 
-## Current branch verification (22 November 2026)
+## Current committed Apple verification (23 November 2026)
 
 | Check | Result |
 |---|---|
-| JVM unit tests (`:core:coach:test`, `:core:backup:test`, `:core:wearables:test`) | **54 passed, 0 failed** (including `kg`/`lb` round-trip, 7-day rolling weight trend, Ramadan meal slots/combo recipes, local food-swap calculator, and shared family pot scaling) |
-| Android EN/AR localization (`check_localization.py`) | **765 EN/AR keys & placeholders match** |
-| Apple source localization (`check_apple_sources.py`) | **188 EN/AR keys match** (static check only; macOS/Xcode build for latest iOS edits pending CI/Mac) |
 | Canonical/generated catalog (`generate_exercise_catalog.py --check`) | **50 stable exercises**, equipment & 14 simplified muscle groups; no drift |
+| Shared 3D motion (`generate_exercise_motion.py --check`) | **5 synchronized pilot clips**; generated Kotlin/Swift and mathematical constraints match |
 | Shared movement guides & art (`generate_exercise_guides.py --check`, `check_exercise_art.py`) | **50 bilingual guides** and **50 compressed 960×640 two-phase PNGs (~18.09 MB)**; hashes, XML escaping & packaging match |
-| Android debug, lint & R8 minified release (`--max-workers=1`) | Passed (0 lint errors; `INTERNET` permission scoped strictly to free, keyless Open Food Facts lookup) |
-| GitHub Actions `macos-15` CI (`Apple source validation`) | `swift test`, XcodeGen, `FormaPhone` iOS Simulator, `FormaWatch` watchOS Simulator, and unsigned ARM64 `FormaPhone-unsigned.ipa` artifact built on `macos-15` |
+| Bundled exercise video (`check_exercise_video.py`) | **1 of 50** (`SQUAT`); valid file/manifest, **qualified review pending** |
+| Apple source checks and localization (`check_apple_sources.py`) | **191 EN/AR keys match**, plus source/fixture/media/discomfort-filter assertions |
+| Portable verification chain | All six commands above and `git diff --check` passed on Windows for committed Apple source `ff9cd48` |
+| GitHub Actions `macos-15` run [`45191884998`](https://github.com/7atem/Forma/actions/runs/45191884998), job `137752084876` | **Passed** on `ff9cd48`: Swift tests, XcodeGen, iPhone Simulator build, watchOS Simulator build, unsigned ARM64 IPA packaging and artifact upload |
+| Physical iPhone/Watch, Apple Health permission, visual 3D/video/photo acceptance and qualified pose/cue/video review | **Not performed** |
+
+The IPA is ad-hoc/unsigned for distribution purposes and requires owner-controlled provisioning. Its embedded HealthKit declaration does not by itself authorize Apple Health on a device. See `APPLE_WATCH.md`.
+
+## Android UX/accessibility pass (23 November 2026, uncommitted working tree)
+
+Emulator review on API 35 `Medium_Tablet` (Arabic/RTL, light) and a `Pixel_9_Pro` phone image (English, dark). Changes:
+quick-log button hidden during an active workout on Train (it covered set steppers and *Discard*); bodyweight-only
+exercises save with a blank external load (recorded as 0, shown as bodyweight) and a disabled *Save set* now states
+what is missing; save failures show as a snackbar instead of an off-screen banner; one-tap meal repeats confirm with
+*Undo*; untouched meal forms no longer show a name error; destructive confirmations name the action and use 48 dp
+buttons; exercise-picker rows are 48 dp with selection semantics and a no-results message; Today quick-start cards
+show two-line names; `secondaryContainer` is now an on-brand tonal green (tonal buttons, selected chips) with amber
+kept as an explicit `accentContainer` for records/warm-ups/protein; remaining hard-coded unit labels (s, kcal, RPE/RIR,
+macro shares, set numbers) moved to EN/AR resources.
+
+| Check | Result |
+|---|---|
+| Static checks (localization, catalog, guides, art, Apple sources) | Passed; **812 EN/AR keys** match |
+| JVM unit tests, debug/release builds, lint (`--max-workers=1`) | **60 passed, 0 failed**; builds pass; lint 0 errors |
+| Muscle detail upgrade (same working tree) | 20 detailed regions over the unchanged 14 groups, exact roll-up enforced by the generator and by new Kotlin/Swift tests; redrawn original geometry with shaded rendering on Android and iPhone. Android checked visually on the phone emulator (dark and light). **iPhone rendering is source-only until macOS CI/simulator runs.** |
+| Full `:app:connectedDebugAndroidTest` on `Medium_Tablet` API 35 | **37 passed, 0 failed** (14 encrypted storage + 23 UI, including 3 new tests for these changes) |
+| `Pixel_9_Pro` image (Android 17 preview) | Instrumented tests cannot run: Espresso's `InputManager.getInstance` reflection is absent on that image; used for manual review only |
+
+## Previous Android verification (22 November 2026)
+
+These results cover the Android checkpoint tested that day; they are not rerun results for every later uncommitted Android edit.
+
+| Check | Result |
+|---|---|
+| JVM unit tests (`:core:coach:test`, `:core:backup:test`, `:core:wearables:test`) | **54 passed, 0 failed** at that checkpoint |
+| Android EN/AR localization (`check_localization.py`) | **765 EN/AR keys & placeholders match** at that checkpoint |
+| Android debug, lint & R8 minified release (`--max-workers=1`) | Passed at that checkpoint (0 lint errors; `INTERNET` scoped to free, keyless Open Food Facts lookup) |
 | Emulator instrumented tests (`:app:connectedDebugAndroidTest`) | **26 passed, 0 failed** on disposable API 35 `Medium_Tablet` emulator (14 encrypted storage + 12 UI journeys) |
-| Physical paired iPhone/Watch WatchConnectivity & qualified pose/cue review | **Not performed** |
 
 ---
 
@@ -120,9 +152,10 @@ remain preserved. This work does not alter the original Nemory checkout.
 
 ## Remaining gates
 
-Qualified review of every generated pose and translated cue; actual beginner usability
+Qualified review of every generated pose, translated cue and exercise video; actual beginner usability
 study; physical Android/minimum API/long-history/accessibility/battery/interruption
 acceptance; supported-hardware local-model inference; owner signing/privacy/store
-choices. Swift tests, Xcode builds, HealthKit lifecycle and physical paired
-WatchConnectivity transfer require macOS and Apple devices. No physical device or
-native Apple success is claimed by the Android emulator or static checks.
+choices. Swift tests and Xcode builds now run in macOS CI. Visual simulator/device acceptance,
+HealthKit permission/import with owner-controlled HealthKit-enabled provisioning, and physical paired
+WatchConnectivity transfer remain open. No physical-device behavior is established by Android emulator
+results, portable static checks, remote compilation or generated-video inspection alone.

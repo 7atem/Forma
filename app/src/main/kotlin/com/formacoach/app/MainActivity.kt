@@ -2,7 +2,9 @@ package com.formacoach.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -66,6 +68,13 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     val prefs = remember { context.getSharedPreferences("forma_ui_prefs", android.content.Context.MODE_PRIVATE) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var darkTheme by rememberSaveable { mutableStateOf(prefs.getBoolean("dark_theme", true)) }
+    val activity = context as? ComponentActivity
+    LaunchedEffect(activity, darkTheme) {
+        activity?.enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkTheme },
+            navigationBarStyle = SystemBarStyle.auto(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT) { darkTheme },
+        )
+    }
     var weightUnit by rememberSaveable { mutableStateOf(if (prefs.getString("weight_unit", "KG") == "LB") WeightUnit.LB else WeightUnit.KG) }
     var showQuickLog by rememberSaveable { mutableStateOf(false) }
     var showSettings by rememberSaveable { mutableStateOf(false) }
@@ -79,6 +88,21 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     val setRemovedMsg = stringResource(R.string.set_removed_undo)
     val undoLabel = stringResource(R.string.undo)
     val weightSavedMsg = stringResource(R.string.quick_weight_saved)
+    val saveFailedMsg = stringResource(R.string.save_failed)
+    val mealAddedMsg = stringResource(R.string.meal_added_undo)
+    // Save failures surface as a snackbar so they are seen (and announced) wherever the user has scrolled.
+    LaunchedEffect(state.error) {
+        if (state.error) {
+            snackbarHostState.showSnackbar(saveFailedMsg, withDismissAction = true, duration = SnackbarDuration.Long)
+            vm.clearError()
+        }
+    }
+    val onMealLogged: (Meal) -> Unit = { meal ->
+        scope.launch {
+            val res = snackbarHostState.showSnackbar(mealAddedMsg.format(meal.name), actionLabel = undoLabel, duration = SnackbarDuration.Short)
+            if (res == SnackbarResult.ActionPerformed) vm.removeMeal(meal.id)
+        }
+    }
     val pageState = key(generation) { rememberSaveableStateHolder() }
     // Re-evaluate calendar totals if the app remains open over local midnight.
     var today by remember { mutableStateOf(LocalDate.now(vm.clock)) }
@@ -109,11 +133,9 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     ) {
         Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
             if (state.loading) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+                AppStartupStatus(loading = true, onRetry = vm::retryLoad)
             } else if (state.loadFailed) {
-                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.load_failed))
-                }
+                AppStartupStatus(loading = false, onRetry = vm::retryLoad)
             } else if (state.snapshot.profile == null || editingProfile) {
                 Box(Modifier.fillMaxSize().systemBarsPadding().imePadding(), contentAlignment = Alignment.TopCenter) {
                     ProfileForm(
@@ -139,6 +161,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                     onQuickLog = { showQuickLog = true },
                     onProfile = { editingProfile = true },
                     onSettings = { showSettings = true },
+                    showQuickLog = !(tab == 1 && state.snapshot.sessions.any { it.completedAt == null }),
                 ) { padding ->
                     Box(Modifier.fillMaxSize().padding(padding).imePadding(), contentAlignment = Alignment.TopCenter) {
                         pageState.SaveableStateProvider(tab) {
@@ -151,27 +174,6 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                     .padding(horizontal = PageGutter, vertical = 18.dp),
                                 verticalArrangement = Arrangement.spacedBy(16.dp),
                             ) {
-                                if (state.error) {
-                                    Surface(
-                                        color = MaterialTheme.colorScheme.errorContainer,
-                                        shape = RoundedCornerShape(16.dp),
-                                        modifier = Modifier.fillMaxWidth(),
-                                    ) {
-                                        Row(
-                                            Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            Text(
-                                                stringResource(R.string.save_failed),
-                                                Modifier.weight(1f),
-                                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                            )
-                                            TextButton(onClick = vm::clearError) {
-                                                Text(stringResource(R.string.dismiss), color = MaterialTheme.colorScheme.onErrorContainer)
-                                            }
-                                        }
-                                    }
-                                }
                                 val liveSession = state.snapshot.sessions.firstOrNull { it.completedAt == null }
                                 if (liveSession != null && tab != 1) {
                                     val liveSets = state.snapshot.sets.filter { it.sessionId == liveSession.id }
@@ -202,7 +204,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                                     color = MaterialTheme.colorScheme.primary,
                                                 )
                                             }
-                                            PillBadge(number(liveSets.size.toDouble(), 0))
+                                            PillBadge(stringResource(R.string.live_set_count, number(liveSets.size.toDouble(), 0)))
                                         }
                                     }
                                 }
@@ -232,7 +234,7 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                             }
                                         }
                                     }
-                                    2 -> EatContent(state, today, vm)
+                                    2 -> EatContent(state, today, vm, onMealLogged)
                                     3 -> {
                                         SegmentedTabs(
                                             selectedIndex = progressSection,
@@ -292,6 +294,10 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                     quickWeight,
                                     { quickWeight = it },
                                     "quick_weight_input",
+                                    error = quickWeight.isNotBlank() && parsedQuickWeight == null,
+                                    supportingText = if (quickWeight.isNotBlank() && parsedQuickWeight == null) {
+                                        stringResource(R.string.quick_weight_error)
+                                    } else null,
                                 )
                             }
                             FilledTonalButton(
@@ -318,9 +324,11 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                                 recentMeals.forEach { recent ->
                                     AssistChip(
                                         onClick = {
-                                            vm.addMeal(recent.copy(id = java.util.UUID.randomUUID().toString(), date = today)) {
+                                            val repeated = recent.copy(id = java.util.UUID.randomUUID().toString(), date = today)
+                                            vm.addMeal(repeated) {
                                                 showQuickLog = false
                                                 tab = 2
+                                                onMealLogged(repeated)
                                             }
                                         },
                                         enabled = !state.busy,
@@ -385,6 +393,62 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     }
 }
 
+@Composable
+private fun AppStartupStatus(loading: Boolean, onRetry: () -> Unit) {
+    Box(
+        Modifier.fillMaxSize().systemBarsPadding().padding(24.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            Modifier.widthIn(max = 520.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = if (loading) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.errorContainer,
+                modifier = Modifier.size(64.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (loading) {
+                        CircularProgressIndicator(Modifier.size(30.dp), strokeWidth = 3.dp)
+                    } else {
+                        Icon(
+                            Icons.Default.ErrorOutline,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                            modifier = Modifier.size(30.dp),
+                        )
+                    }
+                }
+            }
+            Text(
+                stringResource(if (loading) R.string.app_loading_title else R.string.load_failed_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            Text(
+                stringResource(if (loading) R.string.app_loading_body else R.string.load_failed),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            if (!loading) {
+                Button(
+                    onClick = onRetry,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("retry_load"),
+                ) {
+                    Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text(stringResource(R.string.retry), fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ProfileForm(
@@ -402,13 +466,18 @@ private fun ProfileForm(
     var sessions by rememberSaveable { mutableIntStateOf(profile?.sessionsPerWeek ?: 3) }
     var calories by rememberSaveable { mutableStateOf(profile?.caloriesTarget?.toString().orEmpty()) }
     var protein by rememberSaveable { mutableStateOf(profile?.proteinTarget?.toString().orEmpty()) }
+    val nameInvalid = name.length > 80
+    val calorieValue = if (calories.isBlank()) null else NumericInput.integer(calories)
+    val proteinValue = if (protein.isBlank()) null else NumericInput.decimal(protein)
+    val caloriesInvalid = calories.isNotBlank() && (calorieValue == null || calorieValue !in 1..20000)
+    val proteinInvalid = protein.isNotBlank() && (proteinValue == null || proteinValue !in 0.0001..1000.0)
     val candidate = runCatching {
         Profile(
             name.trim(),
             goal,
             sessions,
-            if (calories.isBlank()) null else requireNotNull(NumericInput.integer(calories)),
-            if (protein.isBlank()) null else requireNotNull(NumericInput.decimal(protein)),
+            if (calories.isBlank()) null else requireNotNull(calorieValue),
+            if (protein.isBlank()) null else requireNotNull(proteinValue),
         )
     }.getOrNull()
     Column(
@@ -433,7 +502,15 @@ private fun ProfileForm(
             Text(stringResource(R.string.welcome_body), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         InfoCard {
-            Input(R.string.name, name, { name = it }, "profile_name", numeric = false)
+            Input(
+                R.string.name,
+                name,
+                { name = it },
+                "profile_name",
+                numeric = false,
+                error = nameInvalid,
+                supportingText = if (nameInvalid) stringResource(R.string.profile_name_too_long) else null,
+            )
             Text(stringResource(R.string.your_goal), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Goal.entries.forEach { value ->
@@ -471,8 +548,26 @@ private fun ProfileForm(
             Text(stringResource(R.string.manual_targets), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(stringResource(R.string.manual_targets_body), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             FormFieldPair(
-                first = { Input(R.string.calorie_target, calories, { calories = it }, "profile_calories") },
-                second = { Input(R.string.protein_target, protein, { protein = it }, "profile_protein") },
+                first = {
+                    Input(
+                        R.string.calorie_target,
+                        calories,
+                        { calories = it },
+                        "profile_calories",
+                        error = caloriesInvalid,
+                        supportingText = if (caloriesInvalid) stringResource(R.string.calorie_target_error) else null,
+                    )
+                },
+                second = {
+                    Input(
+                        R.string.protein_target,
+                        protein,
+                        { protein = it },
+                        "profile_protein",
+                        error = proteinInvalid,
+                        supportingText = if (proteinInvalid) stringResource(R.string.protein_target_error) else null,
+                    )
+                },
             )
         }
         if (error) Text(stringResource(R.string.save_failed), color = MaterialTheme.colorScheme.error)
@@ -672,11 +767,12 @@ private fun TodayContent(
         ) {
             quickItems.take(5).forEach { (id, name, exercises) ->
                 Surface(
-                    onClick = { if (!busy) onStartProgram(id) },
+                    onClick = { onStartProgram(id) },
+                    enabled = !busy,
                     shape = RoundedCornerShape(20.dp),
                     color = MaterialTheme.colorScheme.surface,
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)),
-                    modifier = Modifier.width(210.dp),
+                    modifier = Modifier.width(236.dp).testTag("quick_start_$id"),
                 ) {
                     Row(
                         Modifier.padding(12.dp),
@@ -694,7 +790,8 @@ private fun TodayContent(
                                 name,
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                maxLines = 1,
+                                // Two lines keep similar names (e.g. "Full body · A/B") distinguishable.
+                                maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
@@ -829,7 +926,7 @@ private fun MilestonesCard(snapshot: FitnessSnapshot) {
             setMilestones.forEach { count ->
                 PillBadge(
                     text = "★ " + stringResource(R.string.milestone_sets_count, number(count.toDouble(), 0)),
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    containerColor = MaterialTheme.colorScheme.accentContainer,
                     contentColor = MaterialTheme.colorScheme.secondary,
                 )
             }
@@ -850,12 +947,29 @@ internal fun InfoCard(modifier: Modifier = Modifier, content: @Composable Column
 }
 
 @Composable
-internal fun Input(label: Int, value: String, onChange: (String) -> Unit, tag: String, numeric: Boolean = true, error: Boolean = false, placeholder: String? = null) {
+internal fun Input(
+    label: Int,
+    value: String,
+    onChange: (String) -> Unit,
+    tag: String,
+    numeric: Boolean = true,
+    error: Boolean = false,
+    placeholder: String? = null,
+    supportingText: String? = null,
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
         label = { Text(stringResource(label)) },
         placeholder = placeholder?.let { hint -> ({ Text(hint, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)) }) },
+        supportingText = supportingText?.let { message ->
+            ({
+                Text(
+                    message,
+                    color = if (error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            })
+        },
         singleLine = true,
         isError = error,
         shape = RoundedCornerShape(14.dp),

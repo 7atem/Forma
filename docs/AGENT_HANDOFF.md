@@ -1,9 +1,16 @@
 # Forma — Agent Handoff & Current State
 
-**Last updated:** 22 November 2026  
-**Repository:** `d:\Projects\Forma` (`https://github.com/7atem/Forma`)  
-**Branches:** `main` and `codex/guided-fitness-workflows` (kept in sync)  
+**Last updated:** 23 November 2026  
+**Repository:** `D:\Projects\Forma` (`https://github.com/7atem/Forma`)  
+**Active branch:** `codex/guided-fitness-workflows`; do not assume other branches are synchronized  
 **Product isolation:** Never touch Nemory (`D:\Vault Brain` or `https://github.com/7atem/NEMORY`). Follow all rules in `AGENTS.md`.
+
+## Current continuation — iPhone media and conservative library filters
+
+- Commits `1a28002`, `f2e45ba`, `7c64fa2`, `aa347f6` and `ff9cd48` add accessible catalog-driven muscle overlays, a shared highlight toggle across photo/video/3D modes, a native iPhone SceneKit renderer for the five-exercise 3D pilot, real bundled-MP4 playback with explicit photo-mode labeling, removal of the iPhone family-pot feature, HealthKit signing diagnostics/package declarations, and default-off discomfort exclusions. The exclusions affect only iPhone library visibility; they are not diagnoses, treatment or contraindication/recommendation rules.
+- GitHub Actions run `45191884998` passed on `ff9cd48`: Swift tests, iPhone/watchOS Simulator builds and unsigned ARM64 IPA packaging. Visual simulator/device acceptance has not occurred. Physical Apple Health still requires owner-controlled HealthKit-enabled provisioning; the CI artifact alone cannot repair an incorrectly re-signed installed copy.
+- The video workflow now covers all 50 catalog IDs. Raw generated candidates are kept only in ignored `artifacts/video-candidates/`; they are not bundled or marked reviewed. The existing bundled `SQUAT` clip remains the only app video and still has `reviewed: false`. See `EXERCISE_VIDEO.md` for the exact candidate-run record and release gate.
+- Documentation was corrected to reflect 50 exercises, native SceneKit rendering, real CI results, one bundled unreviewed video, explicit photo behavior, conservative filter boundaries and remaining device/clinical gates. Many unrelated Android working-tree edits are intentionally preserved and must not be swept into Apple/video commits without separate review and verification.
 
 ---
 

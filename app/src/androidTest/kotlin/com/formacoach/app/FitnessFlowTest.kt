@@ -103,6 +103,7 @@ class FitnessFlowTest {
         rule.onNodeWithTag("start_A").performScrollTo().performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("set_reps").fetchSemanticsNodes().isNotEmpty()}
         rule.onNodeWithTag("session_form_guide").performScrollTo().performClick()
+        rule.onNodeWithTag("guide_mode_photos").performClick()
         rule.onNodeWithTag("exercise_art_SQUAT",useUnmergedTree=true).performScrollTo().assertExists()
         rule.onNodeWithTag("guide_tab_muscles").performClick()
         rule.onNodeWithTag("muscle_map_SQUAT").performScrollTo().assertExists()
@@ -206,6 +207,35 @@ class FitnessFlowTest {
         rule.onNodeWithText(rule.activity.getString(R.string.weekly_review)).performScrollTo().assertExists()
     }
 
+    @Test fun muscleHighlightToggleWorksWithVideoAndSurvivesRecreation() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_1").performClick()
+        rule.onNodeWithTag("training_section_1").performClick()
+        rule.onNodeWithTag("exercise_search").performTextReplacement(rule.activity.getString(exerciseLabel(com.formacoach.model.Exercise.SQUAT)))
+        rule.onNodeWithTag("exercise_search").performImeAction()
+        rule.onNodeWithTag("library_SQUAT").performScrollTo().performClick()
+        rule.onNodeWithTag("guide_mode_video").performClick()
+        rule.onNodeWithTag("exercise_video").assertExists()
+        rule.onNodeWithTag("compact_muscle_overlay_SQUAT",useUnmergedTree=true).assertExists()
+        val activation=com.formacoach.model.ExerciseMuscles.of(com.formacoach.model.Exercise.SQUAT)
+        val primary=activation.primaryDetail.joinToString {rule.activity.getString(muscleDetailLabel(it))}
+        val secondary=activation.secondaryDetail.joinToString {rule.activity.getString(muscleDetailLabel(it))}
+        rule.onNodeWithText(rule.activity.getString(R.string.muscle_primary,primary)).assertExists()
+        rule.onNodeWithText(rule.activity.getString(R.string.muscle_secondary,secondary)).assertExists()
+        rule.onNodeWithTag("muscle_highlights_toggle").assertHeightIsAtLeast(androidx.compose.ui.unit.Dp(48f)).performScrollTo().performClick()
+        rule.onNodeWithTag("muscle_highlights_toggle").assertIsOff()
+        rule.onNodeWithTag("compact_muscle_overlay_SQUAT",useUnmergedTree=true).assertDoesNotExist()
+        rule.onNodeWithTag("demo_muscle_legend_SQUAT").assertExists()
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("muscle_highlights_toggle").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("muscle_highlights_toggle").assertIsOff()
+        rule.onNodeWithTag("compact_muscle_overlay_SQUAT",useUnmergedTree=true).assertDoesNotExist()
+        rule.onNodeWithTag("muscle_highlights_toggle").performScrollTo().performClick()
+        rule.onNodeWithTag("muscle_highlights_toggle").assertIsOn()
+        rule.onNodeWithTag("compact_muscle_overlay_SQUAT",useUnmergedTree=true).assertExists()
+        rule.onNodeWithTag("guide_close").performClick()
+    }
+
     @Test fun muscleMapsCoverEveryExerciseAndWatchTransferIsAccessible() {
         ensureProfile()
         rule.onNodeWithTag("tab_1").performClick()
@@ -214,7 +244,12 @@ class FitnessFlowTest {
             rule.onNodeWithTag("exercise_search").performScrollTo().performTextReplacement(rule.activity.getString(exerciseLabel(exercise)))
             rule.onNodeWithTag("exercise_search").performImeAction()
             rule.onNodeWithTag("library_${exercise.name}").performScrollTo().performClick()
+            if(rule.onAllNodesWithTag("guide_mode_photos").fetchSemanticsNodes().isNotEmpty()) {
+                rule.onNodeWithTag("guide_mode_photos").performClick()
+            }
             rule.onNodeWithTag("exercise_art_${exercise.name}",useUnmergedTree=true).performScrollTo().assertExists()
+            rule.onNodeWithTag("muscle_highlights_toggle").assertExists()
+            rule.onNodeWithTag("demo_muscle_legend_${exercise.name}").assertExists()
             rule.onNodeWithTag("guide_tab_muscles").performClick()
             rule.onNodeWithTag("muscle_map_${exercise.name}").performScrollTo().assertExists()
             rule.onNodeWithTag("guide_close").performClick()
@@ -268,5 +303,89 @@ class FitnessFlowTest {
         rule.onNodeWithTag("image_viewer_close").performClick()
         rule.onNodeWithTag("guide_close").performClick()
         rule.onNodeWithTag("exercise_search").performScrollTo().assertTextContains("Romanian")
+    }
+
+    @Test fun invalidProfileTargetExplainsHowToRestoreSaving() {
+        ensureProfile()
+        rule.onNodeWithContentDescription(rule.activity.getString(R.string.profile)).performClick()
+        rule.onNodeWithTag("profile_calories").performScrollTo().performTextInput("0")
+        rule.onNodeWithText(rule.activity.getString(R.string.calorie_target_error)).assertExists()
+        rule.onNodeWithTag("save_profile").assertIsNotEnabled()
+        rule.onNodeWithTag("profile_calories").performTextReplacement("2500")
+        rule.onNodeWithTag("save_profile").assertIsEnabled()
+    }
+
+    @Test fun invalidMealValuesShowFieldErrorsWithoutLosingInput() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_2").performClick()
+        rule.onNodeWithTag("meal_name").performScrollTo().performTextInput("Validation meal")
+        rule.onNodeWithTag("meal_calories").performScrollTo().performTextInput("-1")
+        rule.onNodeWithText(rule.activity.getString(R.string.calories_error)).assertExists()
+        rule.onNodeWithTag("save_meal").assertIsNotEnabled()
+        rule.onNodeWithTag("meal_calories").performTextReplacement("100")
+        listOf("meal_protein", "meal_carbs", "meal_fat").forEach { tag ->
+            rule.onNodeWithTag(tag).performScrollTo().performTextInput("0")
+        }
+        rule.onNodeWithTag("meal_name").assertTextContains("Validation meal")
+        rule.onNodeWithTag("save_meal").assertIsEnabled()
+    }
+
+    @Test fun bodyweightSetSavesWithoutLoadAndQuickLogStaysOutOfTheWay() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_1").performClick()
+        if(rule.onAllNodesWithTag("set_reps").fetchSemanticsNodes().isEmpty()) {
+            rule.onNodeWithTag("start_empty_workout").performScrollTo().performClick()
+        }
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("set_reps").fetchSemanticsNodes().isNotEmpty()}
+        // The quick-log button would cover set controls during an active workout.
+        rule.onNodeWithTag("quick_log_fab").assertDoesNotExist()
+        rule.onNodeWithTag("exercise_picker").performScrollTo().performClick()
+        rule.onNodeWithTag("picker_exercise_search").performTextInput("zzzz no such move")
+        rule.onNodeWithTag("picker_no_results").assertExists()
+        rule.onNodeWithTag("picker_exercise_search").performTextReplacement("")
+        rule.onNodeWithTag("exercise_SQUAT").performScrollTo().performClick()
+        rule.onNodeWithTag("set_reps").performScrollTo().performTextReplacement("")
+        rule.onNodeWithTag("set_weight").performTextReplacement("")
+        rule.onNodeWithTag("add_set").assertIsNotEnabled()
+        rule.onNodeWithTag("set_save_hint").performScrollTo().assertTextContains(rule.activity.getString(R.string.set_needs_reps))
+        rule.onNodeWithTag("set_reps").performScrollTo().performTextReplacement("12")
+        rule.onNodeWithTag("add_set").performScrollTo().assertIsEnabled().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithText(rule.activity.getString(R.string.bodyweight_load),substring=true).fetchSemanticsNodes().size>1}
+        rule.onNodeWithText(rule.activity.getString(R.string.cancel_session)).performScrollTo().performClick()
+        rule.onNodeWithTag("confirm_destructive").assertTextEquals(rule.activity.getString(R.string.cancel_session)).performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("start_empty_workout").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("quick_log_fab").assertExists()
+    }
+
+    @Test fun oneTapMealRepeatConfirmsAndCanBeUndone() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_2").performClick()
+        val name="Undo workflow ${System.nanoTime()%100000}"
+        rule.onNodeWithTag("meal_name").performScrollTo().performTextInput(name)
+        listOf("meal_calories" to "300","meal_protein" to "20","meal_carbs" to "30","meal_fat" to "10").forEach {(tag,value)->rule.onNodeWithTag(tag).performScrollTo().performTextInput(value)}
+        rule.onNodeWithTag("save_meal").performScrollTo().performClick()
+        val titles=hasText(name) and hasClickAction().not()
+        rule.waitUntil(10_000) {rule.onAllNodes(titles).fetchSemanticsNodes().isNotEmpty()}
+        val before=rule.onAllNodes(titles).fetchSemanticsNodes().size
+        // The saved form resets without flagging its now-empty name as an error.
+        rule.onNodeWithText(rule.activity.getString(R.string.meal_name_error)).assertDoesNotExist()
+        // Drive the clock by hand so the short snackbar is not auto-advanced away before it is read.
+        rule.onNodeWithTag("quick_repeat_$name").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        rule.mainClock.autoAdvance=false
+        val added=rule.activity.getString(R.string.meal_added_undo,name)
+        var snack=false
+        var count=before
+        repeat(80) {
+            if(!(snack&&count==before+1)) {
+                rule.mainClock.advanceTimeBy(50)
+                Thread.sleep(50)
+                snack=snack||rule.onAllNodesWithText(added).fetchSemanticsNodes().isNotEmpty()
+                count=rule.onAllNodes(titles).fetchSemanticsNodes().size
+            }
+        }
+        check(snack&&count==before+1) {"snackbar=$snack entries=$count expected=${before+1}"}
+        rule.onNodeWithText(rule.activity.getString(R.string.undo)).performClick()
+        rule.mainClock.autoAdvance=true
+        rule.waitUntil(10_000) {rule.onAllNodes(titles).fetchSemanticsNodes().size==before}
     }
 }

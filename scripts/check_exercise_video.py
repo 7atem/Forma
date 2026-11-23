@@ -2,7 +2,7 @@
 
 Every file in assets/exercises/res/raw must have a manifest entry and vice versa, with matching
 size and SHA-256; each must be a silent H.264-style MP4, 720x720, 3-9 s, within the size budget,
-for an exercise in the video pilot. Passes with zero videos. --release also requires reviewed=true.
+for an exercise in the video catalog. Passes with zero videos. --release also requires reviewed=true.
 """
 from pathlib import Path
 import hashlib
@@ -61,8 +61,8 @@ if __name__ == '__main__':
     release = '--release' in sys.argv
     spec = json.loads((ROOT / 'catalog/exercise-video-prompts.json').read_text(encoding='utf-8'))
     exercises = {e['id'] for e in json.loads((ROOT / 'catalog/exercise-muscles.json').read_text(encoding='utf-8'))['exercises']}
-    pilot = {clip['id'] for clip in spec['clips']}
-    assert pilot <= exercises, pilot - exercises
+    catalog_exercises = {clip['id'] for clip in spec['clips']}
+    assert catalog_exercises <= exercises, catalog_exercises - exercises
     manifest = json.loads((ROOT / 'catalog/exercise-video-manifest.json').read_text(encoding='utf-8'))
     entries = manifest['videos']
     assert len({v['id'] for v in entries}) == len(entries), 'Duplicate manifest id'
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     assert files == listed, f'Files and manifest differ: {sorted(files ^ listed)}'
     pending = []
     for v in entries:
-        assert v['id'] in pilot, f"{v['id']} is not in the video pilot"
+        assert v['id'] in catalog_exercises, f"{v['id']} is not in the exercise video catalog"
         assert v['file'] == f"assets/exercises/res/raw/exercise_video_{v['id'].lower()}.mp4", v['file']
         data = (ROOT / v['file']).read_bytes()
         assert len(data) == v['bytes'] and hashlib.sha256(data).hexdigest() == v['sha256'], f"{v['id']}: bytes/hash changed"
@@ -87,4 +87,4 @@ if __name__ == '__main__':
     if release:
         assert not pending, f'Unreviewed videos block release: {pending}'
     note = f'; review pending: {", ".join(pending)}' if pending else ''
-    print(f'{len(entries)} of {len(pilot)} pilot exercise videos valid{note}.')
+    print(f'{len(entries)} of {len(catalog_exercises)} catalog exercise videos valid{note}.')

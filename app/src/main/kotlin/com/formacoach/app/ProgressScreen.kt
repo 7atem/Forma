@@ -47,11 +47,15 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     var waist by rememberSaveable(day, existing?.waistCm) {
         mutableStateOf(existing?.waistCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
     }
+    val weightKg = if (weight.isBlank()) null else NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) }
+    val waistValue = if (waist.isBlank()) null else NumericInput.decimal(waist)
+    val weightInvalid = weight.isNotBlank() && (weightKg == null || weightKg !in 0.0001..1000.0)
+    val waistInvalid = waist.isNotBlank() && (waistValue == null || waistValue !in 0.0001..500.0)
     val measure = runCatching {
         Measurement(
             date,
-            if (weight.isBlank()) null else WeightUnits.toKg(requireNotNull(NumericInput.decimal(weight)), unit),
-            if (waist.isBlank()) null else requireNotNull(NumericInput.decimal(waist)),
+            if (weight.isBlank()) null else requireNotNull(weightKg),
+            if (waist.isBlank()) null else requireNotNull(waistValue),
         )
     }.getOrNull()
     var limit by rememberSaveable { mutableIntStateOf(14) }
@@ -98,8 +102,26 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
             ScopeInfoButton(R.string.progress_title, R.string.measure_note)
         }
         FormFieldPair(
-            first = { Input(if (unit == WeightUnit.KG) R.string.body_weight else R.string.body_weight_lb, weight, { weight = it }, "body_weight") },
-            second = { Input(R.string.waist, waist, { waist = it }, "waist") },
+            first = {
+                Input(
+                    if (unit == WeightUnit.KG) R.string.body_weight else R.string.body_weight_lb,
+                    weight,
+                    { weight = it },
+                    "body_weight",
+                    error = weightInvalid,
+                    supportingText = if (weightInvalid) stringResource(R.string.weight_error) else null,
+                )
+            },
+            second = {
+                Input(
+                    R.string.waist,
+                    waist,
+                    { waist = it },
+                    "waist",
+                    error = waistInvalid,
+                    supportingText = if (waistInvalid) stringResource(R.string.waist_error) else null,
+                )
+            },
         )
         Button(
             onClick = { measure?.let { vm.measure(it) {} } },

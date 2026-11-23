@@ -26,7 +26,7 @@ parser.add_argument('source', type=Path)
 parser.add_argument('--tool', required=True, help='Generator and model, e.g. "Veo 3 (Gemini)" or "Kling 2.1"')
 parser.add_argument('--no-reverse', action='store_true')
 args = parser.parse_args()
-assert args.exercise in {clip['id'] for clip in spec['clips']}, 'Exercise is not in the video pilot'
+assert args.exercise in {clip['id'] for clip in spec['clips']}, 'Exercise is not in the exercise video catalog'
 assert args.source.is_file(), args.source
 
 target = ROOT / f'assets/exercises/res/raw/exercise_video_{args.exercise.lower()}.mp4'
