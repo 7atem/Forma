@@ -1056,6 +1056,7 @@ private struct MealSlotOption: Identifiable {
     @State private var recordingExercise: Exercise?
     @AppStorage("forma_dark_mode") private var darkMode = true
     @AppStorage("forma_use_lb") private var useLb = false
+    @AppStorage(ExerciseDiscomfortSelection.storageKey) private var storedDiscomfortRegions = ""
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
@@ -1067,8 +1068,10 @@ private struct MealSlotOption: Identifiable {
     }
 
     var body: some View {
+        let discomfortRegions = ExerciseDiscomfortSelection.decode(storedDiscomfortRegions)
         let filtered = Exercise.allCases.filter { exercise in
-            (selectedMuscle == nil || ExerciseMuscles.of(exercise).primary.first == selectedMuscle) &&
+            ExerciseDiscomfortRegion.includes(exercise, excluding: discomfortRegions) &&
+                (selectedMuscle == nil || ExerciseMuscles.of(exercise).primary.first == selectedMuscle) &&
                 (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) &&
                 (exerciseSearch.isEmpty || (exercise.label(arabic: false) + " " + exercise.label(arabic: true)).localizedStandardContains(exerciseSearch))
         }
@@ -1104,6 +1107,8 @@ private struct MealSlotOption: Identifiable {
                         .padding(12)
                         .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.border, lineWidth: 1))
+
+                    ExerciseDiscomfortFilterButton()
 
                     // Main Muscle Category Chips
                     ScrollView(.horizontal, showsIndicators: false) {

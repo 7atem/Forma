@@ -180,3 +180,12 @@
 "motion_video" = "Video clip";
 "motion_video_note" = "Continuous looping AI-generated video. Highlighted muscles come from the Forma muscle catalog. Not personal form coaching.";
 "motion_video_a11y" = "%@, looping demonstration video. Working muscles: %@";
+"discomfort_filters" = "Discomfort filters";
+"discomfort_filter_hint" = "Choose areas whose directly targeted exercises you want to hide";
+"discomfort_filter_explainer" = "Hide exercises that directly target a selected area as a primary or supporting muscle. These are personal library preferences, not medical contraindications. Saved programs and workout history are not changed.";
+"discomfort_filter_limits" = "Indirect stabilizer loads are not fully captured, and the remaining exercises are not confirmed suitable for your condition. For pain or injury, seek advice from a qualified clinician.";
+"clear_discomfort_filters" = "Clear discomfort filters";
+"done" = "Done";
+"discomfort_region_neck_upper_back" = "Neck / upper back";
+"discomfort_region_shoulders" = "Shoulders";
+"discomfort_region_lower_back" = "Lower back";

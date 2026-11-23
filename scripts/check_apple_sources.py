@@ -97,4 +97,28 @@ for required in ['FormaTheme.musclePrimary', 'FormaTheme.muscleSupporting', 'str
                  'demo_muscle_legend_', 'compact_muscle_overlay_', 'muscle_accessibility']:
     assert required in diagram, ('Accessible muscle diagram', required)
 assert 'primary ? Color.green' not in diagram
-print(f'Apple static consistency: fixture, target IDs, 3D pilot, family-pot removal, highlight wiring and {len(en)} EN/AR keys match. Swift/Xcode build NOT checked.')
+# Discomfort choices are direct-target library preferences only; they do not prescribe treatment or rewrite training data.
+discomfort = (root / 'apple/Sources/FormaCore/ExerciseDiscomfort.swift').read_text(encoding='utf-8')
+for required in [
+    'case neckUpperBack = "NECK_UPPER_BACK"',
+    'case shoulders = "SHOULDERS"',
+    'case lowerBack = "LOWER_BACK"',
+    'case .neckUpperBack: return [.upper_back]',
+    'case .shoulders: return [.front_delts, .rear_delts]',
+    'case .lowerBack: return [.erectors]',
+    'Set(activation.primary + activation.secondary).isDisjoint(with: excludedMuscles)',
+    'public static let storageKey = "forma_discomfort_exclusions"',
+]:
+    assert required in discomfort, ('Discomfort preference model', required)
+phone = (root / 'apple/iPhone/FormaPhoneApp.swift').read_text(encoding='utf-8')
+assert 'ExerciseDiscomfortRegion.includes(exercise, excluding: discomfortRegions)' in phone
+assert 'ExerciseDiscomfortFilterButton()' in phone
+filter_view = (root / 'apple/iPhone/ExerciseDiscomfortFilter.swift').read_text(encoding='utf-8')
+for required in ['@AppStorage(ExerciseDiscomfortSelection.storageKey)', 'discomfort_filter_limits',
+                 'Saved programs and workout history are not changed']:
+    if required == 'Saved programs and workout history are not changed':
+        assert required in en['discomfort_filter_explainer']
+    else:
+        assert required in filter_view, ('Discomfort preference UI', required)
+assert (root / 'apple/Tests/FormaCoreTests/ExerciseDiscomfortTests.swift').exists()
+print(f'Apple static consistency: fixture, target IDs, 3D pilot, family-pot removal, highlight wiring, discomfort preferences and {len(en)} EN/AR keys match. Swift/Xcode build NOT checked.')
