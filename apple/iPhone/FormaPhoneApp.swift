@@ -1815,16 +1815,31 @@ private struct MealSlotOption: Identifiable {
     @ObservedObject var bridge: WatchBridge
     let onImport: () -> Void
 
+    static func statusKey(_ state: WatchLinkState) -> String {
+        switch state {
+        case .ready: return "watch_connected"
+        case .notPaired: return "watch_not_paired"
+        case .appNotInstalled: return "watch_app_missing"
+        case .inactive, .unsupported: return "watch_disconnected"
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     FormaCard {
+                        let ready = bridge.linkState == .ready
                         FormaPill(
-                            text: bridge.activated ? String(localized: "watch_connected") : String(localized: "watch_disconnected"),
-                            background: bridge.activated ? FormaTheme.primaryContainer : FormaTheme.surfaceHigh,
-                            foreground: bridge.activated ? FormaTheme.primary : FormaTheme.textMuted
+                            text: String(localized: String.LocalizationValue(Self.statusKey(bridge.linkState))),
+                            background: ready ? FormaTheme.primaryContainer : FormaTheme.surfaceHigh,
+                            foreground: ready ? FormaTheme.primary : FormaTheme.textMuted
                         )
+                        if bridge.linkState == .appNotInstalled {
+                            Text("watch_app_missing_help")
+                                .font(.caption)
+                                .foregroundStyle(FormaTheme.textMuted)
+                        }
                         Text("phone_bridge_note")
                             .font(.subheadline)
                             .foregroundStyle(FormaTheme.textPrimary)
@@ -1851,7 +1866,7 @@ private struct MealSlotOption: Identifiable {
                                 .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .foregroundStyle(FormaTheme.textPrimary)
                         }
-                        .disabled(!bridge.activated)
+                        .disabled(bridge.linkState != .ready)
                     }
                 }
                 .padding(16)

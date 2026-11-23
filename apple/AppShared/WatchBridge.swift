@@ -3,9 +3,13 @@ import WatchConnectivity
 import Combine
 import FormaCore
 
+/// What the phone can honestly say about its watch link.
+enum WatchLinkState: Equatable { case unsupported, inactive, notPaired, appNotInstalled, ready }
+
 /// Watch results remain in the durable outbox until the phone has saved them and ACKed their IDs.
 @MainActor final class WatchBridge: NSObject, ObservableObject, WCSessionDelegate {
     @Published private(set) var activated = false
+    @Published private(set) var linkState: WatchLinkState = WCSession.isSupported() ? .inactive : .unsupported
     private let store: LocalStore
     private var transport: WCSession?
     init(store: LocalStore) {
@@ -37,11 +41,28 @@ import FormaCore
         #endif
     }
     nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        Task {@MainActor in self.activated=activationState == .activated;self.flush()}
+        let state=Self.linkState(of:session)
+        Task {@MainActor in self.activated=activationState == .activated;self.linkState=state;self.flush()}
+    }
+    /// "Activated" only means the phone's session is up. Pairing and the watch app's install state are separate.
+    nonisolated private static func linkState(of session: WCSession) -> WatchLinkState {
+        guard session.activationState == .activated else {return .inactive}
+        #if os(iOS)
+        if !session.isPaired {return .notPaired}
+        if !session.isWatchAppInstalled {return .appNotInstalled}
+        #endif
+        return .ready
     }
     #if os(iOS)
-    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {
+        Task {@MainActor in self.linkState = .inactive}
+    }
     nonisolated func sessionDidDeactivate(_ session: WCSession) {session.activate()}
+    /// Pairing, unpairing and installing/removing the watch app all arrive here.
+    nonisolated func sessionWatchStateDidChange(_ session: WCSession) {
+        let state=Self.linkState(of:session)
+        Task {@MainActor in self.linkState=state}
+    }
     #endif
     nonisolated func session(_ session: WCSession, didReceiveUserInfo userInfo: [String:Any]) {
         Task {@MainActor in

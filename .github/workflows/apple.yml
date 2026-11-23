@@ -35,6 +35,14 @@ jobs:
           done
           codesign --force --sign - --timestamp=none --entitlements apple/Generated/FormaPhone.entitlements "$APP"
           codesign -d --entitlements :- "$APP" 2>/dev/null | grep -q "com.apple.developer.healthkit" || { echo "::error::HealthKit entitlement missing from IPA"; exit 1; }
+          # The paired-watch install needs the watch app embedded under Watch/; fail loudly if it is not.
+          test -f "$APP/Watch/FormaWatch.app/Info.plist" || { echo "::error::FormaWatch.app is not embedded in the IPA"; exit 1; }
+          {
+            echo "### IPA contents"
+            echo "- iPhone app: \`$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")\`"
+            echo "- Watch app: \`$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Watch/FormaWatch.app/Info.plist")\` (companion \`$(/usr/libexec/PlistBuddy -c 'Print :WKCompanionAppBundleIdentifier' "$APP/Watch/FormaWatch.app/Info.plist")\`)"
+            echo "- HealthKit entitlement embedded: yes"
+          } >> "$GITHUB_STEP_SUMMARY"
           mkdir -p apple/ipa/Payload
           cp -R "$APP" apple/ipa/Payload/
           (cd apple/ipa && zip -r -y ../FormaPhone-unsigned.ipa Payload)

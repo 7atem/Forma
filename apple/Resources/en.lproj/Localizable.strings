@@ -186,3 +186,6 @@
 "daily_story_trained" = "You showed up today. Enjoy your family meal and recover well.";
 "daily_story_fueled" = "Fueling steadily today. Rest days are part of the rhythm, not missed days.";
 "daily_story_complete" = "Great rhythm today — workout and meals logged cleanly on your device.";
+"watch_not_paired" = "No Apple Watch is paired with this iPhone";
+"watch_app_missing" = "Forma is not installed on your Apple Watch";
+"watch_app_missing_help" = "On iPhone open the Watch app › My Watch › scroll to Available Apps › Forma › Install. If Forma is not listed, this build was installed without its watch app (common with re-signed IPAs); install through Xcode or TestFlight.";
