@@ -1328,7 +1328,6 @@ private struct MealSlotOption: Identifiable {
     @State private var selectedSlot = "BREAKFAST"
     @State private var addingMeal = false
     @State private var showOnlineFood = false
-    @State private var showFamilyPot = false
     @State private var showRemaining = false
     @AppStorage("forma_dark_mode") private var darkMode = true
     @AppStorage("forma_use_lb") private var useLb = false
@@ -1424,16 +1423,6 @@ private struct MealSlotOption: Identifiable {
                                 .padding(.vertical, 12)
                                 .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .foregroundStyle(FormaTheme.primary)
-                            }
-                            Button { showFamilyPot = true } label: {
-                                HStack {
-                                    Image(systemName: "person.3.fill")
-                                    Text("family_pot_btn").fontWeight(.semibold)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 12)
-                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                .foregroundStyle(FormaTheme.secondary)
                             }
                         }
                     }
@@ -1550,13 +1539,6 @@ private struct MealSlotOption: Identifiable {
             }
             .sheet(isPresented: $showOnlineFood) {
                 PhoneOnlineFoodSheet(slot: selectedSlot) { meal in
-                    store.attempt { try store.addMeal(meal) }
-                }
-                .preferredColorScheme(darkMode ? .dark : .light)
-                .tint(FormaTheme.primary)
-            }
-            .sheet(isPresented: $showFamilyPot) {
-                PhoneFamilyPotSheet(slot: selectedSlot) { meal in
                     store.attempt { try store.addMeal(meal) }
                 }
                 .preferredColorScheme(darkMode ? .dark : .light)

@@ -99,6 +99,7 @@ struct ExerciseDetail: View {
                                               background: current == option ? FormaTheme.primary : FormaTheme.surface,
                                               foreground: current == option ? FormaTheme.onPrimary : FormaTheme.textMuted)
                                 }
+                                .accessibilityIdentifier("exercise_motion_mode_\(option)")
                             }
                             Spacer()
                         }

@@ -66,9 +66,23 @@ assert 'if showMuscleHighlights' in video and 'guard play && showMuscleHighlight
 motion = (root / 'apple/AppShared/ExerciseMotion3DView.swift').read_text(encoding='utf-8')
 assert 'showMuscleHighlights ? MotionEngine.highlights(exercise) : [:]' in motion
 assert 'FormaTheme.musclePrimary' in motion and 'FormaTheme.muscleSupporting' in motion
+assert 'exercise_motion_3d_' in motion
+# The five generated clips open directly in the iPhone guide; photos/video remain explicit alternatives.
+assert 'let modes = [hasMotion ? 0 : nil, hasVideo ? 1 : nil, 2].compactMap { $0 }' in detail
+assert 'let current = mode ?? modes[0]' in detail
+assert 'exercise_motion_mode_' in detail
+motion_catalog = json.loads((root / 'catalog/exercise-motion.json').read_text(encoding='utf-8'))
+pilot_ids = {entry['id'] for entry in motion_catalog['exercises']}
+assert {'SQUAT', 'BARBELL_BENCH_PRESS', 'BARBELL_ROW', 'CONVENTIONAL_DEADLIFT', 'BARBELL_OVERHEAD_PRESS'} <= pilot_ids
+# Family pot is removed from the iPhone feature surface, not merely hidden.
+assert not (root / 'apple/iPhone/PhoneFamilyPotSheet.swift').exists()
+for file in (root / 'apple').rglob('*.swift'):
+    source = file.read_text(encoding='utf-8')
+    assert 'PhoneFamilyPot' not in source and 'showFamilyPot' not in source and 'family_pot_' not in source, file
+assert not any(key.startswith(('family_pot_', 'family_plate_')) for values in [en, ar] for key in values)
 diagram = (root / 'apple/AppShared/MuscleDiagram.swift').read_text(encoding='utf-8')
 for required in ['FormaTheme.musclePrimary', 'FormaTheme.muscleSupporting', 'struct MuscleDemoLegend',
                  'demo_muscle_legend_', 'compact_muscle_overlay_', 'muscle_accessibility']:
     assert required in diagram, ('Accessible muscle diagram', required)
 assert 'primary ? Color.green' not in diagram
-print(f'Apple static consistency: fixture, target IDs, highlight wiring and {len(en)} EN/AR keys match. Swift/Xcode build NOT checked.')
+print(f'Apple static consistency: fixture, target IDs, 3D pilot, family-pot removal, highlight wiring and {len(en)} EN/AR keys match. Swift/Xcode build NOT checked.')

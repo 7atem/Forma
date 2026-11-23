@@ -42,6 +42,7 @@ struct ExerciseMotion3DView: View {
             )
             .environment(\.layoutDirection, .leftToRight)
             .accessibilityElement()
+            .accessibilityIdentifier("exercise_motion_3d_\(exercise.rawValue)")
             .accessibilityLabel(accessibilityText)
         }
     }
