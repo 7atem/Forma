@@ -1,0 +1,45 @@
+# 3D exercise motion (pilot)
+
+Five exercises show a looping, rotatable 3D figure in the exercise guide instead of only the two
+still photos: **Squat, Barbell bench press, Barbell row, Conventional deadlift and Barbell overhead press**.
+Every other exercise keeps the photo guide. Users can switch between **3D motion** and **Photos**.
+
+## What it is
+- An original, code-built mannequin (rounded body segments), drawn with Compose `Canvas` on Android
+  and SwiftUI `Canvas` on iPhone. No 3D engine, model files, downloads or network.
+- Real continuous motion: poses are eased between keyframes 60 times a second and loop seamlessly.
+- Drag sideways to rotate the figure. Bar, plates and bench are drawn where the exercise needs them.
+- Body parts carrying the exercise's catalogued muscles glow on their **front or back** side
+  (lime = main, amber = supporting), strongest during the working phase of the rep. Muscle mapping
+  comes from `catalog/exercise-muscles.json`; colours show which muscles the catalog lists,
+  **not measured activation, effort or recovery**.
+- Respects reduced motion (iOS Reduce Motion, Android "Remove animations"): the figure holds a still
+  pose. Screen readers hear the exercise and its working muscles.
+- Phase order and the figure are never mirrored for Arabic/RTL.
+
+## Source of truth
+`catalog/exercise-motion.json` holds the skeleton, the muscle→body-part map and each clip's
+keyframes: pelvis height/depth, trunk lean, head tilt and the hand (bar) target, plus timing,
+camera angle, props and knee/elbow bend directions. Knees and elbows are solved by two-bone IK, so
+feet stay planted and grip width stays constant.
+
+`scripts/generate_exercise_motion.py` generates
+`core/model/.../ExerciseMotion.Generated.kt` and `apple/Sources/FormaCore/ExerciseMotion.Generated.swift`.
+It also replays the motion engine and fails if any frame overreaches a limb by more than 1.5 cm,
+puts a joint below the floor, drives plates through the floor, or breaks the loop. Run with `--check`
+in CI; never hand-edit the generated files.
+
+Engine: `core/model/.../ExerciseMotion.kt` and `apple/Sources/FormaCore/ExerciseMotion.swift`
+(identical maths). Renderers: `app/.../ExerciseMotion3D.kt`, `apple/AppShared/ExerciseMotion3DView.swift`.
+Tests: `ExerciseMotionTest.kt` (JVM) and `ExerciseMotionTests.swift` (`swift test`) check bone lengths,
+planted feet, symmetry, floor, plates, loop continuity, IK and highlight roles.
+
+## Adding an exercise
+Add a clip to the JSON (start and end keys identical), run the generator, check the loop on a device,
+and keep keyframes within the validator's limits. The exercise must already exist in the muscle catalog.
+
+## Limits
+- Stylised mannequin, not a lifelike human; poses are illustrative demonstrations of the named
+  variation, not motion capture or personal form coaching.
+- **Qualified pose and cue review remains a release gate**, as for the photo guides.
+- Not yet on Apple Watch screens.

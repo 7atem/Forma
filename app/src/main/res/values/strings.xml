@@ -355,4 +355,8 @@
     <string name="plate_oil_buffer">+1 tbsp cooking oil (+120 kcal)</string>
     <string name="family_plate_source">Estimated family plate</string>
     <string name="family_plate_default_name">Family dinner plate</string>
+    <string name="motion_3d">3D motion</string>
+    <string name="motion_photos">Photos</string>
+    <string name="motion_drag_hint">Drag sideways to rotate. Glowing areas show the working muscles; brighter means main muscles. Illustrative demo, not personal form coaching.</string>
+    <string name="motion_3d_description">%1$s, rotatable 3D motion demo. Working muscles: %2$s</string>
 </resources>

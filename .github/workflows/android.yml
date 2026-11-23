@@ -25,5 +25,6 @@ jobs:
           python3 scripts/check_apple_sources.py
           python3 scripts/generate_exercise_guides.py --check
           python3 scripts/check_exercise_art.py
+          python3 scripts/generate_exercise_motion.py --check
       - name: Test, build and lint
         run: bash ./gradlew :core:coach:test :core:wearables:test :core:backup:test :app:assembleDebug :app:lintDebug :app:assembleRelease --max-workers=1

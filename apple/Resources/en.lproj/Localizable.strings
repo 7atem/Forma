@@ -189,3 +189,7 @@
 "watch_not_paired" = "No Apple Watch is paired with this iPhone";
 "watch_app_missing" = "Forma is not installed on your Apple Watch";
 "watch_app_missing_help" = "On iPhone open the Watch app › My Watch › scroll to Available Apps › Forma › Install. If Forma is not listed, this build was installed without its watch app (common with re-signed IPAs); install through Xcode or TestFlight.";
+"motion_3d" = "3D motion";
+"motion_photos" = "Photos";
+"motion_drag_hint" = "Drag sideways to rotate. Glowing areas show the working muscles; brighter means main muscles. Illustrative demo, not personal form coaching.";
+"motion_3d_a11y" = "%@, rotatable 3D motion demo. Working muscles: %@";

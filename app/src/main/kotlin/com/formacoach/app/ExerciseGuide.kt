@@ -129,13 +129,38 @@ internal fun ExerciseGuideSheet(
             if(tab==0) {
                 val reduceMotion = rememberReduceMotion()
                 var animating by rememberSaveable(exercise) { mutableStateOf(!reduceMotion) }
-                if (animating && !reduceMotion) {
+                val hasMotion = remember(exercise) { ExerciseMotionCatalog.of(exercise) != null }
+                var showMotion by rememberSaveable(exercise) { mutableStateOf(hasMotion) }
+                if (hasMotion) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = showMotion,
+                            onClick = { showMotion = true },
+                            label = { Text(stringResource(R.string.motion_3d)) },
+                            modifier = Modifier.testTag("guide_mode_3d"),
+                        )
+                        FilterChip(
+                            selected = !showMotion,
+                            onClick = { showMotion = false },
+                            label = { Text(stringResource(R.string.motion_photos)) },
+                            modifier = Modifier.testTag("guide_mode_photos"),
+                        )
+                    }
+                }
+                if (hasMotion && showMotion) {
+                    ExerciseMotion3D(exercise, playing = animating)
+                    Text(
+                        stringResource(R.string.motion_drag_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (animating && !reduceMotion) {
                     AnimatedExerciseIllustration(exercise) { enlarged = true }
                 } else {
                     ExerciseIllustration(exercise) { enlarged = true }
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                    if (!animating || reduceMotion) {
+                    if ((!animating || reduceMotion) && !(hasMotion && showMotion)) {
                         Box(Modifier.weight(1f)) { PhaseLabels() }
                     } else {
                         Spacer(Modifier.weight(1f))

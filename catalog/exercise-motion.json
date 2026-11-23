@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "note": "Original, code-built 3D mannequin motion for the exercise guide pilot. Keyframes are illustrative demonstrations of the named variation, not measured motion capture or personalised coaching. Qualified pose review remains a release gate. Units are metres and degrees. Origin is between the planted ankles on the floor; +x is the figure's right, +y up, +z forward.",
+  "skeleton": {
+    "ankleHeight": 0.08,
+    "hipHalf": 0.09,
+    "thigh": 0.44,
+    "shin": 0.42,
+    "foot": 0.18,
+    "torso": 0.52,
+    "shoulderHalf": 0.19,
+    "neck": 0.10,
+    "headRadius": 0.11,
+    "upperArm": 0.30,
+    "forearm": 0.27
+  },
+  "muscleParts": {
+    "CHEST": ["UPPER_TORSO", "FRONT"],
+    "FRONT_DELTS": ["SHOULDER", "FRONT"],
+    "REAR_DELTS": ["SHOULDER", "BACK"],
+    "LATS": ["UPPER_TORSO", "BACK"],
+    "UPPER_BACK": ["UPPER_TORSO", "BACK"],
+    "BICEPS": ["UPPER_ARM", "FRONT"],
+    "TRICEPS": ["UPPER_ARM", "BACK"],
+    "CORE": ["LOWER_TORSO", "FRONT"],
+    "GLUTES": ["PELVIS", "BACK"],
+    "QUADRICEPS": ["THIGH", "FRONT"],
+    "HAMSTRINGS": ["THIGH", "BACK"],
+    "CALVES": ["SHIN", "BACK"],
+    "ERECTORS": ["LOWER_TORSO", "BACK"],
+    "ADDUCTORS": ["THIGH", "BOTH"]
+  },
+  "exercises": [
+    {
+      "id": "SQUAT",
+      "cycleSeconds": 3.2,
+      "defaultYaw": 60,
+      "prop": "NONE",
+      "plateRadius": 0,
+      "ankleHalf": 0.15,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, -1, 0],
+      "working": [0.55, 1.0],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": 4, "head": 0, "hand": [0.17, 1.40, 0.58]},
+        {"t": 0.42, "pelvis": [0.50, -0.30], "trunk": 40, "head": -10, "hand": [0.17, 0.92, 0.58]},
+        {"t": 0.55, "pelvis": [0.50, -0.30], "trunk": 40, "head": -10, "hand": [0.17, 0.92, 0.58]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": 4, "head": 0, "hand": [0.17, 1.40, 0.58]}
+      ]
+    },
+    {
+      "id": "BARBELL_BENCH_PRESS",
+      "cycleSeconds": 3.4,
+      "defaultYaw": 65,
+      "prop": "BARBELL",
+      "plateRadius": 0.225,
+      "bench": {"top": 0.40, "zFrom": -1.20, "zTo": -0.25, "halfWidth": 0.15},
+      "ankleHalf": 0.26,
+      "kneePole": [0, 1, 0.2],
+      "elbowPole": [1, -0.4, 0.25],
+      "working": [0.55, 1.0],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.27, 1.06, -0.90]},
+        {"t": 0.45, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.27, 0.64, -0.83]},
+        {"t": 0.55, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.27, 0.64, -0.83]},
+        {"t": 1.0, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.27, 1.06, -0.90]}
+      ]
+    },
+    {
+      "id": "BARBELL_ROW",
+      "cycleSeconds": 3.0,
+      "defaultYaw": 75,
+      "prop": "BARBELL",
+      "plateRadius": 0.225,
+      "ankleHalf": 0.13,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, 0.35, -1],
+      "working": [0.0, 0.40],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.86, -0.18], "trunk": 50, "head": -15, "hand": [0.24, 0.65, 0.26]},
+        {"t": 0.40, "pelvis": [0.86, -0.18], "trunk": 50, "head": -15, "hand": [0.24, 0.92, 0.10]},
+        {"t": 0.52, "pelvis": [0.86, -0.18], "trunk": 50, "head": -15, "hand": [0.24, 0.92, 0.10]},
+        {"t": 1.0, "pelvis": [0.86, -0.18], "trunk": 50, "head": -15, "hand": [0.24, 0.65, 0.26]}
+      ]
+    },
+    {
+      "id": "CONVENTIONAL_DEADLIFT",
+      "cycleSeconds": 3.6,
+      "defaultYaw": 70,
+      "prop": "BARBELL",
+      "plateRadius": 0.225,
+      "ankleHalf": 0.13,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, 0, -1],
+      "working": [0.0, 0.45],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.50, -0.26], "trunk": 58, "head": -20, "hand": [0.22, 0.235, 0.05]},
+        {"t": 0.22, "pelvis": [0.62, -0.18], "trunk": 42, "head": -12, "hand": [0.22, 0.46, 0.05]},
+        {"t": 0.33, "pelvis": [0.79, -0.09], "trunk": 22, "head": -6, "hand": [0.22, 0.71, 0.045]},
+        {"t": 0.45, "pelvis": [0.93, 0.0], "trunk": 0, "head": 0, "hand": [0.22, 0.89, 0.04]},
+        {"t": 0.58, "pelvis": [0.93, 0.0], "trunk": 0, "head": 0, "hand": [0.22, 0.89, 0.04]},
+        {"t": 0.72, "pelvis": [0.79, -0.09], "trunk": 22, "head": -6, "hand": [0.22, 0.71, 0.045]},
+        {"t": 0.86, "pelvis": [0.62, -0.18], "trunk": 42, "head": -12, "hand": [0.22, 0.46, 0.05]},
+        {"t": 1.0, "pelvis": [0.50, -0.26], "trunk": 58, "head": -20, "hand": [0.22, 0.235, 0.05]}
+      ]
+    },
+    {
+      "id": "BARBELL_OVERHEAD_PRESS",
+      "cycleSeconds": 3.0,
+      "defaultYaw": 55,
+      "prop": "BARBELL",
+      "plateRadius": 0.2,
+      "ankleHalf": 0.14,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, -1, 0.8],
+      "working": [0.0, 0.42],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": -3, "head": 0, "hand": [0.25, 1.46, 0.12]},
+        {"t": 0.42, "pelvis": [0.93, 0.0], "trunk": -3, "head": 0, "hand": [0.25, 2.00, 0.0]},
+        {"t": 0.55, "pelvis": [0.93, 0.0], "trunk": -3, "head": 0, "hand": [0.25, 2.00, 0.0]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": -3, "head": 0, "hand": [0.25, 1.46, 0.12]}
+      ]
+    }
+  ]
+}

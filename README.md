@@ -4,6 +4,8 @@ Independent fitness and nutrition project with an Android app and native iPhone/
 
 ## Current version: 0.6.0-alpha06
 
+A **3D motion pilot** shows a looping, rotatable figure with glowing working muscles for squat, bench press, barbell row, deadlift and overhead press ([details](docs/EXERCISE_MOTION.md)).
+
 Offline bilingual logging with **50** original two-phase 3D exercise illustrations (compressed `960×640` PNGs), named variation guides, an enlarged phase viewer, main-muscle categorized exercise library, 7-day body muscle heat map, warm-up/RPE/RIR sets, live PR & estimated 1RM analytics, Olympic barbell plate visualizer + warm-up ramp, 12-week recorded-workout grid, encrypted Room storage, editable saved training programs, set corrections and date backfill, a radial rest timer, session search/load history, sourced food/recipe portions with **30 curated offline USDA FoodData Central (CC0) starter whole foods**, meal corrections, macro donut split, measurements and charts, evidence-based weekly reviews, explicit check-ins/schedule proposals, and portable password-encrypted backup/restore.
 
 Optional Gemini Nano on compatible AICore devices can select existing report highlights. No raw model claims, automatic diet/exercise prescriptions, cloud LLM or application INTERNET permission. Logging and reviews work without a model. Actual inference still needs supported physical-device verification.

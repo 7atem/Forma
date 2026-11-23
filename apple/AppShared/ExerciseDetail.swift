@@ -8,6 +8,7 @@ struct ExerciseDetail: View {
     @State private var phase = 0
     @State private var animating = true
     @State private var showSecondPhase = false
+    @State private var showMotion = true
     @Environment(\.locale) private var locale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
@@ -73,7 +74,45 @@ struct ExerciseDetail: View {
                     MuscleDiagram(exercise: exercise)
                 } else {
                     #if os(iOS)
+                    let hasMotion = ExerciseMotionCatalog.of(exercise) != nil
+                    let showPhotos = !(hasMotion && showMotion)
+                    #else
+                    let showPhotos = true
+                    #endif
+                    #if os(iOS)
+                    if hasMotion {
+                        HStack(spacing: 6) {
+                            Button { showMotion = true } label: {
+                                FormaPill(text: String(localized: "motion_3d"),
+                                          background: showMotion ? FormaTheme.primary : FormaTheme.surface,
+                                          foreground: showMotion ? FormaTheme.onPrimary : FormaTheme.textMuted)
+                            }
+                            Button { showMotion = false } label: {
+                                FormaPill(text: String(localized: "motion_photos"),
+                                          background: !showMotion ? FormaTheme.primary : FormaTheme.surface,
+                                          foreground: !showMotion ? FormaTheme.onPrimary : FormaTheme.textMuted)
+                            }
+                            Spacer()
+                        }
+                    }
+                    if hasMotion && showMotion {
+                        ExerciseMotion3DView(exercise: exercise, playing: animating)
+                            .background(FormaTheme.surface)
+                            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        HStack {
+                            Text("motion_drag_hint").font(.caption).foregroundStyle(FormaTheme.textMuted)
+                            Spacer()
+                            if !reduceMotion {
+                                Button { animating.toggle() } label: {
+                                    FormaPill(text: animating ? String(localized: "pause_demo") : String(localized: "play_demo"),
+                                              background: animating ? FormaTheme.secondary : FormaTheme.primaryContainer,
+                                              foreground: animating ? FormaTheme.onPrimary : FormaTheme.primary)
+                                }
+                            }
+                        }
+                    }
                     let phaseKeys = ["both_phases", "phase_start", "phase_movement"]
+                    if showPhotos {
                     HStack(spacing: 6) {
                         ForEach(0..<phaseKeys.count, id: \.self) { idx in
                             Button { animating = false; phase = idx } label: {
@@ -98,10 +137,12 @@ struct ExerciseDetail: View {
                             }
                         }
                     }
+                    }
                     #endif
                     // Each PNG holds two side-by-side panels: start (left) and movement (right).
                     // Show one panel at a time and cross-fade between them; never mirrored in RTL.
                     let singlePanel = animating && !reduceMotion || phase != 0
+                    if showPhotos {
                     ZStack(alignment: .topTrailing) {
                         if animating && !reduceMotion {
                             ZStack {
@@ -135,6 +176,7 @@ struct ExerciseDetail: View {
                             showSecondPhase.toggle()
                         }
                     }
+                    }
 
                     // Affected muscles summary pills directly under the moving demo
                     ScrollView(.horizontal, showsIndicators: false) {
@@ -156,14 +198,16 @@ struct ExerciseDetail: View {
                         }
                     }
 
-                    HStack {
-                        Text("phase_start")
-                        Spacer()
-                        Text("phase_movement")
+                    if showPhotos {
+                        HStack {
+                            Text("phase_start")
+                            Spacer()
+                            Text("phase_movement")
+                        }
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(FormaTheme.primary)
+                        .environment(\.layoutDirection, .leftToRight)
                     }
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(FormaTheme.primary)
-                    .environment(\.layoutDirection, .leftToRight)
 
                     ForEach(Array(guide.cues.enumerated()), id: \.offset) { index, cue in
                         HStack(alignment: .top, spacing: 10) {

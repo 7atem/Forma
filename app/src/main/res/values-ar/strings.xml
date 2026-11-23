@@ -355,4 +355,8 @@
     <string name="plate_oil_buffer">+ملعقة زيت طهي (+120 سعرة)</string>
     <string name="family_plate_source">طبق عائلي تقديري</string>
     <string name="family_plate_default_name">طبق عشاء عائلي</string>
+    <string name="motion_3d">حركة ثلاثية الأبعاد</string>
+    <string name="motion_photos">صور</string>
+    <string name="motion_drag_hint">اسحب يمين وشمال للتدوير. الأجزاء المضيئة بتوضح العضلات الشغالة، والأفتح هي الأساسية. عرض توضيحي، مش تقييم شخصي لأدائك.</string>
+    <string name="motion_3d_description">%1$s، عرض حركة ثلاثي الأبعاد قابل للتدوير. العضلات الشغالة: %2$s</string>
 </resources>
