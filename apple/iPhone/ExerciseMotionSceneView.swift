@@ -14,7 +14,7 @@ struct ExerciseMotionSceneView: UIViewRepresentable {
     let highlights: [MusclePart: Int]
 
     func makeUIView(context: Context) -> ExerciseMotionSceneUIView {
-        let view = ExerciseMotionSceneUIView()
+        let view = ExerciseMotionSceneUIView(frame: .zero)
         view.configure(exerciseID: exerciseID, clip: clip)
         return view
     }
