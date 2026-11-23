@@ -15,6 +15,7 @@ enum ExerciseVideoLibrary {
 struct ExerciseVideoView: View {
     let exercise: Exercise
     var playing: Bool = true
+    var showMuscleHighlights: Bool = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.locale) private var locale
     @State private var pulse = false
@@ -24,14 +25,16 @@ struct ExerciseVideoView: View {
             let play = playing && !reduceMotion
             ZStack(alignment: .topTrailing) {
                 LoopingVideoPlayer(url: url, playing: play).id(url)
-                CompactMuscleOverlayView(exercise: exercise, pulsePeak: pulse)
-                    .padding(8)
+                if showMuscleHighlights {
+                    CompactMuscleOverlayView(exercise: exercise, pulsePeak: pulse)
+                        .padding(8)
+                }
             }
             .aspectRatio(1, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .environment(\.layoutDirection, .leftToRight)
-            .task(id: play) {
-                guard play else { return }
+            .task(id: play && showMuscleHighlights) {
+                guard play && showMuscleHighlights else { return }
                 while !Task.isCancelled {
                     try? await Task.sleep(nanoseconds: 1_300_000_000)
                     pulse.toggle()

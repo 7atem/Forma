@@ -47,4 +47,28 @@ for file in (root / 'apple').rglob('*.swift'):
         assert banned not in source, (file, banned)
     assert not re.search(r'toShare:\s*\[\s*[^\]\s]', source), (file, 'Apple Health share/write permission requested')
 assert health_files == ['iPhone/HealthImporter.swift'], health_files
-print(f'Apple static consistency: fixture, target IDs and {len(en)} EN/AR keys match. Swift/Xcode build NOT checked.')
+
+# Catalog-driven exercise highlighting: persistent per-exercise preference, non-color text and no video baking.
+detail = (root / 'apple/AppShared/ExerciseDetail.swift').read_text(encoding='utf-8')
+for required in [
+    '@AppStorage private var showMuscleHighlights',
+    'exercise_muscle_highlights_',
+    'Toggle("muscle_highlights", isOn: $showMuscleHighlights)',
+    'ExerciseVideoView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)',
+    'ExerciseMotion3DView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)',
+    'if showMuscleHighlights',
+    'MuscleDemoLegend(exercise: exercise)',
+]:
+    assert required in detail, ('Exercise highlight wiring', required)
+video = (root / 'apple/iPhone/ExerciseVideoView.swift').read_text(encoding='utf-8')
+assert 'var showMuscleHighlights: Bool = true' in video
+assert 'if showMuscleHighlights' in video and 'guard play && showMuscleHighlights' in video
+motion = (root / 'apple/AppShared/ExerciseMotion3DView.swift').read_text(encoding='utf-8')
+assert 'showMuscleHighlights ? MotionEngine.highlights(exercise) : [:]' in motion
+assert 'FormaTheme.musclePrimary' in motion and 'FormaTheme.muscleSupporting' in motion
+diagram = (root / 'apple/AppShared/MuscleDiagram.swift').read_text(encoding='utf-8')
+for required in ['FormaTheme.musclePrimary', 'FormaTheme.muscleSupporting', 'struct MuscleDemoLegend',
+                 'demo_muscle_legend_', 'compact_muscle_overlay_', 'muscle_accessibility']:
+    assert required in diagram, ('Accessible muscle diagram', required)
+assert 'primary ? Color.green' not in diagram
+print(f'Apple static consistency: fixture, target IDs, highlight wiring and {len(en)} EN/AR keys match. Swift/Xcode build NOT checked.')

@@ -3,6 +3,9 @@
 "body_back" = "Back";
 "muscle_primary" = "Primary";
 "muscle_secondary" = "Supporting";
+"muscle_highlights" = "Muscle highlights";
+"muscle_accessibility" = "%@. Primary: %@. Supporting: %@";
+"no_supporting_mapped" = "No supporting muscles mapped in this simplified view";
 "muscle_note" = "Simplified muscle groups, not measured activation. Technique and equipment change involvement. Hip hinge represents a Romanian deadlift style.";
 "operation_failed" = "Could not complete this action. Check capacity, pairing and conflicting records. Saved data was retained.";
 "storage_failed" = "Saved data could not be read. It has not been reset. Recover your original file before continuing.";

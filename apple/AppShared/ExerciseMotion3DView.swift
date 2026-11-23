@@ -7,6 +7,7 @@ import FormaCore
 struct ExerciseMotion3DView: View {
     let exercise: Exercise
     var playing: Bool = true
+    var showMuscleHighlights: Bool = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.locale) private var locale
     @State private var yaw: Double?
@@ -17,7 +18,7 @@ struct ExerciseMotion3DView: View {
         if let clip = ExerciseMotionCatalog.of(exercise) {
             let animate = playing && !reduceMotion
             let bounds = MotionBounds(clip)
-            let highlights = MotionEngine.highlights(exercise)
+            let highlights = showMuscleHighlights ? MotionEngine.highlights(exercise) : [:]
             let currentYaw = yaw ?? clip.defaultYaw
             TimelineView(.animation(minimumInterval: 1.0 / 60, paused: !animate)) { timeline in
                 let phase = animate
@@ -146,7 +147,7 @@ private enum MotionRenderer {
                     .sorted { $0.1 < $1.1 }
                 for (side, role) in bands {
                     let alpha = (0.35 + 0.65 * effort) * (role >= 2 ? 1 : 0.75)
-                    let color = (role >= 2 ? FormaTheme.primary : FormaTheme.secondary).opacity(alpha)
+                    let color = (role >= 2 ? FormaTheme.musclePrimary : FormaTheme.muscleSupporting).opacity(alpha)
                     if side == .both || front == nil {
                         ctx.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: width * (role >= 2 ? 0.62 : 0.3), lineCap: .round))
                     } else if let front {

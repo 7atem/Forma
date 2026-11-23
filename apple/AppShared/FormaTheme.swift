@@ -54,6 +54,9 @@ enum FormaTheme {
     static let onPrimary = dynamic(dark: (0.063, 0.141, 0.071), light: (1.000, 1.000, 1.000))
     static let primaryContainer = dynamic(dark: (0.137, 0.239, 0.161), light: (0.851, 0.961, 0.784))
     static let secondary = dynamic(dark: (1.000, 0.745, 0.482), light: (0.702, 0.357, 0.071))
+    /// Catalogued primary/supporting roles, not measured activation or recovery.
+    static let musclePrimary = dynamic(dark: (1.000, 0.545, 0.451), light: (0.710, 0.267, 0.204))
+    static let muscleSupporting = dynamic(dark: (0.486, 0.781, 1.000), light: (0.141, 0.420, 0.620))
     static let tertiary = dynamic(dark: (0.431, 0.906, 0.718), light: (0.059, 0.463, 0.431))
     static let border = dynamic(dark: (0.149, 0.263, 0.220), light: (0.792, 0.847, 0.808))
     static let textPrimary = dynamic(dark: (0.953, 0.973, 0.945), light: (0.067, 0.125, 0.094))

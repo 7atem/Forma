@@ -3,7 +3,8 @@ import FormaCore
 
 struct ExerciseDetail: View {
     let exercise: Exercise
-    var onRecordSet: (() -> Void)? = nil
+    var onRecordSet: (() -> Void)?
+    @AppStorage private var showMuscleHighlights: Bool
     @State private var muscles = false
     @State private var phase = 0
     @State private var animating = true
@@ -13,6 +14,12 @@ struct ExerciseDetail: View {
     @Environment(\.locale) private var locale
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
+
+    init(exercise: Exercise, onRecordSet: (() -> Void)? = nil) {
+        self.exercise = exercise
+        self.onRecordSet = onRecordSet
+        _showMuscleHighlights = AppStorage(wrappedValue: true, "exercise_muscle_highlights_\(exercise.rawValue)")
+    }
 
     var body: some View {
         let guide = ExerciseGuides.of(exercise, arabic: arabic)
@@ -96,12 +103,16 @@ struct ExerciseDetail: View {
                             Spacer()
                         }
                     }
+                    Toggle("muscle_highlights", isOn: $showMuscleHighlights)
+                        .tint(FormaTheme.primary)
+                        .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+                        .accessibilityIdentifier("muscle_highlights_toggle")
                     if current == 1 {
-                        ExerciseVideoView(exercise: exercise, playing: animating)
+                        ExerciseVideoView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)
                         Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
                     }
                     if current == 0 {
-                        ExerciseMotion3DView(exercise: exercise, playing: animating)
+                        ExerciseMotion3DView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)
                             .background(FormaTheme.surface)
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         HStack {
@@ -164,8 +175,10 @@ struct ExerciseDetail: View {
                             ExercisePhasePanel(asset: guide.asset, panel: phase - 1)
                         }
                         #if os(iOS)
-                        CompactMuscleOverlayView(exercise: exercise, pulsePeak: animating && !reduceMotion && showSecondPhase)
-                            .padding(8)
+                        if showMuscleHighlights {
+                            CompactMuscleOverlayView(exercise: exercise, pulsePeak: animating && !reduceMotion && showSecondPhase)
+                                .padding(8)
+                        }
                         #endif
                     }
                     .frame(maxWidth: .infinity)
@@ -183,25 +196,7 @@ struct ExerciseDetail: View {
                     }
                     }
 
-                    // Affected muscles summary pills directly under the moving demo
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(activation.primary, id: \.self) { m in
-                                FormaPill(
-                                    text: m.label(arabic: arabic),
-                                    background: FormaTheme.primaryContainer,
-                                    foreground: FormaTheme.primary
-                                )
-                            }
-                            ForEach(activation.secondary, id: \.self) { m in
-                                FormaPill(
-                                    text: m.label(arabic: arabic),
-                                    background: FormaTheme.secondary.opacity(0.2),
-                                    foreground: FormaTheme.secondary
-                                )
-                            }
-                        }
-                    }
+                    MuscleDemoLegend(exercise: exercise)
 
                     if showPhotos {
                         HStack {
