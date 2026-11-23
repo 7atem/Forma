@@ -10,6 +10,8 @@ import FormaCore
     @Published private(set) var syncing = false
     @Published private(set) var lastResult: Result?
     @Published private(set) var failed = false
+    /// The system's own reason (e.g. a missing HealthKit entitlement in a re-signed build), shown under the message.
+    @Published private(set) var failureDetail: String?
 
     private let healthStore = HKHealthStore()
 
@@ -24,6 +26,7 @@ import FormaCore
         guard Self.isAvailable, !syncing else { return }
         syncing = true
         failed = false
+        failureDetail = nil
         defer { syncing = false }
         do {
             try await healthStore.requestAuthorization(toShare: [], read: readTypes)
@@ -36,6 +39,7 @@ import FormaCore
             lastResult = Result(workouts: added.workouts, weights: added.weights)
         } catch {
             failed = true
+            failureDetail = error.localizedDescription
         }
     }
 

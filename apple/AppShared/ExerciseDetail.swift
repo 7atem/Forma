@@ -99,36 +99,34 @@ struct ExerciseDetail: View {
                         }
                     }
                     #endif
-                    GeometryReader { geo in
-                        let width = geo.size.width
-                        ZStack(alignment: .topTrailing) {
-                            if animating && !reduceMotion {
-                                ZStack {
-                                    FormaExerciseImage(asset: guide.asset, contentMode: .fill)
-                                        .frame(width: width * 2, height: width / 1.5, alignment: .leading)
-                                        .clipped()
-                                        .scaleEffect(showSecondPhase ? 1.035 : 1.0)
-                                        .opacity(showSecondPhase ? 0.0 : 1.0)
-                                    FormaExerciseImage(asset: guide.asset, contentMode: .fill)
-                                        .frame(width: width * 2, height: width / 1.5, alignment: .trailing)
-                                        .clipped()
-                                        .scaleEffect(showSecondPhase ? 1.035 : 1.0)
-                                        .opacity(showSecondPhase ? 1.0 : 0.0)
-                                }
-                                .animation(.easeInOut(duration: 0.6), value: showSecondPhase)
-                            } else {
-                                FormaExerciseImage(asset: guide.asset, contentMode: .fill)
-                                    .frame(width: phase == 0 ? width : width * 2, height: width / 1.5, alignment: phase == 2 ? .trailing : .leading)
-                                    .clipped()
+                    // Each PNG holds two side-by-side panels: start (left) and movement (right).
+                    // Show one panel at a time and cross-fade between them; never mirrored in RTL.
+                    let singlePanel = animating && !reduceMotion || phase != 0
+                    ZStack(alignment: .topTrailing) {
+                        if animating && !reduceMotion {
+                            ZStack {
+                                ExercisePhasePanel(asset: guide.asset, panel: 0)
+                                    .opacity(showSecondPhase ? 0.0 : 1.0)
+                                ExercisePhasePanel(asset: guide.asset, panel: 1)
+                                    .opacity(showSecondPhase ? 1.0 : 0.0)
                             }
-                            #if os(iOS)
-                            CompactMuscleOverlayView(exercise: exercise, pulsePeak: animating && !reduceMotion && showSecondPhase)
-                                .padding(8)
-                            #endif
+                            .scaleEffect(showSecondPhase ? 1.035 : 1.0)
+                            .animation(.easeInOut(duration: 0.6), value: showSecondPhase)
+                        } else if phase == 0 {
+                            FormaExerciseImage(asset: guide.asset, contentMode: .fit)
+                        } else {
+                            ExercisePhasePanel(asset: guide.asset, panel: phase - 1)
                         }
+                        #if os(iOS)
+                        CompactMuscleOverlayView(exercise: exercise, pulsePeak: animating && !reduceMotion && showSecondPhase)
+                            .padding(8)
+                        #endif
                     }
-                    .aspectRatio(1.5, contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .aspectRatio(singlePanel ? 1.0 : 1.5, contentMode: .fit)
+                    .background(FormaTheme.surface)
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .environment(\.layoutDirection, .leftToRight)
                     .accessibilityLabel(guide.variant)
                     .task(id: animating) {
                         guard animating && !reduceMotion else { return }
@@ -191,5 +189,23 @@ struct ExerciseDetail: View {
         }
         .background(FormaTheme.background.ignoresSafeArea())
         .navigationTitle(exercise.label(arabic: arabic))
+    }
+}
+
+/// One panel (0 = start, 1 = movement) of a two-panel exercise image, shown whole at the container's height.
+struct ExercisePhasePanel: View {
+    let asset: String
+    let panel: Int
+
+    var body: some View {
+        GeometryReader { geo in
+            let height = geo.size.height
+            // The full image is 1.5x as wide as it is tall, so each panel is 0.75x the height wide.
+            FormaExerciseImage(asset: asset, contentMode: .fit)
+                .frame(width: height * 1.5, height: height)
+                .offset(x: panel == 0 ? height * 0.375 : -height * 0.375)
+                .frame(width: geo.size.width, height: height)
+                .mask(Rectangle().frame(width: min(geo.size.width, height * 0.75), height: height))
+        }
     }
 }

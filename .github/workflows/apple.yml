@@ -27,8 +27,16 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild -project apple/FormaApple.xcodeproj -scheme FormaPhone -configuration Release -destination 'generic/platform=iOS' -derivedDataPath apple/DerivedDataDevice CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build 2>&1 | tee /tmp/ipa.log || (grep -E "error:" /tmp/ipa.log | head -n 20 | sed 's/^/::error::/'; exit 1)
+          APP=apple/DerivedDataDevice/Build/Products/Release-iphoneos/FormaPhone.app
+          # Unsigned builds carry no entitlements, so a re-signing tool would drop HealthKit and Apple Health
+          # would refuse access. Ad-hoc sign (nested bundles first) to embed them; installers re-sign anyway.
+          find "$APP" -mindepth 1 \( -name "*.app" -o -name "*.appex" -o -name "*.framework" \) -print | awk '{ print length, $0 }' | sort -rn | cut -d' ' -f2- | while read -r nested; do
+            codesign --force --sign - --timestamp=none "$nested"
+          done
+          codesign --force --sign - --timestamp=none --entitlements apple/Generated/FormaPhone.entitlements "$APP"
+          codesign -d --entitlements :- "$APP" 2>/dev/null | grep -q "com.apple.developer.healthkit" || { echo "::error::HealthKit entitlement missing from IPA"; exit 1; }
           mkdir -p apple/ipa/Payload
-          cp -R apple/DerivedDataDevice/Build/Products/Release-iphoneos/FormaPhone.app apple/ipa/Payload/
+          cp -R "$APP" apple/ipa/Payload/
           (cd apple/ipa && zip -r -y ../FormaPhone-unsigned.ipa Payload)
           ls -lh apple/FormaPhone-unsigned.ipa
       - name: Upload Unsigned IPA Artifact

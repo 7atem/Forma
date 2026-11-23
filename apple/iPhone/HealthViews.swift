@@ -43,6 +43,9 @@ import FormaCore
                 }
                 if importer.failed {
                     Text("health_failed").font(.caption.weight(.semibold)).foregroundStyle(.red)
+                    if let detail = importer.failureDetail {
+                        Text(verbatim: detail).font(.caption2).foregroundStyle(FormaTheme.textMuted)
+                    }
                 } else if store.state.healthLastSync != nil && !hasImported && !importer.syncing {
                     Text("health_nothing_found").font(.caption).foregroundStyle(FormaTheme.textMuted)
                 }
