@@ -1,23 +1,5 @@
 import SwiftUI
-import UniformTypeIdentifiers
 import FormaCore
-
-extension UTType {
-    static let formaWorkouts = UTType(exportedAs: "com.formacoach.workouts", conformingTo: .json)
-}
-
-struct TransferDocument: FileDocument {
-    static var readableContentTypes: [UTType] { [.formaWorkouts, .json] }
-    var data: Data
-    init(data: Data) { self.data = data }
-    init(configuration: ReadConfiguration) throws {
-        guard let bytes = configuration.file.regularFileContents else { throw TransferError.invalid }
-        data = bytes
-    }
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        FileWrapper(regularFileWithContents: data)
-    }
-}
 
 @main @MainActor struct FormaPhoneApp: App {
     @StateObject private var store: LocalStore
@@ -45,10 +27,6 @@ struct TransferDocument: FileDocument {
     @ObservedObject var store: LocalStore
     @ObservedObject var bridge: WatchBridge
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
-    @State private var importing = false
-    @State private var pending: WatchTransfer?
-    @State private var document: TransferDocument?
-    @State private var exporting = false
     @State private var deleting: String?
     @State private var showBridge = false
     @State private var showSettings = false
@@ -76,12 +54,6 @@ struct TransferDocument: FileDocument {
                     PhoneTrainTab(
                         store: store,
                         onOpenBridge: { showSettings = true },
-                        onExport: { workout in
-                            store.attempt {
-                                document = TransferDocument(data: try WatchTransferCodec.encode(WatchTransfer(workouts: [workout])))
-                                exporting = true
-                            }
-                        },
                         onDelete: { deleting = $0 },
                         onOpenProgress: { selectedTab = 3 }
                     )
@@ -105,35 +77,9 @@ struct TransferDocument: FileDocument {
                 .tint(FormaTheme.primary)
         }
         .sheet(isPresented: $showBridge) {
-            PhoneBridgeTab(store: store, bridge: bridge, onImport: { showBridge = false; importing = true })
+            PhoneBridgeTab(store: store, bridge: bridge)
                 .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
-        }
-        .fileImporter(isPresented: $importing, allowedContentTypes: [.formaWorkouts, .json, .data]) { result in
-            store.attempt {
-                let url = try result.get()
-                let access = url.startAccessingSecurityScopedResource()
-                defer { if access { url.stopAccessingSecurityScopedResource() } }
-                let handle = try FileHandle(forReadingFrom: url)
-                defer { try? handle.close() }
-                let bytes = try handle.read(upToCount: WatchTransferCodec.maximumBytes + 1) ?? Data()
-                let transfer = try WatchTransferCodec.decode(bytes)
-                guard transfer.workouts.isEmpty, !transfer.programs.isEmpty else { throw TransferError.invalid }
-                pending = transfer
-            }
-        }
-        .confirmationDialog("replace_programs", isPresented: Binding(get: { pending != nil }, set: { if !$0 { pending = nil } }), titleVisibility: .visible) {
-            Button("confirm") {
-                if let transfer = pending { store.attempt { try store.library(transfer.programs) } }
-                pending = nil
-            }
-            Button("cancel", role: .cancel) { pending = nil }
-        } message: {
-            Text("\(pending?.programs.count ?? 0) \(String(localized: "programs"))")
-        }
-        .fileExporter(isPresented: $exporting, document: document, contentType: .formaWorkouts, defaultFilename: "forma-workout.formaworkouts") { result in
-            if case .failure = result { store.notice = String(localized: "operation_failed") }
-            document = nil
         }
         .confirmationDialog("delete_workout_confirm", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } }), titleVisibility: .visible) {
             Button("delete", role: .destructive) {
@@ -165,7 +111,6 @@ private struct MealSlotOption: Identifiable {
 @MainActor private struct PhoneTrainTab: View {
     @ObservedObject var store: LocalStore
     let onOpenBridge: () -> Void
-    let onExport: (WatchWorkout) -> Void
     let onDelete: (String) -> Void
     let onOpenProgress: () -> Void
     @State private var creatingProgram = false
@@ -408,9 +353,6 @@ private struct MealSlotOption: Identifiable {
                                         }
                                     }
                                     HStack(spacing: 12) {
-                                        Button("export_workout") { onExport(workout) }
-                                            .buttonStyle(.bordered)
-                                            .tint(FormaTheme.primary)
                                         Spacer()
                                         Button("delete", role: .destructive) { onDelete(workout.id) }
                                             .font(.subheadline)
@@ -791,10 +733,36 @@ private struct MealSlotOption: Identifiable {
                 }
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
+                        if let lastSet = exSets.last {
+                            Button {
+                                FormaHaptics.tap()
+                                reps = lastSet.reps
+                                kg = lastSet.weightKg
+                                warmup = lastSet.kind == .warmUp
+                            } label: {
+                                FormaPill(
+                                    text: String(localized: "same_as_last_set"),
+                                    background: FormaTheme.secondary.opacity(0.18),
+                                    foreground: FormaTheme.secondary
+                                )
+                            }
+                        }
                         ForEach([5, 8, 10, 12], id: \.self) { preset in
-                            Button { reps = preset } label: {
+                            Button { FormaHaptics.tap(); reps = preset } label: {
                                 FormaPill(text: "\(preset)×", background: FormaTheme.surfaceHigh, foreground: FormaTheme.textPrimary)
                             }
+                        }
+                        let minusBump = useLb ? 5.0 : 2.5
+                        Button {
+                            FormaHaptics.tap()
+                            let deltaKg = useLb ? (minusBump / 2.20462262185) : minusBump
+                            kg = max(0.0, ((kg - deltaKg) * 1000.0).rounded() / 1000.0)
+                        } label: {
+                            FormaPill(
+                                text: "-\(minusBump.formatted()) \(useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))",
+                                background: FormaTheme.surfaceHigh,
+                                foreground: FormaTheme.textMuted
+                            )
                         }
                         ForEach(useLb ? [5.0, 10.0, 25.0] : [2.5, 5.0, 10.0], id: \.self) { bump in
                             Button {
@@ -1402,6 +1370,10 @@ private struct MealSlotOption: Identifiable {
     @State private var selectedSlot = "BREAKFAST"
     @State private var addingMeal = false
     @State private var showOnlineFood = false
+    @State private var showStarterFoods = false
+    @State private var showFoodSwap = false
+    @State private var showBarcodeScanner = false
+    @State private var scannedBarcode = ""
     @State private var showRemaining = false
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
@@ -1488,15 +1460,56 @@ private struct MealSlotOption: Identifiable {
                                 .background(FormaTheme.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .foregroundStyle(FormaTheme.onPrimary)
                             }
-                            Button { showOnlineFood = true } label: {
-                                HStack {
-                                    Image(systemName: "globe")
-                                    Text("online_food_search_btn").fontWeight(.semibold)
+                            Button {
+                                FormaHaptics.tap()
+                                scannedBarcode = ""
+                                showOnlineFood = true
+                            } label: {
+                                Image(systemName: "globe")
+                                    .font(.headline)
+                                    .padding(12)
+                                    .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                    .foregroundStyle(FormaTheme.primary)
+                            }
+                            .accessibilityLabel(Text("online_food_search"))
+                            Button {
+                                FormaHaptics.tap()
+                                showBarcodeScanner = true
+                            } label: {
+                                Image(systemName: "barcode.viewfinder")
+                                    .font(.headline)
+                                    .padding(12)
+                                    .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                    .foregroundStyle(FormaTheme.primary)
+                            }
+                            .accessibilityLabel(Text("scan_barcode_btn"))
+                        }
+                        HStack(spacing: 8) {
+                            Button {
+                                FormaHaptics.tap()
+                                showStarterFoods = true
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "leaf.fill")
+                                    Text("starter_foods_title").font(.caption.weight(.bold))
                                 }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 12)
-                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                .foregroundStyle(FormaTheme.primary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .foregroundStyle(FormaTheme.textPrimary)
+                            }
+                            Button {
+                                FormaHaptics.tap()
+                                showFoodSwap = true
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "arrow.left.arrow.right")
+                                    Text("food_swap_title").font(.caption.weight(.bold))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .foregroundStyle(FormaTheme.secondary)
                             }
                         }
                     }
@@ -1609,9 +1622,77 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    if !store.state.mealCombos.isEmpty {
+                        Text("saved_combos_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 10) {
+                                ForEach(store.state.mealCombos) { combo in
+                                    Button {
+                                        FormaHaptics.success()
+                                        store.attempt {
+                                            try store.addMeal(PhoneMeal(
+                                                date: today,
+                                                name: combo.name,
+                                                calories: combo.calories,
+                                                protein: combo.protein,
+                                                carbs: combo.carbs,
+                                                fat: combo.fat,
+                                                slot: selectedSlot
+                                            ))
+                                        }
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(combo.name)
+                                                .font(.caption.weight(.bold))
+                                                .foregroundStyle(FormaTheme.textPrimary)
+                                                .lineLimit(1)
+                                            Text("\(Int(combo.calories.rounded())) kcal · \(Int(combo.protein.rounded()))g P")
+                                                .font(.caption2)
+                                                .foregroundStyle(FormaTheme.secondary)
+                                        }
+                                        .padding(10)
+                                        .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.secondary.opacity(0.4), lineWidth: 1))
+                                    }
+                                    .contextMenu {
+                                        Button("delete", role: .destructive) {
+                                            store.attempt { try store.deleteMealCombo(combo.id) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if meals.isEmpty {
                         FormaCard { Text("no_meals_today").foregroundStyle(FormaTheme.textMuted) }
                     } else {
+                        let slotMeals = meals.filter { $0.slot == selectedSlot }
+                        if slotMeals.count >= 2 {
+                            Button {
+                                FormaHaptics.success()
+                                let labelKey = slotOptions.first(where: { $0.id == selectedSlot })?.labelKey ?? "meal_unspecified"
+                                let comboName = "\(String(localized: String.LocalizationValue(labelKey))) (\(slotMeals.count))"
+                                store.attempt {
+                                    try store.saveMealCombo(PhoneMealCombo(
+                                        name: comboName,
+                                        calories: slotMeals.reduce(0) { $0 + $1.calories },
+                                        protein: slotMeals.reduce(0) { $0 + $1.protein },
+                                        carbs: slotMeals.reduce(0) { $0 + $1.carbs },
+                                        fat: slotMeals.reduce(0) { $0 + $1.fat }
+                                    ))
+                                }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "bookmark.fill")
+                                    Text("save_meal_combo").font(.caption.weight(.bold))
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                                .background(FormaTheme.secondary.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .foregroundStyle(FormaTheme.secondary)
+                            }
+                        }
                         ForEach(meals.reversed()) { meal in
                             FormaCard {
                                 HStack {
@@ -1663,8 +1744,30 @@ private struct MealSlotOption: Identifiable {
                 .tint(FormaTheme.primary)
             }
             .sheet(isPresented: $showOnlineFood) {
-                PhoneOnlineFoodSheet(slot: selectedSlot) { meal in
+                PhoneOnlineFoodSheet(slot: selectedSlot, initialQuery: scannedBarcode) { meal in
                     store.attempt { try store.addMeal(meal) }
+                }
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
+                .tint(FormaTheme.primary)
+            }
+            .sheet(isPresented: $showStarterFoods) {
+                PhoneStarterFoodsSheet(slot: selectedSlot) { meal in
+                    store.attempt { try store.addMeal(meal) }
+                }
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
+                .tint(FormaTheme.primary)
+            }
+            .sheet(isPresented: $showFoodSwap) {
+                PhoneFoodSwapSheet(slot: selectedSlot) { meal in
+                    store.attempt { try store.addMeal(meal) }
+                }
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
+                .tint(FormaTheme.primary)
+            }
+            .sheet(isPresented: $showBarcodeScanner) {
+                BarcodeScannerSheet { code in
+                    scannedBarcode = code
+                    showOnlineFood = true
                 }
                 .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
@@ -1997,7 +2100,6 @@ private struct MealSlotOption: Identifiable {
 @MainActor private struct PhoneBridgeTab: View {
     @ObservedObject var store: LocalStore
     @ObservedObject var bridge: WatchBridge
-    let onImport: () -> Void
 
     static func statusKey(_ state: WatchLinkState) -> String {
         switch state {
@@ -2027,19 +2129,6 @@ private struct MealSlotOption: Identifiable {
                         Text("phone_bridge_note")
                             .font(.subheadline)
                             .foregroundStyle(FormaTheme.textPrimary)
-                        Text("transfer_privacy")
-                            .font(.caption)
-                            .foregroundStyle(FormaTheme.textMuted)
-                        Button {
-                            onImport()
-                        } label: {
-                            Text("import_programs")
-                                .fontWeight(.bold)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(FormaTheme.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                .foregroundStyle(FormaTheme.onPrimary)
-                        }
                         Button {
                             store.attempt { try bridge.sendLibrary() }
                         } label: {
@@ -2047,8 +2136,8 @@ private struct MealSlotOption: Identifiable {
                                 .fontWeight(.semibold)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 12)
-                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                                .foregroundStyle(FormaTheme.textPrimary)
+                                .background(ready ? FormaTheme.primary : FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                                .foregroundStyle(ready ? FormaTheme.onPrimary : FormaTheme.textPrimary)
                         }
                         .disabled(bridge.linkState != .ready)
                     }

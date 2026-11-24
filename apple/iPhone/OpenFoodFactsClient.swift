@@ -100,6 +100,7 @@ enum OpenFoodFactsService {
 
 @MainActor struct PhoneOnlineFoodSheet: View {
     let slot: String
+    var initialQuery: String = ""
     let onLog: (PhoneMeal) -> Void
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
@@ -108,6 +109,7 @@ enum OpenFoodFactsService {
     @State private var searching = false
     @State private var searched = false
     @State private var failed = false
+    @State private var showScanner = false
     @State private var results: [OnlineFoodItem] = []
 
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
@@ -127,6 +129,17 @@ enum OpenFoodFactsService {
                             .padding(12)
                             .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                             .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(FormaTheme.border, lineWidth: 1))
+                        Button {
+                            FormaHaptics.tap()
+                            showScanner = true
+                        } label: {
+                            Image(systemName: "barcode.viewfinder")
+                                .font(.title3.weight(.semibold))
+                                .padding(12)
+                                .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                .foregroundStyle(FormaTheme.primary)
+                        }
+                        .accessibilityLabel(Text("scan_barcode_btn"))
                         Button {
                             runSearch()
                         } label: {
@@ -231,6 +244,18 @@ enum OpenFoodFactsService {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("cancel") { dismiss() }
+                }
+            }
+            .onAppear {
+                if !initialQuery.isEmpty && query.isEmpty {
+                    query = initialQuery
+                    runSearch()
+                }
+            }
+            .sheet(isPresented: $showScanner) {
+                BarcodeScannerSheet { code in
+                    query = code
+                    runSearch()
                 }
             }
         }

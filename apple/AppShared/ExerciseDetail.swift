@@ -104,19 +104,25 @@ struct ExerciseDetail: View {
                             Spacer()
                         }
                     }
+                    // Placed cleanly outside the exercise media frame so it never blocks watching the movement.
+                    MuscleHighlightControl(isOn: $showMuscleHighlights)
                     if current == 1 {
                         ExerciseVideoView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)
-                            .overlay(alignment: .bottomTrailing) {
-                                MuscleHighlightControl(isOn: $showMuscleHighlights).padding(10)
+                        HStack {
+                            Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
+                            Spacer()
+                            if !reduceMotion {
+                                Button { animating.toggle() } label: {
+                                    FormaPill(text: animating ? String(localized: "pause_demo") : String(localized: "play_demo"),
+                                              background: animating ? FormaTheme.secondary : FormaTheme.primaryContainer,
+                                              foreground: animating ? FormaTheme.onPrimary : FormaTheme.primary)
+                                }
                             }
-                        Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
+                        }
                     }
                     if current == 0 {
                         ExerciseMotion3DView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)
                             .background(FormaTheme.surface)
-                            .overlay(alignment: .bottomTrailing) {
-                                MuscleHighlightControl(isOn: $showMuscleHighlights).padding(10)
-                            }
                             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                         HStack {
                             Text("motion_drag_hint").font(.caption).foregroundStyle(FormaTheme.textMuted)
@@ -187,11 +193,6 @@ struct ExerciseDetail: View {
                     .frame(maxWidth: .infinity)
                     .aspectRatio(singlePanel ? 1.0 : 1.5, contentMode: .fit)
                     .background(FormaTheme.surface)
-                    #if os(iOS)
-                    .overlay(alignment: .bottomTrailing) {
-                        MuscleHighlightControl(isOn: $showMuscleHighlights).padding(10)
-                    }
-                    #endif
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                     .environment(\.layoutDirection, .leftToRight)
                     .accessibilityLabel(guide.variant)
@@ -265,18 +266,19 @@ struct ExercisePhasePanel: View {
     }
 }
 
-/// Compact media-overlay control shared by photos, real video clips and the 3D scene.
+/// Shared muscle-highlight toggle placed outside the exercise media frame so it never obscures watching the movement.
 private struct MuscleHighlightControl: View {
     @Binding var isOn: Bool
 
     var body: some View {
         Toggle("muscle_highlights", isOn: $isOn)
-            .font(.caption.weight(.semibold))
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(FormaTheme.textPrimary)
             .tint(FormaTheme.primary)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(Capsule().stroke(FormaTheme.border.opacity(0.7), lineWidth: 1))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+            .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.border.opacity(0.75), lineWidth: 1))
             .frame(minHeight: 44)
             .accessibilityIdentifier("muscle_highlights_toggle")
     }

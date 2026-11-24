@@ -9,7 +9,7 @@
 "muscle_note" = "Simplified muscle regions for orientation, not measured activation. Shading is illustrative. Technique and equipment change involvement. Hip hinge represents a Romanian deadlift style.";
 "operation_failed" = "Could not complete this action. Check capacity, pairing and conflicting records. Saved data was retained.";
 "storage_failed" = "Saved data could not be read. It has not been reset. Recover your original file before continuing.";
-"phone_bridge_note" = "Import programs exported by Forma Android, then send to your paired watch. Export each completed workout here and import the file on Android.";
+"phone_bridge_note" = "Send your saved training programs to your paired Apple Watch and receive completed workouts logged on your wrist.";
 "watch_local_note" = "Log offline. Sync results to paired iPhone later. No heart-rate or energy recording in this build.";
 "transfer_privacy" = "Transfer files include readable workout data, program notes and targets. Keep them private and use the latest Forma companion. No profile, meals or keys are included.";
 "import_programs" = "Open programs file";
@@ -59,7 +59,7 @@
 "linked_group" = "Superset / circuit";
 "tab_train" = "Train";
 "tab_exercises" = "Exercises";
-"tab_bridge" = "Bridge";
+"tab_bridge" = "Apple Watch";
 "start_workout" = "Start workout";
 "resume_workout" = "Resume workout";
 "active_workout" = "Active workout";
@@ -150,7 +150,7 @@
 "theme_dark" = "Dark";
 "theme_light" = "Light";
 "units_label" = "Weight unit";
-"watch_bridge_title" = "Apple Watch & Android Bridge";
+"watch_bridge_title" = "Apple Watch";
 "swap_exercise" = "Swap exercise";
 "swap_exercise_title" = "Swap with similar muscle";
 "current_exercise_sets" = "This exercise";
@@ -211,3 +211,17 @@
 "measure_arms_short" = "Arms";
 "measure_hips_short" = "Hips";
 "measure_thighs_short" = "Thighs";
+"discomfort_active_summary" = "Active library preferences";
+"same_as_last_set" = "Same as last";
+"scan_barcode_btn" = "Scan Barcode";
+"barcode_scan_hint" = "Center a product barcode inside the frame";
+"barcode_camera_unavailable" = "Camera unavailable. You can still type a barcode or food name in Online Food Search.";
+"starter_foods_title" = "Starter Foods";
+"starter_foods_search" = "Search 42 whole foods & Arabic staples";
+"starter_foods_all" = "All (42)";
+"starter_foods_arabic" = "Arabic Staples";
+"food_swap_title" = "Food Swap";
+"food_swap_source" = "Swap from";
+"food_swap_match_by" = "Match by";
+"saved_combos_title" = "Saved Meal Combos";
+"save_meal_combo" = "Save selected meal as combo";

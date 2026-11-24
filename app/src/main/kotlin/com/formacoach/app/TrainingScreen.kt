@@ -699,18 +699,40 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             },
         )
 
-        // Quick Rep & Weight Preset Chips + Live Barbell Preview
+        // Quick Rep & Weight Preset Chips + Same-as-Last + Live Barbell Preview
+        val lastThisSession = remember(sets, exercise) { sets.lastOrNull { it.exercise == exercise } }
         FlowRow(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(6.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
+            if (lastThisSession != null) {
+                AssistChip(
+                    onClick = {
+                        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        reps = lastThisSession.reps.toString()
+                        weight = formatInputNumber(WeightUnits.fromKg(lastThisSession.weightKg, unit), locale, 2)
+                        warmup = lastThisSession.kind == SetKind.WARM_UP
+                    },
+                    label = { Text(stringResource(R.string.same_as_last_set), color = MaterialTheme.colorScheme.secondary, fontWeight = FontWeight.Bold) },
+                )
+            }
             listOf(5, 8, 10, 12).forEach { preset ->
                 AssistChip(
                     onClick = { haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); reps = preset.toString() },
                     label = { Text("${number(preset.toDouble(), 0)}×", fontWeight = FontWeight.SemiBold) },
                 )
             }
+            val stepBump = WeightUnits.step(unit)
+            AssistChip(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    val cur = NumericInput.decimal(weight) ?: 0.0
+                    val next = (cur - stepBump).coerceAtLeast(0.0)
+                    weight = formatInputNumber(next, locale, 2)
+                },
+                label = { Text("-${number(stepBump)} $unitLabel", color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.SemiBold) },
+            )
             WeightUnits.quickBumps(unit).forEach { bump ->
                 AssistChip(
                     onClick = {

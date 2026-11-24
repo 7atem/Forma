@@ -395,4 +395,5 @@
     <string name="arms_cm">الذراع (سم)</string>
     <string name="hips_cm">الأرداف (سم)</string>
     <string name="thighs_cm">الفخذ (سم)</string>
+    <string name="same_as_last_set">نفس آخر مجموعة</string>
 </resources>

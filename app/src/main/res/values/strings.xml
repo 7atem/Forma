@@ -395,4 +395,5 @@
     <string name="arms_cm">Arms (cm)</string>
     <string name="hips_cm">Hips (cm)</string>
     <string name="thighs_cm">Thighs (cm)</string>
+    <string name="same_as_last_set">Same as last</string>
 </resources>

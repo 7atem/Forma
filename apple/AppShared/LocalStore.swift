@@ -39,6 +39,15 @@ struct PhoneHydration: Codable, Identifiable, Equatable {
     var milliliters: Int
 }
 
+struct PhoneMealCombo: Codable, Identifiable, Equatable {
+    var id = UUID().uuidString
+    var name: String
+    var calories: Double
+    var protein: Double
+    var carbs: Double
+    var fat: Double
+}
+
 struct SavedState: Codable {
     var programs: [WatchProgram] = [
         .init(id: "starter-A", name: "A", exercises: [.squat, .chest_press, .row]),
@@ -50,6 +59,7 @@ struct SavedState: Codable {
     var libraryRevision: Int64?
     var draft: WorkoutDraft?
     var meals: [PhoneMeal] = []
+    var mealCombos: [PhoneMealCombo] = []
     var weights: [PhoneWeight] = []
     var hydration: [PhoneHydration] = []
     var calorieTarget: Int?
@@ -73,6 +83,7 @@ struct SavedState: Codable {
         libraryRevision = try c.decodeIfPresent(Int64.self, forKey: .libraryRevision)
         draft = try c.decodeIfPresent(WorkoutDraft.self, forKey: .draft)
         meals = try c.decodeIfPresent([PhoneMeal].self, forKey: .meals) ?? []
+        mealCombos = try c.decodeIfPresent([PhoneMealCombo].self, forKey: .mealCombos) ?? []
         weights = try c.decodeIfPresent([PhoneWeight].self, forKey: .weights) ?? []
         hydration = try c.decodeIfPresent([PhoneHydration].self, forKey: .hydration) ?? []
         calorieTarget = try c.decodeIfPresent(Int.self, forKey: .calorieTarget)
@@ -289,6 +300,22 @@ struct SavedState: Codable {
 
     func deleteMeal(_ id: String) throws {
         try commit { $0.meals.removeAll { $0.id == id } }
+    }
+
+    func saveMealCombo(_ combo: PhoneMealCombo) throws {
+        guard !combo.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              combo.calories.isFinite, combo.calories >= 0, combo.calories <= 20000,
+              combo.protein.isFinite, combo.protein >= 0,
+              combo.carbs.isFinite, combo.carbs >= 0,
+              combo.fat.isFinite, combo.fat >= 0 else { throw TransferError.invalid }
+        try commit { state in
+            guard state.mealCombos.count < 200 else { throw TransferError.capacity }
+            state.mealCombos.append(combo)
+        }
+    }
+
+    func deleteMealCombo(_ id: String) throws {
+        try commit { $0.mealCombos.removeAll { $0.id == id } }
     }
 
     func saveWeight(

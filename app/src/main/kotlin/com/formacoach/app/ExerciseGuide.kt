@@ -388,10 +388,9 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     if(showDiscomfortDialog) {
         AlertDialog(
             onDismissRequest={showDiscomfortDialog=false},
-            title={Text(stringResource(R.string.discomfort_filters))},
+            title={Text(stringResource(R.string.discomfort_filters),fontWeight=FontWeight.Bold)},
             text={
-                Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(10.dp)) {
-                    Text(stringResource(R.string.discomfort_filter_hint),style=MaterialTheme.typography.titleSmall,fontWeight=FontWeight.SemiBold)
+                Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(12.dp)) {
                     Text(stringResource(R.string.discomfort_filter_explainer),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
                     ExerciseDiscomfortRegion.entries.forEach {region ->
                         val checked=region in discomfortExcluded
@@ -400,24 +399,50 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
                             ExerciseDiscomfortRegion.SHOULDERS -> R.string.discomfort_region_shoulders
                             ExerciseDiscomfortRegion.LOWER_BACK -> R.string.discomfort_region_lower_back
                         }
-                        Row(
-                            Modifier
+                        val hiddenCount=remember(region) {Exercise.entries.count {!ExerciseDiscomfortSelection.includes(it,setOf(region))}}
+                        val muscleText=region.directlyTargetedMuscles.map {stringResource(muscleLabel(it))}.sorted().joinToString(" · ")
+                        Surface(
+                            shape=RoundedCornerShape(14.dp),
+                            color=if(checked) MaterialTheme.colorScheme.secondaryContainer.copy(alpha=0.55f) else MaterialTheme.colorScheme.surfaceContainerHigh,
+                            border=BorderStroke(if(checked) 1.5.dp else 1.dp, if(checked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant),
+                            modifier=Modifier
                                 .fillMaxWidth()
-                                .heightIn(min=48.dp)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(RoundedCornerShape(14.dp))
                                 .toggleable(value=checked,role=androidx.compose.ui.semantics.Role.Checkbox) {
                                     saveDiscomfort(if(it) discomfortExcluded+region else discomfortExcluded-region)
                                 }
-                                .padding(horizontal=4.dp)
                                 .testTag("discomfort_region_${region.name.lowercase()}"),
-                            verticalAlignment=Alignment.CenterVertically,
-                            horizontalArrangement=Arrangement.spacedBy(8.dp),
                         ) {
-                            Checkbox(checked=checked,onCheckedChange=null)
-                            Text(stringResource(labelRes),style=MaterialTheme.typography.bodyLarge)
+                            Row(
+                                Modifier.fillMaxWidth().padding(horizontal=12.dp,vertical=10.dp),
+                                verticalAlignment=Alignment.CenterVertically,
+                                horizontalArrangement=Arrangement.spacedBy(10.dp),
+                            ) {
+                                Checkbox(checked=checked,onCheckedChange=null)
+                                Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(2.dp)) {
+                                    Text(stringResource(labelRes),style=MaterialTheme.typography.titleSmall,fontWeight=FontWeight.Bold)
+                                    Text(muscleText,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                PillBadge(
+                                    text="-${number(hiddenCount.toDouble(),0)}",
+                                    containerColor=if(checked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface,
+                                    contentColor=if(checked) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
                         }
                     }
-                    Text(stringResource(R.string.discomfort_filter_limits),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
+                    Surface(
+                        shape=RoundedCornerShape(12.dp),
+                        color=MaterialTheme.colorScheme.surfaceContainerLow,
+                        border=BorderStroke(1.dp,MaterialTheme.colorScheme.outlineVariant.copy(alpha=0.6f)),
+                    ) {
+                        Text(
+                            stringResource(R.string.discomfort_filter_limits),
+                            Modifier.padding(10.dp),
+                            style=MaterialTheme.typography.bodySmall,
+                            color=MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
             },
             confirmButton={TextButton(onClick={showDiscomfortDialog=false}) {Text(stringResource(R.string.close))}},

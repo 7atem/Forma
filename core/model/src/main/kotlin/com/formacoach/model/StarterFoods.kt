@@ -57,5 +57,18 @@ object StarterFoods {
         StarterFoodEntry("starter_avocado", "Avocado", "أفوكادو", 100.0, NutritionUnit.GRAMS, Nutrients(160.0, 2.0, 8.5, 14.7)),
         StarterFoodEntry("starter_milk_whole", "Whole milk", "حليب كامل الدسم", 100.0, NutritionUnit.GRAMS, Nutrients(61.0, 3.2, 4.8, 3.3)),
         StarterFoodEntry("starter_milk_skim", "Skim milk", "حليب خالي الدسم", 100.0, NutritionUnit.GRAMS, Nutrients(34.0, 3.4, 5.0, 0.1)),
+        // Middle Eastern / Arabic everyday staples (USDA FDC CC0 & FAO Near East reference values)
+        StarterFoodEntry("starter_hummus", "Hummus (chickpea & tahini)", "حمص بالطحينة", 100.0, NutritionUnit.GRAMS, Nutrients(166.0, 7.9, 14.3, 9.6)),
+        StarterFoodEntry("starter_falafel", "Falafel / Taameya (baked)", "طعمية / فلافل مشوية", 100.0, NutritionUnit.GRAMS, Nutrients(230.0, 11.2, 26.8, 8.9), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_labneh", "Labneh (strained yogurt)", "لبنة", 100.0, NutritionUnit.GRAMS, Nutrients(140.0, 8.5, 5.2, 9.5), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_halloumi", "Halloumi cheese (grilled)", "جبنة حلوم مشوية", 100.0, NutritionUnit.GRAMS, Nutrients(321.0, 21.4, 2.2, 25.0)),
+        StarterFoodEntry("starter_kofta_grilled", "Grilled beef kofta", "كفتة لحم مشوية", 100.0, NutritionUnit.GRAMS, Nutrients(235.0, 22.0, 2.5, 15.0), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_shish_tawook", "Shish tawook (grilled chicken)", "شيش طاووق مشوي", 100.0, NutritionUnit.GRAMS, Nutrients(168.0, 26.5, 2.8, 5.4), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_shawarma_chicken", "Chicken shawarma (meat only)", "شاورما دجاج بدون خبز", 100.0, NutritionUnit.GRAMS, Nutrients(195.0, 25.0, 3.2, 9.0), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_lentil_soup", "Red lentil soup", "شوربة عدس", 100.0, NutritionUnit.GRAMS, Nutrients(75.0, 4.8, 12.2, 0.9), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_molokhia", "Molokhia stew", "ملوخية مطهوة", 100.0, NutritionUnit.GRAMS, Nutrients(48.0, 3.1, 5.4, 1.6), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_koshary", "Koshary (rice, lentils & pasta)", "كشري مصري", 100.0, NutritionUnit.GRAMS, Nutrients(156.0, 5.6, 29.8, 1.6), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_baba_ganoush", "Baba ganoush", "بابا غنوج", 100.0, NutritionUnit.GRAMS, Nutrients(128.0, 3.2, 9.4, 8.8), "FAO Near East / USDA reference"),
+        StarterFoodEntry("starter_shakshuka", "Shakshuka (eggs & tomato)", "شكشوكة بالبيض والطماطم", 100.0, NutritionUnit.GRAMS, Nutrients(108.0, 6.2, 5.8, 6.8), "FAO Near East / USDA reference"),
     )
 }

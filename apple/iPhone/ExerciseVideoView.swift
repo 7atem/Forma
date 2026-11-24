@@ -2,12 +2,18 @@ import SwiftUI
 import AVFoundation
 import FormaCore
 
-/// Bundled, reviewed AI exercise clips (assets/exercises/res/raw/exercise_video_<id>.mp4).
+/// Bundled AI exercise clips (assets/exercises/res/raw/exercise_video_<id>.mp4).
 enum ExerciseVideoLibrary {
     static func url(_ exercise: Exercise) -> URL? {
         let name = "exercise_video_\(exercise.rawValue.lowercased())"
-        return Bundle.main.url(forResource: name, withExtension: "mp4", subdirectory: "raw")
-            ?? Bundle.main.url(forResource: name, withExtension: "mp4")
+        if let nested = Bundle.main.url(forResource: name, withExtension: "mp4", subdirectory: "raw") {
+            return nested
+        }
+        if let root = Bundle.main.url(forResource: name, withExtension: "mp4") {
+            return root
+        }
+        return Bundle.main.urls(forResourcesWithExtension: "mp4", subdirectory: nil)?
+            .first { $0.deletingPathExtension().lastPathComponent.lowercased() == name }
     }
 }
 
@@ -18,28 +24,23 @@ struct ExerciseVideoView: View {
     var showMuscleHighlights: Bool = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.locale) private var locale
-    @State private var pulse = false
 
     var body: some View {
         if let url = ExerciseVideoLibrary.url(exercise) {
             let play = playing && !reduceMotion
             ZStack(alignment: .topTrailing) {
-                LoopingVideoPlayer(url: url, playing: play).id(url)
+                LoopingVideoPlayer(url: url, playing: play)
+                    .id(url)
                 if showMuscleHighlights {
-                    CompactMuscleOverlayView(exercise: exercise, pulsePeak: pulse)
+                    PulsingVideoMuscleOverlay(exercise: exercise, play: play, showMuscleHighlights: showMuscleHighlights)
                         .padding(8)
+                        .allowsHitTesting(false)
                 }
             }
             .aspectRatio(1, contentMode: .fit)
+            .background(FormaTheme.surface)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .environment(\.layoutDirection, .leftToRight)
-            .task(id: play && showMuscleHighlights) {
-                guard play && showMuscleHighlights else { return }
-                while !Task.isCancelled {
-                    try? await Task.sleep(nanoseconds: 1_300_000_000)
-                    pulse.toggle()
-                }
-            }
             .accessibilityElement()
             .accessibilityLabel(accessibilityText)
         }
@@ -53,6 +54,25 @@ struct ExerciseVideoView: View {
     }
 }
 
+/// Isolated pulse state so toggling the highlight overlay never triggers updateUIView on the video player.
+private struct PulsingVideoMuscleOverlay: View {
+    let exercise: Exercise
+    let play: Bool
+    let showMuscleHighlights: Bool
+    @State private var pulse = false
+
+    var body: some View {
+        CompactMuscleOverlayView(exercise: exercise, pulsePeak: pulse)
+            .task(id: play && showMuscleHighlights) {
+                guard play && showMuscleHighlights else { return }
+                while !Task.isCancelled {
+                    try? await Task.sleep(nanoseconds: 1_300_000_000)
+                    pulse.toggle()
+                }
+            }
+    }
+}
+
 private struct LoopingVideoPlayer: UIViewRepresentable {
     let url: URL
     let playing: Bool
@@ -63,36 +83,119 @@ private struct LoopingVideoPlayer: UIViewRepresentable {
         return view
     }
 
-    func updateUIView(_ view: LoopingPlayerView, context: Context) { view.setPlaying(playing) }
+    func updateUIView(_ view: LoopingPlayerView, context: Context) {
+        view.setPlaying(playing)
+    }
 
-    static func dismantleUIView(_ view: LoopingPlayerView, coordinator: ()) { view.stop() }
+    static func dismantleUIView(_ view: LoopingPlayerView, coordinator: ()) {
+        view.stop()
+    }
 }
 
 final class LoopingPlayerView: UIView {
     override static var layerClass: AnyClass { AVPlayerLayer.self }
     private let player = AVQueuePlayer()
     private var looper: AVPlayerLooper?
+    private var statusObserver: NSKeyValueObservation?
+    private var itemObserver: NSKeyValueObservation?
+    private var foregroundToken: NSObjectProtocol?
+    private var desiredPlaying = false
 
     init(url: URL) {
         super.init(frame: .zero)
         // A silent demo must not stop the user's music or podcast.
         try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
         player.isMuted = true
+        player.volume = 0
+        player.automaticallyWaitsToMinimizeStalling = false
         player.preventsDisplaySleepDuringVideoPlayback = false
-        looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(url: url))
+        player.actionAtItemEnd = .none
+
+        let asset = AVURLAsset(url: url)
+        let templateItem = AVPlayerItem(asset: asset)
+        looper = AVPlayerLooper(player: player, templateItem: templateItem)
+
         if let layer = layer as? AVPlayerLayer {
             layer.player = player
             layer.videoGravity = .resizeAspectFill
+        }
+
+        // Observe item readiness so playback starts reliably once AVPlayerLooper enqueues the item.
+        itemObserver = player.observe(\.currentItem, options: [.initial, .new]) { [weak self] player, _ in
+            DispatchQueue.main.async {
+                self?.observeCurrentItem(player.currentItem)
+            }
+        }
+        foregroundToken = NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.resumeIfNeeded()
         }
         isAccessibilityElement = false
     }
 
     required init?(coder: NSCoder) { nil }
 
-    func setPlaying(_ playing: Bool) { playing ? player.play() : player.pause() }
+    deinit {
+        stop()
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        if window != nil {
+            resumeIfNeeded()
+        } else {
+            player.pause()
+        }
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.frame = bounds
+    }
+
+    private func observeCurrentItem(_ item: AVPlayerItem?) {
+        statusObserver?.invalidate()
+        guard let item else { return }
+        statusObserver = item.observe(\.status, options: [.initial, .new]) { [weak self] observed, _ in
+            if observed.status == .readyToPlay {
+                DispatchQueue.main.async {
+                    self?.resumeIfNeeded()
+                }
+            }
+        }
+    }
+
+    private func resumeIfNeeded() {
+        guard desiredPlaying, window != nil else { return }
+        if player.timeControlStatus != .playing {
+            player.playImmediately(atRate: 1.0)
+        }
+    }
+
+    func setPlaying(_ playing: Bool) {
+        desiredPlaying = playing
+        if playing {
+            resumeIfNeeded()
+        } else {
+            player.pause()
+        }
+    }
 
     func stop() {
+        desiredPlaying = false
+        statusObserver?.invalidate()
+        statusObserver = nil
+        itemObserver?.invalidate()
+        itemObserver = nil
+        if let token = foregroundToken {
+            NotificationCenter.default.removeObserver(token)
+            foregroundToken = nil
+        }
         player.pause()
         looper?.disableLooping()
+        looper = nil
     }
 }
