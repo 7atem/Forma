@@ -298,5 +298,71 @@
     "file": "assets/exercises/res/drawable-nodpi/exercise_hanging_leg_raise.png",
     "bytes": 331419,
     "sha256": "808b29c826559c722bf334d6844a3d87850724e180674705fd64a3d6965dc470"
+  },
+  {
+    "id": "dumbbell_chest_fly",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_chest_fly.png",
+    "bytes": 531666,
+    "sha256": "9945444e0a145a9ae29f7c5725d1f3aba1d1adc046085c566d6271f352302466"
+  },
+  {
+    "id": "pec_deck_fly",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_pec_deck_fly.png",
+    "bytes": 610002,
+    "sha256": "e0adfe7ada2e40d37d68dcbaae2e392a43cfc1f04c1b518f6eb9bded18748b52"
+  },
+  {
+    "id": "straight_arm_pulldown",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_straight_arm_pulldown.png",
+    "bytes": 494247,
+    "sha256": "ed481c47c117743e546a88a013448042adbedee5a9a9e68d6bebc07ff9cfbf38"
+  },
+  {
+    "id": "pendlay_row",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_pendlay_row.png",
+    "bytes": 519050,
+    "sha256": "a14f730983af893bde57aa7ff23d1e7344fc6ede912223b61fb43314f173bffa"
+  },
+  {
+    "id": "back_extension",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_back_extension.png",
+    "bytes": 551421,
+    "sha256": "13bf93043623652f33cb649869c4ae768eca5493bf84ece2b0b9205ddccf1b99"
+  },
+  {
+    "id": "front_raise",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_front_raise.png",
+    "bytes": 549874,
+    "sha256": "5bb098faf8ef2b84ab43124aeadfc5e1cdd73521bcac14080bfa39912d1ed096"
+  },
+  {
+    "id": "incline_dumbbell_curl",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_dumbbell_curl.png",
+    "bytes": 604651,
+    "sha256": "0a414e14a2e681cc6e3c2cddfae0a0f396c7a680c1057b02451c3b2ded8765ca"
+  },
+  {
+    "id": "concentration_curl",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_concentration_curl.png",
+    "bytes": 614014,
+    "sha256": "8859be9b7580c3372282b9536d30bcd724497e325d74778bf08c7b6f65daf450"
+  },
+  {
+    "id": "bulgarian_split_squat",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_bulgarian_split_squat.png",
+    "bytes": 548244,
+    "sha256": "b4f2b0d79fcf0d549dde160ff594a1dcf5adbbc248dcb0b684563f43120b175b"
+  },
+  {
+    "id": "front_squat",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_front_squat.png",
+    "bytes": 563564,
+    "sha256": "b4fc3cb65a71a85403344ff9082a216f8da6a53b77d417215042f4adb6adde40"
+  },
+  {
+    "id": "plank",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_plank.png",
+    "bytes": 525834,
+    "sha256": "2a9309a72c12585e58a0a9b65b94a9da2d2d89317eebec904f79d83f4c17187e"
   }
 ]

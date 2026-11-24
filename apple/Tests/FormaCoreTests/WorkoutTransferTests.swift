@@ -47,7 +47,7 @@ final class WorkoutTransferTests: XCTestCase {
         XCTAssertThrowsError(try WatchSet(exercise:.row,reps:8,weightKg:10,rpe:11).validate())
     }
     func testCatalogCoversEveryExerciseWithoutOverlappingRoles() {
-        XCTAssertEqual(Exercise.allCases.count,50)
+        XCTAssertEqual(Exercise.allCases.count,61)
         for exercise in Exercise.allCases {
             let mapping=ExerciseMuscles.of(exercise)
             XCTAssertFalse(mapping.primary.isEmpty)

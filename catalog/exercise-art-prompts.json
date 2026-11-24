@@ -251,6 +251,61 @@
       "id": "hanging_leg_raise",
       "tool": "image-generator (built-in)",
       "prompt": "Original two-phase 3D instructional illustration for Forma mobile app (hanging leg raise), dark forest-green #10231D studio backdrop, silver-gray athletic mannequin, sage-green shirt, charcoal shorts, resized and optimized to 960x640 PNG."
+    },
+    {
+      "id": "dumbbell_chest_fly",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Dumbbell chest fly (Flat dumbbell chest fly) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "pec_deck_fly",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Machine pec deck fly (Seated machine pec deck fly) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "straight_arm_pulldown",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Straight-arm cable pulldown (Standing straight-arm cable pulldown) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "pendlay_row",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Pendlay barbell row (Dead-stop Pendlay barbell row) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "back_extension",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Back extension (45° Roman chair back extension) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "front_raise",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Dumbbell front raise (Standing dumbbell front raise) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "incline_dumbbell_curl",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Incline dumbbell curl (Seated 45° incline dumbbell curl) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "concentration_curl",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Concentration curl (Seated single-arm concentration curl) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "bulgarian_split_squat",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Bulgarian split squat (Rear-foot-elevated dumbbell split squat) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "front_squat",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Barbell front squat (Barbell front-rack squat) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "plank",
+      "tool": "image_gen (built-in)",
+      "prompt": "Original Forma 3D two-phase demonstration render for Forearm plank (Braced forearm plank) in dark forest-green studio #10231D."
     }
   ]
 }

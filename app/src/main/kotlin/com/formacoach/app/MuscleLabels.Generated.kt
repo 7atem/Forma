@@ -94,6 +94,17 @@ internal fun exerciseLabel(exercise:com.formacoach.model.Exercise):Int=when(exer
     com.formacoach.model.Exercise.BARBELL_CURL->R.string.catalog_exercise_barbell_curl
     com.formacoach.model.Exercise.SKULL_CRUSHER->R.string.catalog_exercise_skull_crusher
     com.formacoach.model.Exercise.HANGING_LEG_RAISE->R.string.catalog_exercise_hanging_leg_raise
+    com.formacoach.model.Exercise.DUMBBELL_CHEST_FLY->R.string.catalog_exercise_dumbbell_chest_fly
+    com.formacoach.model.Exercise.PEC_DECK_FLY->R.string.catalog_exercise_pec_deck_fly
+    com.formacoach.model.Exercise.STRAIGHT_ARM_PULLDOWN->R.string.catalog_exercise_straight_arm_pulldown
+    com.formacoach.model.Exercise.PENDLAY_ROW->R.string.catalog_exercise_pendlay_row
+    com.formacoach.model.Exercise.BACK_EXTENSION->R.string.catalog_exercise_back_extension
+    com.formacoach.model.Exercise.FRONT_RAISE->R.string.catalog_exercise_front_raise
+    com.formacoach.model.Exercise.INCLINE_DUMBBELL_CURL->R.string.catalog_exercise_incline_dumbbell_curl
+    com.formacoach.model.Exercise.CONCENTRATION_CURL->R.string.catalog_exercise_concentration_curl
+    com.formacoach.model.Exercise.BULGARIAN_SPLIT_SQUAT->R.string.catalog_exercise_bulgarian_split_squat
+    com.formacoach.model.Exercise.FRONT_SQUAT->R.string.catalog_exercise_front_squat
+    com.formacoach.model.Exercise.PLANK->R.string.catalog_exercise_plank
 }
 
 internal fun equipmentLabel(value:com.formacoach.model.Equipment):Int=when(value) {

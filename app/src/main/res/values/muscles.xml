@@ -85,4 +85,15 @@
     <string name="catalog_exercise_barbell_curl">Barbell curl</string>
     <string name="catalog_exercise_skull_crusher">Lying triceps extension</string>
     <string name="catalog_exercise_hanging_leg_raise">Hanging leg raise</string>
+    <string name="catalog_exercise_dumbbell_chest_fly">Dumbbell chest fly</string>
+    <string name="catalog_exercise_pec_deck_fly">Machine pec deck fly</string>
+    <string name="catalog_exercise_straight_arm_pulldown">Straight-arm cable pulldown</string>
+    <string name="catalog_exercise_pendlay_row">Pendlay barbell row</string>
+    <string name="catalog_exercise_back_extension">Back extension</string>
+    <string name="catalog_exercise_front_raise">Dumbbell front raise</string>
+    <string name="catalog_exercise_incline_dumbbell_curl">Incline dumbbell curl</string>
+    <string name="catalog_exercise_concentration_curl">Concentration curl</string>
+    <string name="catalog_exercise_bulgarian_split_squat">Bulgarian split squat</string>
+    <string name="catalog_exercise_front_squat">Barbell front squat</string>
+    <string name="catalog_exercise_plank">Forearm plank</string>
 </resources>

@@ -1765,6 +1765,289 @@
       "secondaryDetail": [
         "OBLIQUES"
       ]
+    },
+    {
+      "id": "DUMBBELL_CHEST_FLY",
+      "en": "Dumbbell chest fly",
+      "ar": "تفتيح صدر بالدمبل",
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS"
+      ],
+      "primaryDetail": [
+        "MID_LOWER_CHEST"
+      ],
+      "secondaryDetail": [
+        "UPPER_CHEST",
+        "FRONT_DELT"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/38/chest-fly/"
+    },
+    {
+      "id": "PEC_DECK_FLY",
+      "en": "Machine pec deck fly",
+      "ar": "تفتيح صدر على جهاز الفراشة",
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false,
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS"
+      ],
+      "primaryDetail": [
+        "MID_LOWER_CHEST"
+      ],
+      "secondaryDetail": [
+        "UPPER_CHEST",
+        "FRONT_DELT"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/"
+    },
+    {
+      "id": "STRAIGHT_ARM_PULLDOWN",
+      "en": "Straight-arm cable pulldown",
+      "ar": "سحب علوي بذراعين مستقيمتين بالكابل",
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false,
+      "primary": [
+        "LATS"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "REAR_DELTS",
+        "CORE"
+      ],
+      "primaryDetail": [
+        "LATS"
+      ],
+      "secondaryDetail": [
+        "TRICEPS",
+        "REAR_DELT",
+        "RECTUS_ABDOMINIS"
+      ],
+      "reference": "https://www.nasm.org/resource-center/blog/training/the-biomechanics-of-the-lat-pulldown-muscles-grip-and-form"
+    },
+    {
+      "id": "PENDLAY_ROW",
+      "en": "Pendlay barbell row",
+      "ar": "سحب بندلاي بالبار",
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "primary": [
+        "UPPER_BACK",
+        "LATS"
+      ],
+      "secondary": [
+        "BICEPS",
+        "REAR_DELTS",
+        "ERECTORS",
+        "HAMSTRINGS"
+      ],
+      "primaryDetail": [
+        "MID_BACK",
+        "LATS"
+      ],
+      "secondaryDetail": [
+        "BICEPS",
+        "REAR_DELT",
+        "FOREARMS",
+        "SPINAL_ERECTORS",
+        "HAMSTRINGS"
+      ],
+      "reference": "https://www.nasm.org/resource-center/exercise-library/barbell-bent-over-row"
+    },
+    {
+      "id": "BACK_EXTENSION",
+      "en": "Back extension",
+      "ar": "تمديد أسفل الظهر",
+      "equipment": [
+        "BODYWEIGHT",
+        "BENCH"
+      ],
+      "perSide": false,
+      "primary": [
+        "ERECTORS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "HAMSTRINGS"
+      ],
+      "primaryDetail": [
+        "SPINAL_ERECTORS",
+        "GLUTE_MAX"
+      ],
+      "secondaryDetail": [
+        "HAMSTRINGS"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/41/back-extensions/"
+    },
+    {
+      "id": "FRONT_RAISE",
+      "en": "Dumbbell front raise",
+      "ar": "رفرفة أمامية بالدمبل",
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": false,
+      "primary": [
+        "FRONT_DELTS"
+      ],
+      "secondary": [
+        "CHEST",
+        "UPPER_BACK"
+      ],
+      "primaryDetail": [
+        "FRONT_DELT"
+      ],
+      "secondaryDetail": [
+        "SIDE_DELT",
+        "UPPER_CHEST",
+        "UPPER_TRAPS"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/106/front-raise/"
+    },
+    {
+      "id": "INCLINE_DUMBBELL_CURL",
+      "en": "Incline dumbbell curl",
+      "ar": "بايسبس مائل بالدمبل",
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "primary": [
+        "BICEPS"
+      ],
+      "secondary": [],
+      "primaryDetail": [
+        "BICEPS"
+      ],
+      "secondaryDetail": [
+        "FOREARMS"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/166/biceps-curl/"
+    },
+    {
+      "id": "CONCENTRATION_CURL",
+      "en": "Concentration curl",
+      "ar": "بايسبس تركيز بالدمبل",
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": true,
+      "primary": [
+        "BICEPS"
+      ],
+      "secondary": [],
+      "primaryDetail": [
+        "BICEPS"
+      ],
+      "secondaryDetail": [
+        "FOREARMS"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/166/biceps-curl/"
+    },
+    {
+      "id": "BULGARIAN_SPLIT_SQUAT",
+      "en": "Bulgarian split squat",
+      "ar": "سكوات بلغاري برجل واحدة",
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": true,
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "ADDUCTORS",
+        "HAMSTRINGS",
+        "CORE"
+      ],
+      "primaryDetail": [
+        "QUADRICEPS",
+        "GLUTE_MAX"
+      ],
+      "secondaryDetail": [
+        "GLUTE_MED",
+        "ADDUCTORS",
+        "HAMSTRINGS",
+        "RECTUS_ABDOMINIS",
+        "OBLIQUES"
+      ],
+      "reference": "https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat"
+    },
+    {
+      "id": "FRONT_SQUAT",
+      "en": "Barbell front squat",
+      "ar": "سكوات أمامي بالبار",
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "CORE",
+        "ERECTORS",
+        "UPPER_BACK",
+        "ADDUCTORS"
+      ],
+      "primaryDetail": [
+        "QUADRICEPS",
+        "GLUTE_MAX"
+      ],
+      "secondaryDetail": [
+        "RECTUS_ABDOMINIS",
+        "OBLIQUES",
+        "SPINAL_ERECTORS",
+        "MID_BACK",
+        "ADDUCTORS"
+      ],
+      "reference": "https://www.nasm.org/resource-center/exercise-library/barbell-front-squat"
+    },
+    {
+      "id": "PLANK",
+      "en": "Forearm plank",
+      "ar": "بلانك على الساعدين",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "primary": [
+        "CORE"
+      ],
+      "secondary": [
+        "FRONT_DELTS",
+        "GLUTES"
+      ],
+      "primaryDetail": [
+        "RECTUS_ABDOMINIS",
+        "OBLIQUES"
+      ],
+      "secondaryDetail": [
+        "FRONT_DELT",
+        "GLUTE_MAX"
+      ],
+      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/"
     }
   ]
 }

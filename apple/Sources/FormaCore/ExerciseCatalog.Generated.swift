@@ -52,6 +52,17 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
     case barbell_curl = "BARBELL_CURL"
     case skull_crusher = "SKULL_CRUSHER"
     case hanging_leg_raise = "HANGING_LEG_RAISE"
+    case dumbbell_chest_fly = "DUMBBELL_CHEST_FLY"
+    case pec_deck_fly = "PEC_DECK_FLY"
+    case straight_arm_pulldown = "STRAIGHT_ARM_PULLDOWN"
+    case pendlay_row = "PENDLAY_ROW"
+    case back_extension = "BACK_EXTENSION"
+    case front_raise = "FRONT_RAISE"
+    case incline_dumbbell_curl = "INCLINE_DUMBBELL_CURL"
+    case concentration_curl = "CONCENTRATION_CURL"
+    case bulgarian_split_squat = "BULGARIAN_SPLIT_SQUAT"
+    case front_squat = "FRONT_SQUAT"
+    case plank = "PLANK"
     public func label(arabic: Bool) -> String {
         switch self {
         case .squat: return arabic ? "سكوات" : "Squat"
@@ -104,6 +115,17 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
         case .barbell_curl: return arabic ? "بايسبس بالبار" : "Barbell curl"
         case .skull_crusher: return arabic ? "ترايسبس نائم بالبار" : "Lying triceps extension"
         case .hanging_leg_raise: return arabic ? "رفع الأرجل معلقًا" : "Hanging leg raise"
+        case .dumbbell_chest_fly: return arabic ? "تفتيح صدر بالدمبل" : "Dumbbell chest fly"
+        case .pec_deck_fly: return arabic ? "تفتيح صدر على جهاز الفراشة" : "Machine pec deck fly"
+        case .straight_arm_pulldown: return arabic ? "سحب علوي بذراعين مستقيمتين بالكابل" : "Straight-arm cable pulldown"
+        case .pendlay_row: return arabic ? "سحب بندلاي بالبار" : "Pendlay barbell row"
+        case .back_extension: return arabic ? "تمديد أسفل الظهر" : "Back extension"
+        case .front_raise: return arabic ? "رفرفة أمامية بالدمبل" : "Dumbbell front raise"
+        case .incline_dumbbell_curl: return arabic ? "بايسبس مائل بالدمبل" : "Incline dumbbell curl"
+        case .concentration_curl: return arabic ? "بايسبس تركيز بالدمبل" : "Concentration curl"
+        case .bulgarian_split_squat: return arabic ? "سكوات بلغاري برجل واحدة" : "Bulgarian split squat"
+        case .front_squat: return arabic ? "سكوات أمامي بالبار" : "Barbell front squat"
+        case .plank: return arabic ? "بلانك على الساعدين" : "Forearm plank"
         }
     }
 }
@@ -179,6 +201,17 @@ public enum ExerciseCatalog {public static func of(_ exercise:Exercise)->Exercis
     case .barbell_curl:return .init(equipment:[.barbell],perSide:false)
     case .skull_crusher:return .init(equipment:[.barbell,.bench],perSide:false)
     case .hanging_leg_raise:return .init(equipment:[.pull_up_bar,.bodyweight],perSide:false)
+    case .dumbbell_chest_fly:return .init(equipment:[.dumbbells,.bench],perSide:false)
+    case .pec_deck_fly:return .init(equipment:[.machine],perSide:false)
+    case .straight_arm_pulldown:return .init(equipment:[.cable],perSide:false)
+    case .pendlay_row:return .init(equipment:[.barbell],perSide:false)
+    case .back_extension:return .init(equipment:[.bodyweight,.bench],perSide:false)
+    case .front_raise:return .init(equipment:[.dumbbells],perSide:false)
+    case .incline_dumbbell_curl:return .init(equipment:[.dumbbells,.bench],perSide:false)
+    case .concentration_curl:return .init(equipment:[.dumbbells,.bench],perSide:true)
+    case .bulgarian_split_squat:return .init(equipment:[.dumbbells,.bench],perSide:true)
+    case .front_squat:return .init(equipment:[.barbell],perSide:false)
+    case .plank:return .init(equipment:[.bodyweight],perSide:false)
 }}}
 public enum Muscle: String, Codable, CaseIterable, Sendable {
     case chest = "CHEST"
@@ -398,6 +431,17 @@ public enum ExerciseMuscles {
         case .barbell_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [.forearms], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .skull_crusher: return .init(primary: [.triceps], secondary: [], primaryDetail: [.triceps], secondaryDetail: [], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .hanging_leg_raise: return .init(primary: [.core], secondary: [], primaryDetail: [.rectus_abdominis], secondaryDetail: [.obliques], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .dumbbell_chest_fly: return .init(primary: [.chest], secondary: [.front_delts], primaryDetail: [.mid_lower_chest], secondaryDetail: [.upper_chest, .front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/38/chest-fly/")
+        case .pec_deck_fly: return .init(primary: [.chest], secondary: [.front_delts], primaryDetail: [.mid_lower_chest], secondaryDetail: [.upper_chest, .front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/188/seated-chest-press/")
+        case .straight_arm_pulldown: return .init(primary: [.lats], secondary: [.triceps, .rear_delts, .core], primaryDetail: [.lats], secondaryDetail: [.triceps, .rear_delt, .rectus_abdominis], reference: "https://www.nasm.org/resource-center/blog/training/the-biomechanics-of-the-lat-pulldown-muscles-grip-and-form")
+        case .pendlay_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts, .erectors, .hamstrings], primaryDetail: [.mid_back, .lats], secondaryDetail: [.biceps, .rear_delt, .forearms, .spinal_erectors, .hamstrings], reference: "https://www.nasm.org/resource-center/exercise-library/barbell-bent-over-row")
+        case .back_extension: return .init(primary: [.erectors, .glutes], secondary: [.hamstrings], primaryDetail: [.spinal_erectors, .glute_max], secondaryDetail: [.hamstrings], reference: "https://www.acefitness.org/resources/everyone/exercise-library/41/back-extensions/")
+        case .front_raise: return .init(primary: [.front_delts], secondary: [.chest, .upper_back], primaryDetail: [.front_delt], secondaryDetail: [.side_delt, .upper_chest, .upper_traps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/106/front-raise/")
+        case .incline_dumbbell_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [.forearms], reference: "https://www.acefitness.org/resources/everyone/exercise-library/166/biceps-curl/")
+        case .concentration_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [.forearms], reference: "https://www.acefitness.org/resources/everyone/exercise-library/166/biceps-curl/")
+        case .bulgarian_split_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .hamstrings, .core], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.glute_med, .adductors, .hamstrings, .rectus_abdominis, .obliques], reference: "https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat")
+        case .front_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .erectors, .upper_back, .adductors], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.rectus_abdominis, .obliques, .spinal_erectors, .mid_back, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/barbell-front-squat")
+        case .plank: return .init(primary: [.core], secondary: [.front_delts, .glutes], primaryDetail: [.rectus_abdominis, .obliques], secondaryDetail: [.front_delt, .glute_max], reference: "https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/")
         }
     }
 }
