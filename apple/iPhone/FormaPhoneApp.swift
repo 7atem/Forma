@@ -1114,6 +1114,8 @@ private struct MealSlotOption: Identifiable {
                         .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.border, lineWidth: 1))
 
+                    PhoneCustomExercisesCard(store: store, useLb: useLb)
+
                     ExerciseDiscomfortFilterButton()
 
                     // Main Muscle Category Chips

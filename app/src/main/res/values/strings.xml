@@ -408,4 +408,12 @@
     <string name="export_measurements_csv">Body &amp; Water CSV</string>
     <string name="dumbbell_per_hand_hint">Log weight per dumbbell (one hand).</string>
     <string name="dumbbell_per_hand_total">Per dumbbell · Pair total: %1$s %2$s</string>
+    <string name="custom_exercises_title">My Custom Exercises</string>
+    <string name="custom_exercise_add">New exercise</string>
+    <string name="custom_exercises_empty">Create your own movements for machines, rehab, or specialty lifts.</string>
+    <string name="custom_exercise_name">Exercise name</string>
+    <string name="custom_exercise_muscle">Primary muscle</string>
+    <string name="custom_exercise_equipment">Equipment</string>
+    <string name="custom_exercise_notes">Personal note (optional)</string>
+    <string name="custom_exercise_best">Best</string>
 </resources>

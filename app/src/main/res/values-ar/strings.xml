@@ -408,4 +408,12 @@
     <string name="export_measurements_csv">تصدير القياسات والماء CSV</string>
     <string name="dumbbell_per_hand_hint">سجّل وزن الدمبل الواحد (لكل يد).</string>
     <string name="dumbbell_per_hand_total">وزن الدمبل الواحد · الإجمالي لليدين: %1$s %2$s</string>
+    <string name="custom_exercises_title">تماريني المخصصة</string>
+    <string name="custom_exercise_add">تمرين جديد</string>
+    <string name="custom_exercises_empty">أضف تمارينك الخاصة للأجهزة أو التأهيل أو الحركات الإضافية.</string>
+    <string name="custom_exercise_name">اسم التمرين</string>
+    <string name="custom_exercise_muscle">العضلة الأساسية</string>
+    <string name="custom_exercise_equipment">الأداة</string>
+    <string name="custom_exercise_notes">ملاحظة شخصية (اختياري)</string>
+    <string name="custom_exercise_best">الأفضل</string>
 </resources>

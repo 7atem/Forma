@@ -349,6 +349,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     }
     var limit by rememberSaveable {mutableIntStateOf(12)}
     LaunchedEffect(search,equipment,muscle,homeOnly,favoritesOnly,recentOnly,discomfortEncoded) {limit=12}
+    CustomExercisesSection(today)
     Input(R.string.search_exercises,search,{search=it},"exercise_search",numeric=false)
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         Box(Modifier.weight(1f)) {

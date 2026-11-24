@@ -54,6 +54,23 @@ struct PhoneSupplement: Codable, Identifiable, Equatable {
     var dose: String = ""
 }
 
+struct PhoneCustomExercise: Codable, Identifiable, Equatable {
+    var id = UUID().uuidString
+    var name: String
+    var equipment: Equipment = .dumbbells
+    var primaryMuscle: Muscle = .chest
+    var notes: String = ""
+}
+
+struct PhoneCustomSet: Codable, Identifiable, Equatable {
+    var id = UUID().uuidString
+    var exerciseId: String
+    var date: String
+    var reps: Int
+    var weightKg: Double
+    var warmUp: Bool = false
+}
+
 struct SavedState: Codable {
     var programs: [WatchProgram] = [
         .init(id: "starter-A", name: "A", exercises: [.squat, .chest_press, .row]),
@@ -70,6 +87,8 @@ struct SavedState: Codable {
     var hydration: [PhoneHydration] = []
     var supplements: [PhoneSupplement] = []
     var supplementLogs: [String: [String]] = [:]
+    var customExercises: [PhoneCustomExercise] = []
+    var customSets: [PhoneCustomSet] = []
     var calorieTarget: Int?
     var proteinTarget: Double?
     var waterGoalMl: Int?
@@ -96,6 +115,8 @@ struct SavedState: Codable {
         hydration = try c.decodeIfPresent([PhoneHydration].self, forKey: .hydration) ?? []
         supplements = try c.decodeIfPresent([PhoneSupplement].self, forKey: .supplements) ?? []
         supplementLogs = try c.decodeIfPresent([String: [String]].self, forKey: .supplementLogs) ?? [:]
+        customExercises = try c.decodeIfPresent([PhoneCustomExercise].self, forKey: .customExercises) ?? []
+        customSets = try c.decodeIfPresent([PhoneCustomSet].self, forKey: .customSets) ?? []
         calorieTarget = try c.decodeIfPresent(Int.self, forKey: .calorieTarget)
         proteinTarget = try c.decodeIfPresent(Double.self, forKey: .proteinTarget)
         waterGoalMl = try c.decodeIfPresent(Int.self, forKey: .waterGoalMl)
@@ -447,5 +468,32 @@ struct SavedState: Codable {
 
     func attempt(_ action: () throws -> Void) {
         do { try action() } catch { notice = String(localized: "operation_failed") }
+    }
+
+    func addCustomExercise(name: String, equipment: Equipment, primaryMuscle: Muscle, notes: String) throws {
+        let clean = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(60))
+        let cleanNotes = String(notes.trimmingCharacters(in: .whitespacesAndNewlines).prefix(120))
+        guard !clean.isEmpty else { throw TransferError.invalid }
+        try commit { state in
+            guard state.customExercises.count < 100 else { throw TransferError.capacity }
+            state.customExercises.append(PhoneCustomExercise(name: clean, equipment: equipment, primaryMuscle: primaryMuscle, notes: cleanNotes))
+        }
+    }
+
+    func deleteCustomExercise(_ id: String) throws {
+        try commit { state in
+            state.customExercises.removeAll { $0.id == id }
+            state.customSets.removeAll { $0.exerciseId == id }
+        }
+    }
+
+    func logCustomSet(exerciseId: String, reps: Int, weightKg: Double, warmUp: Bool, date: String = LocalStore.todayString()) throws {
+        guard (1...1000).contains(reps), weightKg.isFinite, (0...1000).contains(weightKg) else { throw TransferError.invalid }
+        try commit { state in
+            state.customSets.append(PhoneCustomSet(exerciseId: exerciseId, date: date, reps: reps, weightKg: weightKg, warmUp: warmUp))
+            if state.customSets.count > 2000 {
+                state.customSets = Array(state.customSets.suffix(2000))
+            }
+        }
     }
 }

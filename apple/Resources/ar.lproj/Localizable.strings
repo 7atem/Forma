@@ -238,3 +238,12 @@
 "weekly_muscle_split_title" = "مجموعات العمل (آخر ٧ جلسات — بدون الإحماء)";
 "primary_short" = "أساسي";
 "supporting_short" = "مساعد";
+"custom_exercises_title" = "تماريني المخصصة";
+"custom_exercise_add" = "تمرين جديد";
+"custom_exercises_empty" = "أضف تمارينك الخاصة للأجهزة أو التأهيل أو الحركات الإضافية.";
+"custom_exercise_name" = "اسم التمرين";
+"custom_exercise_muscle" = "العضلة الأساسية";
+"custom_exercise_equipment" = "الأداة";
+"custom_exercise_notes" = "ملاحظة شخصية (اختياري)";
+"custom_exercise_best" = "الأفضل";
+"recent_workouts" = "آخر المجموعات";

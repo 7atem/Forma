@@ -238,3 +238,12 @@
 "weekly_muscle_split_title" = "Working sets (last 7 sessions — warm-ups excluded)";
 "primary_short" = "main";
 "supporting_short" = "support";
+"custom_exercises_title" = "My Custom Exercises";
+"custom_exercise_add" = "New exercise";
+"custom_exercises_empty" = "Create your own movements for machines, rehab, or specialty lifts.";
+"custom_exercise_name" = "Exercise name";
+"custom_exercise_muscle" = "Primary muscle";
+"custom_exercise_equipment" = "Equipment";
+"custom_exercise_notes" = "Personal note (optional)";
+"custom_exercise_best" = "Best";
+"recent_workouts" = "Recent sets";
