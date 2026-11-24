@@ -43,3 +43,29 @@ These detailed assignments are general strength-training anatomy chosen for orie
 ### Drawing
 
 Regions are stored once per side with a `fiber` angle (degrees, screen coordinates) and redrawn as smooth original cubic curves. Android (`MuscleRendering.kt`) and iPhone (`MuscleBodyCanvas` in `MuscleDiagram.swift`) render the same layers: a soft drop shadow, a lit body, each muscle with a highlight toward the upper left and darker edges, fibre striations along `fiber` (omitted in the small demo overlay), dark region contours and a dashed edge for supporting regions. All shading is illustrative and never encodes activation, effort or recovery. Muscle colours follow the app's own light/dark setting.
+
+## Source cross-check (24 November 2026)
+
+The mappings that changed most recently were compared with public exercise libraries (ExRx, NASM, ACE) and peer-reviewed surface-EMG studies. Where most sources agreed, the catalog follows them. This is a literature check by the development team, **not** a qualified expert review; that release gate remains open, and EMG percentages from small studies are not treated as measured activation for a user.
+
+| Exercise / region | What the sources say | Catalog decision |
+|---|---|---|
+| Conventional deadlift | ExRx lists the erector spinae as an isometric stabilizer/synergist; glutes, hamstrings and adductor magnus extend the hip. One EMG study still reports high erector activity (~73% MVC). | Erectors moved back from main to **supporting**; main = hamstrings, glutes. |
+| Front plank | EMG: very high rectus abdominis and obliques; high gluteus maximus only in the hip-extension variant. Anterior deltoid is listed as a stabilizer. | Removed glutes; supporting = front delt. |
+| Face pull | NASM and most sources: rear delts with rhomboids/middle trapezius and rotator cuff; upper-trap shrugging is a form fault (low anchor). | Kept rear delt + mid back main; removed upper traps and side delt from supporting. |
+| "Forearms" region | Anatomy references: the brachioradialis is a separate forearm muscle (posterior compartment, radial nerve) that flexes the elbow with biceps and brachialis; EMG shows it is most active in neutral/hammer grips. | Renamed region to "Brachioradialis (forearm)" and the broad group to "Biceps and elbow flexors", so the roll-up is anatomically honest. |
+| Lateral raise → rear delt | EMG: posterior deltoid activity rises with internal rotation; one study reports more posterior-delt activity than other shoulder exercises. | Kept as supporting. |
+| Pull-up / lat pulldown → rear delt | EMG studies record posterior deltoid in pull-ups and grip-dependent posterior-delt activity in pulldowns. | Kept as supporting. |
+| Romanian deadlift → traps | NASM/ACE: hamstrings main, glutes assisting; trapezius as shoulder-girdle stabilizer. | Kept traps/mid back as supporting. |
+| Front overhead press → upper chest | EMG (front vs back press): front press favours pectoralis major. | Kept upper chest as supporting. |
+| Hip thrust → quadriceps, adductors | EMG: vastus lateralis active (sometimes more than glute bridge); adductors not measured but adductor magnus is a hip extensor. | Kept as supporting; adductors noted as lower-confidence. |
+
+Sources:
+- ExRx, [Barbell deadlift](https://exrx.net/WeightExercises/ErectorSpinae/BBDeadlift) and [deadlift kinesiology](https://exrx.net/Kinesiology/Deadlift)
+- NASM, [Face pull](https://www.nasm.org/resource-center/exercise-library/face-pull) and [Romanian deadlift](https://www.nasm.org/resource-center/exercise-library/romanian-deadlift-barbell)
+- Coratella et al. 2022, [Front vs back and barbell vs machine overhead press](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9354811/)
+- Coratella et al. 2020, [Lateral raise variations and frontal raise](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7503819/); [deltoid activation across exercises](https://pubmed.ncbi.nlm.nih.gov/24947920/)
+- [Pull-up variations EMG](https://pmc.ncbi.nlm.nih.gov/articles/PMC5548150); [lat pulldown grip and trunk angle](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12452428/)
+- Contreras et al. 2015, [hip thrust vs back squat](https://pubmed.ncbi.nlm.nih.gov/26214739/); [hip thrust variations](https://pubmed.ncbi.nlm.nih.gov/30335717/)
+- [Plank variations EMG](https://pubmed.ncbi.nlm.nih.gov/28922049/)
+- [Brachioradialis, StatPearls](https://ncbi.nlm.nih.gov/books/NBK526110); [curl handgrips and brachioradialis](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10054060/); [curl variants EMG](https://peerj.com/articles/5165)

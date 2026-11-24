@@ -30,8 +30,8 @@
     },
     {
       "id": "BICEPS",
-      "en": "Biceps",
-      "ar": "العضلة ذات الرأسين"
+      "en": "Biceps and elbow flexors",
+      "ar": "ذات الرأسين وثانيات المرفق"
     },
     {
       "id": "TRICEPS",
@@ -74,7 +74,7 @@
       "ar": "عضلات الفخذ الداخلية"
     }
   ],
-  "detailReview": "Detailed regions are general strength-training anatomy for orientation; qualified review pending. They do not represent measured activation.",
+  "detailReview": "Detailed regions are general strength-training anatomy for orientation, cross-checked on 24 November 2026 against public exercise libraries and EMG studies (see docs/EXERCISE_MUSCLES.md). This is a literature check, not a qualified expert review, which is still pending. They do not represent measured activation.",
   "details": [
     {
       "id": "UPPER_CHEST",
@@ -199,8 +199,8 @@
     {
       "id": "FOREARMS",
       "group": "BICEPS",
-      "en": "Forearms & grip",
-      "ar": "الساعدان والقبضة"
+      "en": "Brachioradialis (forearm)",
+      "ar": "العضلة العضدية الكعبرية (الساعد)"
     }
   ],
   "regions": [
@@ -1238,21 +1238,18 @@
         "UPPER_BACK"
       ],
       "secondary": [
-        "FRONT_DELTS",
         "BICEPS"
       ],
       "equipment": [
         "CABLE"
       ],
       "perSide": false,
-      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "reference": "https://www.nasm.org/resource-center/exercise-library/face-pull",
       "primaryDetail": [
         "REAR_DELT",
         "MID_BACK"
       ],
       "secondaryDetail": [
-        "UPPER_TRAPS",
-        "SIDE_DELT",
         "BICEPS"
       ]
     },
@@ -1595,10 +1592,10 @@
       "ar": "ديدلفت تقليدي بالبار",
       "primary": [
         "HAMSTRINGS",
-        "GLUTES",
-        "ERECTORS"
+        "GLUTES"
       ],
       "secondary": [
+        "ERECTORS",
         "UPPER_BACK",
         "QUADRICEPS",
         "ADDUCTORS",
@@ -1608,13 +1605,13 @@
         "BARBELL"
       ],
       "perSide": false,
-      "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
+      "reference": "https://exrx.net/WeightExercises/ErectorSpinae/BBDeadlift",
       "primaryDetail": [
         "HAMSTRINGS",
-        "GLUTE_MAX",
-        "SPINAL_ERECTORS"
+        "GLUTE_MAX"
       ],
       "secondaryDetail": [
+        "SPINAL_ERECTORS",
         "UPPER_TRAPS",
         "MID_BACK",
         "QUADRICEPS",
@@ -2038,16 +2035,14 @@
         "CORE"
       ],
       "secondary": [
-        "FRONT_DELTS",
-        "GLUTES"
+        "FRONT_DELTS"
       ],
       "primaryDetail": [
         "RECTUS_ABDOMINIS",
         "OBLIQUES"
       ],
       "secondaryDetail": [
-        "FRONT_DELT",
-        "GLUTE_MAX"
+        "FRONT_DELT"
       ],
       "reference": "https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/"
     }

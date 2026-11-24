@@ -5,7 +5,7 @@
     <string name="muscle_rear_delts">الكتف الخلفي</string>
     <string name="muscle_lats">العضلات الظهرية العريضة</string>
     <string name="muscle_upper_back">أعلى ووسط الظهر</string>
-    <string name="muscle_biceps">العضلة ذات الرأسين</string>
+    <string name="muscle_biceps">ذات الرأسين وثانيات المرفق</string>
     <string name="muscle_triceps">العضلة ثلاثية الرؤوس</string>
     <string name="muscle_core">البطن وعضلات تثبيت الجذع</string>
     <string name="muscle_glutes">عضلات الأرداف</string>
@@ -34,7 +34,7 @@
     <string name="muscle_detail_adductors">عضلات الفخذ الداخلية</string>
     <string name="muscle_detail_gastrocnemius">عضلة السمانة (أعلى الساق)</string>
     <string name="muscle_detail_soleus">العضلة النعلية (أسفل الساق)</string>
-    <string name="muscle_detail_forearms">الساعدان والقبضة</string>
+    <string name="muscle_detail_forearms">العضلة العضدية الكعبرية (الساعد)</string>
     <string name="catalog_exercise_squat">سكوات</string>
     <string name="catalog_exercise_leg_press">دفع الرجلين</string>
     <string name="catalog_exercise_chest_press">ضغط الصدر</string>

@@ -235,7 +235,7 @@ public enum Muscle: String, Codable, CaseIterable, Sendable {
         case .rear_delts: return arabic ? "الكتف الخلفي" : "Rear shoulders"
         case .lats: return arabic ? "العضلات الظهرية العريضة" : "Lats"
         case .upper_back: return arabic ? "أعلى ووسط الظهر" : "Upper and mid back"
-        case .biceps: return arabic ? "العضلة ذات الرأسين" : "Biceps"
+        case .biceps: return arabic ? "ذات الرأسين وثانيات المرفق" : "Biceps and elbow flexors"
         case .triceps: return arabic ? "العضلة ثلاثية الرؤوس" : "Triceps"
         case .core: return arabic ? "البطن وعضلات تثبيت الجذع" : "Abdominal and trunk stabilizers"
         case .glutes: return arabic ? "عضلات الأرداف" : "Glutes"
@@ -316,7 +316,7 @@ public enum MuscleDetail: String, Codable, CaseIterable, Sendable {
         case .adductors: return arabic ? "عضلات الفخذ الداخلية" : "Hip adductors"
         case .gastrocnemius: return arabic ? "عضلة السمانة (أعلى الساق)" : "Gastrocnemius (upper calf)"
         case .soleus: return arabic ? "العضلة النعلية (أسفل الساق)" : "Soleus (lower calf)"
-        case .forearms: return arabic ? "الساعدان والقبضة" : "Forearms & grip"
+        case .forearms: return arabic ? "العضلة العضدية الكعبرية (الساعد)" : "Brachioradialis (forearm)"
         }
     }
 }
@@ -408,7 +408,7 @@ public enum ExerciseMuscles {
         case .single_arm_dumbbell_row: return .init(primary: [.lats, .upper_back], secondary: [.biceps, .rear_delts, .core], primaryDetail: [.lats, .mid_back], secondaryDetail: [.biceps, .rear_delt, .forearms, .obliques, .rectus_abdominis], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .chest_supported_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts], primaryDetail: [.mid_back, .lats], secondaryDetail: [.biceps, .rear_delt, .forearms], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .pull_up: return .init(primary: [.lats], secondary: [.biceps, .upper_back, .rear_delts, .core], primaryDetail: [.lats], secondaryDetail: [.biceps, .mid_back, .rear_delt, .forearms, .rectus_abdominis], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .face_pull: return .init(primary: [.rear_delts, .upper_back], secondary: [.front_delts, .biceps], primaryDetail: [.rear_delt, .mid_back], secondaryDetail: [.upper_traps, .side_delt, .biceps], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .face_pull: return .init(primary: [.rear_delts, .upper_back], secondary: [.biceps], primaryDetail: [.rear_delt, .mid_back], secondaryDetail: [.biceps], reference: "https://www.nasm.org/resource-center/exercise-library/face-pull")
         case .dumbbell_shoulder_press: return .init(primary: [.front_delts], secondary: [.triceps, .upper_back, .chest, .core], primaryDetail: [.front_delt], secondaryDetail: [.triceps, .upper_traps, .side_delt, .upper_chest, .rectus_abdominis, .obliques], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back, .rear_delts], primaryDetail: [.side_delt], secondaryDetail: [.upper_traps, .front_delt, .rear_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .rear_delt_fly: return .init(primary: [.rear_delts], secondary: [.upper_back], primaryDetail: [.rear_delt], secondaryDetail: [.mid_back], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
@@ -424,7 +424,7 @@ public enum ExerciseMuscles {
         case .barbell_bench_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], primaryDetail: [.mid_lower_chest], secondaryDetail: [.front_delt, .triceps, .upper_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .incline_barbell_press: return .init(primary: [.chest], secondary: [.front_delts, .triceps], primaryDetail: [.upper_chest], secondaryDetail: [.front_delt, .triceps, .mid_lower_chest], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .dip: return .init(primary: [.chest, .triceps], secondary: [.front_delts], primaryDetail: [.mid_lower_chest, .triceps], secondaryDetail: [.front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
-        case .conventional_deadlift: return .init(primary: [.hamstrings, .glutes, .erectors], secondary: [.upper_back, .quadriceps, .adductors, .core], primaryDetail: [.hamstrings, .glute_max, .spinal_erectors], secondaryDetail: [.upper_traps, .mid_back, .quadriceps, .adductors, .rectus_abdominis], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
+        case .conventional_deadlift: return .init(primary: [.hamstrings, .glutes], secondary: [.erectors, .upper_back, .quadriceps, .adductors, .core], primaryDetail: [.hamstrings, .glute_max], secondaryDetail: [.spinal_erectors, .upper_traps, .mid_back, .quadriceps, .adductors, .rectus_abdominis], reference: "https://exrx.net/WeightExercises/ErectorSpinae/BBDeadlift")
         case .barbell_row: return .init(primary: [.upper_back, .lats], secondary: [.biceps, .rear_delts, .erectors, .core], primaryDetail: [.mid_back, .lats], secondaryDetail: [.biceps, .rear_delt, .forearms, .spinal_erectors, .rectus_abdominis], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .barbell_overhead_press: return .init(primary: [.front_delts], secondary: [.triceps, .upper_back, .chest, .core], primaryDetail: [.front_delt], secondaryDetail: [.triceps, .upper_traps, .side_delt, .upper_chest, .rectus_abdominis, .obliques], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
         case .cable_lateral_raise: return .init(primary: [.front_delts], secondary: [.upper_back, .rear_delts], primaryDetail: [.side_delt], secondaryDetail: [.upper_traps, .front_delt, .rear_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/")
@@ -441,7 +441,7 @@ public enum ExerciseMuscles {
         case .concentration_curl: return .init(primary: [.biceps], secondary: [], primaryDetail: [.biceps], secondaryDetail: [.forearms], reference: "https://www.acefitness.org/resources/everyone/exercise-library/166/biceps-curl/")
         case .bulgarian_split_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .hamstrings, .core], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.glute_med, .adductors, .hamstrings, .rectus_abdominis, .obliques], reference: "https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat")
         case .front_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .erectors, .upper_back, .adductors], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.rectus_abdominis, .obliques, .spinal_erectors, .mid_back, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/barbell-front-squat")
-        case .plank: return .init(primary: [.core], secondary: [.front_delts, .glutes], primaryDetail: [.rectus_abdominis, .obliques], secondaryDetail: [.front_delt, .glute_max], reference: "https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/")
+        case .plank: return .init(primary: [.core], secondary: [.front_delts], primaryDetail: [.rectus_abdominis, .obliques], secondaryDetail: [.front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/")
         }
     }
 }

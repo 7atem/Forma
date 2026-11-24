@@ -5,7 +5,7 @@
     <string name="muscle_rear_delts">Rear shoulders</string>
     <string name="muscle_lats">Lats</string>
     <string name="muscle_upper_back">Upper and mid back</string>
-    <string name="muscle_biceps">Biceps</string>
+    <string name="muscle_biceps">Biceps and elbow flexors</string>
     <string name="muscle_triceps">Triceps</string>
     <string name="muscle_core">Abdominal and trunk stabilizers</string>
     <string name="muscle_glutes">Glutes</string>
@@ -34,7 +34,7 @@
     <string name="muscle_detail_adductors">Hip adductors</string>
     <string name="muscle_detail_gastrocnemius">Gastrocnemius (upper calf)</string>
     <string name="muscle_detail_soleus">Soleus (lower calf)</string>
-    <string name="muscle_detail_forearms">Forearms &amp; grip</string>
+    <string name="muscle_detail_forearms">Brachioradialis (forearm)</string>
     <string name="catalog_exercise_squat">Squat</string>
     <string name="catalog_exercise_leg_press">Leg press</string>
     <string name="catalog_exercise_chest_press">Chest press</string>
