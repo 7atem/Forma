@@ -190,11 +190,12 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     }
 
     // 7-Day Body Muscle Heat Map
-    val weeklyMuscleMap = remember(state.snapshot, today) {
-        MuscleTraining.weekly(state.snapshot, today).associate { it.muscle to (it.primarySets + it.secondarySets) }
-    }
+    val weeklyCounts = remember(state.snapshot, today) { MuscleTraining.weekly(state.snapshot, today) }
+    val weeklyMuscleMap = remember(weeklyCounts) { weeklyCounts.associate { it.muscle to (it.primarySets + it.secondarySets) } }
     InfoCard {
         WeeklyMuscleHeatMap(weeklyMuscleMap)
+        // The shading combines roles; main and supporting set counts stay listed separately.
+        WeeklyMuscleSplit(weeklyCounts)
     }
 
     // 12-Week GitHub-Style Training Consistency Grid + Streak

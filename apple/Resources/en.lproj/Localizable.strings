@@ -264,3 +264,7 @@
 "meal_slot_label" = "Meal";
 "edit_meal_title" = "Edit meal";
 "meal_unspecified" = "Other meals";
+"logged_entries_heading" = "Logged entries";
+"delete_meal_confirm" = "Delete this meal entry? This cannot be undone.";
+"week_streak_badge" = "Active weeks in a row: %@";
+"bodyweight_load" = "bodyweight";

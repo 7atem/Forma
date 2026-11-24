@@ -428,4 +428,7 @@
     <string name="review_tile_weight">Average body weight · %1$s observations</string>
     <string name="logged_entries_heading">Logged entries</string>
     <string name="add_food_heading">Add food</string>
+    <string name="weekly_muscle_split_title">Working sets this week (warm-ups excluded)</string>
+    <string name="muscle_sets_main">%1$s main</string>
+    <string name="muscle_sets_supporting">%1$s support</string>
 </resources>

@@ -162,3 +162,26 @@ internal fun CompactMuscleOverlay(exercise: Exercise, pulsePeak: Boolean = false
         }
     }
 }
+
+/** Working sets per broad group this week, with main (primary) and supporting counts kept apart. */
+@Composable
+internal fun WeeklyMuscleSplit(counts: List<com.formacoach.coach.MuscleSetCount>) {
+    val rows = counts.filter { it.primarySets > 0 || it.secondarySets > 0 }
+        .sortedWith(compareByDescending<com.formacoach.coach.MuscleSetCount> { it.primarySets }.thenByDescending { it.secondarySets })
+    if (rows.isEmpty()) return
+    Column(Modifier.fillMaxWidth().testTag("weekly_muscle_split"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        Text(stringResource(R.string.weekly_muscle_split_title), style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        rows.forEach { row ->
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(stringResource(muscleLabel(row.muscle)), Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                if (row.primarySets > 0) PillBadge(stringResource(R.string.muscle_sets_main, number(row.primarySets.toDouble(), 0)))
+                if (row.secondarySets > 0) PillBadge(
+                    stringResource(R.string.muscle_sets_supporting, number(row.secondarySets.toDouble(), 0)),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}

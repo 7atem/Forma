@@ -264,3 +264,7 @@
 "meal_slot_label" = "الوجبة";
 "edit_meal_title" = "تعديل الوجبة";
 "meal_unspecified" = "وجبات أخرى";
+"logged_entries_heading" = "ما سجلته";
+"delete_meal_confirm" = "حذف هذا الإدخال؟ لا يمكن التراجع عن ذلك.";
+"week_streak_badge" = "أسابيع نشطة متتالية: %@";
+"bodyweight_load" = "وزن الجسم";

@@ -532,14 +532,15 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             Text(stringResource(R.string.linked_timing_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        // Compact Form Guide + History Peek Row
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        // Form guide + history. With large text the history button moves below the guide card so neither is squeezed.
+        val stackGuide = LocalDensity.current.fontScale > 1.25f
+        val guideCard: @Composable (Modifier) -> Unit = { mod ->
             Surface(
                 onClick = { guide = true },
                 shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.7f),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)),
-                modifier = Modifier.weight(1f).testTag("session_form_guide"),
+                modifier = mod.testTag("session_form_guide"),
             ) {
                 Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     ExerciseThumbnail(exercise, Modifier.width(84.dp).clip(RoundedCornerShape(10.dp)))
@@ -556,15 +557,33 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-            OutlinedButton(
-                onClick = { showHistoryPeek = true },
-                shape = RoundedCornerShape(16.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
-                modifier = Modifier.testTag("session_exercise_history"),
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        }
+        if (stackGuide) {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                guideCard(Modifier.fillMaxWidth())
+                OutlinedButton(
+                    onClick = { showHistoryPeek = true },
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("session_exercise_history"),
+                ) {
                     Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Text(stringResource(R.string.exercise_history_peek), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(R.string.exercise_history_peek), fontWeight = FontWeight.SemiBold)
+                }
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                guideCard(Modifier.weight(1f))
+                OutlinedButton(
+                    onClick = { showHistoryPeek = true },
+                    shape = RoundedCornerShape(16.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
+                    modifier = Modifier.testTag("session_exercise_history"),
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Text(stringResource(R.string.exercise_history_peek), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
+                    }
                 }
             }
         }
