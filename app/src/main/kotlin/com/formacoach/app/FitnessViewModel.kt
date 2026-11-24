@@ -118,6 +118,15 @@ class FitnessViewModel @Inject constructor(
     fun measure(value: Measurement, done: () -> Unit) = write(done) { repository.saveMeasurement(value) }
     fun removeMeasurement(date: LocalDate) = write { repository.removeMeasurement(date) }
     fun saveHydration(value: Hydration, done: () -> Unit = {}) = write(done) { repository.saveHydration(value) }
+    fun saveCustomExercise(value: CustomExercise, done: () -> Unit = {}) = write(done) { repository.saveCustomExercise(value) }
+    fun deleteCustomExercise(id: String) = write { repository.deleteCustomExercise(id) }
+    fun addCustomSet(value: CustomExerciseSet, done: () -> Unit = {}) = write(done) { repository.addCustomSet(value) }
+    fun saveSupplement(value: Supplement, done: () -> Unit = {}) = write(done) { repository.saveSupplement(value) }
+    fun deleteSupplement(id: String) = write { repository.deleteSupplement(id) }
+    fun setSupplementTaken(date: LocalDate, id: String, taken: Boolean) = write { repository.setSupplementTaken(date, id, taken) }
+    /** Moves records older builds kept in plain preferences into the encrypted database; [done] runs only after the commit. */
+    internal fun importLocalRecords(records: LegacyLocalRecords, done: () -> Unit) =
+        write(done) { repository.importLocalRecords(records.exercises, records.sets, records.supplements, records.intakes) }
     fun correctSet(set: TrainingSet, done: () -> Unit) = write(done) {repository.correctSet(set)}
     fun moveSession(id: String,date: LocalDate) = write {repository.moveSession(id,date)}
     fun deleteSession(id: String) = write {repository.deleteSession(id)}

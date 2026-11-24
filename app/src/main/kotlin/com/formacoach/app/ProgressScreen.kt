@@ -243,7 +243,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
                                 overflow = TextOverflow.Ellipsis,
                             )
                             Text(
-                                "${formatWeight(best.weightKg)} × ${number(best.repsAtWeight.toDouble(), 0)}",
+                                "${if (best.weightKg == 0.0) stringResource(R.string.bodyweight_load) else formatWeight(best.weightKg)} × ${number(best.repsAtWeight.toDouble(), 0)}",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary,
@@ -301,19 +301,19 @@ internal fun WeeklyReviewCard(snapshot: FitnessSnapshot, date: LocalDate, vm: Fi
     InfoCard {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.weekly_review), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            PillBadge(stringResource(R.string.date_range, dateLabel(review.start), dateLabel(review.end)))
             ScopeInfoButton(R.string.weekly_review, R.string.logged_only, R.string.no_auto_change)
         }
+        PillBadge(stringResource(R.string.date_range, dateLabel(review.start), dateLabel(review.end)))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             MetricTile(
                 number(review.completedSessions.toDouble(), 0),
-                stringResource(R.string.review_sessions, number(review.completedSessions.toDouble(), 0)),
+                stringResource(R.string.review_tile_sessions),
                 Modifier.weight(1f),
                 accent = MaterialTheme.colorScheme.primary,
             )
             MetricTile(
-                number(review.mealDays.toDouble(), 0),
-                stringResource(R.string.review_meal_days, number(review.mealDays.toDouble(), 0)),
+                stringResource(R.string.review_tile_meal_days_value, number(review.mealDays.toDouble(), 0)),
+                stringResource(R.string.review_tile_meal_days),
                 Modifier.weight(1f),
                 accent = MaterialTheme.colorScheme.secondary,
             )
@@ -323,14 +323,14 @@ internal fun WeeklyReviewCard(snapshot: FitnessSnapshot, date: LocalDate, vm: Fi
                 review.meanLoggedCalories?.let {
                     MetricTile(
                         number(it, 0),
-                        stringResource(R.string.review_calories, number(it, 0)),
+                        stringResource(R.string.review_tile_calories),
                         Modifier.weight(1f),
                     )
                 }
                 review.meanWeight?.let {
                     MetricTile(
                         formatWeight(it, 1),
-                        stringResource(R.string.review_weight, formatWeight(it, 1), number(review.weightObservations.toDouble(), 0)),
+                        stringResource(R.string.review_tile_weight, number(review.weightObservations.toDouble(), 0)),
                         Modifier.weight(1f),
                         accent = MaterialTheme.colorScheme.tertiary,
                     )

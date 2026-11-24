@@ -36,6 +36,14 @@ data class MealRow(@PrimaryKey val id:String,val day:Long,val name:String,val ca
 data class MeasurementRow(@PrimaryKey val day:Long,val weightKg:Double?,val waistCm:Double?,val neckCm:Double?=null,val chestCm:Double?=null,val armsCm:Double?=null,val hipsCm:Double?=null,val thighsCm:Double?=null)
 @Entity(tableName="hydration")
 data class HydrationRow(@PrimaryKey val day:Long,val milliliters:Int)
+@Entity(tableName="custom_exercises")
+data class CustomExerciseRow(@PrimaryKey val id:String,val name:String,val equipment:String,val primaryMuscle:String,val notes:String)
+@Entity(tableName="custom_sets",indices=[Index("exerciseId"),Index("day")])
+data class CustomSetRow(@PrimaryKey val id:String,val exerciseId:String,val day:Long,val reps:Int,val weightKg:Double,val warmUp:Boolean)
+@Entity(tableName="supplements")
+data class SupplementRow(@PrimaryKey val id:String,val name:String,val dose:String)
+@Entity(tableName="supplement_intakes",primaryKeys=["day","supplementId"],indices=[Index("supplementId")])
+data class SupplementIntakeRow(val day:Long,val supplementId:String)
 @Entity(tableName="programs")
 data class ProgramRow(@PrimaryKey val id:String,val name:String,val exercises:String,val restSeconds:Int,
     @ColumnInfo(defaultValue="'[]'") val prescriptions:String="[]")
@@ -48,7 +56,7 @@ data class ProposalRow(@PrimaryKey val id:String,val checkInId:String,val baseSe
 
 @Dao
 interface FitnessDao {
-    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class])
+    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class])
     fun changes(query:SupportSQLiteQuery):Flow<Int>
     @Query("SELECT * FROM profile WHERE id=1") fun profile():Flow<ProfileRow?>
     @Query("SELECT * FROM meals ORDER BY day DESC,rowid DESC") fun meals():Flow<List<MealRow>>
@@ -67,6 +75,38 @@ interface FitnessDao {
     @Upsert suspend fun saveHydration(row:HydrationRow)
     @Query("DELETE FROM hydration WHERE day=:day") suspend fun removeHydration(day:Long)
     @Query("DELETE FROM hydration") suspend fun clearHydration()
+    @Query("SELECT * FROM custom_exercises ORDER BY rowid") suspend fun allCustomExercises():List<CustomExerciseRow>
+    @Query("SELECT * FROM custom_sets ORDER BY day,rowid") suspend fun allCustomSets():List<CustomSetRow>
+    @Query("SELECT * FROM supplements ORDER BY rowid") suspend fun allSupplements():List<SupplementRow>
+    @Query("SELECT * FROM supplement_intakes ORDER BY day,supplementId") suspend fun allSupplementIntakes():List<SupplementIntakeRow>
+    @Upsert suspend fun saveCustomExercise(row:CustomExerciseRow)
+    @Upsert suspend fun saveCustomSet(row:CustomSetRow)
+    @Query("SELECT COUNT(*) FROM custom_exercises WHERE id=:id") suspend fun customExerciseCount(id:String):Int
+    @Query("DELETE FROM custom_sets WHERE id=:id") suspend fun removeCustomSet(id:String)
+    @Query("DELETE FROM custom_sets WHERE exerciseId=:id") suspend fun removeCustomSetsFor(id:String)
+    @Query("DELETE FROM custom_exercises WHERE id=:id") suspend fun removeCustomExerciseRow(id:String)
+    @Transaction suspend fun deleteCustomExercise(id:String) {removeCustomSetsFor(id);removeCustomExerciseRow(id)}
+    @Transaction suspend fun addCustomSet(row:CustomSetRow) {check(customExerciseCount(row.exerciseId)==1);saveCustomSet(row)}
+    @Upsert suspend fun saveSupplement(row:SupplementRow)
+    @Query("SELECT COUNT(*) FROM supplements WHERE id=:id") suspend fun supplementCount(id:String):Int
+    @Upsert suspend fun insertSupplementIntake(row:SupplementIntakeRow)
+    @Query("DELETE FROM supplement_intakes WHERE day=:day AND supplementId=:id") suspend fun removeSupplementIntake(day:Long,id:String)
+    @Query("DELETE FROM supplement_intakes WHERE supplementId=:id") suspend fun removeIntakesFor(id:String)
+    @Query("DELETE FROM supplements WHERE id=:id") suspend fun removeSupplementRow(id:String)
+    @Transaction suspend fun deleteSupplement(id:String) {removeIntakesFor(id);removeSupplementRow(id)}
+    @Transaction suspend fun setSupplementTaken(day:Long,id:String,taken:Boolean) {
+        check(supplementCount(id)==1)
+        if(taken) insertSupplementIntake(SupplementIntakeRow(day,id)) else removeSupplementIntake(day,id)
+    }
+    @Query("DELETE FROM custom_sets") suspend fun clearCustomSets()
+    @Query("DELETE FROM custom_exercises") suspend fun clearCustomExercises()
+    @Query("DELETE FROM supplement_intakes") suspend fun clearSupplementIntakes()
+    @Query("DELETE FROM supplements") suspend fun clearSupplements()
+    /** One-time copy of records older builds kept in plain preferences; upserts by ID so repeating it is harmless. */
+    @Transaction suspend fun importLocalRecords(exercises:List<CustomExerciseRow>,sets:List<CustomSetRow>,supplements:List<SupplementRow>,intakes:List<SupplementIntakeRow>) {
+        exercises.forEach {saveCustomExercise(it)};sets.forEach {addCustomSet(it)}
+        supplements.forEach {saveSupplement(it)};intakes.forEach {setSupplementTaken(it.day,it.supplementId,true)}
+    }
     @Query("SELECT * FROM exercise_preferences WHERE exercise=:exercise") suspend fun exercisePreference(exercise:String):ExercisePreferenceRow?
     @Upsert suspend fun saveExercisePreference(row:ExercisePreferenceRow)
     @Transaction suspend fun favorite(exercise:String,value:Boolean) {
@@ -88,6 +128,10 @@ interface FitnessDao {
         allProposals().map {PlanProposal(it.id,it.checkInId,it.baseSessions,it.proposedSessions,Json.decodeFromString(it.evidence),ProposalStatus.valueOf(it.status))},
         allExercisePreferences().map {ExercisePreference(Exercise.valueOf(it.exercise),it.favorite,it.notes)},
         allHydration().map {Hydration(LocalDate.ofEpochDay(it.day),it.milliliters)},
+        allCustomExercises().map {CustomExercise(it.id,it.name,Equipment.valueOf(it.equipment),Muscle.valueOf(it.primaryMuscle),it.notes)},
+        allCustomSets().map {CustomExerciseSet(it.id,it.exerciseId,LocalDate.ofEpochDay(it.day),it.reps,it.weightKg,it.warmUp)},
+        allSupplements().map {Supplement(it.id,it.name,it.dose)},
+        allSupplementIntakes().map {SupplementIntake(LocalDate.ofEpochDay(it.day),it.supplementId)},
     )
     @Upsert suspend fun insertProfile(row:ProfileRow)
     @Transaction suspend fun saveProfile(row:ProfileRow) {insertProfile(row);supersedeMismatched(row.sessionsPerWeek)}
@@ -189,7 +233,7 @@ interface FitnessDao {
     @Query("DELETE FROM exercise_preferences") suspend fun clearExercisePreferences()
     @Insert suspend fun insertMeasurementRows(rows:List<MeasurementRow>)
     @Transaction suspend fun replaceSnapshot(data:FitnessSnapshot) {
-        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods();clearExercisePreferences();clearHydration()
+        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods();clearExercisePreferences();clearHydration();clearSupplementIntakes();clearSupplements();clearCustomSets();clearCustomExercises()
         data.profile?.let {insertProfile(it.row())}
         data.programs.forEach {saveProgram(it.row())};data.foods.forEach {saveFood(it.row())}
         data.sessions.forEach {insertSession(it.row())};data.sets.forEach {insertSet(it.row())}
@@ -198,10 +242,16 @@ interface FitnessDao {
         data.checkIns.forEach {insertCheckIn(it.row())};data.proposals.forEach {insertProposal(it.row())}
         data.exercisePreferences.forEach {saveExercisePreference(ExercisePreferenceRow(it.exercise.name,it.favorite,it.notes))}
         data.hydration.forEach {saveHydration(HydrationRow(it.date.toEpochDay(),it.milliliters))}
+        data.customExercises.forEach {saveCustomExercise(it.row())};data.customSets.forEach {saveCustomSet(it.row())}
+        data.supplements.forEach {saveSupplement(it.row())};data.supplementIntakes.forEach {insertSupplementIntake(it.row())}
     }
 }
 
 internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget,carbsTarget=carbsTarget,fatTarget=fatTarget,waterGoalMl=waterGoalMl)
+internal fun CustomExercise.row()=CustomExerciseRow(id,name,equipment.name,primaryMuscle.name,notes)
+internal fun CustomExerciseSet.row()=CustomSetRow(id,exerciseId,date.toEpochDay(),reps,weightKg,warmUp)
+internal fun Supplement.row()=SupplementRow(id,name,dose)
+internal fun SupplementIntake.row()=SupplementIntakeRow(date.toEpochDay(),supplementId)
 internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds,source.name,averageHeartRateBpm,activeEnergyKcal,healthKitWorkoutId,Json.encodeToString(prescriptions))
 internal fun TrainingSet.row()=SetRow(id,sessionId,exercise.name,reps,weightKg,kind.name,rpe)
 internal fun Meal.row()=MealRow(id,date.toEpochDay(),name,calories,protein,carbs,fat,foodId,quantity,unit?.name,source,slot.name)
@@ -210,10 +260,15 @@ internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
 internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
 internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
-@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class],version=6,exportSchema=true)
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class],version=7,exportSchema=true)
 abstract class FitnessDatabase:RoomDatabase() {
     abstract fun dao():FitnessDao
     companion object {
+        val MIGRATION_6_7=object:Migration(6,7) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                MIGRATION_6_7_SQL.forEach(db::execSQL)
+            }
+        }
         val MIGRATION_5_6=object:Migration(5,6) {
             override fun migrate(db:SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE profile ADD COLUMN carbsTarget REAL")
@@ -271,7 +326,18 @@ abstract class FitnessDatabase:RoomDatabase() {
             System.loadLibrary("sqlcipher")
             val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
             return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6).build()
+                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6,MIGRATION_6_7).build()
         }
     }
 }
+
+/** Must match the Room v7 schema export exactly (schemas/com.formacoach.data.FitnessDatabase/7.json). */
+internal val MIGRATION_6_7_SQL=listOf(
+    "CREATE TABLE IF NOT EXISTS `custom_exercises` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `equipment` TEXT NOT NULL, `primaryMuscle` TEXT NOT NULL, `notes` TEXT NOT NULL, PRIMARY KEY(`id`))",
+    "CREATE TABLE IF NOT EXISTS `custom_sets` (`id` TEXT NOT NULL, `exerciseId` TEXT NOT NULL, `day` INTEGER NOT NULL, `reps` INTEGER NOT NULL, `weightKg` REAL NOT NULL, `warmUp` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+    "CREATE INDEX IF NOT EXISTS `index_custom_sets_exerciseId` ON `custom_sets` (`exerciseId`)",
+    "CREATE INDEX IF NOT EXISTS `index_custom_sets_day` ON `custom_sets` (`day`)",
+    "CREATE TABLE IF NOT EXISTS `supplements` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, `dose` TEXT NOT NULL, PRIMARY KEY(`id`))",
+    "CREATE TABLE IF NOT EXISTS `supplement_intakes` (`day` INTEGER NOT NULL, `supplementId` TEXT NOT NULL, PRIMARY KEY(`day`, `supplementId`))",
+    "CREATE INDEX IF NOT EXISTS `index_supplement_intakes_supplementId` ON `supplement_intakes` (`supplementId`)",
+)

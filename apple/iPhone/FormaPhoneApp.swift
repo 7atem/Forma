@@ -718,7 +718,12 @@ private struct MealSlotOption: Identifiable {
                 )
                 if ExerciseCatalog.of(exercise).equipment.contains(.dumbbells) {
                     let perSide = ExerciseCatalog.of(exercise).perSide
-                    if kg > 0 && !perSide {
+                    // One dumbbell held in both hands (e.g. goblet squat) is never doubled into a "pair".
+                    if ExerciseCatalog.of(exercise).singleDumbbell {
+                        Text("dumbbell_single_hint")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(FormaTheme.secondary)
+                    } else if kg > 0 && !perSide {
                         Text("\(String(localized: "dumbbell_per_hand_hint")) · \(String(localized: "dumbbell_pair_total")) \(FormaTheme.formatWeight(kg * 2.0, useLb: useLb))")
                             .font(.caption.weight(.medium))
                             .foregroundStyle(FormaTheme.secondary)

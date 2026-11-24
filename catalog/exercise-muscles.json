@@ -747,6 +747,7 @@
         "DUMBBELLS"
       ],
       "perSide": false,
+      "singleDumbbell": true,
       "reference": "https://www.nasm.org/resource-center/exercise-library/goblet-squat",
       "primaryDetail": [
         "QUADRICEPS",
@@ -1443,6 +1444,7 @@
         "BENCH"
       ],
       "perSide": false,
+      "singleDumbbell": true,
       "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
       "primaryDetail": [
         "TRICEPS"

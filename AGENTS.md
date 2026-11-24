@@ -2,7 +2,7 @@
 
 Independent Android project, working name Forma / فورمة. Nemory is a separate product and remains at `D:\Vault Brain`. Never rename, rewrite, migrate or delete that checkout as part of Forma work. See `docs/NEMORY_PRESERVATION.md` before proposing shared-source changes.
 
-- Kotlin, Jetpack Compose, Hilt, Room v6 with SQLCipher and explicit 1→2→3→4→5→6 migrations. Native iPhone/watchOS source under apple/ is unbuilt on this Windows host. Never claim Apple runtime validation without Mac/paired-device evidence.
+- Kotlin, Jetpack Compose, Hilt, Room v7 with SQLCipher and explicit 1→2→3→4→5→6→7 migrations. Native iPhone/watchOS source under apple/ is unbuilt on this Windows host. Never claim Apple runtime validation without Mac/paired-device evidence.
 - Separate ID `com.formacoach.app`, database `forma.db`, key filename and Keystore alias. Never reuse Nemory signing credentials or read its database.
 - New typed fitness entities; do not use VaultItem, lens IDs or arbitrary metadata as the fitness schema.
 - All Android strings in matching `values/*.xml` and `values-ar/*.xml`; Apple strings in `apple/Resources/en.lproj` and `ar.lproj`. Support RTL and localized numeric input.

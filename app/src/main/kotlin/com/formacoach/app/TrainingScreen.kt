@@ -136,7 +136,7 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
                     Text(stringResource(R.string.starter_programs), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     ScopeInfoButton(R.string.starter_programs, R.string.template_note)
                 }
-                StarterTemplates.all.forEach { template ->
+                StarterTemplates.all.forEachIndexed { index, template ->
                     ProgramCard(
                         stringResource(
                             when (template.id) {
@@ -149,6 +149,8 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
                         "start_${template.id}",
                         state.busy,
                         { vm.start(template.id, date) },
+                        // Only one solid call to action: the first starter, and only until the user has saved a program.
+                        emphasized = index == 0 && state.snapshot.programs.isEmpty(),
                     )
                 }
             }
@@ -177,6 +179,7 @@ private fun ProgramCard(
     tag: String,
     busy: Boolean,
     onStart: () -> Unit,
+    emphasized: Boolean = true,
     actions: @Composable () -> Unit = {},
 ) {
     InfoCard(Modifier.testTag("card_$tag")) {
@@ -197,15 +200,18 @@ private fun ProgramCard(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Button(
-            onClick = onStart,
-            enabled = !busy,
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag(tag),
-        ) {
+        val startContent: @Composable RowScope.() -> Unit = {
             Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(stringResource(R.string.start_session), fontWeight = FontWeight.Bold)
+        }
+        val startModifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag(tag)
+        // The user's own programs keep the solid primary button; starter templates use a quieter tonal one
+        // so a list of cards does not show several equally loud calls to action.
+        if (emphasized) {
+            Button(onClick = onStart, enabled = !busy, shape = RoundedCornerShape(14.dp), modifier = startModifier, content = startContent)
+        } else {
+            FilledTonalButton(onClick = onStart, enabled = !busy, shape = RoundedCornerShape(14.dp), modifier = startModifier, content = startContent)
         }
         actions()
     }
@@ -641,17 +647,17 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Row(
-                    Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+                // With large text the button would crush the sentence, so stack them instead.
+                val stackPrevious = LocalDensity.current.fontScale > 1.25f
+                val previousText: @Composable (Modifier) -> Unit = { mod ->
                     Text(
                         stringResource(R.string.previous_set, number(last.reps.toDouble(), 0), formatLoad(last.weightKg, last.exercise)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f),
+                        modifier = mod,
                     )
+                }
+                val copyPrevious: @Composable () -> Unit = {
                     TextButton(
                         onClick = {
                             reps = formatInputNumber(last.reps.toDouble(), locale, 0)
@@ -662,6 +668,21 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                             showRpe = last.rpe != null
                         },
                     ) { Text(stringResource(R.string.copy_previous_set), fontWeight = FontWeight.SemiBold) }
+                }
+                if (stackPrevious) {
+                    Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                        previousText(Modifier)
+                        copyPrevious()
+                    }
+                } else {
+                    Row(
+                        Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        previousText(Modifier.weight(1f))
+                        copyPrevious()
+                    }
                 }
             }
         }
@@ -701,7 +722,11 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
 
         if (Equipment.DUMBBELLS in ExerciseCatalog.of(exercise).equipment) {
             val enteredVal = NumericInput.decimal(weight)
-            val pairNote = if (enteredVal != null && enteredVal > 0.0 && !ExerciseCatalog.of(exercise).perSide) {
+            val details = ExerciseCatalog.of(exercise)
+            // One dumbbell held in both hands (e.g. goblet squat) is never doubled into a "pair".
+            val pairNote = if (details.singleDumbbell) {
+                stringResource(R.string.dumbbell_single_hint)
+            } else if (enteredVal != null && enteredVal > 0.0 && !details.perSide) {
                 stringResource(R.string.dumbbell_per_hand_total, number(enteredVal * 2.0, 1), unitLabel)
             } else {
                 stringResource(R.string.dumbbell_per_hand_hint)

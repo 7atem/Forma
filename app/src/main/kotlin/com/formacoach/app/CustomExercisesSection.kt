@@ -1,6 +1,5 @@
 package com.formacoach.app
 
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -14,77 +13,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.formacoach.model.*
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.time.LocalDate
-import java.util.UUID
-
-@Serializable
-internal data class CustomExerciseEntry(
-    val id: String,
-    val name: String,
-    val equipment: String,
-    val primaryMuscle: String,
-    val notes: String = "",
-)
-
-@Serializable
-internal data class CustomExerciseSet(
-    val id: String,
-    val exerciseId: String,
-    val date: String,
-    val reps: Int,
-    val weightKg: Double,
-    val warmUp: Boolean = false,
-)
-
-@Serializable
-internal data class CustomExercisesState(
-    val exercises: List<CustomExerciseEntry> = emptyList(),
-    val sets: List<CustomExerciseSet> = emptyList(),
-)
-
-internal object CustomExercisesStore {
-    private const val PREFS = "forma_custom_exercises_prefs"
-    private const val KEY = "state_v1"
-    private val json = Json { ignoreUnknownKeys = true }
-
-    fun load(context: Context): CustomExercisesState {
-        val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null) ?: return CustomExercisesState()
-        return runCatching { json.decodeFromString<CustomExercisesState>(raw) }.getOrDefault(CustomExercisesState())
-    }
-
-    fun save(context: Context, state: CustomExercisesState) {
-        val clean = state.copy(
-            exercises = state.exercises.take(100),
-            sets = state.sets.takeLast(2000),
-        )
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY, json.encodeToString(clean))
-            .apply()
-    }
-}
 
 @Composable
-internal fun CustomExercisesSection(today: LocalDate) {
-    val context = LocalContext.current
+internal fun CustomExercisesSection(app: AppState, vm: FitnessViewModel, today: LocalDate) {
     val unit = LocalWeightUnit.current
-    var state by remember { mutableStateOf(CustomExercisesStore.load(context)) }
+    // Stored as typed records in the encrypted database and included in backup.
+    val exercises = app.snapshot.customExercises
+    val allSets = app.snapshot.customSets
     var showCreate by remember { mutableStateOf(false) }
-    var loggingExercise by remember { mutableStateOf<CustomExerciseEntry?>(null) }
-
-    fun update(next: CustomExercisesState) {
-        state = next
-        CustomExercisesStore.save(context, next)
-    }
+    var loggingExercise by remember { mutableStateOf<CustomExercise?>(null) }
 
     InfoCard(Modifier.testTag("custom_exercises_card")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -97,6 +40,7 @@ internal fun CustomExercisesSection(today: LocalDate) {
             )
             FilledTonalButton(
                 onClick = { showCreate = true },
+                enabled = !app.busy && exercises.size < MAX_CUSTOM_EXERCISES,
                 shape = RoundedCornerShape(10.dp),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 modifier = Modifier.testTag("add_custom_exercise_btn"),
@@ -107,13 +51,13 @@ internal fun CustomExercisesSection(today: LocalDate) {
             }
         }
 
-        if (state.exercises.isNotEmpty()) {
+        if (exercises.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.exercises.forEach { ex ->
-                    val exSets = state.sets.filter { it.exerciseId == ex.id }
+                exercises.forEach { ex ->
+                    val exSets = allSets.filter { it.exerciseId == ex.id }
                     val best = exSets.filterNot { it.warmUp }.maxByOrNull { it.weightKg }
-                    val muscleEnum = runCatching { Muscle.valueOf(ex.primaryMuscle) }.getOrNull()
-                    val equipEnum = runCatching { Equipment.valueOf(ex.equipment) }.getOrNull()
+                    val muscleEnum: Muscle? = ex.primaryMuscle
+                    val equipEnum: Equipment? = ex.equipment
                     Surface(
                         shape = RoundedCornerShape(14.dp),
                         color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -144,21 +88,17 @@ internal fun CustomExercisesSection(today: LocalDate) {
                             }
                             FilledTonalButton(
                                 onClick = { loggingExercise = ex },
+                                enabled = !app.busy,
+                                modifier = Modifier.testTag("log_custom_${ex.id}"),
                                 shape = RoundedCornerShape(10.dp),
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                             ) { Text(stringResource(R.string.add_set)) }
-                            IconButton(
-                                onClick = {
-                                    update(
-                                        state.copy(
-                                            exercises = state.exercises.filterNot { it.id == ex.id },
-                                            sets = state.sets.filterNot { it.exerciseId == ex.id },
-                                        ),
-                                    )
-                                },
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove), tint = MaterialTheme.colorScheme.error)
-                            }
+                            ConfirmButton(
+                                R.string.remove,
+                                stringResource(R.string.custom_exercise_delete_note, number(exSets.size.toDouble(), 0)),
+                                !app.busy,
+                                tag = "remove_custom_${ex.id}",
+                            ) { vm.deleteCustomExercise(ex.id) }
                         }
                     }
                 }
@@ -180,6 +120,7 @@ internal fun CustomExercisesSection(today: LocalDate) {
                         value = name,
                         onValueChange = { name = it },
                         label = { Text(stringResource(R.string.custom_exercise_name)) },
+                        modifier = Modifier.testTag("custom_exercise_name"),
                         singleLine = true,
                     )
                     Text(stringResource(R.string.custom_exercise_muscle), style = MaterialTheme.typography.labelMedium)
@@ -212,21 +153,18 @@ internal fun CustomExercisesSection(today: LocalDate) {
             },
             confirmButton = {
                 TextButton(
-                    enabled = name.trim().isNotEmpty(),
+                    enabled = name.trim().isNotEmpty() && !app.busy,
                     onClick = {
-                        update(
-                            state.copy(
-                                exercises = state.exercises + CustomExerciseEntry(
-                                    id = UUID.randomUUID().toString(),
-                                    name = name.trim().take(60),
-                                    equipment = selectedEquipment.name,
-                                    primaryMuscle = selectedMuscle.name,
-                                    notes = notes.trim().take(120),
-                                ),
+                        vm.saveCustomExercise(
+                            CustomExercise(
+                                name = name.trim().take(60),
+                                equipment = selectedEquipment,
+                                primaryMuscle = selectedMuscle,
+                                notes = notes.trim().take(120),
                             ),
-                        )
-                        showCreate = false
+                        ) { showCreate = false }
                     },
+                    modifier = Modifier.testTag("save_custom_exercise"),
                 ) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
@@ -239,7 +177,7 @@ internal fun CustomExercisesSection(today: LocalDate) {
         var repsText by remember(target.id) { mutableStateOf("10") }
         var weightText by remember(target.id) { mutableStateOf("") }
         var warmUp by remember(target.id) { mutableStateOf(false) }
-        val recentSets = state.sets.filter { it.exerciseId == target.id }.takeLast(5).reversed()
+        val recentSets = allSets.filter { it.exerciseId == target.id }.takeLast(5).reversed()
         AlertDialog(
             onDismissRequest = { loggingExercise = null },
             title = { Text(target.name, fontWeight = FontWeight.Bold) },
@@ -249,12 +187,14 @@ internal fun CustomExercisesSection(today: LocalDate) {
                         value = repsText,
                         onValueChange = { repsText = it },
                         label = { Text(stringResource(R.string.reps)) },
+                        modifier = Modifier.testTag("custom_set_reps"),
                         singleLine = true,
                     )
                     OutlinedTextField(
                         value = weightText,
                         onValueChange = { weightText = it },
                         label = { Text(stringResource(if (unit == WeightUnit.KG) R.string.weight_kg else R.string.weight_lb)) },
+                        modifier = Modifier.testTag("custom_set_weight"),
                         singleLine = true,
                     )
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -265,7 +205,7 @@ internal fun CustomExercisesSection(today: LocalDate) {
                         HorizontalDivider()
                         recentSets.forEach { s ->
                             Text(
-                                "${s.date} · ${formatWeight(s.weightKg, 1)} × ${s.reps}" + if (s.warmUp) " (${stringResource(R.string.warmup_set)})" else "",
+                                "${dateLabel(s.date)} · ${formatWeight(s.weightKg, 1)} × ${s.reps}" + if (s.warmUp) " (${stringResource(R.string.warmup_set)})" else "",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -277,24 +217,21 @@ internal fun CustomExercisesSection(today: LocalDate) {
                 val parsedReps = NumericInput.integer(repsText)?.takeIf { it in 1..1000 }
                 val parsedWeight = if (weightText.isBlank()) 0.0 else NumericInput.decimal(weightText)?.let { WeightUnits.toKg(it, unit) }?.takeIf { it in 0.0..1000.0 }
                 TextButton(
-                    enabled = parsedReps != null && parsedWeight != null,
+                    enabled = parsedReps != null && parsedWeight != null && !app.busy,
                     onClick = {
                         if (parsedReps != null && parsedWeight != null) {
-                            update(
-                                state.copy(
-                                    sets = state.sets + CustomExerciseSet(
-                                        id = UUID.randomUUID().toString(),
-                                        exerciseId = target.id,
-                                        date = today.toString(),
-                                        reps = parsedReps,
-                                        weightKg = parsedWeight,
-                                        warmUp = warmUp,
-                                    ),
+                            vm.addCustomSet(
+                                CustomExerciseSet(
+                                    exerciseId = target.id,
+                                    date = today,
+                                    reps = parsedReps,
+                                    weightKg = parsedWeight,
+                                    warmUp = warmUp,
                                 ),
-                            )
-                            loggingExercise = null
+                            ) { loggingExercise = null }
                         }
                     },
+                    modifier = Modifier.testTag("save_custom_set"),
                 ) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
@@ -303,3 +240,6 @@ internal fun CustomExercisesSection(today: LocalDate) {
         )
     }
 }
+
+/** Keeps the library list manageable; nothing already saved is ever trimmed. */
+private const val MAX_CUSTOM_EXERCISES = 100

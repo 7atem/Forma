@@ -28,6 +28,55 @@ import org.json.JSONArray
 
 @RunWith(AndroidJUnit4::class)
 class EncryptedStorageTest {
+    @Test fun schemaSixUpgradeKeepsHistoryAndStoresCustomExercisesAndSupplementsInBackup()=runBlocking {
+        val helper=createLegacy(6)
+        helper.writableDatabase.execSQL("INSERT INTO hydration VALUES(20759,1500)")
+        helper.close()
+        val repo=repository()
+        assertEquals(1500,database!!.dao().readSnapshot().hydration.single().milliliters)
+        val exercise=CustomExercise(name="Landmine press",equipment=Equipment.BARBELL,primaryMuscle=Muscle.FRONT_DELTS)
+        repo.saveCustomExercise(exercise)
+        repo.addCustomSet(CustomExerciseSet(exerciseId=exercise.id,date=LocalDate.of(2026,11,3),reps=8,weightKg=30.0))
+        val supplement=Supplement(name="Vitamin D3")
+        repo.saveSupplement(supplement)
+        repo.setSupplementTaken(LocalDate.of(2026,11,3),supplement.id,true)
+        var orphanRejected=false
+        try {repo.addCustomSet(CustomExerciseSet(exerciseId="missing",date=LocalDate.of(2026,11,3),reps=8,weightKg=30.0))} catch(_:IllegalStateException) {orphanRejected=true}
+        assertTrue(orphanRejected)
+        val saved=database!!.dao().readSnapshot()
+        assertEquals(1,saved.customSets.size);assertEquals(1,saved.supplementIntakes.size)
+        val archive=repo.export("schema seven backup round trip".toCharArray())
+        repo.deleteCustomExercise(exercise.id);repo.deleteSupplement(supplement.id)
+        val cleared=database!!.dao().readSnapshot()
+        assertTrue(cleared.customSets.isEmpty()&&cleared.supplementIntakes.isEmpty())
+        repo.restore(repo.previewRestore(archive,"schema seven backup round trip".toCharArray()))
+        assertEquals(saved,database!!.dao().readSnapshot())
+    }
+    @Test fun plainPreferenceRecordsMoveIntoTheEncryptedDatabaseOnce()=runBlocking {
+        LegacyLocalStore.clear(context)
+        val repo=repository()
+        context.getSharedPreferences("forma_custom_exercises_prefs",Context.MODE_PRIVATE).edit().putString("state_v1",
+            """{"exercises":[{"id":"ex1","name":"Cable pullover","equipment":"CABLE","primaryMuscle":"LATS"}],"sets":[{"id":"s1","exerciseId":"ex1","date":"2026-11-02","reps":12,"weightKg":15.0},{"id":"s2","exerciseId":"gone","date":"2026-11-02","reps":5,"weightKg":5.0}]}""").commit()
+        context.getSharedPreferences("forma_supplements_prefs",Context.MODE_PRIVATE).edit().putString("state_v1",
+            """{"items":[{"id":"sup1","name":"Creatine","dose":"5 g"}],"takenByDate":{"2026-11-02":["sup1","sup1","gone"]}}""").commit()
+        val records=checkNotNull(LegacyLocalStore.read(context))
+        repo.importLocalRecords(records.exercises,records.sets,records.supplements,records.intakes)
+        repo.importLocalRecords(records.exercises,records.sets,records.supplements,records.intakes) // repeat is harmless
+        LegacyLocalStore.clear(context)
+        val data=database!!.dao().readSnapshot()
+        assertEquals(listOf("Cable pullover"),data.customExercises.map {it.name})
+        assertEquals(listOf("s1"),data.customSets.map {it.id})
+        assertEquals("5 g",data.supplements.single().dose)
+        assertEquals(listOf(SupplementIntake(LocalDate.of(2026,11,2),"sup1")),data.supplementIntakes)
+        assertNull(LegacyLocalStore.read(context))
+        // Unreadable data is reported, not silently replaced, so the original stays in place.
+        context.getSharedPreferences("forma_supplements_prefs",Context.MODE_PRIVATE).edit().putString("state_v1","{broken").commit()
+        var unreadable=false
+        try {LegacyLocalStore.read(context)} catch(_:Exception) {unreadable=true}
+        assertTrue(unreadable)
+        assertEquals("{broken",context.getSharedPreferences("forma_supplements_prefs",Context.MODE_PRIVATE).getString("state_v1",null))
+        LegacyLocalStore.clear(context) // preferences are app-wide, so leave none behind for other tests
+    }
     @Test fun schemaFiveUpgradeRetainsHistoryAndSupportsHydrationAndExpandedMeasurements()=runBlocking {
         val helper=createLegacy(5)
         helper.writableDatabase.execSQL("INSERT INTO profile VALUES(1,'Legacy v5','FAT_LOSS',3,2000,150.0)")

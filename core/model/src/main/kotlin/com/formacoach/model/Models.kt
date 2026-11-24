@@ -160,7 +160,60 @@ data class FitnessSnapshot(
     val proposals: List<PlanProposal> = emptyList(),
     val exercisePreferences: List<ExercisePreference> = emptyList(),
     val hydration: List<Hydration> = emptyList(),
+    val customExercises: List<CustomExercise> = emptyList(),
+    val customSets: List<CustomExerciseSet> = emptyList(),
+    val supplements: List<Supplement> = emptyList(),
+    val supplementIntakes: List<SupplementIntake> = emptyList(),
 )
+
+/** A user-defined exercise outside the reviewed catalog; muscle and equipment are the user's own labels. */
+@Serializable
+data class CustomExercise(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val equipment: Equipment,
+    val primaryMuscle: Muscle,
+    val notes: String = "",
+) {
+    init {
+        require(id.isNotBlank() && id.length <= 64)
+        require(name.isNotBlank() && name.length <= 60)
+        require(notes.length <= 120)
+    }
+}
+
+/** One recorded set for a custom exercise. Warm-ups stay out of personal bests. */
+@Serializable
+data class CustomExerciseSet(
+    val id: String = UUID.randomUUID().toString(),
+    val exerciseId: String,
+    val date: LocalDate,
+    val reps: Int,
+    val weightKg: Double,
+    val warmUp: Boolean = false,
+) {
+    init {
+        require(id.isNotBlank() && id.length <= 64 && exerciseId.isNotBlank())
+        require(reps in 1..1000)
+        require(weightKg.isFinite() && weightKg in 0.0..1000.0)
+    }
+}
+
+/** A user-entered supplement name and optional free-text dose label; Forma never suggests doses. */
+@Serializable
+data class Supplement(val id: String = UUID.randomUUID().toString(), val name: String, val dose: String = "") {
+    init {
+        require(id.isNotBlank() && id.length <= 64)
+        require(name.isNotBlank() && name.length <= 60)
+        require(dose.length <= 30)
+    }
+}
+
+/** The user checked a supplement off on a local calendar date. Missing check-offs are unknown, not misses. */
+@Serializable
+data class SupplementIntake(val date: LocalDate, val supplementId: String) {
+    init { require(supplementId.isNotBlank()) }
+}
 
 @Serializable
 data class ExercisePreference(val exercise:Exercise,val favorite:Boolean=false,val notes:String="") {

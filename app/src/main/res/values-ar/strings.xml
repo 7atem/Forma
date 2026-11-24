@@ -239,7 +239,7 @@
     <string name="workout_complete_banner">تم حفظ الجلسة</string>
     <string name="new_pr_badge">رقم قياسي جديد!</string>
     <string name="activity_heatmap_title">شبكة تدريب 12 أسبوع</string>
-    <string name="week_streak_badge">%1$s أسابيع مسجلة</string>
+    <string name="week_streak_badge">أسابيع نشطة متتالية: %1$s</string>
     <string name="calc_from_macros">احسب السعرات</string>
     <string name="toggle_theme">تبديل المظهر الفاتح أو الداكن</string>
     <string name="play_demo">تحريك</string>
@@ -407,6 +407,7 @@
     <string name="export_nutrition_csv">تصدير التغذية CSV</string>
     <string name="export_measurements_csv">تصدير القياسات والماء CSV</string>
     <string name="dumbbell_per_hand_hint">سجّل وزن الدمبل الواحد (لكل يد).</string>
+    <string name="dumbbell_single_hint">سجّل وزن الدمبل الواحد الذي تمسكه.</string>
     <string name="dumbbell_per_hand_total">وزن الدمبل الواحد · الإجمالي لليدين: %1$s %2$s</string>
     <string name="custom_exercises_title">تماريني المخصصة</string>
     <string name="custom_exercise_add">تمرين جديد</string>
@@ -418,4 +419,13 @@
     <string name="custom_exercise_best">الأفضل</string>
     <string name="badge_video_short">فيديو</string>
     <string name="badge_3d_short">3D</string>
+    <string name="custom_exercise_delete_note">يحذف هذا التمرين ومجموعاته المسجّلة (%1$s). لا يمكن التراجع عن ذلك.</string>
+    <string name="supplement_delete_note">يحذف هذا المكمّل وسجل تناوله. لا يمكن التراجع عن ذلك.</string>
+    <string name="review_tile_sessions">التمارين المكتملة</string>
+    <string name="review_tile_meal_days_value">%1$s / 7</string>
+    <string name="review_tile_meal_days">أيام فيها أكل مسجل</string>
+    <string name="review_tile_calories">متوسط السعرات لكل يوم مسجل</string>
+    <string name="review_tile_weight">متوسط وزن الجسم · %1$s قياسات</string>
+    <string name="logged_entries_heading">ما سجلته</string>
+    <string name="add_food_heading">أضف طعامًا</string>
 </resources>

@@ -117,6 +117,9 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
         }
     }
 
+    // The library opens from the toolbar, so it appears right under it.
+    if (library) FoodLibrary(state, vm)
+
     // Compact Macro Summary Dashboard (single glanceable card)
     InfoCard {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -189,6 +192,84 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
         }
     }
 
+    // The day's log comes right after the summary; entry tools follow below.
+    Text(stringResource(R.string.logged_entries_heading), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.testTag("logged_entries_heading"))
+    // Searching one day's entries only helps once the list is long.
+    if (logged.size > 6 || search.isNotBlank()) Input(R.string.search_meals, search, { search = it }, "meal_search", numeric = false)
+    val meals = state.snapshot.meals.filter { it.date == date && (search.isBlank() || it.name.contains(search, true)) }
+    var comboGroup by remember { mutableStateOf<Pair<MealSlot, List<Meal>>?>(null) }
+    if (meals.isEmpty()) Text(stringResource(R.string.no_meals), color = MaterialTheme.colorScheme.onSurfaceVariant)
+    MealSlot.entries.forEach { group ->
+        val values = meals.filter { it.slot == group }
+        if (values.isNotEmpty()) {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth().testTag("meal_group_${group.name}"),
+            ) {
+                Row(
+                    Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(mealSlotIcon(group), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+                    Text(
+                        stringResource(
+                            R.string.meal_group_heading,
+                            stringResource(mealSlotLabel(group)),
+                            number(values.sumOf { it.calories }, 0),
+                            number(values.sumOf { it.protein }),
+                        ),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (values.size in 2..30) {
+                        TextButton(
+                            onClick = { comboGroup = group to values },
+                            enabled = !state.busy,
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                            modifier = Modifier.testTag("save_combo_${group.name}"),
+                        ) {
+                            Text(stringResource(R.string.save_as_combo), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+        values.forEach { meal ->
+            key(meal.id) {
+                InfoCard {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(meal.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            meal.quantity?.let {
+                                Text(
+                                    stringResource(R.string.portion_record, number(it), stringResource(unitLabel(checkNotNull(meal.unit)))),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+                    NutrientSummary(meal.calories, meal.protein, meal.carbs, meal.fat)
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            if (meal.source.isBlank()) stringResource(R.string.manual_source) else stringResource(R.string.source_value, meal.source),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = { editing = meal }, enabled = !state.busy) { Text(stringResource(R.string.edit)) }
+                        ConfirmButton(R.string.remove, stringResource(R.string.delete_meal_note), !state.busy) { vm.removeMeal(meal.id) }
+                    }
+                }
+            }
+        }
+    }
+
+
     // Compact Daily Hydration Bar (single-row above-the-fold, persisted in Room v6)
     val waterMl = state.snapshot.hydration.firstOrNull { it.date == date }?.milliliters ?: 0
     val waterGoal = state.snapshot.profile?.waterGoalMl
@@ -240,9 +321,9 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
         }
     }
 
-    SupplementsVitaminsCard(date)
+    SupplementsVitaminsCard(state, vm, date)
 
-    if (library) FoodLibrary(state, vm)
+    Text(stringResource(R.string.add_food_heading), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.testTag("add_food_heading"))
 
     if (state.snapshot.foods.isEmpty()) {
         val arabic = LocalConfiguration.current.locales[0].language == "ar"
@@ -411,110 +492,18 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
         }
     }
 
-    InfoCard { MealFields(null, date, today, state.busy, defaultSlot = slot, onSave = { meal, done -> vm.addMeal(meal, done) }) }
-
-    Text(stringResource(R.string.food_for_date, dateLabel(date)), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-    Input(R.string.search_meals, search, { search = it }, "meal_search", numeric = false)
-    val meals = state.snapshot.meals.filter { it.date == date && (search.isBlank() || it.name.contains(search, true)) }
-    var comboGroup by remember { mutableStateOf<Pair<MealSlot, List<Meal>>?>(null) }
-    if (meals.isEmpty()) Text(stringResource(R.string.no_meals), color = MaterialTheme.colorScheme.onSurfaceVariant)
-    MealSlot.entries.forEach { group ->
-        val values = meals.filter { it.slot == group }
-        if (values.isNotEmpty()) {
-            Surface(
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier.fillMaxWidth().testTag("meal_group_${group.name}"),
-            ) {
-                Row(
-                    Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Icon(mealSlotIcon(group), contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
-                    Text(
-                        stringResource(
-                            R.string.meal_group_heading,
-                            stringResource(mealSlotLabel(group)),
-                            number(values.sumOf { it.calories }, 0),
-                            number(values.sumOf { it.protein }),
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.weight(1f),
-                    )
-                    if (values.size in 2..30) {
-                        TextButton(
-                            onClick = { comboGroup = group to values },
-                            enabled = !state.busy,
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                            modifier = Modifier.testTag("save_combo_${group.name}"),
-                        ) {
-                            Text(stringResource(R.string.save_as_combo), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
-        values.forEach { meal ->
-            key(meal.id) {
-                InfoCard {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                            Text(meal.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            meal.quantity?.let {
-                                Text(
-                                    stringResource(R.string.portion_record, number(it), stringResource(unitLabel(checkNotNull(meal.unit)))),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary,
-                                )
-                            }
-                        }
-                        PillBadge(stringResource(R.string.kcal_value, number(meal.calories, 0)))
-                    }
-                    NutrientSummary(meal.calories, meal.protein, meal.carbs, meal.fat)
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            if (meal.source.isBlank()) stringResource(R.string.manual_source) else stringResource(R.string.source_value, meal.source),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.weight(1f),
-                        )
-                        TextButton(onClick = { editing = meal }, enabled = !state.busy) { Text(stringResource(R.string.edit)) }
-                        ConfirmButton(R.string.remove, stringResource(R.string.delete_meal_note), !state.busy) { vm.removeMeal(meal.id) }
-                    }
-                }
-            }
-        }
-    }
-
-    val recentMeals = state.snapshot.meals.distinctBy { listOf(it.name, it.calories, it.protein, it.carbs, it.fat, it.source) }.take(5)
-    if (recentMeals.isNotEmpty()) {
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.reuse_meal), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            Text(stringResource(R.string.reuse_selected_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        recentMeals.forEach { meal ->
-            InfoCard {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(meal.name, Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                    PillBadge(stringResource(R.string.kcal_value, number(meal.calories, 0)))
-                }
-                NutrientSummary(meal.calories, meal.protein, meal.carbs, meal.fat)
-                OutlinedButton(
-                    onClick = {
-                        val repeated = meal.copy(id = java.util.UUID.randomUUID().toString(), date = date, slot = slot)
-                        vm.addMeal(repeated) { onMealLogged(repeated) }
-                    },
-                    enabled = !state.busy,
-                    shape = RoundedCornerShape(12.dp),
-                ) {
-                    Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.repeat_for_date, dateLabel(date)))
-                }
-            }
+    var manualOpen by rememberSaveable { mutableStateOf(false) }
+    if (manualOpen) {
+        InfoCard { MealFields(null, date, today, state.busy, defaultSlot = slot, onSave = { meal, done -> vm.addMeal(meal, done) }) }
+    } else {
+        OutlinedButton(
+            onClick = { manualOpen = true },
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("open_manual_meal"),
+        ) {
+            Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(stringResource(R.string.manual_meal), fontWeight = FontWeight.SemiBold)
         }
     }
 

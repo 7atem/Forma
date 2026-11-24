@@ -74,7 +74,7 @@ assert 'let current = mode.flatMap { modes.contains($0) ? $0 : nil } ?? modes[0]
 assert 'exercise_motion_mode_' in detail
 assert 'motion_photos_note' in detail and 'AVQueuePlayer' in video and 'AVPlayerLooper' in video
 scene = (root / 'apple/iPhone/ExerciseMotionSceneView.swift').read_text(encoding='utf-8')
-for required in ['UIViewRepresentable', 'SCNView', 'SCNCapsule', 'SCNCamera', 'castsShadow = true',
+for required in ['UIViewRepresentable', 'SCNView', 'TaperedMesh', 'SCNCamera', 'castsShadow = true',
                  'MotionEngine.pose', 'FormaTheme.musclePrimary', 'FormaTheme.muscleSupporting']:
     assert required in scene, ('Native 3D scene', required)
 assert 'ExerciseMotionSceneView(exerciseID: exercise.rawValue' in motion

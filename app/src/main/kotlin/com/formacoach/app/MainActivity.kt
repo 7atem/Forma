@@ -102,6 +102,17 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
             vm.clearError()
         }
     }
+    // One-time move of custom exercises/supplements that older builds kept in plain preferences.
+    // The preference copies are deleted only after the encrypted database write commits; unreadable
+    // data is left in place rather than partially imported.
+    LaunchedEffect(state.loading, state.loadFailed) {
+        if (!state.loading && !state.loadFailed) {
+            val legacy = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                runCatching { LegacyLocalStore.read(context) }.getOrNull()
+            }
+            if (legacy != null) vm.importLocalRecords(legacy) { LegacyLocalStore.clear(context) }
+        }
+    }
     val onMealLogged: (Meal) -> Unit = { meal ->
         scope.launch {
             val res = snackbarHostState.showSnackbar(mealAddedMsg.format(meal.name), actionLabel = undoLabel, duration = SnackbarDuration.Short)

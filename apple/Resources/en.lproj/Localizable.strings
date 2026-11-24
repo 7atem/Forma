@@ -235,6 +235,7 @@
 "supplements_disclaimer" = "Personal daily checklist only — not medical or dosage advice.";
 "dumbbell_per_hand_hint" = "Weight per dumbbell";
 "dumbbell_pair_total" = "Pair total:";
+"dumbbell_single_hint" = "Weight of the one dumbbell you hold";
 "weekly_muscle_split_title" = "Working sets (last 7 sessions — warm-ups excluded)";
 "primary_short" = "main";
 "supporting_short" = "support";

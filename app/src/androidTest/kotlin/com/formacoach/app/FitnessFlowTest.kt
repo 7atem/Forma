@@ -77,6 +77,36 @@ class FitnessFlowTest {
         rule.onNodeWithTag("settings_theme_light").performScrollTo().assertIsSelected()
         rule.onNodeWithTag("settings_theme_system").performClick().assertIsSelected()
     }
+    @Test fun customExerciseSetsPersistAcrossRecreationAndDeleteNeedsConfirmation() {
+        ensureProfile();rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_1").performClick()
+        rule.onNodeWithTag("add_custom_exercise_btn").performScrollTo().performClick()
+        rule.onNodeWithTag("custom_exercise_name").performTextInput("UI cable pullover")
+        rule.onNodeWithTag("save_custom_exercise").performClick()
+        val logMatcher=SemanticsMatcher("custom log button") {node ->
+            val key=androidx.compose.ui.semantics.SemanticsProperties.TestTag
+            node.config.contains(key)&&node.config[key].startsWith("log_custom_")
+        }
+        rule.waitUntil(10_000) {rule.onAllNodes(logMatcher).fetchSemanticsNodes().isNotEmpty()}
+        val logTag=rule.onAllNodes(logMatcher).fetchSemanticsNodes().first().config[androidx.compose.ui.semantics.SemanticsProperties.TestTag]
+        val id=logTag.removePrefix("log_custom_")
+        rule.onNodeWithTag(logTag).performScrollTo().performClick()
+        rule.onNodeWithTag("custom_set_reps").performTextReplacement("12")
+        rule.onNodeWithTag("custom_set_weight").performTextInput("15")
+        rule.onNodeWithTag("save_custom_set").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("save_custom_set").fetchSemanticsNodes().isEmpty()}
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("tab_1").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_1").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("remove_custom_$id").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithText("UI cable pullover").performScrollTo().assertExists()
+        rule.onNodeWithText("× 12",substring=true).assertExists()
+        rule.onNodeWithTag("remove_custom_$id").performScrollTo().performClick()
+        rule.onNodeWithText(rule.activity.getString(R.string.cancel)).performClick()
+        rule.onNodeWithText("UI cable pullover").assertExists()
+        rule.onNodeWithTag("remove_custom_$id").performScrollTo().performClick()
+        rule.onNodeWithTag("confirm_destructive").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithText("UI cable pullover").fetchSemanticsNodes().isEmpty()}
+    }
     @Test fun ArabicExerciseSearchWorksInEnglishInterface() {
         ensureProfile();rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_1").performClick()
         rule.onNodeWithTag("exercise_search").performTextInput("الحَشَرة المَيّتة")
@@ -86,7 +116,10 @@ class FitnessFlowTest {
     }
     @Test fun mealCategoryPersistsWithRecordedPortion() {
         ensureProfile();rule.onNodeWithTag("tab_2").performClick()
-        rule.onNodeWithTag("meal_slot_BREAKFAST").performScrollTo().performClick()
+        // Semantic click: on wide layouts the horizontal chip row can be clipped after scrolling.
+        rule.onNodeWithTag("meal_slot_BREAKFAST").performSemanticsAction(androidx.compose.ui.semantics.SemanticsActions.OnClick)
+        rule.onNodeWithTag("meal_slot_BREAKFAST").assertIsSelected()
+        openManualMeal()
         rule.onNodeWithTag("meal_name").performScrollTo().performTextInput("Breakfast workflow")
         listOf("meal_calories" to "300","meal_protein" to "20","meal_carbs" to "30","meal_fat" to "10").forEach {(tag,value)->rule.onNodeWithTag(tag).performScrollTo().performTextInput(value)}
         rule.onNodeWithTag("meal_fat").performImeAction()
@@ -110,6 +143,10 @@ class FitnessFlowTest {
     }
     @get:Rule val rule = createAndroidComposeRule<MainActivity>()
 
+    /** The manual meal form opens on demand under "Add food". */
+    private fun openManualMeal() {
+        if(rule.onAllNodesWithTag("open_manual_meal").fetchSemanticsNodes().isNotEmpty()) rule.onNodeWithTag("open_manual_meal").performScrollTo().performClick()
+    }
     private fun ensureProfile() {
         rule.waitUntil(20_000) {rule.onAllNodesWithTag("profile_name").fetchSemanticsNodes().isNotEmpty() || rule.onAllNodesWithTag("tab_0").fetchSemanticsNodes().isNotEmpty()}
         if(rule.onAllNodesWithTag("profile_name").fetchSemanticsNodes().isNotEmpty()) {
@@ -144,6 +181,7 @@ class FitnessFlowTest {
         rule.waitUntil(10_000) {!rule.onNodeWithTag("finish_session").fetchSemanticsNode().config.contains(androidx.compose.ui.semantics.SemanticsProperties.Disabled)}
         rule.onNodeWithTag("finish_session").performScrollTo().assertIsEnabled().performClick()
         rule.onNodeWithTag("tab_2").performClick()
+        openManualMeal()
         rule.onNodeWithTag("meal_name").performScrollTo().performTextInput("Test portion")
         listOf("meal_calories" to "500", "meal_protein" to "30", "meal_carbs" to "50", "meal_fat" to "20").forEach {(tag,value) ->
             rule.onNodeWithTag(tag).performScrollTo().performTextInput(value)
@@ -343,6 +381,7 @@ class FitnessFlowTest {
     @Test fun invalidMealValuesShowFieldErrorsWithoutLosingInput() {
         ensureProfile()
         rule.onNodeWithTag("tab_2").performClick()
+        openManualMeal()
         rule.onNodeWithTag("meal_name").performScrollTo().performTextInput("Validation meal")
         rule.onNodeWithTag("meal_calories").performScrollTo().performTextInput("-1")
         rule.onNodeWithText(rule.activity.getString(R.string.calories_error)).assertExists()
@@ -386,6 +425,7 @@ class FitnessFlowTest {
         ensureProfile()
         rule.onNodeWithTag("tab_2").performClick()
         val name="Undo workflow ${System.nanoTime()%100000}"
+        openManualMeal()
         rule.onNodeWithTag("meal_name").performScrollTo().performTextInput(name)
         listOf("meal_calories" to "300","meal_protein" to "20","meal_carbs" to "30","meal_fat" to "10").forEach {(tag,value)->rule.onNodeWithTag(tag).performScrollTo().performTextInput(value)}
         rule.onNodeWithTag("save_meal").performScrollTo().performClick()

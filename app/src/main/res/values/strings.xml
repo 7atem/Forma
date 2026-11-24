@@ -239,7 +239,7 @@
     <string name="workout_complete_banner">Session saved</string>
     <string name="new_pr_badge">NEW PR!</string>
     <string name="activity_heatmap_title">12-week training grid</string>
-    <string name="week_streak_badge">%1$s active weeks</string>
+    <string name="week_streak_badge">Active weeks in a row: %1$s</string>
     <string name="calc_from_macros">Calc kcal</string>
     <string name="toggle_theme">Switch light or dark theme</string>
     <string name="play_demo">Animate</string>
@@ -407,6 +407,7 @@
     <string name="export_nutrition_csv">Nutrition CSV</string>
     <string name="export_measurements_csv">Body &amp; Water CSV</string>
     <string name="dumbbell_per_hand_hint">Log weight per dumbbell (one hand).</string>
+    <string name="dumbbell_single_hint">Log the weight of the one dumbbell you hold.</string>
     <string name="dumbbell_per_hand_total">Per dumbbell · Pair total: %1$s %2$s</string>
     <string name="custom_exercises_title">My Custom Exercises</string>
     <string name="custom_exercise_add">New exercise</string>
@@ -418,4 +419,13 @@
     <string name="custom_exercise_best">Best</string>
     <string name="badge_video_short">Video</string>
     <string name="badge_3d_short">3D</string>
+    <string name="custom_exercise_delete_note">Removes this exercise and its recorded sets (%1$s). This cannot be undone.</string>
+    <string name="supplement_delete_note">Removes this supplement and its check-off history. This cannot be undone.</string>
+    <string name="review_tile_sessions">Completed sessions</string>
+    <string name="review_tile_meal_days_value">%1$s / 7</string>
+    <string name="review_tile_meal_days">Days with food entries</string>
+    <string name="review_tile_calories">Average kcal per logged day</string>
+    <string name="review_tile_weight">Average body weight · %1$s observations</string>
+    <string name="logged_entries_heading">Logged entries</string>
+    <string name="add_food_heading">Add food</string>
 </resources>

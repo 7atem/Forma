@@ -1,6 +1,5 @@
 package com.formacoach.app
 
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.toggleable
@@ -17,80 +16,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import com.formacoach.model.Supplement
 import java.time.LocalDate
-import java.util.UUID
 
-@Serializable
-internal data class SupplementEntry(
-    val id: String,
-    val name: String,
-    val dose: String = "",
-)
-
-@Serializable
-internal data class SupplementsState(
-    val items: List<SupplementEntry> = emptyList(),
-    val takenByDate: Map<String, List<String>> = emptyMap(),
-)
-
-internal object SupplementsStore {
-    private const val PREFS = "forma_supplements_prefs"
-    private const val KEY = "state_v1"
-    private val json = Json { ignoreUnknownKeys = true }
-
-    fun load(context: Context): SupplementsState {
-        val raw = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null) ?: return SupplementsState()
-        return runCatching { json.decodeFromString<SupplementsState>(raw) }.getOrDefault(SupplementsState())
-    }
-
-    fun save(context: Context, state: SupplementsState) {
-        // Keep last 90 days of check-offs bounded
-        val boundedDates = state.takenByDate.entries.sortedByDescending { it.key }.take(90).associate { it.key to it.value }
-        val clean = state.copy(items = state.items.take(40), takenByDate = boundedDates)
-        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .edit()
-            .putString(KEY, json.encodeToString(clean))
-            .apply()
-    }
-}
-
-private data class SupplementPreset(val nameEn: String, val nameAr: String, val dose: String)
+/** Name-only shortcuts; Forma never suggests a dose. Users may type their own dose label. */
+private data class SupplementPreset(val nameEn: String, val nameAr: String)
 
 private val defaultSupplementPresets = listOf(
-    SupplementPreset("Creatine", "كرياتين", "5 g"),
-    SupplementPreset("Vitamin D3", "فيتامين د٣", "2000 IU"),
-    SupplementPreset("Omega-3", "أوميجا ٣", "1000 mg"),
-    SupplementPreset("Magnesium", "ماغنيسيوم", "300 mg"),
-    SupplementPreset("Multivitamin", "فيتامينات متعددة", "1 cap"),
-    SupplementPreset("Electrolytes", "إلكترولايت", "1 scoop"),
+    SupplementPreset("Creatine", "كرياتين"),
+    SupplementPreset("Vitamin D3", "فيتامين د٣"),
+    SupplementPreset("Omega-3", "أوميجا ٣"),
+    SupplementPreset("Magnesium", "ماغنيسيوم"),
+    SupplementPreset("Multivitamin", "فيتامينات متعددة"),
+    SupplementPreset("Electrolytes", "إلكترولايت"),
 )
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun SupplementsVitaminsCard(date: LocalDate) {
-    val context = LocalContext.current
+internal fun SupplementsVitaminsCard(app: AppState, vm: FitnessViewModel, date: LocalDate) {
     val arabic = LocalConfiguration.current.locales[0].language == "ar"
-    val dateKey = date.toString()
-    var state by remember { mutableStateOf(SupplementsStore.load(context)) }
+    // Stored as typed records in the encrypted database and included in backup.
+    val items = app.snapshot.supplements
     var expanded by remember { mutableStateOf(false) }
     var showAddDialog by remember { mutableStateOf(false) }
 
-    fun update(next: SupplementsState) {
-        state = next
-        SupplementsStore.save(context, next)
-    }
-
-    val takenToday = state.takenByDate[dateKey].orEmpty().toSet()
-    val takenCount = state.items.count { it.id in takenToday }
+    val takenToday = app.snapshot.supplementIntakes.filter { it.date == date }.map { it.supplementId }.toSet()
+    val takenCount = items.count { it.id in takenToday }
 
     InfoCard(Modifier.testTag("supplements_card")) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -101,9 +57,9 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
-            if (state.items.isNotEmpty()) {
+            if (items.isNotEmpty()) {
                 PillBadge(
-                    text = "${number(takenCount.toDouble(), 0)} / ${number(state.items.size.toDouble(), 0)}",
+                    text = "${number(takenCount.toDouble(), 0)} / ${number(items.size.toDouble(), 0)}",
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                 )
@@ -113,16 +69,14 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
             }
         }
 
-        if (!expanded && state.items.isNotEmpty()) {
+        if (!expanded && items.isNotEmpty()) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                state.items.forEach { item ->
+                items.forEach { item ->
                     val checked = item.id in takenToday
                     FilterChip(
                         selected = checked,
-                        onClick = {
-                            val nextSet = if (!checked) takenToday + item.id else takenToday - item.id
-                            update(state.copy(takenByDate = state.takenByDate + (dateKey to nextSet.toList())))
-                        },
+                        onClick = { vm.setSupplementTaken(date, item.id, !checked) },
+                        enabled = !app.busy,
                         leadingIcon = {
                             Icon(
                                 if (checked) Icons.Default.CheckCircle else Icons.Outlined.Circle,
@@ -134,9 +88,9 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
                     )
                 }
             }
-        } else if (expanded && state.items.isNotEmpty()) {
+        } else if (expanded && items.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.items.forEach { item ->
+                items.forEach { item ->
                     val checked = item.id in takenToday
                     Surface(
                         shape = RoundedCornerShape(12.dp),
@@ -145,9 +99,8 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .toggleable(value = checked, role = Role.Checkbox) { nowChecked ->
-                                val nextSet = if (nowChecked) takenToday + item.id else takenToday - item.id
-                                update(state.copy(takenByDate = state.takenByDate + (dateKey to nextSet.toList())))
+                            .toggleable(value = checked, enabled = !app.busy, role = Role.Checkbox) { nowChecked ->
+                                vm.setSupplementTaken(date, item.id, nowChecked)
                             },
                     ) {
                         Row(
@@ -167,15 +120,12 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
                                     Text(item.dose, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            IconButton(
-                                onClick = {
-                                    val nextItems = state.items.filterNot { it.id == item.id }
-                                    val nextDates = state.takenByDate.mapValues { (_, list) -> list.filterNot { it == item.id } }
-                                    update(state.copy(items = nextItems, takenByDate = nextDates))
-                                },
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove), tint = MaterialTheme.colorScheme.error)
-                            }
+                            ConfirmButton(
+                                R.string.remove,
+                                stringResource(R.string.supplement_delete_note),
+                                !app.busy,
+                                tag = "remove_supplement_${item.id}",
+                            ) { vm.deleteSupplement(item.id) }
                         }
                     }
                 }
@@ -186,12 +136,11 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 defaultSupplementPresets.forEach { preset ->
                     val label = if (arabic) preset.nameAr else preset.nameEn
-                    val alreadyAdded = state.items.any { it.name.equals(label, ignoreCase = true) }
+                    val alreadyAdded = items.any { it.name.equals(label, ignoreCase = true) }
                     if (!alreadyAdded) {
                         AssistChip(
-                            onClick = {
-                                update(state.copy(items = state.items + SupplementEntry(UUID.randomUUID().toString(), label, preset.dose)))
-                            },
+                            onClick = { vm.saveSupplement(Supplement(name = label)) },
+                            enabled = !app.busy && items.size < MAX_SUPPLEMENTS,
                             leadingIcon = { Icon(Icons.Default.Add, null, Modifier.size(16.dp)) },
                             label = { Text(label) },
                         )
@@ -199,6 +148,7 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
                 }
                 FilledTonalButton(
                     onClick = { showAddDialog = true },
+                    enabled = !app.busy && items.size < MAX_SUPPLEMENTS,
                     shape = RoundedCornerShape(10.dp),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
                 ) {
@@ -239,10 +189,9 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
             },
             confirmButton = {
                 TextButton(
-                    enabled = name.trim().isNotEmpty(),
+                    enabled = name.trim().isNotEmpty() && !app.busy,
                     onClick = {
-                        update(state.copy(items = state.items + SupplementEntry(UUID.randomUUID().toString(), name.trim().take(60), dose.trim().take(30))))
-                        showAddDialog = false
+                        vm.saveSupplement(Supplement(name = name.trim().take(60), dose = dose.trim().take(30))) { showAddDialog = false }
                     },
                 ) { Text(stringResource(R.string.save)) }
             },
@@ -252,3 +201,6 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
         )
     }
 }
+
+/** Keeps the check-off list manageable; nothing already saved is ever trimmed. */
+private const val MAX_SUPPLEMENTS = 40

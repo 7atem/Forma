@@ -61,11 +61,13 @@ kt += 'package com.formacoach.model\n\n'
 kt += 'enum class Exercise { ' + ', '.join(item['id'] for item in exercises) + ' }\n'
 equipment=['BODYWEIGHT','DUMBBELLS','BARBELL','CABLE','MACHINE','BENCH','BOX','PULL_UP_BAR']
 assert all(x.get('equipment') and set(x['equipment']) <= set(equipment) for x in exercises)
+# singleDumbbell: one dumbbell held by both hands (e.g. goblet squat); the load is that dumbbell, never doubled.
+assert all(isinstance(x.get('singleDumbbell',False),bool) and (not x.get('singleDumbbell') or 'DUMBBELLS' in x['equipment']) for x in exercises)
 kt += 'enum class Equipment { '+', '.join(equipment)+' }\n'
-kt += 'data class ExerciseDetails(val equipment:List<Equipment>,val perSide:Boolean)\n'
+kt += 'data class ExerciseDetails(val equipment:List<Equipment>,val perSide:Boolean,val singleDumbbell:Boolean=false)\n'
 kt += 'object ExerciseCatalog {\n    fun of(exercise:Exercise):ExerciseDetails=when(exercise) {\n'
 for x in exercises:
-    kt += f'        Exercise.{x["id"]}->ExerciseDetails(listOf('+','.join('Equipment.'+e for e in x['equipment'])+f'),{str(x["perSide"]).lower()})\n'
+    kt += f'        Exercise.{x["id"]}->ExerciseDetails(listOf('+','.join('Equipment.'+e for e in x['equipment'])+f'),{str(x["perSide"]).lower()},{str(x.get("singleDumbbell",False)).lower()})\n'
 kt += '    }\n    fun searchText(exercise:Exercise):String=when(exercise) {\n'
 for x in exercises:kt += f'        Exercise.{x["id"]}->{quote(x["en"]+" "+x["ar"]+" "+x["id"].replace("_"," "))}\n'
 kt += '    }\n    fun similar(exercise:Exercise):List<Exercise> = Exercise.entries.filter {it!=exercise && ExerciseMuscles.of(it).primary.any {muscle ->muscle in ExerciseMuscles.of(exercise).primary}}\n}\n'
@@ -101,9 +103,9 @@ equipment_labels=[('Bodyweight','وزن الجسم'),('Dumbbells','دمبل'),('
 for e in equipment:swift += f'    case {e.lower()} = {quote(e)}\n'
 swift += '    public func label(arabic:Bool)->String {switch self {\n'
 for e,(en,ar) in zip(equipment,equipment_labels):swift += f'        case .{e.lower()}:return arabic ? {quote(ar)} : {quote(en)}\n'
-swift += '    }}\n}\npublic struct ExerciseDetails:Sendable {public let equipment:[Equipment];public let perSide:Bool}\n'
+swift += '    }}\n}\npublic struct ExerciseDetails:Sendable {public let equipment:[Equipment];public let perSide:Bool;public let singleDumbbell:Bool}\n'
 swift += 'public enum ExerciseCatalog {public static func of(_ exercise:Exercise)->ExerciseDetails {switch exercise {\n'
-for x in exercises:swift += f'    case .{x["id"].lower()}:return .init(equipment:['+','.join('.'+e.lower() for e in x['equipment'])+f'],perSide:{str(x["perSide"]).lower()})\n'
+for x in exercises:swift += f'    case .{x["id"].lower()}:return .init(equipment:['+','.join('.'+e.lower() for e in x['equipment'])+f'],perSide:{str(x["perSide"]).lower()},singleDumbbell:{str(x.get("singleDumbbell",False)).lower()})\n'
 swift += '}}}\n'
 swift += 'public enum Muscle: String, Codable, CaseIterable, Sendable {\n'
 for item in muscles:

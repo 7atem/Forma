@@ -43,6 +43,12 @@ class MuscleTrainingTest {
         assertEquals(listOf(MuscleDetail.SIDE_DELT),ExerciseMuscles.of(Exercise.LATERAL_RAISE).primaryDetail)
         assertEquals(listOf(MuscleDetail.SOLEUS),ExerciseMuscles.of(Exercise.SEATED_CALF_RAISE).primaryDetail)
     }
+    @Test fun singleDumbbellExercisesAreMarkedSoLoadsAreNeverDoubled() {
+        val single=Exercise.entries.filter {ExerciseCatalog.of(it).singleDumbbell}.toSet()
+        assertEquals(setOf(Exercise.GOBLET_SQUAT,Exercise.OVERHEAD_TRICEPS_EXTENSION),single)
+        single.forEach {assertTrue(Equipment.DUMBBELLS in ExerciseCatalog.of(it).equipment)}
+        assertFalse(ExerciseCatalog.of(Exercise.DUMBBELL_BENCH_PRESS).singleDumbbell)
+    }
     @Test fun weeklyCountsExcludeWarmupDraftsFutureAndOutsideWindowWithoutAddingSecondaryVolume() {
         val sessions=listOf(Session("now",day,"A",1),Session("old",day.minusDays(7),"A",1),Session("draft",day,"A"),Session("future",day.plusDays(1),"A",1))
         val sets=sessions.map {TrainingSet(sessionId=it.id,exercise=Exercise.ROW,reps=8,weightKg=20.0)}+

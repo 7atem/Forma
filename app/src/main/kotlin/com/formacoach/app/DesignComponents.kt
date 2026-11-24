@@ -325,6 +325,8 @@ internal fun SegmentedTabs(
                             color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
+                            // Large text can wrap a label; keep both lines centred in the segment.
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         )
                     }
                 }
@@ -380,30 +382,43 @@ internal fun StepperInput(
         val formatted = formatInputNumber(next, locale, if (integer) 0 else 2)
         onChange(formatted)
     }
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Input(label = label, value = value, onChange = onChange, tag = tag, numeric = true, error = error, placeholder = placeholder)
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalIconButton(
-                onClick = { adjust(-step) },
-                modifier = Modifier.weight(1f).height(48.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-            ) {
-                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.decrease_value, stringResource(label)), modifier = Modifier.size(18.dp))
+    @Composable
+    fun StepButton(delta: Double, modifier: Modifier) {
+        val increase = delta > 0
+        FilledTonalIconButton(
+            onClick = { adjust(delta) },
+            modifier = modifier,
+            shape = RoundedCornerShape(10.dp),
+            colors = IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = if (increase) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh,
+                contentColor = if (increase) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            ),
+        ) {
+            Icon(
+                if (increase) Icons.Default.Add else Icons.Default.Remove,
+                contentDescription = stringResource(if (increase) R.string.increase_value else R.string.decrease_value, stringResource(label)),
+                modifier = Modifier.size(18.dp),
+            )
+        }
+    }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        if (maxWidth >= 240.dp) {
+            // Enough width (a full-width field): −  [field]  +  on one line keeps the set form short.
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                StepButton(-step, Modifier.size(56.dp))
+                Box(Modifier.weight(1f)) {
+                    Input(label = label, value = value, onChange = onChange, tag = tag, numeric = true, error = error, placeholder = placeholder)
+                }
+                StepButton(step, Modifier.size(56.dp))
             }
-            FilledTonalIconButton(
-                onClick = { adjust(step) },
-                modifier = Modifier.weight(1f).height(48.dp),
-                shape = RoundedCornerShape(10.dp),
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary,
-                ),
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.increase_value, stringResource(label)), modifier = Modifier.size(18.dp))
+        } else {
+            // Narrow (two fields side by side): buttons go under the field so it stays readable.
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Input(label = label, value = value, onChange = onChange, tag = tag, numeric = true, error = error, placeholder = placeholder)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StepButton(-step, Modifier.weight(1f).height(48.dp))
+                    StepButton(step, Modifier.weight(1f).height(48.dp))
+                }
             }
         }
     }

@@ -455,21 +455,14 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
             },
         )
     }
-    val mainMuscles=remember {Muscle.entries.filter {m ->Exercise.entries.any {ExerciseMuscles.of(it).primary.first()==m}}}
-    Row(Modifier.fillMaxWidth().bleedToPageEdges().horizontalScroll(rememberScrollState()).padding(horizontal=PageGutter),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-        FilterChip(muscle==null,{muscle=null},label={Text(stringResource(R.string.all_muscles))})
-        mainMuscles.forEach {m ->
-            val count=Exercise.entries.count {ExerciseMuscles.of(it).primary.first()==m}
-            FilterChip(muscle==m,{muscle=if(muscle==m) null else m},label={Text("${stringResource(muscleLabel(m))} ($count)")})
-        }
-    }
+    // Muscle filtering lives in the dropdown above; a second chip row for the same filter was removed.
     val favorites=state.snapshot.exercisePreferences.filter {it.favorite}.map {it.exercise}.toSet()
     val completed=state.snapshot.sessions.filter {it.completedAt!=null}.map {it.id}.toSet()
     val recent=state.snapshot.sets.filter {it.sessionId in completed}.map {it.exercise}.toSet()
     val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseMuscles.of(it).primaryDetail.map {d ->stringResource(muscleDetailLabel(d))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
     val homeEquipment = remember { setOf(Equipment.BODYWEIGHT, Equipment.DUMBBELLS, Equipment.BENCH, Equipment.BOX, Equipment.PULL_UP_BAR) }
     val matches=Exercise.entries.filter {ExerciseDiscomfortSelection.includes(it,discomfortExcluded)&&(!homeOnly||ExerciseCatalog.of(it).equipment.all {eq -> eq in homeEquipment})&&(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
-    CustomExercisesSection(today)
+    CustomExercisesSection(state,vm,today)
     Text(stringResource(R.string.exercise_results,number(matches.size.toDouble(),0),number(Exercise.entries.size.toDouble(),0)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
     if(matches.isEmpty()) {
         Column(Modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(8.dp),horizontalAlignment=Alignment.CenterHorizontally) {

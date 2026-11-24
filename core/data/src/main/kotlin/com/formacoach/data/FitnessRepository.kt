@@ -53,6 +53,17 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     suspend fun removeMeasurement(date:LocalDate)=dao.removeMeasurement(date.toEpochDay())
     suspend fun saveHydration(value:Hydration) {checkDate(value.date);dao.saveHydration(HydrationRow(value.date.toEpochDay(),value.milliliters))}
     suspend fun removeHydration(date:LocalDate)=dao.removeHydration(date.toEpochDay())
+    suspend fun saveCustomExercise(value:CustomExercise)=dao.saveCustomExercise(value.row())
+    suspend fun deleteCustomExercise(id:String)=dao.deleteCustomExercise(id)
+    suspend fun addCustomSet(value:CustomExerciseSet) {checkDate(value.date);dao.addCustomSet(value.row())}
+    suspend fun removeCustomSet(id:String)=dao.removeCustomSet(id)
+    suspend fun saveSupplement(value:Supplement)=dao.saveSupplement(value.row())
+    suspend fun deleteSupplement(id:String)=dao.deleteSupplement(id)
+    suspend fun setSupplementTaken(date:LocalDate,id:String,taken:Boolean) {checkDate(date);dao.setSupplementTaken(date.toEpochDay(),id,taken)}
+    suspend fun importLocalRecords(exercises:List<CustomExercise>,sets:List<CustomExerciseSet>,supplements:List<Supplement>,intakes:List<SupplementIntake>) {
+        (sets.map {it.date}+intakes.map {it.date}).forEach {checkDate(it)}
+        dao.importLocalRecords(exercises.map {it.row()},sets.map {it.row()},supplements.map {it.row()},intakes.map {it.row()})
+    }
     suspend fun saveProgram(program:TrainingProgram)=dao.saveProgram(program.row())
     suspend fun deleteProgram(id:String)=dao.deleteProgram(id)
     suspend fun favorite(exercise:Exercise,value:Boolean)=dao.favorite(exercise.name,value)

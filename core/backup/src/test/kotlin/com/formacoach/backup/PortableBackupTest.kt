@@ -26,6 +26,23 @@ class PortableBackupTest {
         assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(data.copy(exercisePreferences=prefs+prefs))}
         assertTrue(kotlinx.serialization.json.Json.decodeFromString<FitnessSnapshot>("{}").exercisePreferences.isEmpty())
     }
+    @Test fun customExercisesAndSupplementsRoundTripAndRejectDanglingReferences() {
+        val exercise=CustomExercise(name="تمرين خاص",equipment=Equipment.CABLE,primaryMuscle=Muscle.LATS,notes="note")
+        val set=CustomExerciseSet(exerciseId=exercise.id,date=date,reps=10,weightKg=22.5,warmUp=true)
+        val supplement=Supplement(name="Creatine",dose="my label")
+        val intake=SupplementIntake(date,supplement.id)
+        val data=FitnessSnapshot(customExercises=listOf(exercise),customSets=listOf(set),supplements=listOf(supplement),supplementIntakes=listOf(intake))
+        assertEquals(data,PortableBackup.decrypt(PortableBackup.encrypt(data,password,1),password).data)
+        assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(data.copy(customExercises=emptyList()))}
+        assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(data.copy(supplements=emptyList()))}
+        assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(data.copy(supplementIntakes=listOf(intake,intake)))}
+        assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(data.copy(customSets=listOf(set,set)))}
+        // Archives from before these records existed still decode, with nothing inferred.
+        val old=kotlinx.serialization.json.Json.decodeFromString<FitnessSnapshot>("{}")
+        assertTrue(old.customExercises.isEmpty()&&old.customSets.isEmpty()&&old.supplements.isEmpty()&&old.supplementIntakes.isEmpty())
+        assertThrows(IllegalArgumentException::class.java) {CustomExerciseSet(exerciseId=exercise.id,date=date,reps=0,weightKg=10.0)}
+        assertThrows(IllegalArgumentException::class.java) {Supplement(name=" ")}
+    }
     private val password="a long test passphrase".toCharArray()
     private val date=LocalDate.of(2026,11,3)
     private fun sample()=FitnessSnapshot(profile=Profile("اختبار",Goal.FAT_LOSS,3),

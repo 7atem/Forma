@@ -235,6 +235,7 @@
 "supplements_disclaimer" = "قائمة متابعة شخصية فقط — ليست نصيحة طبية أو جرعة موصى بها.";
 "dumbbell_per_hand_hint" = "وزن الدمبل الواحد";
 "dumbbell_pair_total" = "الإجمالي لليدين:";
+"dumbbell_single_hint" = "وزن الدمبل الواحد الذي تمسكه";
 "weekly_muscle_split_title" = "مجموعات العمل (آخر ٧ جلسات — بدون الإحماء)";
 "primary_short" = "أساسي";
 "supporting_short" = "مساعد";

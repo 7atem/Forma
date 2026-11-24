@@ -1,8 +1,32 @@
 # Validation record — current branch (post-alpha06)
 
-Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schema 6 (explicit `1→2→3→4→5→6` migrations). Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise/video approval remain pending.
+Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schema 7 (explicit `1→2→3→4→5→6→7` migrations). Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise/video approval remain pending.
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
+
+## Android UI/UX pass 2 (24 November 2026, uncommitted)
+
+Audit on the `Pixel_9_Pro` image at 150% and 100% text, light and dark. Changes:
+- **Eat:** the day's logged entries now follow the summary card instead of sitting below every entry tool (about half the previous scroll length). Entry tools are grouped under "Add food"; the 7-field manual form opens on demand; the separate "recent portion" list that duplicated the one-tap repeat chips (which confirm with Undo) is removed; the food library opens directly under the toolbar; meal cards no longer repeat calories twice; the per-day search appears only for long lists.
+- **Progress:** the weekly-review title no longer wraps one syllable per line (date range moved below it); review tiles no longer print each number twice; bodyweight records read "bodyweight × 10" instead of "0 kg × 10"; streak badge reads "Active weeks in a row: N".
+- **Train:** tab labels stay centred when large text wraps them, "My programs" shortened to "Programs"; only the first starter program keeps a solid Start button (and only until the user saves a program), the rest use tonal buttons.
+- **Workout set form:** when a number field has the full width (large text, or narrow screens), its −/+ buttons now sit beside it (56 dp) instead of on a separate full-width row, so *Save set* is much closer to the exercise; side-by-side fields keep the buttons below. The "Previously logged" sentence stacks above *Copy previous values* with large text instead of breaking mid-word.
+- **Exercise library:** removed a second chip row that duplicated the muscle dropdown filter.
+- **Tests:** 918 EN/AR keys match; builds pass, lint 0 errors; **42/42** `connectedDebugAndroidTest` on `Medium_Tablet` API 35 (meal tests now open the manual form first).
+- **Performance:** not changed. Frame timing on this emulator is dominated by software GPU rendering (≈5 s 90th-percentile GPU frames), so it is not a valid measure; real-device profiling is still needed.
+
+## Android custom exercises & supplements storage fix (24 November 2026, uncommitted)
+
+Android custom exercises, their sets, supplements and daily supplement check-offs moved from plain-JSON `SharedPreferences` into typed tables in the encrypted Room database (schema **7**, explicit `6→7` migration) and into `FORMABK1` backup/restore with reference and duplicate validation. The previous silent trimming (newest 2,000 sets, 90 days of check-offs) is removed; adding stops at 100 custom exercises / 40 supplements instead. Deleting an exercise or supplement now asks for confirmation and states that its history goes too. Existing preference data is copied once after the database loads; the plain copies are deleted only after the database commit, and unreadable data is left in place rather than partly imported. Supplement shortcuts no longer pre-fill doses. The app module now applies the Kotlin serialization plugin; without it the earlier preference code could not serialize its classes.
+
+| Check | Result |
+|---|---|
+| Android localization | **910 EN/AR keys** match |
+| JVM tests, debug/release builds, lint (`--max-workers=1`) | coach 52, wearables 5, backup **10** (new round-trip/reference test) — 0 failures; builds pass; lint 0 errors |
+| Full `:app:connectedDebugAndroidTest` on `Medium_Tablet` API 35 | **42 passed, 0 failed**, including `6→7` upgrade + backup round trip, one-time preference import, and create/log/recreate/confirm-delete UI flow |
+| iPhone | Unchanged (already stores these records in `forma.json`); not rebuilt |
+
+Follow-up the same day: the canonical catalog gained `singleDumbbell` (goblet squat, overhead dumbbell extension). Android and iPhone now show "log the one dumbbell you hold" for those instead of a doubled "pair total"; generator check, a new coach test (53 total) and `check_apple_sources.py` (266 EN/AR keys, run against the committed 3D scene file) pass. `docs/RIGGED_3D_MODELS.md` now states the `.usdz` loader is iPhone-only, untested on device, with no models bundled and no Android loader.
 
 ## Latest checkpoint (24 November 2026 — 61 exercises, 21 detailed muscles, Supplements, CSV exports & iOS parity)
 
