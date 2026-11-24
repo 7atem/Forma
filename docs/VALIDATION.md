@@ -1,10 +1,24 @@
 # Validation record — current branch (post-alpha06)
 
-Updated 23 November 2026. Application `com.formacoach.app`, encrypted Room schema 5. Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise approval remain pending.
+Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schema 6 (explicit `1→2→3→4→5→6` migrations). Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise/video approval remain pending.
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
 
-## Current committed Apple verification (23 November 2026)
+## Latest checkpoint (24 November 2026 — Room v6, 12 3D motion clips & iOS parity)
+
+| Check | Result |
+|---|---|
+| Canonical/generated catalog (`generate_exercise_catalog.py --check`) | **50 stable exercises**, equipment & 14 simplified / 20 detailed muscle regions; no drift |
+| Shared 3D motion (`generate_exercise_motion.py --check`) | **12 synchronized clips** (5 original + 7 new); reach, floor, plate clearance & loop continuity verified across Kotlin and Swift |
+| Shared movement guides & art (`generate_exercise_guides.py --check`, `check_exercise_art.py`) | **50 bilingual guides** and **50 compressed 960×640 two-phase PNGs**; hashes, XML escaping & packaging match |
+| Bundled exercise video (`check_exercise_video.py`) | **31 of 50** bundled; valid files/manifest, **qualified review pending** |
+| Android localization (`check_localization.py`) | **829 EN/AR keys** match |
+| Apple source checks & localization (`check_apple_sources.py`) | **213 EN/AR keys** match, plus Home/Gym filter, Freestyle workout, expanded tape measurements, read-only HealthKit, discomfort filter & Family-Pot removal assertions. **Swift/Xcode NOT built on Windows; push to trigger `macos-15` CI.** |
+| Android JVM tests, debug/release builds, lint (`--max-workers=1`) | Verified on Windows (`:core:coach:test`, `:core:wearables:test`, `:core:backup:test`, `:app:assembleDebug`, `:app:lintDebug`, `:app:assembleRelease`, `:app:compileDebugAndroidTestKotlin`) |
+| Room v6 migration (`EncryptedStorageTest` on API 35 `Medium_Tablet`) | **15/15 passed** including `5→6` migration retaining history with hydration & expanded measurements (`b04f131`) |
+| Physical iPhone/Watch, visual 3D/video/photo acceptance and qualified pose/cue/video review | **Not performed** |
+
+## Previous committed Apple CI verification (23 November 2026)
 
 | Check | Result |
 |---|---|

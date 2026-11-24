@@ -120,6 +120,128 @@
         {"t": 0.55, "pelvis": [0.93, 0.0], "trunk": -3, "head": 0, "hand": [0.25, 2.00, 0.0]},
         {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": -3, "head": 0, "hand": [0.25, 1.46, 0.12]}
       ]
+    },
+    {
+      "id": "BARBELL_CURL",
+      "cycleSeconds": 3.0,
+      "defaultYaw": 55,
+      "prop": "BARBELL",
+      "plateRadius": 0.16,
+      "ankleHalf": 0.14,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, -1, -0.2],
+      "working": [0.0, 0.45],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 0.91, 0.10]},
+        {"t": 0.45, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 1.38, 0.25]},
+        {"t": 0.58, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 1.38, 0.25]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 0.91, 0.10]}
+      ]
+    },
+    {
+      "id": "SKULL_CRUSHER",
+      "cycleSeconds": 3.2,
+      "defaultYaw": 65,
+      "prop": "BARBELL",
+      "plateRadius": 0.15,
+      "bench": {"top": 0.40, "zFrom": -1.20, "zTo": -0.25, "halfWidth": 0.15},
+      "ankleHalf": 0.26,
+      "kneePole": [0, 1, 0.2],
+      "elbowPole": [0, 1, 0.25],
+      "working": [0.55, 1.0],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.19, 1.06, -0.94]},
+        {"t": 0.45, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.19, 0.73, -1.08]},
+        {"t": 0.55, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.19, 0.73, -1.08]},
+        {"t": 1.0, "pelvis": [0.50, -0.42], "trunk": -90, "head": 0, "hand": [0.19, 1.06, -0.94]}
+      ]
+    },
+    {
+      "id": "DUMBBELL_CURL",
+      "cycleSeconds": 3.0,
+      "defaultYaw": 55,
+      "prop": "NONE",
+      "plateRadius": 0,
+      "ankleHalf": 0.14,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, -1, -0.2],
+      "working": [0.0, 0.45],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 0.90, 0.06]},
+        {"t": 0.45, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 1.38, 0.22]},
+        {"t": 0.58, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 1.38, 0.22]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 0.90, 0.06]}
+      ]
+    },
+    {
+      "id": "HAMMER_CURL",
+      "cycleSeconds": 3.0,
+      "defaultYaw": 55,
+      "prop": "NONE",
+      "plateRadius": 0,
+      "ankleHalf": 0.14,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, -1, -0.2],
+      "working": [0.0, 0.45],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.21, 0.90, 0.06]},
+        {"t": 0.45, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.20, 1.36, 0.24]},
+        {"t": 0.58, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.20, 1.36, 0.24]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.21, 0.90, 0.06]}
+      ]
+    },
+    {
+      "id": "DUMBBELL_SHRUG",
+      "cycleSeconds": 2.6,
+      "defaultYaw": 40,
+      "prop": "NONE",
+      "plateRadius": 0,
+      "ankleHalf": 0.14,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, 0, -1],
+      "working": [0.0, 0.40],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.23, 0.90, 0.03]},
+        {"t": 0.40, "pelvis": [0.93, 0.0], "trunk": 0, "head": 0, "hand": [0.23, 0.99, 0.03]},
+        {"t": 0.56, "pelvis": [0.93, 0.0], "trunk": 0, "head": 0, "hand": [0.23, 0.99, 0.03]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.23, 0.90, 0.03]}
+      ]
+    },
+    {
+      "id": "BARBELL_BACK_SQUAT",
+      "cycleSeconds": 3.4,
+      "defaultYaw": 60,
+      "prop": "BARBELL",
+      "plateRadius": 0.225,
+      "ankleHalf": 0.16,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0.3, -1, -0.5],
+      "working": [0.55, 1.0],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": 6, "head": 0, "hand": [0.34, 1.44, -0.02]},
+        {"t": 0.44, "pelvis": [0.50, -0.30], "trunk": 40, "head": -10, "hand": [0.34, 0.91, -0.04]},
+        {"t": 0.56, "pelvis": [0.50, -0.30], "trunk": 40, "head": -10, "hand": [0.34, 0.91, -0.04]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": 6, "head": 0, "hand": [0.34, 1.44, -0.02]}
+      ]
+    },
+    {
+      "id": "BARBELL_ROMANIAN_DEADLIFT",
+      "cycleSeconds": 3.4,
+      "defaultYaw": 70,
+      "prop": "BARBELL",
+      "plateRadius": 0.225,
+      "ankleHalf": 0.13,
+      "kneePole": [0, 0, 1],
+      "elbowPole": [0, 0, -1],
+      "working": [0.55, 1.0],
+      "keys": [
+        {"t": 0.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 0.90, 0.05]},
+        {"t": 0.22, "pelvis": [0.89, -0.11], "trunk": 36, "head": -10, "hand": [0.22, 0.76, 0.16]},
+        {"t": 0.45, "pelvis": [0.84, -0.22], "trunk": 68, "head": -22, "hand": [0.22, 0.54, 0.20]},
+        {"t": 0.55, "pelvis": [0.84, -0.22], "trunk": 68, "head": -22, "hand": [0.22, 0.54, 0.20]},
+        {"t": 0.78, "pelvis": [0.89, -0.11], "trunk": 36, "head": -10, "hand": [0.22, 0.76, 0.16]},
+        {"t": 1.0, "pelvis": [0.93, 0.0], "trunk": 2, "head": 0, "hand": [0.22, 0.90, 0.05]}
+      ]
     }
   ]
 }

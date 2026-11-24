@@ -25,6 +25,12 @@ struct PhoneWeight: Codable, Identifiable, Equatable {
     var id: String { date }
     var date: String
     var weightKg: Double
+    var waistCm: Double?
+    var neckCm: Double?
+    var chestCm: Double?
+    var armsCm: Double?
+    var hipsCm: Double?
+    var thighsCm: Double?
 }
 
 struct PhoneHydration: Codable, Identifiable, Equatable {
@@ -185,6 +191,18 @@ struct SavedState: Codable {
         }
     }
 
+    func startFreestyle(label: String) throws {
+        let clean = label.trimmingCharacters(in: .whitespacesAndNewlines)
+        let program = WatchProgram(
+            id: "freestyle",
+            name: clean.isEmpty ? "Freestyle" : String(clean.prefix(60)),
+            exercises: [.squat],
+            restSeconds: 90,
+            prescriptions: []
+        )
+        try start(program)
+    }
+
     func add(_ set: WatchSet) throws {
         try set.validate()
         try commit { state in
@@ -273,11 +291,33 @@ struct SavedState: Codable {
         try commit { $0.meals.removeAll { $0.id == id } }
     }
 
-    func saveWeight(_ weightKg: Double, date: String = LocalStore.todayString()) throws {
+    func saveWeight(
+        _ weightKg: Double,
+        waistCm: Double? = nil,
+        neckCm: Double? = nil,
+        chestCm: Double? = nil,
+        armsCm: Double? = nil,
+        hipsCm: Double? = nil,
+        thighsCm: Double? = nil,
+        date: String = LocalStore.todayString()
+    ) throws {
         guard weightKg.isFinite, weightKg > 0, weightKg <= 1000 else { throw TransferError.invalid }
+        let extras = [waistCm, neckCm, chestCm, armsCm, hipsCm, thighsCm].compactMap { $0 }
+        guard extras.allSatisfy({ $0.isFinite && $0 > 0 && $0 <= 300 }) else { throw TransferError.invalid }
         try commit { state in
             state.weights.removeAll { $0.date == date }
-            state.weights.append(PhoneWeight(date: date, weightKg: weightKg))
+            state.weights.append(
+                PhoneWeight(
+                    date: date,
+                    weightKg: weightKg,
+                    waistCm: waistCm,
+                    neckCm: neckCm,
+                    chestCm: chestCm,
+                    armsCm: armsCm,
+                    hipsCm: hipsCm,
+                    thighsCm: thighsCm
+                )
+            )
             state.weights.sort { $0.date < $1.date }
         }
     }

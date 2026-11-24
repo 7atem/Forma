@@ -1,7 +1,9 @@
-# 3D exercise motion (pilot)
+# 3D exercise motion
 
-Five exercises show a looping, rotatable 3D figure in the exercise guide instead of only the two
-still photos: **Squat, Barbell bench press, Barbell row, Conventional deadlift and Barbell overhead press**.
+Twelve exercises show a looping, rotatable 3D figure in the exercise guide instead of only the two
+still photos: **Squat, Barbell bench press, Barbell row, Conventional deadlift, Barbell overhead press,
+Barbell curl, Skull crusher, Dumbbell curl, Hammer curl, Dumbbell shrug, Barbell back squat, and
+Barbell Romanian deadlift**.
 On iPhone, users can switch among **3D motion**, **Video** when a bundled clip exists, and **Photos**.
 
 ## What it is

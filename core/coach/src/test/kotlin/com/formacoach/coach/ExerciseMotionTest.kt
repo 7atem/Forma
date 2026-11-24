@@ -9,6 +9,9 @@ class ExerciseMotionTest {
     private val pilot = listOf(
         Exercise.SQUAT, Exercise.BARBELL_BENCH_PRESS, Exercise.BARBELL_ROW,
         Exercise.CONVENTIONAL_DEADLIFT, Exercise.BARBELL_OVERHEAD_PRESS,
+        Exercise.BARBELL_CURL, Exercise.SKULL_CRUSHER, Exercise.DUMBBELL_CURL,
+        Exercise.HAMMER_CURL, Exercise.DUMBBELL_SHRUG, Exercise.BARBELL_BACK_SQUAT,
+        Exercise.BARBELL_ROMANIAN_DEADLIFT,
     )
     private val sk = ExerciseMotionCatalog.skeleton
 

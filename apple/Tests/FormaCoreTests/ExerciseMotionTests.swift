@@ -2,7 +2,11 @@ import XCTest
 @testable import FormaCore
 
 final class ExerciseMotionTests: XCTestCase {
-    private let pilot: [Exercise] = [.squat, .barbell_bench_press, .barbell_row, .conventional_deadlift, .barbell_overhead_press]
+    private let pilot: [Exercise] = [
+        .squat, .barbell_bench_press, .barbell_row, .conventional_deadlift, .barbell_overhead_press,
+        .barbell_curl, .skull_crusher, .dumbbell_curl, .hammer_curl, .dumbbell_shrug,
+        .barbell_back_squat, .barbell_romanian_deadlift,
+    ]
     private let sk = ExerciseMotionCatalog.skeleton
 
     func testPilotClipsExistAndOthersFallBackToPhotos() {

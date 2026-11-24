@@ -314,6 +314,21 @@ private struct MealSlotOption: Identifiable {
                             }
                         }
 
+                        Button {
+                            FormaHaptics.success()
+                            store.attempt { try store.startFreestyle(label: String(localized: "freestyle_workout_name")) }
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "bolt.fill")
+                                Text("start_freestyle_workout").fontWeight(.bold)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(FormaTheme.secondary.opacity(0.18), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.secondary.opacity(0.45), lineWidth: 1))
+                            .foregroundStyle(FormaTheme.secondary)
+                        }
+
                         HStack {
                             Text("programs")
                                 .font(.title2.weight(.bold))
@@ -1060,6 +1075,7 @@ private struct MealSlotOption: Identifiable {
     let onOpenTrain: () -> Void
     @State private var exerciseSearch = ""
     @State private var equipment: Equipment?
+    @State private var homeOnly = false
     @State private var selectedMuscle: Muscle?
     @State private var recordingExercise: Exercise?
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
@@ -1068,6 +1084,7 @@ private struct MealSlotOption: Identifiable {
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
+    private let homeEquipment: Set<Equipment> = [.bodyweight, .dumbbells, .bench, .box, .pull_up_bar]
 
     private var mainMuscles: [Muscle] {
         Muscle.allCases.filter { m in
@@ -1079,6 +1096,7 @@ private struct MealSlotOption: Identifiable {
         let discomfortRegions = ExerciseDiscomfortSelection.decode(storedDiscomfortRegions)
         let filtered = Exercise.allCases.filter { exercise in
             ExerciseDiscomfortRegion.includes(exercise, excluding: discomfortRegions) &&
+                (!homeOnly || ExerciseCatalog.of(exercise).equipment.allSatisfy { homeEquipment.contains($0) }) &&
                 (selectedMuscle == nil || ExerciseMuscles.of(exercise).primary.first == selectedMuscle) &&
                 (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) &&
                 (exerciseSearch.isEmpty || (exercise.label(arabic: false) + " " + exercise.label(arabic: true)).localizedStandardContains(exerciseSearch))
@@ -1141,18 +1159,37 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    // Equipment Filter Chips
+                    // Equipment Filter Chips (Home vs All/Gym presets + individual gear)
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
-                            Button { equipment = nil } label: {
+                            Button {
+                                FormaHaptics.tap()
+                                homeOnly.toggle()
+                                if homeOnly { equipment = nil }
+                            } label: {
                                 FormaPill(
-                                    text: String(localized: "all_equipment"),
-                                    background: equipment == nil ? FormaTheme.secondary : FormaTheme.surface,
-                                    foreground: equipment == nil ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                    text: String(localized: "preset_home_filter"),
+                                    background: homeOnly ? FormaTheme.primary : FormaTheme.surface,
+                                    foreground: homeOnly ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                )
+                            }
+                            Button {
+                                FormaHaptics.tap()
+                                homeOnly = false
+                                equipment = nil
+                            } label: {
+                                FormaPill(
+                                    text: String(localized: "preset_gym_filter"),
+                                    background: (!homeOnly && equipment == nil) ? FormaTheme.secondary : FormaTheme.surface,
+                                    foreground: (!homeOnly && equipment == nil) ? FormaTheme.onPrimary : FormaTheme.textMuted
                                 )
                             }
                             ForEach(Equipment.allCases, id: \.self) { item in
-                                Button { equipment = item } label: {
+                                Button {
+                                    FormaHaptics.tap()
+                                    homeOnly = false
+                                    equipment = (equipment == item) ? nil : item
+                                } label: {
                                     FormaPill(
                                         text: item.label(arabic: arabic),
                                         background: equipment == item ? FormaTheme.secondary : FormaTheme.surface,
@@ -1173,6 +1210,7 @@ private struct MealSlotOption: Identifiable {
                                     FormaHaptics.tap()
                                     exerciseSearch = ""
                                     equipment = nil
+                                    homeOnly = false
                                     selectedMuscle = nil
                                     storedDiscomfortRegions = ""
                                 }
@@ -1679,9 +1717,28 @@ private struct MealSlotOption: Identifiable {
     let onOpenBridge: () -> Void
     @State private var weightKg = 75.0
     @State private var initializedWeight = false
+    @State private var showMoreMeasurements = false
+    @State private var waistText = ""
+    @State private var neckText = ""
+    @State private var chestText = ""
+    @State private var armsText = ""
+    @State private var hipsText = ""
+    @State private var thighsText = ""
     @State private var scrubbedIndex: Int?
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
+
+    private func parseCm(_ raw: String) -> Double? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let normalized = trimmed
+            .applyingTransform(.toLatin, reverse: false) ?? trimmed
+        let cleaned = normalized
+            .replacingOccurrences(of: "٫", with: ".")
+            .replacingOccurrences(of: ",", with: ".")
+        guard let v = Double(cleaned), v.isFinite, v > 0, v <= 300 else { return nil }
+        return v
+    }
 
     var body: some View {
         NavigationStack {
@@ -1690,7 +1747,7 @@ private struct MealSlotOption: Identifiable {
                     PhoneHealthCard(store: store, importer: health)
                     PhoneHealthActivityCard(records: store.state.healthWorkouts)
 
-                    // Quick Weight Logger Card
+                    // Quick Weight & Body Tape Logger Card
                     FormaCard {
                         HStack {
                             Text("body_weight").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
@@ -1706,7 +1763,45 @@ private struct MealSlotOption: Identifiable {
                                 .foregroundStyle(FormaTheme.primary)
                         }
                         Button {
-                            store.attempt { try store.saveWeight(weightKg) }
+                            withAnimation(.easeInOut(duration: 0.2)) { showMoreMeasurements.toggle() }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: showMoreMeasurements ? "chevron.up" : "chevron.down")
+                                Text("more_measurements").font(.caption.weight(.semibold))
+                                Spacer()
+                            }
+                            .foregroundStyle(FormaTheme.secondary)
+                        }
+                        if showMoreMeasurements {
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+                                TextField("measure_waist_cm", text: $waistText).keyboardType(.decimalPad)
+                                    .padding(10).background(FormaTheme.background, in: RoundedRectangle(cornerRadius: 10))
+                                TextField("measure_neck_cm", text: $neckText).keyboardType(.decimalPad)
+                                    .padding(10).background(FormaTheme.background, in: RoundedRectangle(cornerRadius: 10))
+                                TextField("measure_chest_cm", text: $chestText).keyboardType(.decimalPad)
+                                    .padding(10).background(FormaTheme.background, in: RoundedRectangle(cornerRadius: 10))
+                                TextField("measure_arms_cm", text: $armsText).keyboardType(.decimalPad)
+                                    .padding(10).background(FormaTheme.background, in: RoundedRectangle(cornerRadius: 10))
+                                TextField("measure_hips_cm", text: $hipsText).keyboardType(.decimalPad)
+                                    .padding(10).background(FormaTheme.background, in: RoundedRectangle(cornerRadius: 10))
+                                TextField("measure_thighs_cm", text: $thighsText).keyboardType(.decimalPad)
+                                    .padding(10).background(FormaTheme.background, in: RoundedRectangle(cornerRadius: 10))
+                            }
+                            .font(.subheadline)
+                        }
+                        Button {
+                            FormaHaptics.success()
+                            store.attempt {
+                                try store.saveWeight(
+                                    weightKg,
+                                    waistCm: parseCm(waistText),
+                                    neckCm: parseCm(neckText),
+                                    chestCm: parseCm(chestText),
+                                    armsCm: parseCm(armsText),
+                                    hipsCm: parseCm(hipsText),
+                                    thighsCm: parseCm(thighsText)
+                                )
+                            }
                         } label: {
                             Text("save_weight")
                                 .fontWeight(.bold)
@@ -1714,6 +1809,23 @@ private struct MealSlotOption: Identifiable {
                                 .padding(.vertical, 12)
                                 .background(FormaTheme.primary, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                                 .foregroundStyle(FormaTheme.onPrimary)
+                        }
+                        if let latestTape = store.state.weights.last(where: {
+                            $0.waistCm != nil || $0.neckCm != nil || $0.chestCm != nil || $0.armsCm != nil || $0.hipsCm != nil || $0.thighsCm != nil
+                        }) {
+                            let parts: [String] = [
+                                latestTape.waistCm.map { "\(String(localized: "measure_waist_short")) \(String(format: "%.1f", $0))" },
+                                latestTape.neckCm.map { "\(String(localized: "measure_neck_short")) \(String(format: "%.1f", $0))" },
+                                latestTape.chestCm.map { "\(String(localized: "measure_chest_short")) \(String(format: "%.1f", $0))" },
+                                latestTape.armsCm.map { "\(String(localized: "measure_arms_short")) \(String(format: "%.1f", $0))" },
+                                latestTape.hipsCm.map { "\(String(localized: "measure_hips_short")) \(String(format: "%.1f", $0))" },
+                                latestTape.thighsCm.map { "\(String(localized: "measure_thighs_short")) \(String(format: "%.1f", $0))" },
+                            ].compactMap { $0 }
+                            if !parts.isEmpty {
+                                Text("\(latestTape.date) · \(parts.joined(separator: " · ")) cm")
+                                    .font(.caption)
+                                    .foregroundStyle(FormaTheme.textMuted)
+                            }
                         }
                     }
 
