@@ -268,3 +268,9 @@
 "delete_meal_confirm" = "Delete this meal entry? This cannot be undone.";
 "week_streak_badge" = "Active weeks in a row: %@";
 "bodyweight_load" = "bodyweight";
+"grams_amount" = "%@ g";
+"grams_unit" = "g";
+"kcal_amount" = "%@ kcal";
+"macro_protein_short" = "P %@";
+"macro_carbs_short" = "C %@";
+"macro_fat_short" = "F %@";

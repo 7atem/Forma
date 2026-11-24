@@ -1,5 +1,8 @@
 package com.formacoach.app
 
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -172,19 +175,19 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 MacroProgressRow(
                     label = stringResource(R.string.protein),
-                    valueText = if (proTarget != null) "${number(totalProtein, 0)} / ${number(proTarget, 0)}g" else "${number(totalProtein, 0)}g",
+                    valueText = if (proTarget != null) stringResource(R.string.grams_of_target, number(totalProtein, 0), number(proTarget, 0)) else stringResource(R.string.grams_amount, number(totalProtein, 0)),
                     progress = if (proTarget != null && proTarget > 0) (totalProtein / proTarget).toFloat() else ((totalProtein * 4.0) / macroKcalTotal).toFloat(),
                     color = MaterialTheme.colorScheme.secondary,
                 )
                 MacroProgressRow(
                     label = stringResource(R.string.carbs),
-                    valueText = if (carbsTarget != null) "${number(totalCarbs, 0)} / ${number(carbsTarget, 0)}g" else "${number(totalCarbs, 0)}g",
+                    valueText = if (carbsTarget != null) stringResource(R.string.grams_of_target, number(totalCarbs, 0), number(carbsTarget, 0)) else stringResource(R.string.grams_amount, number(totalCarbs, 0)),
                     progress = if (carbsTarget != null && carbsTarget > 0) (totalCarbs / carbsTarget).toFloat() else if (totalKcal > 0) ((totalCarbs * 4.0) / macroKcalTotal).toFloat() else 0f,
                     color = MaterialTheme.colorScheme.tertiary,
                 )
                 MacroProgressRow(
                     label = stringResource(R.string.fat),
-                    valueText = if (fatTarget != null) "${number(totalFat, 0)} / ${number(fatTarget, 0)}g" else "${number(totalFat, 0)}g",
+                    valueText = if (fatTarget != null) stringResource(R.string.grams_of_target, number(totalFat, 0), number(fatTarget, 0)) else stringResource(R.string.grams_amount, number(totalFat, 0)),
                     progress = if (fatTarget != null && fatTarget > 0) (totalFat / fatTarget).toFloat() else if (totalKcal > 0) ((totalFat * 9.0) / macroKcalTotal).toFloat() else 0f,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -273,6 +276,8 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
     // Compact Daily Hydration Bar (single-row above-the-fold, persisted in Room v6)
     val waterMl = state.snapshot.hydration.firstOrNull { it.date == date }?.milliliters ?: 0
     val waterGoal = state.snapshot.profile?.waterGoalMl
+    val waterAdd250 = stringResource(R.string.water_add_a11y, number(250.0, 0))
+    val waterAdd500 = stringResource(R.string.water_add_a11y, number(500.0, 0))
     InfoCard(Modifier.testTag("hydration_card")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Icon(Icons.Default.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
@@ -290,23 +295,23 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
                 enabled = !state.busy && waterMl < 20000,
                 shape = RoundedCornerShape(10.dp),
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                modifier = Modifier.testTag("water_add_250"),
-            ) { Text("+250", fontWeight = FontWeight.Bold) }
+                modifier = Modifier.heightIn(min = 48.dp).testTag("water_add_250").semantics { contentDescription = waterAdd250 },
+            ) { Text(stringResource(R.string.water_add, number(250.0, 0)), fontWeight = FontWeight.Bold) }
             FilledTonalButton(
                 onClick = { vm.saveHydration(Hydration(date, (waterMl + 500).coerceAtMost(20000))) },
                 enabled = !state.busy && waterMl < 20000,
                 shape = RoundedCornerShape(10.dp),
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
-                modifier = Modifier.testTag("water_add_500"),
-            ) { Text("+500", fontWeight = FontWeight.Bold) }
+                modifier = Modifier.heightIn(min = 48.dp).testTag("water_add_500").semantics { contentDescription = waterAdd500 },
+            ) { Text(stringResource(R.string.water_add, number(500.0, 0)), fontWeight = FontWeight.Bold) }
             if (waterMl > 0) {
                 OutlinedIconButton(
                     onClick = { vm.saveHydration(Hydration(date, (waterMl - 250).coerceAtLeast(0))) },
                     enabled = !state.busy,
                     shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.size(38.dp).testTag("water_sub_250"),
+                    modifier = Modifier.size(48.dp).testTag("water_sub_250"),
                 ) {
-                    Icon(Icons.Default.Remove, contentDescription = "-250 ml", modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.water_remove_a11y, number(250.0, 0)), modifier = Modifier.size(16.dp))
                 }
             }
         }

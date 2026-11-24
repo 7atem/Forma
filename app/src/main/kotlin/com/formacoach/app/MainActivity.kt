@@ -902,7 +902,7 @@ private fun TodayContent(
                         CircularProgressRing(
                             progress = (totalProtein / target).toFloat(),
                             valueText = number(totalProtein, 0),
-                            labelText = "/ ${number(target, 0)}g",
+                            labelText = stringResource(R.string.grams_of_target_short, number(target, 0)),
                             size = 98.dp,
                             strokeWidth = 9.dp,
                             color = MaterialTheme.colorScheme.secondary,

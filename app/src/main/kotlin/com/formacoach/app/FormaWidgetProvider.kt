@@ -74,7 +74,7 @@ class FormaWidgetProvider : AppWidgetProvider() {
             return RemoteViews(context.packageName, R.layout.forma_widget).apply {
                 setOnClickPendingIntent(R.id.widget_root, openIntent)
                 setTextViewText(R.id.widget_kcal_value, kcal.toString())
-                setTextViewText(R.id.widget_protein_value, "${protein}g")
+                setTextViewText(R.id.widget_protein_value, context.getString(R.string.grams_amount, protein.toString()))
                 setTextViewText(R.id.widget_week_value, "$weekSessions/$targetSessions")
                 setTextViewText(
                     R.id.widget_status,

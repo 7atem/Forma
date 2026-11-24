@@ -4,6 +4,14 @@ Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schem
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
 
+## UI/UX pass 3 (24 November 2026)
+
+Audit on the API 35 tablet (fresh install, onboarding, tablet rail layout, Arabic RTL) and the phone at 150% text. Fixes:
+- **Localization (Android + iPhone):** macro values, targets, the widget and iPhone diary/search/food tools no longer show a hard-coded Latin "g", "kcal" or English P/C/F letters; Arabic shows جم/سعرة and macro names.
+- **Water logging (Android):** buttons read "+250 ml"/"+500 ml" with spoken names, and the remove button grew from 38 dp to 48 dp.
+- **History (Android):** muscle rows put the name and "N main · N supporting sets" on separate lines (a long name previously collapsed to one letter per line under large text, drawing a tall empty box) and speak one sentence; the load-history note no longer squeezes beside the guide link.
+- **Tests:** new accessibility test for the muscle row. Tablet onboarding, Coach and Arabic Eat screens were checked and needed no change.
+
 ## Android UI/UX pass 2 (24 November 2026, uncommitted)
 
 Audit on the `Pixel_9_Pro` image at 150% and 100% text, light and dark. Changes:

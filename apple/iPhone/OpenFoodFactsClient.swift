@@ -168,7 +168,7 @@ enum OpenFoodFactsService {
                                     grams = preset
                                 } label: {
                                     FormaPill(
-                                        text: "\(Int(preset))g",
+                                        text: "\(FormaUnits.g(Double(preset)))",
                                         background: grams == preset ? FormaTheme.primary : FormaTheme.surfaceHigh,
                                         foreground: grams == preset ? FormaTheme.onPrimary : FormaTheme.textPrimary
                                     )
@@ -208,9 +208,9 @@ enum OpenFoodFactsService {
                                     }
                                 }
                                 Spacer()
-                                FormaPill(text: "\(Int(kcal.rounded())) kcal")
+                                FormaPill(text: "\(FormaUnits.kcal(Double(kcal.rounded())))")
                             }
-                            Text("\(Int(p.rounded()))g P · \(Int(c.rounded()))g C · \(Int(f.rounded()))g F")
+                            Text("\(FormaUnits.protein(Double(p.rounded()))) · \(FormaUnits.carbs(Double(c.rounded()))) · \(FormaUnits.fat(Double(f.rounded())))")
                                 .font(.caption)
                                 .foregroundStyle(FormaTheme.textMuted)
                             Button {

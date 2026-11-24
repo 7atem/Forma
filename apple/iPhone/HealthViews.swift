@@ -96,7 +96,7 @@ import FormaCore
                             Text("\(Int(record.durationSeconds / 60)) \(String(localized: "minutes_short"))")
                                 .font(.subheadline.weight(.bold)).monospacedDigit().foregroundStyle(FormaTheme.textPrimary)
                             if let kcal = record.activeEnergyKcal {
-                                Text("\(Int(kcal.rounded())) kcal").font(.caption).monospacedDigit().foregroundStyle(FormaTheme.textMuted)
+                                Text("\(FormaUnits.kcal(Double(kcal.rounded())))").font(.caption).monospacedDigit().foregroundStyle(FormaTheme.textMuted)
                             }
                         }
                     }

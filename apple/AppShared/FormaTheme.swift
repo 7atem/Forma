@@ -612,3 +612,14 @@ struct FormaGymStepper: View {
     }
 }
 #endif
+
+/// Localized nutrition units so Arabic never shows a Latin "g"/"kcal" or English macro letters.
+enum FormaUnits {
+    static func g(_ value: Double) -> String { String(format: String(localized: "grams_amount"), "\(Int(value.rounded()))") }
+    static func g(_ value: Int) -> String { g(Double(value)) }
+    static func kcal(_ value: Double) -> String { String(format: String(localized: "kcal_amount"), "\(Int(value.rounded()))") }
+    static func kcal(_ value: Int) -> String { kcal(Double(value)) }
+    static func protein(_ value: Double) -> String { String(format: String(localized: "macro_protein_short"), g(value)) }
+    static func carbs(_ value: Double) -> String { String(format: String(localized: "macro_carbs_short"), g(value)) }
+    static func fat(_ value: Double) -> String { String(format: String(localized: "macro_fat_short"), g(value)) }
+}

@@ -1213,10 +1213,9 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                     unitLabel,
                 )
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.external_load_note), Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                TextButton(onClick = { guide = true }) { Text(stringResource(R.string.view_form)) }
-            }
+            // Note first, then the guide link, so a long note is never squeezed beside the button.
+            Text(stringResource(R.string.external_load_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TextButton(onClick = { guide = true }) { Text(stringResource(R.string.view_form)) }
         }
         InfoCard {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {

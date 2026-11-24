@@ -431,4 +431,11 @@
     <string name="weekly_muscle_split_title">Working sets this week (warm-ups excluded)</string>
     <string name="muscle_sets_main">%1$s main</string>
     <string name="muscle_sets_supporting">%1$s support</string>
+    <string name="grams_amount">%1$s g</string>
+    <string name="grams_of_target">%1$s / %2$s g</string>
+    <string name="grams_of_target_short">/ %1$s g</string>
+    <string name="water_add">+%1$s ml</string>
+    <string name="water_add_a11y">Add %1$s ml of water</string>
+    <string name="water_remove_a11y">Remove %1$s ml of water</string>
+    <string name="muscle_set_split">%1$s main · %2$s supporting sets</string>
 </resources>

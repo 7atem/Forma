@@ -268,3 +268,9 @@
 "delete_meal_confirm" = "حذف هذا الإدخال؟ لا يمكن التراجع عن ذلك.";
 "week_streak_badge" = "أسابيع نشطة متتالية: %@";
 "bodyweight_load" = "وزن الجسم";
+"grams_amount" = "%@ جم";
+"grams_unit" = "جم";
+"kcal_amount" = "%@ سعرة";
+"macro_protein_short" = "بروتين %@";
+"macro_carbs_short" = "كربوهيدرات %@";
+"macro_fat_short" = "دهون %@";

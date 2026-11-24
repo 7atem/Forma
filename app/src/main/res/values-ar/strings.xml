@@ -431,4 +431,11 @@
     <string name="weekly_muscle_split_title">مجموعات العمل هذا الأسبوع (بدون الإحماء)</string>
     <string name="muscle_sets_main">%1$s أساسي</string>
     <string name="muscle_sets_supporting">%1$s مساعد</string>
+    <string name="grams_amount">%1$s جم</string>
+    <string name="grams_of_target">%1$s / %2$s جم</string>
+    <string name="grams_of_target_short">/ %1$s جم</string>
+    <string name="water_add">+%1$s مل</string>
+    <string name="water_add_a11y">أضف %1$s مل من الماء</string>
+    <string name="water_remove_a11y">احذف %1$s مل من الماء</string>
+    <string name="muscle_set_split">%1$s أساسي · %2$s مساعد</string>
 </resources>

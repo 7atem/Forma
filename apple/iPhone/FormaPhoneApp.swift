@@ -1587,11 +1587,11 @@ private struct MealSlotOption: Identifiable {
                             }
                             Spacer()
                             VStack(spacing: 6) {
-                                let proSub = proGoal.map { "/ \(Int($0.rounded()))g" } ?? "g"
+                                let proSub = proGoal.map { "/ \(FormaUnits.g(Double($0.rounded())))" } ?? String(localized: "grams_unit")
                                 let proProg = proGoal.map { totalP / max(1, $0) } ?? (totalP > 0 ? 1.0 : 0.0)
                                 FormaProgressRing(
                                     progress: proProg,
-                                    valueText: "\(Int(totalP.rounded()))g",
+                                    valueText: "\(FormaUnits.g(Double(totalP.rounded())))",
                                     labelText: proSub,
                                     size: 90,
                                     lineWidth: 9,
@@ -1602,9 +1602,9 @@ private struct MealSlotOption: Identifiable {
                             Spacer()
                         }
                         HStack(spacing: 6) {
-                            let cLabel = carbsGoal.map { "\(Int(totalC.rounded()))/\(Int($0.rounded()))g" } ?? "\(Int(totalC.rounded()))g"
-                            let fLabel = fatGoal.map { "\(Int(totalF.rounded()))/\(Int($0.rounded()))g" } ?? "\(Int(totalF.rounded()))g"
-                            FormaPill(text: "\(String(localized: "protein_label")) \(Int(totalP.rounded()))g", background: FormaTheme.secondary.opacity(0.2), foreground: FormaTheme.secondary)
+                            let cLabel = carbsGoal.map { "\(Int(totalC.rounded()))/\(FormaUnits.g(Double($0.rounded())))" } ?? "\(FormaUnits.g(Double(totalC.rounded())))"
+                            let fLabel = fatGoal.map { "\(Int(totalF.rounded()))/\(FormaUnits.g(Double($0.rounded())))" } ?? "\(FormaUnits.g(Double(totalF.rounded())))"
+                            FormaPill(text: "\(String(localized: "protein_label")) \(FormaUnits.g(Double(totalP.rounded())))", background: FormaTheme.secondary.opacity(0.2), foreground: FormaTheme.secondary)
                             FormaPill(text: "\(String(localized: "carbs_label")) \(cLabel)", background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
                             FormaPill(text: "\(String(localized: "fat_label")) \(fLabel)")
                         }
@@ -1689,7 +1689,7 @@ private struct MealSlotOption: Identifiable {
                                             .font(.subheadline.weight(.bold))
                                             .foregroundStyle(FormaTheme.primary)
                                         Spacer()
-                                        Text("\(Int(subKcal.rounded())) kcal · \(Int(subP.rounded()))g P")
+                                        Text("\(FormaUnits.kcal(Double(subKcal.rounded()))) · \(FormaUnits.protein(Double(subP.rounded())))")
                                             .font(.caption.weight(.semibold))
                                             .foregroundStyle(FormaTheme.textMuted)
                                         if groupMeals.count >= 2 {
@@ -1726,14 +1726,14 @@ private struct MealSlotOption: Identifiable {
                                                     Text(meal.name)
                                                         .font(.subheadline.weight(.bold))
                                                         .foregroundStyle(FormaTheme.textPrimary)
-                                                    Text("\(Int(meal.protein))g P · \(Int(meal.carbs))g C · \(Int(meal.fat))g F")
+                                                    Text("\(FormaUnits.protein(Double(meal.protein))) · \(FormaUnits.carbs(Double(meal.carbs))) · \(FormaUnits.fat(Double(meal.fat)))")
                                                         .font(.caption2)
                                                         .foregroundStyle(FormaTheme.textMuted)
                                                 }
                                                 .frame(maxWidth: .infinity, alignment: .leading)
                                             }
                                             .buttonStyle(.plain)
-                                            FormaPill(text: "\(Int(meal.calories.rounded())) kcal")
+                                            FormaPill(text: "\(FormaUnits.kcal(Double(meal.calories.rounded())))")
                                             Button(role: .destructive) { pendingDeleteMeal = meal } label: {
                                                 Image(systemName: "trash").font(.caption)
                                                     .frame(minWidth: 44, minHeight: 44)
@@ -1840,7 +1840,7 @@ private struct MealSlotOption: Identifiable {
                                             .font(.caption.weight(.bold))
                                             .foregroundStyle(FormaTheme.textPrimary)
                                             .lineLimit(1)
-                                        Text("\(Int(item.kcal)) kcal · \(Int(item.p))g P")
+                                        Text("\(FormaUnits.kcal(Double(item.kcal))) · \(FormaUnits.protein(Double(item.p)))")
                                             .font(.caption2)
                                             .foregroundStyle(FormaTheme.primary)
                                     }
@@ -1876,7 +1876,7 @@ private struct MealSlotOption: Identifiable {
                                                 .font(.caption.weight(.bold))
                                                 .foregroundStyle(FormaTheme.textPrimary)
                                                 .lineLimit(1)
-                                            Text("\(Int(combo.calories.rounded())) kcal · \(Int(combo.protein.rounded()))g P")
+                                            Text("\(FormaUnits.kcal(Double(combo.calories.rounded()))) · \(FormaUnits.protein(Double(combo.protein.rounded())))")
                                                 .font(.caption2)
                                                 .foregroundStyle(FormaTheme.secondary)
                                         }
@@ -2000,9 +2000,9 @@ private struct MealSlotOption: Identifiable {
                     }
                 }
                 Stepper("\(String(localized: "calories_label")): \(Int(kcal))", value: $kcal, in: 0...5000, step: 25)
-                Stepper("\(String(localized: "protein_label")): \(Int(protein))g", value: $protein, in: 0...500, step: 2)
-                Stepper("\(String(localized: "carbs_label")): \(Int(carbs))g", value: $carbs, in: 0...500, step: 5)
-                Stepper("\(String(localized: "fat_label")): \(Int(fat))g", value: $fat, in: 0...300, step: 2)
+                Stepper("\(String(localized: "protein_label")): \(FormaUnits.g(Double(protein)))", value: $protein, in: 0...500, step: 2)
+                Stepper("\(String(localized: "carbs_label")): \(FormaUnits.g(Double(carbs)))", value: $carbs, in: 0...500, step: 5)
+                Stepper("\(String(localized: "fat_label")): \(FormaUnits.g(Double(fat)))", value: $fat, in: 0...300, step: 2)
                 Button("calc_from_macros") {
                     kcal = (protein * 4.0) + (carbs * 4.0) + (fat * 9.0)
                 }

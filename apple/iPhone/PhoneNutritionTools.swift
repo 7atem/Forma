@@ -80,7 +80,7 @@ import FormaCore
                                     }
                                 }
                             }
-                            Text("\(Int((food.calories * scale).rounded())) kcal · P \(Int((food.protein * scale).rounded()))g · C \(Int((food.carbs * scale).rounded()))g · F \(Int((food.fat * scale).rounded()))g")
+                            Text("\(FormaUnits.kcal(Double((food.calories * scale).rounded()))) · \(FormaUnits.protein(Double((food.protein * scale).rounded()))) · \(FormaUnits.carbs(Double((food.carbs * scale).rounded()))) · \(FormaUnits.fat(Double((food.fat * scale).rounded())))")
                                 .font(.caption.weight(.semibold))
                                 .foregroundStyle(FormaTheme.primary)
                             Button {
@@ -117,7 +117,7 @@ import FormaCore
                                     Text(item.name(arabic: arabic))
                                         .font(.subheadline.weight(.bold))
                                         .foregroundStyle(FormaTheme.textPrimary)
-                                    Text("\(Int(item.referenceGrams)) \(item.unitLabel(arabic: arabic)) · \(Int(item.calories)) kcal · P \(Int(item.protein.rounded()))g")
+                                    Text("\(Int(item.referenceGrams)) \(item.unitLabel(arabic: arabic)) · \(FormaUnits.kcal(Double(item.calories))) · \(FormaUnits.protein(Double(item.protein.rounded())))")
                                         .font(.caption)
                                         .foregroundStyle(FormaTheme.textMuted)
                                 }
@@ -190,7 +190,7 @@ import FormaCore
                                     Text(option.food.name(arabic: arabic))
                                         .font(.subheadline.weight(.bold))
                                         .foregroundStyle(FormaTheme.textPrimary)
-                                    Text("\(Int(option.matchedAmount.rounded())) \(option.food.unitLabel(arabic: arabic)) · \(Int(option.calories.rounded())) kcal · P \(Int(option.protein.rounded()))g")
+                                    Text("\(Int(option.matchedAmount.rounded())) \(option.food.unitLabel(arabic: arabic)) · \(FormaUnits.kcal(Double(option.calories.rounded()))) · \(FormaUnits.protein(Double(option.protein.rounded())))")
                                         .font(.caption)
                                         .foregroundStyle(FormaTheme.primary)
                                 }

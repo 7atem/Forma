@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.width
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.time.LocalDate
 import org.junit.Rule
@@ -96,6 +97,26 @@ class AccessibilityTest {
         rule.onNodeWithText("1 recorded workout").assertExists()
         rule.onNodeWithText("2 or more recorded workouts").assertExists()
         rule.onNodeWithContentDescription("20 g protein, 30 g carbohydrates, 10 g fat", substring = true).assertExists()
+    }
+
+    @Test fun muscleRowsSpeakOneSentenceAndLongNamesStayReadable() {
+        rule.setContent {
+            MaterialTheme {
+                androidx.compose.foundation.layout.Box(androidx.compose.ui.Modifier.width(320.dp)) {
+                    MuscleVolumeBar(
+                        muscleLabelText = "Abdominal and trunk stabilizers",
+                        primarySets = 0,
+                        secondarySets = 2,
+                        maxSets = 2,
+                        detailText = "Abdominal and trunk stabilizers • 0 primary / 2 supporting",
+                    )
+                }
+            }
+        }
+        rule.onNodeWithContentDescription("Abdominal and trunk stabilizers • 0 primary / 2 supporting").assertExists()
+        // The name gets the full row width instead of being squeezed beside the counts.
+        rule.onNodeWithText("Abdominal and trunk stabilizers", useUnmergedTree = true).assertWidthIsAtLeast(200.dp)
+        rule.onNodeWithText("0 main · 2 supporting sets", useUnmergedTree = true).assertExists()
     }
 
     @Test fun destructiveConfirmationNamesTheAction() {
