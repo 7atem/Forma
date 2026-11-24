@@ -22,7 +22,7 @@ class MuscleTrainingTest {
         assertEquals(setOf(Muscle.CHEST),ExerciseMuscles.of(Exercise.CHEST_PRESS).primary.toSet())
     }
     @Test fun detailedRegionsRollUpExactlyToBroadGroupsAndAreAllDrawn() {
-        assertEquals(20,MuscleDetail.entries.size)
+        assertEquals(21,MuscleDetail.entries.size)
         MuscleDetail.entries.forEach {detail ->assertTrue(ExerciseMuscles.regions.any {it.detail==detail})}
         // Each drawn region appears once per side.
         MuscleDetail.entries.forEach {detail ->

@@ -195,6 +195,12 @@
       "group": "CALVES",
       "en": "Soleus (lower calf)",
       "ar": "العضلة النعلية (أسفل الساق)"
+    },
+    {
+      "id": "FOREARMS",
+      "group": "BICEPS",
+      "en": "Forearms & grip",
+      "ar": "الساعدان والقبضة"
     }
   ],
   "regions": [
@@ -485,6 +491,30 @@
       "view": "back",
       "fiber": 90,
       "path": "M 64.4 176 C 65 177 64.1 182.9 63.7 186 C 63.3 189.1 62.7 193 61.8 194.5 C 60.9 196 59.4 196.4 58.5 195 C 57.6 193.6 56.9 189.3 56.5 186 C 56.1 182.7 55.6 176 56.2 175 C 56.8 174 58.6 179.8 60 180 C 61.4 180.2 63.8 175 64.4 176 Z"
+    },
+    {
+      "detail": "FOREARMS",
+      "view": "front",
+      "fiber": 102,
+      "path": "M 20.5 67 L 24.5 67 L 21.8 81 L 19.2 91 L 16.0 90 L 18.0 79 Z"
+    },
+    {
+      "detail": "FOREARMS",
+      "view": "front",
+      "fiber": 78,
+      "path": "M 79.5 67 L 75.5 67 L 78.2 81 L 80.8 91 L 84.0 90 L 82.0 79 Z"
+    },
+    {
+      "detail": "FOREARMS",
+      "view": "back",
+      "fiber": 102,
+      "path": "M 20.5 67 L 24.5 67 L 21.8 81 L 19.2 91 L 16.0 90 L 18.0 79 Z"
+    },
+    {
+      "detail": "FOREARMS",
+      "view": "back",
+      "fiber": 78,
+      "path": "M 79.5 67 L 75.5 67 L 78.2 81 L 80.8 91 L 84.0 90 L 82.0 79 Z"
     }
   ],
   "exercises": [
@@ -587,7 +617,8 @@
       ],
       "secondaryDetail": [
         "BICEPS",
-        "REAR_DELT"
+        "REAR_DELT",
+        "FOREARMS"
       ]
     },
     {
@@ -599,7 +630,8 @@
       ],
       "secondary": [
         "BICEPS",
-        "UPPER_BACK"
+        "UPPER_BACK",
+        "REAR_DELTS"
       ],
       "reference": "https://www.acefitness.org/resources/pros/expert-articles/8944/a-back-to-school-program-an-evidence-based-approach-to-training-the-back/",
       "equipment": [
@@ -611,7 +643,9 @@
       ],
       "secondaryDetail": [
         "BICEPS",
-        "MID_BACK"
+        "MID_BACK",
+        "REAR_DELT",
+        "FOREARMS"
       ]
     },
     {
@@ -650,7 +684,8 @@
       ],
       "secondary": [
         "TRICEPS",
-        "UPPER_BACK"
+        "UPPER_BACK",
+        "CHEST"
       ],
       "reference": "https://www.nasm.org/workout-exercise-guidance",
       "equipment": [
@@ -663,7 +698,8 @@
       "secondaryDetail": [
         "TRICEPS",
         "UPPER_TRAPS",
-        "SIDE_DELT"
+        "SIDE_DELT",
+        "UPPER_CHEST"
       ]
     },
     {
@@ -704,7 +740,8 @@
       ],
       "secondary": [
         "CORE",
-        "ADDUCTORS"
+        "ADDUCTORS",
+        "ERECTORS"
       ],
       "equipment": [
         "DUMBBELLS"
@@ -718,7 +755,8 @@
       "secondaryDetail": [
         "RECTUS_ABDOMINIS",
         "OBLIQUES",
-        "ADDUCTORS"
+        "ADDUCTORS",
+        "SPINAL_ERECTORS"
       ]
     },
     {
@@ -895,6 +933,8 @@
       ],
       "secondary": [
         "HAMSTRINGS",
+        "QUADRICEPS",
+        "ADDUCTORS",
         "CORE"
       ],
       "equipment": [
@@ -908,6 +948,8 @@
       ],
       "secondaryDetail": [
         "HAMSTRINGS",
+        "QUADRICEPS",
+        "ADDUCTORS",
         "RECTUS_ABDOMINIS",
         "GLUTE_MED"
       ]
@@ -947,6 +989,7 @@
       ],
       "secondary": [
         "ERECTORS",
+        "UPPER_BACK",
         "CORE"
       ],
       "equipment": [
@@ -960,6 +1003,8 @@
       ],
       "secondaryDetail": [
         "SPINAL_ERECTORS",
+        "UPPER_TRAPS",
+        "MID_BACK",
         "RECTUS_ABDOMINIS",
         "OBLIQUES"
       ]
@@ -1105,7 +1150,8 @@
       ],
       "secondary": [
         "BICEPS",
-        "REAR_DELTS"
+        "REAR_DELTS",
+        "CORE"
       ],
       "equipment": [
         "DUMBBELLS",
@@ -1119,7 +1165,10 @@
       ],
       "secondaryDetail": [
         "BICEPS",
-        "REAR_DELT"
+        "REAR_DELT",
+        "FOREARMS",
+        "OBLIQUES",
+        "RECTUS_ABDOMINIS"
       ]
     },
     {
@@ -1146,7 +1195,8 @@
       ],
       "secondaryDetail": [
         "BICEPS",
-        "REAR_DELT"
+        "REAR_DELT",
+        "FOREARMS"
       ]
     },
     {
@@ -1159,6 +1209,7 @@
       "secondary": [
         "BICEPS",
         "UPPER_BACK",
+        "REAR_DELTS",
         "CORE"
       ],
       "equipment": [
@@ -1172,6 +1223,8 @@
       "secondaryDetail": [
         "BICEPS",
         "MID_BACK",
+        "REAR_DELT",
+        "FOREARMS",
         "RECTUS_ABDOMINIS"
       ]
     },
@@ -1184,6 +1237,7 @@
         "UPPER_BACK"
       ],
       "secondary": [
+        "FRONT_DELTS",
         "BICEPS"
       ],
       "equipment": [
@@ -1196,6 +1250,8 @@
         "MID_BACK"
       ],
       "secondaryDetail": [
+        "UPPER_TRAPS",
+        "SIDE_DELT",
         "BICEPS"
       ]
     },
@@ -1208,6 +1264,8 @@
       ],
       "secondary": [
         "TRICEPS",
+        "UPPER_BACK",
+        "CHEST",
         "CORE"
       ],
       "equipment": [
@@ -1221,9 +1279,11 @@
       ],
       "secondaryDetail": [
         "TRICEPS",
+        "UPPER_TRAPS",
+        "SIDE_DELT",
+        "UPPER_CHEST",
         "RECTUS_ABDOMINIS",
-        "OBLIQUES",
-        "SIDE_DELT"
+        "OBLIQUES"
       ]
     },
     {
@@ -1234,7 +1294,8 @@
         "FRONT_DELTS"
       ],
       "secondary": [
-        "UPPER_BACK"
+        "UPPER_BACK",
+        "REAR_DELTS"
       ],
       "equipment": [
         "DUMBBELLS"
@@ -1246,7 +1307,8 @@
       ],
       "secondaryDetail": [
         "UPPER_TRAPS",
-        "FRONT_DELT"
+        "FRONT_DELT",
+        "REAR_DELT"
       ]
     },
     {
@@ -1305,7 +1367,9 @@
       "primaryDetail": [
         "BICEPS"
       ],
-      "secondaryDetail": []
+      "secondaryDetail": [
+        "FOREARMS"
+      ]
     },
     {
       "id": "HAMMER_CURL",
@@ -1321,7 +1385,8 @@
       "perSide": false,
       "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
       "primaryDetail": [
-        "BICEPS"
+        "BICEPS",
+        "FOREARMS"
       ],
       "secondaryDetail": []
     },
@@ -1341,7 +1406,9 @@
       "primaryDetail": [
         "BICEPS"
       ],
-      "secondaryDetail": []
+      "secondaryDetail": [
+        "FOREARMS"
+      ]
     },
     {
       "id": "TRICEPS_PUSHDOWN",
@@ -1526,12 +1593,14 @@
       "ar": "ديدلفت تقليدي بالبار",
       "primary": [
         "HAMSTRINGS",
-        "GLUTES"
+        "GLUTES",
+        "ERECTORS"
       ],
       "secondary": [
-        "ERECTORS",
         "UPPER_BACK",
-        "QUADRICEPS"
+        "QUADRICEPS",
+        "ADDUCTORS",
+        "CORE"
       ],
       "equipment": [
         "BARBELL"
@@ -1540,13 +1609,15 @@
       "reference": "https://www.acefitness.org/resources/everyone/exercise-library/",
       "primaryDetail": [
         "HAMSTRINGS",
-        "GLUTE_MAX"
+        "GLUTE_MAX",
+        "SPINAL_ERECTORS"
       ],
       "secondaryDetail": [
-        "SPINAL_ERECTORS",
         "UPPER_TRAPS",
         "MID_BACK",
-        "QUADRICEPS"
+        "QUADRICEPS",
+        "ADDUCTORS",
+        "RECTUS_ABDOMINIS"
       ]
     },
     {
@@ -1560,7 +1631,8 @@
       "secondary": [
         "BICEPS",
         "REAR_DELTS",
-        "ERECTORS"
+        "ERECTORS",
+        "CORE"
       ],
       "equipment": [
         "BARBELL"
@@ -1574,7 +1646,9 @@
       "secondaryDetail": [
         "BICEPS",
         "REAR_DELT",
-        "SPINAL_ERECTORS"
+        "FOREARMS",
+        "SPINAL_ERECTORS",
+        "RECTUS_ABDOMINIS"
       ]
     },
     {
@@ -1586,6 +1660,8 @@
       ],
       "secondary": [
         "TRICEPS",
+        "UPPER_BACK",
+        "CHEST",
         "CORE"
       ],
       "equipment": [
@@ -1598,9 +1674,11 @@
       ],
       "secondaryDetail": [
         "TRICEPS",
+        "UPPER_TRAPS",
+        "SIDE_DELT",
+        "UPPER_CHEST",
         "RECTUS_ABDOMINIS",
-        "OBLIQUES",
-        "SIDE_DELT"
+        "OBLIQUES"
       ]
     },
     {
@@ -1611,7 +1689,8 @@
         "FRONT_DELTS"
       ],
       "secondary": [
-        "UPPER_BACK"
+        "UPPER_BACK",
+        "REAR_DELTS"
       ],
       "equipment": [
         "CABLE"
@@ -1623,7 +1702,8 @@
       ],
       "secondaryDetail": [
         "UPPER_TRAPS",
-        "FRONT_DELT"
+        "FRONT_DELT",
+        "REAR_DELT"
       ]
     },
     {
@@ -1642,7 +1722,9 @@
       "primaryDetail": [
         "BICEPS"
       ],
-      "secondaryDetail": []
+      "secondaryDetail": [
+        "FOREARMS"
+      ]
     },
     {
       "id": "SKULL_CRUSHER",

@@ -48,6 +48,12 @@ struct PhoneMealCombo: Codable, Identifiable, Equatable {
     var fat: Double
 }
 
+struct PhoneSupplement: Codable, Identifiable, Equatable {
+    var id = UUID().uuidString
+    var name: String
+    var dose: String = ""
+}
+
 struct SavedState: Codable {
     var programs: [WatchProgram] = [
         .init(id: "starter-A", name: "A", exercises: [.squat, .chest_press, .row]),
@@ -62,6 +68,8 @@ struct SavedState: Codable {
     var mealCombos: [PhoneMealCombo] = []
     var weights: [PhoneWeight] = []
     var hydration: [PhoneHydration] = []
+    var supplements: [PhoneSupplement] = []
+    var supplementLogs: [String: [String]] = [:]
     var calorieTarget: Int?
     var proteinTarget: Double?
     var waterGoalMl: Int?
@@ -86,6 +94,8 @@ struct SavedState: Codable {
         mealCombos = try c.decodeIfPresent([PhoneMealCombo].self, forKey: .mealCombos) ?? []
         weights = try c.decodeIfPresent([PhoneWeight].self, forKey: .weights) ?? []
         hydration = try c.decodeIfPresent([PhoneHydration].self, forKey: .hydration) ?? []
+        supplements = try c.decodeIfPresent([PhoneSupplement].self, forKey: .supplements) ?? []
+        supplementLogs = try c.decodeIfPresent([String: [String]].self, forKey: .supplementLogs) ?? [:]
         calorieTarget = try c.decodeIfPresent(Int.self, forKey: .calorieTarget)
         proteinTarget = try c.decodeIfPresent(Double.self, forKey: .proteinTarget)
         waterGoalMl = try c.decodeIfPresent(Int.self, forKey: .waterGoalMl)
@@ -396,6 +406,41 @@ struct SavedState: Codable {
                 state.hydration[idx] = PhoneHydration(date: date, milliliters: milliliters)
             } else {
                 state.hydration.append(PhoneHydration(date: date, milliliters: milliliters))
+            }
+        }
+    }
+
+    func addSupplement(name: String, dose: String) throws {
+        let cleanName = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(60))
+        let cleanDose = String(dose.trimmingCharacters(in: .whitespacesAndNewlines).prefix(30))
+        guard !cleanName.isEmpty else { throw TransferError.invalid }
+        try commit { state in
+            guard state.supplements.count < 40 else { throw TransferError.capacity }
+            state.supplements.append(PhoneSupplement(name: cleanName, dose: cleanDose))
+        }
+    }
+
+    func deleteSupplement(_ id: String) throws {
+        try commit { state in
+            state.supplements.removeAll { $0.id == id }
+            for key in state.supplementLogs.keys {
+                state.supplementLogs[key]?.removeAll { $0 == id }
+            }
+        }
+    }
+
+    func toggleSupplementTaken(_ id: String, date: String = LocalStore.todayString()) throws {
+        try commit { state in
+            var taken = state.supplementLogs[date] ?? []
+            if let idx = taken.firstIndex(of: id) {
+                taken.remove(at: idx)
+            } else {
+                taken.append(id)
+            }
+            state.supplementLogs[date] = taken
+            if state.supplementLogs.count > 90 {
+                let keep = Set(state.supplementLogs.keys.sorted().suffix(90))
+                state.supplementLogs = state.supplementLogs.filter { keep.contains($0.key) }
             }
         }
     }

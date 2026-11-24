@@ -34,6 +34,7 @@
     <string name="muscle_detail_adductors">عضلات الفخذ الداخلية</string>
     <string name="muscle_detail_gastrocnemius">عضلة السمانة (أعلى الساق)</string>
     <string name="muscle_detail_soleus">العضلة النعلية (أسفل الساق)</string>
+    <string name="muscle_detail_forearms">الساعدان والقبضة</string>
     <string name="catalog_exercise_squat">سكوات</string>
     <string name="catalog_exercise_leg_press">دفع الرجلين</string>
     <string name="catalog_exercise_chest_press">ضغط الصدر</string>

@@ -225,3 +225,11 @@
 "food_swap_match_by" = "المطابقة حسب";
 "saved_combos_title" = "وجبات مجمّعة محفوظة";
 "save_meal_combo" = "احفظ الوجبة المختارة كوجبة مجمّعة";
+"supplements_title" = "المكملات والفيتامينات";
+"supplements_manage" = "إدارة";
+"supplements_hide" = "إخفاء";
+"supplements_empty_hint" = "تابع مكملاتك أو فيتاميناتك اليومية بضغطة واحدة.";
+"supplements_add_custom" = "إضافة مخصص";
+"supplements_name_label" = "اسم المكمل أو الفيتامين";
+"supplements_dose_label" = "ملاحظة الجرعة (اختياري، مثل ٥ جم)";
+"supplements_disclaimer" = "قائمة متابعة شخصية فقط — ليست نصيحة طبية أو جرعة موصى بها.";

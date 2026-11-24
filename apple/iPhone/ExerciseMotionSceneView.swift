@@ -138,8 +138,20 @@ private enum MotionSceneMaterial {
     }
 }
 
+/// Optional studio-rigged USDZ character models exported from Blender/Mixamo
+/// (`assets/exercises/res/models/exercise_3d_<id>.usdz`). When present, SceneKit loads the
+/// authored rigged mesh automatically instead of the procedural capsule mannequin.
+enum RiggedModelLibrary {
+    static func url(exerciseID: String) -> URL? {
+        let name = "exercise_3d_\(exerciseID.lowercased())"
+        return Bundle.main.url(forResource: name, withExtension: "usdz", subdirectory: "models")
+            ?? Bundle.main.url(forResource: name, withExtension: "usdz")
+    }
+}
+
 final class ExerciseMotionSceneUIView: SCNView {
     private var exerciseID: String?
+    private var riggedRoot: SCNNode?
     private var segments: [MotionSegment] = []
     private var joints: [(SCNNode, (BodyPose) -> Vec3)] = []
     private var head: SCNNode?
@@ -167,6 +179,7 @@ final class ExerciseMotionSceneUIView: SCNView {
         let scene = SCNScene()
         scene.background.contents = UIColor.clear
         self.scene = scene
+        riggedRoot = nil
         segments = []
         joints = []
         head = nil
@@ -174,6 +187,22 @@ final class ExerciseMotionSceneUIView: SCNView {
 
         addLighting(to: scene.rootNode)
         addFloor(to: scene.rootNode)
+
+        if let usdzURL = RiggedModelLibrary.url(exerciseID: exerciseID),
+           let loaded = try? SCNScene(url: usdzURL, options: [.checkConsistency: true]) {
+            let container = SCNNode()
+            for child in loaded.rootNode.childNodes {
+                container.addChildNode(child)
+            }
+            scene.rootNode.addChildNode(container)
+            riggedRoot = container
+            rendersContinuously = true
+            isPlaying = true
+            addCamera(to: scene.rootNode, bounds: MotionBounds(clip))
+            return
+        }
+
+        rendersContinuously = false
         addMannequin(to: scene.rootNode)
         if let bench = clip.bench { addBench(bench, to: scene.rootNode) }
         if clip.prop == .barbell { addBarbell(clip, to: scene.rootNode) }
@@ -181,6 +210,25 @@ final class ExerciseMotionSceneUIView: SCNView {
     }
 
     func render(clip: MotionClip, phase: Double, yaw: Double, highlights: [MusclePart: Int]) {
+        if let riggedRoot {
+            let effort = MotionEngine.effort(clip, phase)
+            let showHighlights = !highlights.isEmpty
+            riggedRoot.enumerateChildNodes { node, _ in
+                for material in node.geometry?.materials ?? [] {
+                    let matName = (material.name ?? "").uppercased()
+                    if matName.contains("MUSCLE_PRIMARY") {
+                        material.emission.contents = showHighlights ? UIColor(FormaTheme.musclePrimary) : UIColor.clear
+                        material.emission.intensity = showHighlights ? CGFloat(0.45 + 0.5 * effort) : 0
+                    } else if matName.contains("MUSCLE_SECONDARY") {
+                        material.emission.contents = showHighlights ? UIColor(FormaTheme.muscleSupporting) : UIColor.clear
+                        material.emission.intensity = showHighlights ? CGFloat(0.25 + 0.35 * effort) : 0
+                    }
+                }
+            }
+            updateCamera(yaw: yaw)
+            return
+        }
+
         let pose = MotionEngine.pose(clip, MotionEngine.sample(clip, phase))
         let effort = MotionEngine.effort(clip, phase)
         for segment in segments { segment.update(pose: pose, highlights: highlights, effort: effort) }

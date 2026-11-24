@@ -396,4 +396,12 @@
     <string name="hips_cm">الأرداف (سم)</string>
     <string name="thighs_cm">الفخذ (سم)</string>
     <string name="same_as_last_set">نفس آخر مجموعة</string>
+    <string name="supplements_title">المكملات والفيتامينات</string>
+    <string name="supplements_manage">إدارة</string>
+    <string name="supplements_hide">إخفاء</string>
+    <string name="supplements_empty_hint">تابع مكملاتك أو فيتاميناتك اليومية بضغطة واحدة.</string>
+    <string name="supplements_add_custom">إضافة مخصص</string>
+    <string name="supplements_name_label">اسم المكمل أو الفيتامين</string>
+    <string name="supplements_dose_label">ملاحظة الجرعة (اختياري، مثل ٥ جم)</string>
+    <string name="supplements_disclaimer">قائمة متابعة شخصية فقط — ليست نصيحة طبية أو جرعة موصى بها.</string>
 </resources>

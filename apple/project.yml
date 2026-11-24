@@ -27,6 +27,10 @@ targets:
       - path: ../assets/exercises/res/raw
         buildPhase: resources
         optional: true
+      # Optional rigged USDZ character models exported from Blender/Mixamo.
+      - path: ../assets/exercises/res/models
+        buildPhase: resources
+        optional: true
     dependencies:
       - package: FormaCore
       - target: FormaWatch

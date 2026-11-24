@@ -40,6 +40,7 @@ internal fun muscleDetailLabel(detail: com.formacoach.model.MuscleDetail): Int =
     com.formacoach.model.MuscleDetail.ADDUCTORS -> R.string.muscle_detail_adductors
     com.formacoach.model.MuscleDetail.GASTROCNEMIUS -> R.string.muscle_detail_gastrocnemius
     com.formacoach.model.MuscleDetail.SOLEUS -> R.string.muscle_detail_soleus
+    com.formacoach.model.MuscleDetail.FOREARMS -> R.string.muscle_detail_forearms
 }
 
 internal fun exerciseLabel(exercise:com.formacoach.model.Exercise):Int=when(exercise) {

@@ -56,7 +56,7 @@ final class WorkoutTransferTests: XCTestCase {
         }
     }
     func testDetailedRegionsRollUpToBroadGroups() {
-        XCTAssertEqual(MuscleDetail.allCases.count,20)
+        XCTAssertEqual(MuscleDetail.allCases.count,21)
         for detail in MuscleDetail.allCases {XCTAssertTrue(ExerciseMuscles.regions.contains {$0.detail==detail})}
         for exercise in Exercise.allCases {
             let mapping=ExerciseMuscles.of(exercise)

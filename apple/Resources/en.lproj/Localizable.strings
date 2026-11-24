@@ -225,3 +225,11 @@
 "food_swap_match_by" = "Match by";
 "saved_combos_title" = "Saved Meal Combos";
 "save_meal_combo" = "Save selected meal as combo";
+"supplements_title" = "Supplements & Vitamins";
+"supplements_manage" = "Manage";
+"supplements_hide" = "Hide";
+"supplements_empty_hint" = "Track your personal daily vitamins or supplements with one tap.";
+"supplements_add_custom" = "Add custom";
+"supplements_name_label" = "Supplement or vitamin name";
+"supplements_dose_label" = "Dose note (optional, e.g. 5 g)";
+"supplements_disclaimer" = "Personal daily checklist only — not medical or dosage advice.";

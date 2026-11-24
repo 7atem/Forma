@@ -238,6 +238,8 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
         }
     }
 
+    SupplementsVitaminsCard(date)
+
     if (library) FoodLibrary(state, vm)
 
     if (state.snapshot.foods.isEmpty()) {

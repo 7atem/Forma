@@ -1562,6 +1562,9 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    // Daily Supplements & Vitamins Checklist
+                    PhoneSupplementsCard(store: store, today: today)
+
                     // Meal slot selector (including Ramadan Suhoor & Iftar)
                     let slotOptions = [
                         MealSlotOption(id: "BREAKFAST", labelKey: "meal_breakfast"),

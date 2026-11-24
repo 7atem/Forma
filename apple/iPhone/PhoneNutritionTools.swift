@@ -232,3 +232,145 @@ import FormaCore
         }
     }
 }
+
+/// Personal daily Supplements & Vitamins checklist card inside the Eat tab (no medical/dosage prescription).
+@MainActor struct PhoneSupplementsCard: View {
+    @ObservedObject var store: LocalStore
+    let today: String
+    @State private var managing = false
+    @State private var addingCustom = false
+    @State private var customName = ""
+    @State private var customDose = ""
+    @Environment(\.locale) private var locale
+    private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
+
+    private let presets: [(en: String, ar: String, dose: String)] = [
+        ("Creatine", "كرياتين", "5 g"),
+        ("Vitamin D3", "فيتامين د٣", "2000 IU"),
+        ("Omega-3", "أوميجا ٣", "1000 mg"),
+        ("Magnesium", "ماغنيسيوم", "300 mg"),
+        ("Multivitamin", "فيتامينات متعددة", "1 cap"),
+        ("Electrolytes", "إلكترولايت", "1 scoop"),
+    ]
+
+    var body: some View {
+        let items = store.state.supplements
+        let takenSet = Set(store.state.supplementLogs[today] ?? [])
+        let takenCount = items.filter { takenSet.contains($0.id) }.count
+
+        FormaCard {
+            HStack(spacing: 8) {
+                Image(systemName: "pills.fill").foregroundStyle(FormaTheme.secondary)
+                Text("supplements_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                Spacer()
+                if !items.isEmpty {
+                    FormaPill(
+                        text: "\(takenCount)/\(items.count)",
+                        background: FormaTheme.secondary.opacity(0.2),
+                        foreground: FormaTheme.secondary
+                    )
+                }
+                Button(managing ? "supplements_hide" : "supplements_manage") {
+                    FormaHaptics.tap()
+                    withAnimation(.easeInOut(duration: 0.2)) { managing.toggle() }
+                }
+                .font(.caption.weight(.semibold))
+            }
+
+            if items.isEmpty {
+                Text("supplements_empty_hint")
+                    .font(.caption)
+                    .foregroundStyle(FormaTheme.textMuted)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(items) { item in
+                        let checked = takenSet.contains(item.id)
+                        HStack(spacing: 10) {
+                            Button {
+                                FormaHaptics.tap()
+                                store.attempt { try store.toggleSupplementTaken(item.id, date: today) }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    Image(systemName: checked ? "checkmark.circle.fill" : "circle")
+                                        .foregroundStyle(checked ? FormaTheme.secondary : FormaTheme.textMuted)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(item.name)
+                                            .font(.subheadline.weight(.semibold))
+                                            .foregroundStyle(FormaTheme.textPrimary)
+                                        if !item.dose.isEmpty {
+                                            Text(item.dose)
+                                                .font(.caption2)
+                                                .foregroundStyle(FormaTheme.textMuted)
+                                        }
+                                    }
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(.plain)
+
+                            if managing {
+                                Button(role: .destructive) {
+                                    store.attempt { try store.deleteSupplement(item.id) }
+                                } label: {
+                                    Image(systemName: "trash").font(.caption)
+                                }
+                            }
+                        }
+                        .padding(10)
+                        .background(checked ? FormaTheme.secondary.opacity(0.12) : FormaTheme.surfaceHigh.opacity(0.6), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    }
+                }
+            }
+
+            if managing || items.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(Array(presets.enumerated()), id: \.offset) { _, preset in
+                            let label = arabic ? preset.ar : preset.en
+                            if !items.contains(where: { $0.name.caseInsensitiveCompare(label) == .orderedSame }) {
+                                Button {
+                                    FormaHaptics.tap()
+                                    store.attempt { try store.addSupplement(name: label, dose: preset.dose) }
+                                } label: {
+                                    FormaPill(text: "+ \(label)", background: FormaTheme.surfaceHigh, foreground: FormaTheme.textPrimary)
+                                }
+                            }
+                        }
+                        Button {
+                            FormaHaptics.tap()
+                            customName = ""
+                            customDose = ""
+                            addingCustom = true
+                        } label: {
+                            FormaPill(text: "+ \(String(localized: "supplements_add_custom"))", background: FormaTheme.primaryContainer, foreground: FormaTheme.primary)
+                        }
+                    }
+                }
+                Text("supplements_disclaimer")
+                    .font(.caption2)
+                    .foregroundStyle(FormaTheme.textMuted)
+            }
+        }
+        .sheet(isPresented: $addingCustom) {
+            NavigationStack {
+                Form {
+                    TextField("supplements_name_label", text: $customName)
+                    TextField("supplements_dose_label", text: $customDose)
+                }
+                .navigationTitle("supplements_add_custom")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) { Button("cancel") { addingCustom = false } }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("save") {
+                            store.attempt { try store.addSupplement(name: customName, dose: customDose) }
+                            addingCustom = false
+                        }
+                        .disabled(customName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+        }
+    }
+}
