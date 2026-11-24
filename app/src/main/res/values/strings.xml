@@ -416,4 +416,6 @@
     <string name="custom_exercise_equipment">Equipment</string>
     <string name="custom_exercise_notes">Personal note (optional)</string>
     <string name="custom_exercise_best">Best</string>
+    <string name="badge_video_short">Video</string>
+    <string name="badge_3d_short">3D</string>
 </resources>

@@ -277,11 +277,31 @@ import FormaCore
                 .font(.caption.weight(.semibold))
             }
 
-            if items.isEmpty {
-                Text("supplements_empty_hint")
-                    .font(.caption)
-                    .foregroundStyle(FormaTheme.textMuted)
-            } else {
+            if !managing && !items.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(items) { item in
+                            let checked = takenSet.contains(item.id)
+                            Button {
+                                FormaHaptics.tap()
+                                store.attempt { try store.toggleSupplementTaken(item.id, date: today) }
+                            } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: checked ? "checkmark.circle.fill" : "circle")
+                                        .font(.caption)
+                                    Text(item.dose.isEmpty ? item.name : "\(item.name) · \(item.dose)")
+                                        .font(.caption.weight(.semibold))
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(checked ? FormaTheme.secondary.opacity(0.18) : FormaTheme.surfaceHigh, in: Capsule())
+                                .foregroundStyle(checked ? FormaTheme.secondary : FormaTheme.textPrimary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            } else if managing && !items.isEmpty {
                 VStack(spacing: 8) {
                     ForEach(items) { item in
                         let checked = takenSet.contains(item.id)
@@ -308,12 +328,10 @@ import FormaCore
                             }
                             .buttonStyle(.plain)
 
-                            if managing {
-                                Button(role: .destructive) {
-                                    store.attempt { try store.deleteSupplement(item.id) }
-                                } label: {
-                                    Image(systemName: "trash").font(.caption)
-                                }
+                            Button(role: .destructive) {
+                                store.attempt { try store.deleteSupplement(item.id) }
+                            } label: {
+                                Image(systemName: "trash").font(.caption)
                             }
                         }
                         .padding(10)
@@ -322,7 +340,7 @@ import FormaCore
                 }
             }
 
-            if managing || items.isEmpty {
+            if managing {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
                         ForEach(Array(presets.enumerated()), id: \.offset) { _, preset in
@@ -372,5 +390,94 @@ import FormaCore
             }
             .presentationDetents([.medium])
         }
+    }
+}
+
+/// Explicit user-entered personal nutrition & hydration targets sheet (no automatic prescription).
+@MainActor struct PhoneGoalsSheet: View {
+    @ObservedObject var store: LocalStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var caloriesText = ""
+    @State private var proteinText = ""
+    @State private var carbsText = ""
+    @State private var fatText = ""
+    @State private var waterText = ""
+    @State private var initialized = false
+
+    private func parseOptionalDouble(_ raw: String) -> Double? {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        let latin = trimmed.applyingTransform(.toLatin, reverse: false) ?? trimmed
+        let cleaned = latin.replacingOccurrences(of: "٫", with: ".").replacingOccurrences(of: ",", with: ".")
+        return Double(cleaned)
+    }
+
+    private func parseOptionalInt(_ raw: String) -> Int? {
+        parseOptionalDouble(raw).map { Int($0.rounded()) }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Text("personal_goals_note")
+                        .font(.caption)
+                        .foregroundStyle(FormaTheme.textMuted)
+                }
+                Section("personal_goals_title") {
+                    TextField("goal_calories_placeholder", text: $caloriesText)
+                        .keyboardType(.numberPad)
+                    TextField("goal_protein_placeholder", text: $proteinText)
+                        .keyboardType(.decimalPad)
+                    TextField("goal_carbs_placeholder", text: $carbsText)
+                        .keyboardType(.decimalPad)
+                    TextField("goal_fat_placeholder", text: $fatText)
+                        .keyboardType(.decimalPad)
+                    TextField("goal_water_placeholder", text: $waterText)
+                        .keyboardType(.numberPad)
+                }
+                if store.state.calorieTarget != nil || store.state.proteinTarget != nil || store.state.carbsTarget != nil || store.state.fatTarget != nil || store.state.waterGoalMl != nil {
+                    Section {
+                        Button("clear_personal_goals", role: .destructive) {
+                            store.attempt {
+                                try store.saveTargets(calories: nil, protein: nil, carbs: nil, fat: nil, waterMl: nil)
+                            }
+                            dismiss()
+                        }
+                    }
+                }
+            }
+            .navigationTitle("personal_goals_title")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("save") {
+                        FormaHaptics.success()
+                        store.attempt {
+                            try store.saveTargets(
+                                calories: parseOptionalInt(caloriesText),
+                                protein: parseOptionalDouble(proteinText),
+                                carbs: parseOptionalDouble(carbsText),
+                                fat: parseOptionalDouble(fatText),
+                                waterMl: parseOptionalInt(waterText)
+                            )
+                        }
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                if !initialized {
+                    initialized = true
+                    caloriesText = store.state.calorieTarget.map(String.init) ?? ""
+                    proteinText = store.state.proteinTarget.map { String(Int($0.rounded())) } ?? ""
+                    carbsText = store.state.carbsTarget.map { String(Int($0.rounded())) } ?? ""
+                    fatText = store.state.fatTarget.map { String(Int($0.rounded())) } ?? ""
+                    waterText = store.state.waterGoalMl.map(String.init) ?? ""
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 }

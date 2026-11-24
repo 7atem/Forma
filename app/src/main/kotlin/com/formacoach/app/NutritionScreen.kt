@@ -189,52 +189,54 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
         }
     }
 
-    // Daily Hydration Card (1-tap +250ml / +500ml, persisted in Room v6)
+    // Compact Daily Hydration Bar (single-row above-the-fold, persisted in Room v6)
     val waterMl = state.snapshot.hydration.firstOrNull { it.date == date }?.milliliters ?: 0
     val waterGoal = state.snapshot.profile?.waterGoalMl
     InfoCard(Modifier.testTag("hydration_card")) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Default.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(20.dp))
-            Text(stringResource(R.string.hydration_title), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            PillBadge(
-                if (waterGoal != null) stringResource(R.string.hydration_goal_progress, number(waterMl.toDouble(), 0), number(waterGoal.toDouble(), 0))
-                else stringResource(R.string.hydration_value, number(waterMl.toDouble(), 0)),
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                contentColor = MaterialTheme.colorScheme.tertiary,
-            )
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(Icons.Default.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.hydration_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(
+                    if (waterGoal != null) stringResource(R.string.hydration_goal_progress, number(waterMl.toDouble(), 0), number(waterGoal.toDouble(), 0))
+                    else stringResource(R.string.hydration_value, number(waterMl.toDouble(), 0)),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+            FilledTonalButton(
+                onClick = { vm.saveHydration(Hydration(date, (waterMl + 250).coerceAtMost(20000))) },
+                enabled = !state.busy && waterMl < 20000,
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                modifier = Modifier.testTag("water_add_250"),
+            ) { Text("+250", fontWeight = FontWeight.Bold) }
+            FilledTonalButton(
+                onClick = { vm.saveHydration(Hydration(date, (waterMl + 500).coerceAtMost(20000))) },
+                enabled = !state.busy && waterMl < 20000,
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                modifier = Modifier.testTag("water_add_500"),
+            ) { Text("+500", fontWeight = FontWeight.Bold) }
+            if (waterMl > 0) {
+                OutlinedIconButton(
+                    onClick = { vm.saveHydration(Hydration(date, (waterMl - 250).coerceAtLeast(0))) },
+                    enabled = !state.busy,
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.size(38.dp).testTag("water_sub_250"),
+                ) {
+                    Icon(Icons.Default.Remove, contentDescription = "-250 ml", modifier = Modifier.size(16.dp))
+                }
+            }
         }
         if (waterGoal != null && waterGoal > 0) {
             LinearProgressIndicator(
                 progress = { (waterMl.toFloat() / waterGoal).coerceIn(0f, 1f) },
                 color = MaterialTheme.colorScheme.tertiary,
                 trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(999.dp)),
+                modifier = Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(999.dp)),
                 drawStopIndicator = {},
             )
-        }
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalButton(
-                onClick = { vm.saveHydration(Hydration(date, (waterMl + 250).coerceAtMost(20000))) },
-                enabled = !state.busy && waterMl < 20000,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f).testTag("water_add_250"),
-            ) { Text("+250 ml", fontWeight = FontWeight.SemiBold) }
-            FilledTonalButton(
-                onClick = { vm.saveHydration(Hydration(date, (waterMl + 500).coerceAtMost(20000))) },
-                enabled = !state.busy && waterMl < 20000,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.weight(1f).testTag("water_add_500"),
-            ) { Text("+500 ml", fontWeight = FontWeight.SemiBold) }
-            if (waterMl > 0) {
-                OutlinedIconButton(
-                    onClick = { vm.saveHydration(Hydration(date, (waterMl - 250).coerceAtLeast(0))) },
-                    enabled = !state.busy,
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.testTag("water_sub_250"),
-                ) {
-                    Icon(Icons.Default.Remove, contentDescription = "-250 ml")
-                }
-            }
         }
     }
 

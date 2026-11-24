@@ -113,13 +113,28 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
             }
         }
 
-        if (state.items.isEmpty()) {
-            Text(
-                stringResource(R.string.supplements_empty_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
+        if (!expanded && state.items.isNotEmpty()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                state.items.forEach { item ->
+                    val checked = item.id in takenToday
+                    FilterChip(
+                        selected = checked,
+                        onClick = {
+                            val nextSet = if (!checked) takenToday + item.id else takenToday - item.id
+                            update(state.copy(takenByDate = state.takenByDate + (dateKey to nextSet.toList())))
+                        },
+                        leadingIcon = {
+                            Icon(
+                                if (checked) Icons.Default.CheckCircle else Icons.Outlined.Circle,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        },
+                        label = { Text(if (item.dose.isBlank()) item.name else "${item.name} · ${item.dose}") },
+                    )
+                }
+            }
+        } else if (expanded && state.items.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 state.items.forEach { item ->
                     val checked = item.id in takenToday
@@ -152,16 +167,14 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
                                     Text(item.dose, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            if (expanded) {
-                                IconButton(
-                                    onClick = {
-                                        val nextItems = state.items.filterNot { it.id == item.id }
-                                        val nextDates = state.takenByDate.mapValues { (_, list) -> list.filterNot { it == item.id } }
-                                        update(state.copy(items = nextItems, takenByDate = nextDates))
-                                    },
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove), tint = MaterialTheme.colorScheme.error)
-                                }
+                            IconButton(
+                                onClick = {
+                                    val nextItems = state.items.filterNot { it.id == item.id }
+                                    val nextDates = state.takenByDate.mapValues { (_, list) -> list.filterNot { it == item.id } }
+                                    update(state.copy(items = nextItems, takenByDate = nextDates))
+                                },
+                            ) {
+                                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.remove), tint = MaterialTheme.colorScheme.error)
                             }
                         }
                     }
@@ -169,7 +182,7 @@ internal fun SupplementsVitaminsCard(date: LocalDate) {
             }
         }
 
-        if (expanded || state.items.isEmpty()) {
+        if (expanded) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 defaultSupplementPresets.forEach { preset ->
                     val label = if (arabic) preset.nameAr else preset.nameEn

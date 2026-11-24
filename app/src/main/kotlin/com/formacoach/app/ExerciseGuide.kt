@@ -349,7 +349,6 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     }
     var limit by rememberSaveable {mutableIntStateOf(12)}
     LaunchedEffect(search,equipment,muscle,homeOnly,favoritesOnly,recentOnly,discomfortEncoded) {limit=12}
-    CustomExercisesSection(today)
     Input(R.string.search_exercises,search,{search=it},"exercise_search",numeric=false)
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         Box(Modifier.weight(1f)) {
@@ -470,6 +469,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseMuscles.of(it).primaryDetail.map {d ->stringResource(muscleDetailLabel(d))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
     val homeEquipment = remember { setOf(Equipment.BODYWEIGHT, Equipment.DUMBBELLS, Equipment.BENCH, Equipment.BOX, Equipment.PULL_UP_BAR) }
     val matches=Exercise.entries.filter {ExerciseDiscomfortSelection.includes(it,discomfortExcluded)&&(!homeOnly||ExerciseCatalog.of(it).equipment.all {eq -> eq in homeEquipment})&&(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
+    CustomExercisesSection(today)
     Text(stringResource(R.string.exercise_results,number(matches.size.toDouble(),0),number(Exercise.entries.size.toDouble(),0)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
     if(matches.isEmpty()) {
         Column(Modifier.fillMaxWidth(),verticalArrangement=Arrangement.spacedBy(8.dp),horizontalAlignment=Alignment.CenterHorizontally) {
@@ -502,6 +502,23 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
             ) {
                 Box(Modifier.fillMaxWidth()) {
                     ExerciseThumbnail(exercise,Modifier.fillMaxWidth())
+                    val hasVideoClip = remember(exercise) { exerciseVideoResource(context, exercise) != 0 }
+                    val hasMotionClip = remember(exercise) { ExerciseMotionCatalog.of(exercise) != null }
+                    if (hasVideoClip || hasMotionClip) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.78f),
+                            modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+                        ) {
+                            Text(
+                                text = stringResource(if (hasVideoClip) R.string.badge_video_short else R.string.badge_3d_short),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
+                        }
+                    }
                     Surface(
                         shape=CircleShape,
                         color=MaterialTheme.colorScheme.background.copy(alpha=0.72f),

@@ -416,4 +416,6 @@
     <string name="custom_exercise_equipment">الأداة</string>
     <string name="custom_exercise_notes">ملاحظة شخصية (اختياري)</string>
     <string name="custom_exercise_best">الأفضل</string>
+    <string name="badge_video_short">فيديو</string>
+    <string name="badge_3d_short">3D</string>
 </resources>

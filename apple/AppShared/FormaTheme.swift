@@ -535,3 +535,80 @@ struct FormaActivityHeatmap: View {
         }
     }
 }
+
+#if os(iOS)
+/// High-contrast 48pt gym-ready numeric stepper with tap-to-type direct input.
+struct FormaGymStepper: View {
+    let title: String
+    let formattedValue: String
+    let onDecrement: () -> Void
+    let onIncrement: () -> Void
+    let onDirectCommit: (Double) -> Void
+
+    @State private var editingDirect = false
+    @State private var draftText = ""
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(FormaTheme.textMuted)
+                .frame(minWidth: 56, alignment: .leading)
+
+            HStack(spacing: 0) {
+                Button {
+                    FormaHaptics.tap()
+                    onDecrement()
+                } label: {
+                    Image(systemName: "minus")
+                        .font(.headline.weight(.bold))
+                        .frame(width: 48, height: 48)
+                        .contentShape(Rectangle())
+                        .foregroundStyle(FormaTheme.textPrimary)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    FormaHaptics.tap()
+                    draftText = ""
+                    editingDirect = true
+                } label: {
+                    Text(formattedValue)
+                        .font(.headline.weight(.heavy))
+                        .monospacedDigit()
+                        .foregroundStyle(FormaTheme.primary)
+                        .frame(maxWidth: .infinity, minHeight: 48)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    FormaHaptics.tap()
+                    onIncrement()
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.headline.weight(.bold))
+                        .frame(width: 48, height: 48)
+                        .contentShape(Rectangle())
+                        .foregroundStyle(FormaTheme.primary)
+                }
+                .buttonStyle(.plain)
+            }
+            .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.border.opacity(0.75), lineWidth: 1))
+        }
+        .alert(title, isPresented: $editingDirect) {
+            TextField("", text: $draftText)
+                .keyboardType(.decimalPad)
+            Button("save") {
+                let latin = draftText.applyingTransform(.toLatin, reverse: false) ?? draftText
+                let cleaned = latin.replacingOccurrences(of: "٫", with: ".").replacingOccurrences(of: ",", with: ".").trimmingCharacters(in: .whitespacesAndNewlines)
+                if let val = Double(cleaned), val.isFinite {
+                    onDirectCommit(val)
+                }
+            }
+            Button("cancel", role: .cancel) {}
+        }
+    }
+}
+#endif

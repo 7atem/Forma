@@ -107,13 +107,7 @@ internal fun CustomExercisesSection(today: LocalDate) {
             }
         }
 
-        if (state.exercises.isEmpty()) {
-            Text(
-                stringResource(R.string.custom_exercises_empty),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else {
+        if (state.exercises.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 state.exercises.forEach { ex ->
                     val exSets = state.sets.filter { it.exerciseId == ex.id }

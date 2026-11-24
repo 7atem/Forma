@@ -34,11 +34,7 @@ import FormaCore
                 }
             }
 
-            if store.state.customExercises.isEmpty {
-                Text("custom_exercises_empty")
-                    .font(.caption)
-                    .foregroundStyle(FormaTheme.textMuted)
-            } else {
+            if !store.state.customExercises.isEmpty {
                 VStack(spacing: 8) {
                     ForEach(store.state.customExercises) { ex in
                         let exSets = store.state.customSets.filter { $0.exerciseId == ex.id }

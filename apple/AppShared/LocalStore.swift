@@ -91,6 +91,8 @@ struct SavedState: Codable {
     var customSets: [PhoneCustomSet] = []
     var calorieTarget: Int?
     var proteinTarget: Double?
+    var carbsTarget: Double?
+    var fatTarget: Double?
     var waterGoalMl: Int?
     /// Read-only copies imported from Apple Health; kept apart from Forma-logged workouts and weights.
     var healthWorkouts: [HealthWorkoutRecord] = []
@@ -119,6 +121,8 @@ struct SavedState: Codable {
         customSets = try c.decodeIfPresent([PhoneCustomSet].self, forKey: .customSets) ?? []
         calorieTarget = try c.decodeIfPresent(Int.self, forKey: .calorieTarget)
         proteinTarget = try c.decodeIfPresent(Double.self, forKey: .proteinTarget)
+        carbsTarget = try c.decodeIfPresent(Double.self, forKey: .carbsTarget)
+        fatTarget = try c.decodeIfPresent(Double.self, forKey: .fatTarget)
         waterGoalMl = try c.decodeIfPresent(Int.self, forKey: .waterGoalMl)
         healthWorkouts = try c.decodeIfPresent([HealthWorkoutRecord].self, forKey: .healthWorkouts) ?? []
         healthWeights = try c.decodeIfPresent([HealthWeightRecord].self, forKey: .healthWeights) ?? []
@@ -329,6 +333,18 @@ struct SavedState: Codable {
         try commit { $0.meals.append(meal) }
     }
 
+    func updateMeal(_ meal: PhoneMeal) throws {
+        guard !meal.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              meal.calories.isFinite, meal.calories >= 0, meal.calories <= 20000,
+              meal.protein.isFinite, meal.protein >= 0,
+              meal.carbs.isFinite, meal.carbs >= 0,
+              meal.fat.isFinite, meal.fat >= 0 else { throw TransferError.invalid }
+        try commit { state in
+            guard let idx = state.meals.firstIndex(where: { $0.id == meal.id }) else { throw TransferError.invalid }
+            state.meals[idx] = meal
+        }
+    }
+
     func deleteMeal(_ id: String) throws {
         try commit { $0.meals.removeAll { $0.id == id } }
     }
@@ -384,10 +400,24 @@ struct SavedState: Codable {
         try commit { $0.weights.removeAll { $0.date == date } }
     }
 
-    func saveTargets(calories: Int?, protein: Double?) throws {
+    func saveTargets(
+        calories: Int?,
+        protein: Double?,
+        carbs: Double? = nil,
+        fat: Double? = nil,
+        waterMl: Int? = nil
+    ) throws {
+        if let c = calories { guard (200...20000).contains(c) else { throw TransferError.invalid } }
+        if let p = protein { guard p.isFinite && p > 0 && p <= 1000 else { throw TransferError.invalid } }
+        if let cb = carbs { guard cb.isFinite && cb > 0 && cb <= 2000 else { throw TransferError.invalid } }
+        if let ft = fat { guard ft.isFinite && ft > 0 && ft <= 1000 else { throw TransferError.invalid } }
+        if let w = waterMl { guard (250...20000).contains(w) else { throw TransferError.invalid } }
         try commit {
             $0.calorieTarget = calories
             $0.proteinTarget = protein
+            $0.carbsTarget = carbs
+            $0.fatTarget = fat
+            $0.waterGoalMl = waterMl
         }
     }
 

@@ -1,9 +1,11 @@
 import SwiftUI
 
 @MainActor struct PhoneSettingsSheet: View {
+    @ObservedObject var store: LocalStore
     @AppStorage("forma_lang") private var appLang = ""
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
+    @State private var showGoals = false
     let onOpenBridge: () -> Void
     @Environment(\.dismiss) private var dismiss
 
@@ -45,6 +47,11 @@ import SwiftUI
 
                 Section {
                     Button {
+                        showGoals = true
+                    } label: {
+                        Label("personal_goals_title", systemImage: "target")
+                    }
+                    Button {
                         dismiss()
                         onOpenBridge()
                     } label: {
@@ -57,6 +64,10 @@ import SwiftUI
                 ToolbarItem(placement: .confirmationAction) {
                     Button("ok") { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showGoals) {
+                PhoneGoalsSheet(store: store)
+                    .tint(FormaTheme.primary)
             }
         }
     }

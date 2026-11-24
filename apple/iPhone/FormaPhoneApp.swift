@@ -72,7 +72,7 @@ import FormaCore
             }
         }
         .sheet(isPresented: $showSettings) {
-            PhoneSettingsSheet(onOpenBridge: { showBridge = true })
+            PhoneSettingsSheet(store: store, onOpenBridge: { showBridge = true })
                 .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
         }
@@ -191,21 +191,6 @@ private struct MealSlotOption: Identifiable {
                                     color: FormaTheme.primary
                                 )
                             }
-                        }
-
-                        // 7-Day Body Muscle Heat Map
-                        let muscleCounts: [Muscle: Int] = {
-                            var counts: [Muscle: Int] = [:]
-                            for workout in store.state.workouts.suffix(7) {
-                                for set in workout.sets where set.kind == .working {
-                                    let act = ExerciseMuscles.of(set.exercise)
-                                    for m in act.primary + act.secondary { counts[m, default: 0] += 1 }
-                                }
-                            }
-                            return counts
-                        }()
-                        if !muscleCounts.isEmpty {
-                            FormaCard { WeeklyMuscleHeatMapView(setsByMuscle: muscleCounts) }
                         }
 
                         // Personal Records (PR) Trophy Strip
@@ -374,14 +359,6 @@ private struct MealSlotOption: Identifiable {
                     } label: {
                         FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
                     }
-                    Button {
-                        FormaHaptics.tap()
-                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
-                        themeModeRaw = next.rawValue
-                    } label: {
-                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
-                    }
-                    .accessibilityLabel(Text("appearance_label"))
                     Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
                         .accessibilityLabel(Text("settings_title"))
                 }
@@ -721,16 +698,24 @@ private struct MealSlotOption: Identifiable {
                     )
                 }
 
-                Stepper(value: $reps, in: 1...1000) {
-                    Text("\(String(localized: "reps")): \(reps)")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(FormaTheme.textPrimary)
-                }
-                Stepper(value: $kg, in: 0...1000, step: useLb ? (5.0 / 2.20462262185) : 0.5) {
-                    Text(FormaTheme.formatWeight(kg, useLb: useLb))
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(FormaTheme.textPrimary)
-                }
+                FormaGymStepper(
+                    title: String(localized: "reps"),
+                    formattedValue: "\(reps)",
+                    onDecrement: { reps = max(1, reps - 1) },
+                    onIncrement: { reps = min(1000, reps + 1) },
+                    onDirectCommit: { val in reps = min(1000, max(1, Int(val.rounded()))) }
+                )
+                let stepKg = useLb ? (2.5 / FormaTheme.lbPerKg) : 0.5
+                FormaGymStepper(
+                    title: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"),
+                    formattedValue: FormaTheme.formatWeight(kg, useLb: useLb),
+                    onDecrement: { kg = max(0.0, ((kg - stepKg) * 1000.0).rounded() / 1000.0) },
+                    onIncrement: { kg = min(1000.0, ((kg + stepKg) * 1000.0).rounded() / 1000.0) },
+                    onDirectCommit: { val in
+                        let inKg = useLb ? (val / FormaTheme.lbPerKg) : val
+                        kg = min(1000.0, max(0.0, (inKg * 1000.0).rounded() / 1000.0))
+                    }
+                )
                 if ExerciseCatalog.of(exercise).equipment.contains(.dumbbells) {
                     let perSide = ExerciseCatalog.of(exercise).perSide
                     if kg > 0 && !perSide {
@@ -1032,10 +1017,26 @@ private struct MealSlotOption: Identifiable {
     }
 
     var body: some View {
+        let stepKg = useLb ? (2.5 / FormaTheme.lbPerKg) : 0.5
         NavigationStack {
             Form {
-                Stepper("\(String(localized: "reps")) \(reps)", value: $reps, in: 1...1000)
-                Stepper(FormaTheme.formatWeight(kg, useLb: useLb), value: $kg, in: 0...1000, step: useLb ? (5.0 / 2.20462262185) : 0.5)
+                FormaGymStepper(
+                    title: String(localized: "reps"),
+                    formattedValue: "\(reps)",
+                    onDecrement: { reps = max(1, reps - 1) },
+                    onIncrement: { reps = min(1000, reps + 1) },
+                    onDirectCommit: { val in reps = min(1000, max(1, Int(val.rounded()))) }
+                )
+                FormaGymStepper(
+                    title: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"),
+                    formattedValue: FormaTheme.formatWeight(kg, useLb: useLb),
+                    onDecrement: { kg = max(0.0, ((kg - stepKg) * 1000.0).rounded() / 1000.0) },
+                    onIncrement: { kg = min(1000.0, ((kg + stepKg) * 1000.0).rounded() / 1000.0) },
+                    onDirectCommit: { val in
+                        let inKg = useLb ? (val / FormaTheme.lbPerKg) : val
+                        kg = min(1000.0, max(0.0, (inKg * 1000.0).rounded() / 1000.0))
+                    }
+                )
                 Toggle("warmup", isOn: $warmup)
                 Toggle("record_rpe", isOn: $hasRpe)
                 if hasRpe { Stepper("RPE \(rpe.formatted())", value: $rpe, in: 0...10, step: 0.5) }
@@ -1056,15 +1057,27 @@ private struct MealSlotOption: Identifiable {
     @State private var exerciseSearch = ""
     @State private var equipment: Equipment?
     @State private var homeOnly = false
+    @State private var favoritesOnly = false
     @State private var selectedMuscle: Muscle?
     @State private var recordingExercise: Exercise?
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
+    @AppStorage("forma_favorite_exercises") private var favoriteExercisesRaw = ""
     @AppStorage(ExerciseDiscomfortSelection.storageKey) private var storedDiscomfortRegions = ""
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
     private let homeEquipment: Set<Equipment> = [.bodyweight, .dumbbells, .bench, .box, .pull_up_bar]
+
+    private var favoriteSet: Set<String> {
+        Set(favoriteExercisesRaw.split(separator: ",").map(String.init))
+    }
+
+    private func toggleFavorite(_ exercise: Exercise) {
+        var next = favoriteSet
+        if next.contains(exercise.rawValue) { next.remove(exercise.rawValue) } else { next.insert(exercise.rawValue) }
+        favoriteExercisesRaw = next.sorted().joined(separator: ",")
+    }
 
     private var mainMuscles: [Muscle] {
         Muscle.allCases.filter { m in
@@ -1073,9 +1086,11 @@ private struct MealSlotOption: Identifiable {
     }
 
     var body: some View {
+        let favs = favoriteSet
         let discomfortRegions = ExerciseDiscomfortSelection.decode(storedDiscomfortRegions)
         let filtered = Exercise.allCases.filter { exercise in
             ExerciseDiscomfortRegion.includes(exercise, excluding: discomfortRegions) &&
+                (!favoritesOnly || favs.contains(exercise.rawValue)) &&
                 (!homeOnly || ExerciseCatalog.of(exercise).equipment.allSatisfy { homeEquipment.contains($0) }) &&
                 (selectedMuscle == nil || ExerciseMuscles.of(exercise).primary.first == selectedMuscle) &&
                 (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) &&
@@ -1114,8 +1129,6 @@ private struct MealSlotOption: Identifiable {
                         .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                         .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.border, lineWidth: 1))
 
-                    PhoneCustomExercisesCard(store: store, useLb: useLb)
-
                     ExerciseDiscomfortFilterButton()
 
                     // Main Muscle Category Chips
@@ -1141,9 +1154,19 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    // Equipment Filter Chips (Home vs All/Gym presets + individual gear)
+                    // Equipment & Favorites Filter Chips
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
+                            Button {
+                                FormaHaptics.tap()
+                                favoritesOnly.toggle()
+                            } label: {
+                                FormaPill(
+                                    text: "★ \(String(localized: "favorites_filter"))",
+                                    background: favoritesOnly ? FormaTheme.secondary : FormaTheme.surface,
+                                    foreground: favoritesOnly ? FormaTheme.onPrimary : FormaTheme.textMuted
+                                )
+                            }
                             Button {
                                 FormaHaptics.tap()
                                 homeOnly.toggle()
@@ -1193,6 +1216,7 @@ private struct MealSlotOption: Identifiable {
                                     exerciseSearch = ""
                                     equipment = nil
                                     homeOnly = false
+                                    favoritesOnly = false
                                     selectedMuscle = nil
                                     storedDiscomfortRegions = ""
                                 }
@@ -1202,6 +1226,8 @@ private struct MealSlotOption: Identifiable {
                             .frame(maxWidth: .infinity)
                         }
                     }
+
+                    PhoneCustomExercisesCard(store: store, useLb: useLb)
 
                     // Categorized by Main Muscle
                     ForEach(groupedMuscles, id: \.self) { groupMuscle in
@@ -1228,9 +1254,37 @@ private struct MealSlotOption: Identifiable {
                                         )
                                     } label: {
                                         VStack(alignment: .leading, spacing: 6) {
-                                            FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset, maxPixelSize: 320)
-                                                .frame(maxWidth: .infinity)
-                                                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                            ZStack(alignment: .topLeading) {
+                                                FormaExerciseImage(asset: ExerciseGuides.of(exercise, arabic: false).asset, maxPixelSize: 320)
+                                                    .frame(maxWidth: .infinity)
+                                                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                                let hasVideo = ExerciseVideoLibrary.url(exercise) != nil
+                                                let hasMotion = ExerciseMotionCatalog.of(exercise) != nil
+                                                if hasVideo || hasMotion {
+                                                    Text(LocalizedStringKey(hasVideo ? "badge_video_short" : "badge_3d_short"))
+                                                        .font(.caption2.weight(.bold))
+                                                        .padding(.horizontal, 6)
+                                                        .padding(.vertical, 3)
+                                                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                                        .foregroundStyle(FormaTheme.primary)
+                                                        .padding(6)
+                                                }
+                                            }
+                                            .overlay(alignment: .topTrailing) {
+                                                let starred = favs.contains(exercise.rawValue)
+                                                Button {
+                                                    FormaHaptics.tap()
+                                                    toggleFavorite(exercise)
+                                                } label: {
+                                                    Image(systemName: starred ? "star.fill" : "star")
+                                                        .font(.caption.weight(.bold))
+                                                        .padding(6)
+                                                        .background(.ultraThinMaterial, in: Circle())
+                                                        .foregroundStyle(starred ? FormaTheme.secondary : FormaTheme.textMuted)
+                                                }
+                                                .buttonStyle(.plain)
+                                                .padding(6)
+                                            }
                                             Text(exercise.label(arabic: arabic))
                                                 .font(.subheadline.weight(.bold))
                                                 .foregroundStyle(FormaTheme.textPrimary)
@@ -1267,21 +1321,7 @@ private struct MealSlotOption: Identifiable {
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("exercise_library")
             .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        FormaHaptics.tap()
-                        useLb.toggle()
-                    } label: {
-                        FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
-                    }
-                    Button {
-                        FormaHaptics.tap()
-                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
-                        themeModeRaw = next.rawValue
-                    } label: {
-                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
-                    }
-                    .accessibilityLabel(Text("appearance_label"))
+                ToolbarItem(placement: .topBarTrailing) {
                     Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
                         .accessibilityLabel(Text("settings_title"))
                 }
@@ -1381,8 +1421,11 @@ private struct MealSlotOption: Identifiable {
 @MainActor private struct PhoneEatTab: View {
     @ObservedObject var store: LocalStore
     let onOpenBridge: () -> Void
+    @State private var selectedDate = Date()
     @State private var selectedSlot = "BREAKFAST"
     @State private var addingMeal = false
+    @State private var editingMeal: PhoneMeal?
+    @State private var showGoals = false
     @State private var showOnlineFood = false
     @State private var showStarterFoods = false
     @State private var showFoodSwap = false
@@ -1393,6 +1436,17 @@ private struct MealSlotOption: Identifiable {
     @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
+
+    private static let isoFormatter: DateFormatter = {
+        let fmt = DateFormatter()
+        fmt.calendar = Calendar(identifier: .gregorian)
+        fmt.locale = Locale(identifier: "en_US_POSIX")
+        fmt.dateFormat = "yyyy-MM-dd"
+        return fmt
+    }()
+
+    private var dateKey: String { Self.isoFormatter.string(from: selectedDate) }
+    private var isToday: Bool { dateKey == LocalStore.todayString() }
 
     private var starterQuickFoods: [(en: String, ar: String, kcal: Double, p: Double, c: Double, f: Double)] {
         [
@@ -1409,48 +1463,131 @@ private struct MealSlotOption: Identifiable {
     }
 
     var body: some View {
-        let today = LocalStore.todayString()
-        let meals = store.state.meals.filter { $0.date == today }
+        let dayKey = dateKey
+        let meals = store.state.meals.filter { $0.date == dayKey }
         let totalKcal = meals.reduce(0.0) { $0 + $1.calories }
         let totalP = meals.reduce(0.0) { $0 + $1.protein }
         let totalC = meals.reduce(0.0) { $0 + $1.carbs }
         let totalF = meals.reduce(0.0) { $0 + $1.fat }
-        let calGoal = Double(store.state.calorieTarget ?? 2200)
-        let proGoal = store.state.proteinTarget ?? 150.0
+        let calGoal = store.state.calorieTarget.map(Double.init)
+        let proGoal = store.state.proteinTarget
+        let carbsGoal = store.state.carbsTarget
+        let fatGoal = store.state.fatTarget
+        let waterGoal = store.state.waterGoalMl
+
+        let slotOptions = [
+            MealSlotOption(id: "BREAKFAST", labelKey: "meal_breakfast"),
+            MealSlotOption(id: "LUNCH", labelKey: "meal_lunch"),
+            MealSlotOption(id: "DINNER", labelKey: "meal_dinner"),
+            MealSlotOption(id: "SNACK", labelKey: "meal_snack"),
+            MealSlotOption(id: "SUHOOR", labelKey: "meal_suhoor"),
+            MealSlotOption(id: "IFTAR", labelKey: "meal_iftar"),
+        ]
+        let allGroupingSlots = slotOptions + [MealSlotOption(id: "UNSPECIFIED", labelKey: "meal_unspecified")]
 
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 14) {
+                    // Date Switcher Bar
+                    HStack(spacing: 8) {
+                        Button {
+                            FormaHaptics.tap()
+                            selectedDate = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
+                        } label: {
+                            Image(systemName: arabic ? "chevron.right" : "chevron.left")
+                                .font(.subheadline.weight(.bold))
+                                .frame(width: 36, height: 36)
+                                .background(FormaTheme.surface, in: Circle())
+                                .foregroundStyle(FormaTheme.textPrimary)
+                        }
+                        DatePicker("", selection: $selectedDate, displayedComponents: .date)
+                            .labelsHidden()
+                        if !isToday {
+                            Button("date_today_btn") {
+                                FormaHaptics.tap()
+                                selectedDate = Date()
+                            }
+                            .font(.caption.weight(.bold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(FormaTheme.primaryContainer, in: Capsule())
+                            .foregroundStyle(FormaTheme.primary)
+                        }
+                        Spacer()
+                        Button {
+                            FormaHaptics.tap()
+                            selectedDate = Calendar.current.date(byAdding: .day, value: 1, to: selectedDate) ?? selectedDate
+                        } label: {
+                            Image(systemName: arabic ? "chevron.left" : "chevron.right")
+                                .font(.subheadline.weight(.bold))
+                                .frame(width: 36, height: 36)
+                                .background(FormaTheme.surface, in: Circle())
+                                .foregroundStyle(FormaTheme.textPrimary)
+                        }
+                    }
+
+                    // Compact Macro Summary Card (explicit user goals, no silent defaults)
                     FormaCard {
-                        Text("food_today").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                        HStack {
+                            Text(isToday ? LocalizedStringKey("food_today") : LocalizedStringKey(dayKey))
+                                .font(.headline.weight(.bold))
+                                .foregroundStyle(FormaTheme.textPrimary)
+                            Spacer()
+                            Button {
+                                FormaHaptics.tap()
+                                showGoals = true
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "target")
+                                    Text("goals_btn_short").fontWeight(.semibold)
+                                }
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(FormaTheme.surfaceHigh, in: Capsule())
+                                .foregroundStyle(FormaTheme.primary)
+                            }
+                        }
                         HStack(spacing: 18) {
                             Spacer()
                             VStack(spacing: 6) {
-                                let calDelta = calGoal - totalKcal
-                                let ringValue = showRemaining ? "\(Int(abs(calDelta).rounded()))" : "\(Int(totalKcal.rounded()))"
-                                let ringSub = showRemaining ? (calDelta >= 0 ? String(localized: "kcal_left_short") : String(localized: "kcal_over_short")) : "kcal"
+                                let calDelta = calGoal.map { $0 - totalKcal }
+                                let ringValue: String = {
+                                    if let d = calDelta, showRemaining { return "\(Int(abs(d).rounded()))" }
+                                    return "\(Int(totalKcal.rounded()))"
+                                }()
+                                let ringSub: String = {
+                                    if let d = calDelta, showRemaining { return d >= 0 ? String(localized: "kcal_left_short") : String(localized: "kcal_over_short") }
+                                    if let g = calGoal { return "/ \(Int(g))" }
+                                    return "kcal"
+                                }()
+                                let ringProgress = calGoal.map { totalKcal / max(1, $0) } ?? (totalKcal > 0 ? 1.0 : 0.0)
                                 Button {
-                                    FormaHaptics.tap()
-                                    showRemaining.toggle()
+                                    if calGoal != nil {
+                                        FormaHaptics.tap()
+                                        showRemaining.toggle()
+                                    }
                                 } label: {
                                     FormaProgressRing(
-                                        progress: totalKcal / max(1, calGoal),
+                                        progress: ringProgress,
                                         valueText: ringValue,
                                         labelText: ringSub,
-                                        size: 92,
+                                        size: 90,
                                         lineWidth: 9,
-                                        color: totalKcal > calGoal ? .red : FormaTheme.primary
+                                        color: (calGoal != nil && totalKcal > calGoal!) ? .red : FormaTheme.primary
                                     )
                                 }
                                 Text("calories_label").font(.caption).foregroundStyle(FormaTheme.textMuted)
                             }
                             Spacer()
                             VStack(spacing: 6) {
+                                let proSub = proGoal.map { "/ \(Int($0.rounded()))g" } ?? "g"
+                                let proProg = proGoal.map { totalP / max(1, $0) } ?? (totalP > 0 ? 1.0 : 0.0)
                                 FormaProgressRing(
-                                    progress: totalP / max(1, proGoal),
+                                    progress: proProg,
                                     valueText: "\(Int(totalP.rounded()))g",
-                                    labelText: "/ \(Int(proGoal))g",
-                                    size: 92,
+                                    labelText: proSub,
+                                    size: 90,
                                     lineWidth: 9,
                                     color: FormaTheme.secondary
                                 )
@@ -1458,10 +1595,12 @@ private struct MealSlotOption: Identifiable {
                             }
                             Spacer()
                         }
-                        HStack(spacing: 8) {
+                        HStack(spacing: 6) {
+                            let cLabel = carbsGoal.map { "\(Int(totalC.rounded()))/\(Int($0.rounded()))g" } ?? "\(Int(totalC.rounded()))g"
+                            let fLabel = fatGoal.map { "\(Int(totalF.rounded()))/\(Int($0.rounded()))g" } ?? "\(Int(totalF.rounded()))g"
                             FormaPill(text: "\(String(localized: "protein_label")) \(Int(totalP.rounded()))g", background: FormaTheme.secondary.opacity(0.2), foreground: FormaTheme.secondary)
-                            FormaPill(text: "\(String(localized: "carbs_label")) \(Int(totalC.rounded()))g", background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
-                            FormaPill(text: "\(String(localized: "fat_label")) \(Int(totalF.rounded()))g")
+                            FormaPill(text: "\(String(localized: "carbs_label")) \(cLabel)", background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
+                            FormaPill(text: "\(String(localized: "fat_label")) \(fLabel)")
                         }
                         HStack(spacing: 8) {
                             Button { addingMeal = true } label: {
@@ -1528,46 +1667,48 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    // Daily Hydration Card
-                    let waterMl = store.state.hydration.first(where: { $0.date == today })?.milliliters ?? 0
+                    // Compact Single-Row Daily Hydration Bar
+                    let waterMl = store.state.hydration.first(where: { $0.date == dayKey })?.milliliters ?? 0
                     FormaCard {
-                        HStack {
-                            Image(systemName: "drop.fill").foregroundStyle(FormaTheme.tertiary)
-                            Text("hydration_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
-                            Spacer()
-                            FormaPill(text: "\(waterMl) ml", background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
-                        }
                         HStack(spacing: 8) {
+                            Image(systemName: "drop.fill").foregroundStyle(FormaTheme.tertiary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("hydration_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                                Text(waterGoal.map { "\(waterMl) / \($0) ml" } ?? "\(waterMl) ml")
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(FormaTheme.tertiary)
+                            }
+                            Spacer()
                             Button {
                                 FormaHaptics.tap()
-                                store.attempt { try store.saveHydration(min(20000, waterMl + 250), date: today) }
+                                store.attempt { try store.saveHydration(min(20000, waterMl + 250), date: dayKey) }
                             } label: {
-                                Text("+250 ml")
+                                Text("+250")
                                     .font(.caption.weight(.bold))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 7)
                                     .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                                     .foregroundStyle(FormaTheme.primary)
                             }
                             Button {
                                 FormaHaptics.tap()
-                                store.attempt { try store.saveHydration(min(20000, waterMl + 500), date: today) }
+                                store.attempt { try store.saveHydration(min(20000, waterMl + 500), date: dayKey) }
                             } label: {
-                                Text("+500 ml")
+                                Text("+500")
                                     .font(.caption.weight(.bold))
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 8)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 7)
                                     .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                                     .foregroundStyle(FormaTheme.primary)
                             }
                             if waterMl > 0 {
                                 Button {
                                     FormaHaptics.tap()
-                                    store.attempt { try store.saveHydration(max(0, waterMl - 250), date: today) }
+                                    store.attempt { try store.saveHydration(max(0, waterMl - 250), date: dayKey) }
                                 } label: {
                                     Image(systemName: "minus")
                                         .font(.caption.weight(.bold))
-                                        .padding(.horizontal, 12)
+                                        .padding(.horizontal, 10)
                                         .padding(.vertical, 8)
                                         .background(FormaTheme.surfaceHigh, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                                         .foregroundStyle(FormaTheme.textMuted)
@@ -1576,18 +1717,10 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    // Daily Supplements & Vitamins Checklist
-                    PhoneSupplementsCard(store: store, today: today)
+                    // Compact Daily Supplements & Vitamins Bar
+                    PhoneSupplementsCard(store: store, today: dayKey)
 
                     // Meal slot selector (including Ramadan Suhoor & Iftar)
-                    let slotOptions = [
-                        MealSlotOption(id: "BREAKFAST", labelKey: "meal_breakfast"),
-                        MealSlotOption(id: "LUNCH", labelKey: "meal_lunch"),
-                        MealSlotOption(id: "DINNER", labelKey: "meal_dinner"),
-                        MealSlotOption(id: "SNACK", labelKey: "meal_snack"),
-                        MealSlotOption(id: "SUHOOR", labelKey: "meal_suhoor"),
-                        MealSlotOption(id: "IFTAR", labelKey: "meal_iftar"),
-                    ]
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             ForEach(slotOptions) { option in
@@ -1612,7 +1745,7 @@ private struct MealSlotOption: Identifiable {
                                     FormaHaptics.success()
                                     store.attempt {
                                         try store.addMeal(PhoneMeal(
-                                            date: today,
+                                            date: dayKey,
                                             name: arabic ? item.ar : item.en,
                                             calories: item.kcal,
                                             protein: item.p,
@@ -1648,7 +1781,7 @@ private struct MealSlotOption: Identifiable {
                                         FormaHaptics.success()
                                         store.attempt {
                                             try store.addMeal(PhoneMeal(
-                                                date: today,
+                                                date: dayKey,
                                                 name: combo.name,
                                                 calories: combo.calories,
                                                 protein: combo.protein,
@@ -1681,48 +1814,68 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    // Grouped Meal Diary by Slot + Tap-to-Edit
                     if meals.isEmpty {
                         FormaCard { Text("no_meals_today").foregroundStyle(FormaTheme.textMuted) }
                     } else {
-                        let slotMeals = meals.filter { $0.slot == selectedSlot }
-                        if slotMeals.count >= 2 {
-                            Button {
-                                FormaHaptics.success()
-                                let labelKey = slotOptions.first(where: { $0.id == selectedSlot })?.labelKey ?? "meal_unspecified"
-                                let comboName = "\(String(localized: String.LocalizationValue(labelKey))) (\(slotMeals.count))"
-                                store.attempt {
-                                    try store.saveMealCombo(PhoneMealCombo(
-                                        name: comboName,
-                                        calories: slotMeals.reduce(0) { $0 + $1.calories },
-                                        protein: slotMeals.reduce(0) { $0 + $1.protein },
-                                        carbs: slotMeals.reduce(0) { $0 + $1.carbs },
-                                        fat: slotMeals.reduce(0) { $0 + $1.fat }
-                                    ))
-                                }
-                            } label: {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "bookmark.fill")
-                                    Text("save_meal_combo").font(.caption.weight(.bold))
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 10)
-                                .background(FormaTheme.secondary.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                                .foregroundStyle(FormaTheme.secondary)
-                            }
-                        }
-                        ForEach(meals.reversed()) { meal in
-                            FormaCard {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 3) {
-                                        Text(meal.name).font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
-                                        Text("\(Int(meal.protein))g P · \(Int(meal.carbs))g C · \(Int(meal.fat))g F")
-                                            .font(.caption)
+                        ForEach(allGroupingSlots) { group in
+                            let groupMeals = meals.filter { $0.slot == group.id }
+                            if !groupMeals.isEmpty {
+                                let subKcal = groupMeals.reduce(0.0) { $0 + $1.calories }
+                                let subP = groupMeals.reduce(0.0) { $0 + $1.protein }
+                                FormaCard {
+                                    HStack {
+                                        Text(LocalizedStringKey(group.labelKey))
+                                            .font(.subheadline.weight(.bold))
+                                            .foregroundStyle(FormaTheme.primary)
+                                        Spacer()
+                                        Text("\(Int(subKcal.rounded())) kcal · \(Int(subP.rounded()))g P")
+                                            .font(.caption.weight(.semibold))
                                             .foregroundStyle(FormaTheme.textMuted)
+                                        if groupMeals.count >= 2 {
+                                            Button {
+                                                FormaHaptics.success()
+                                                let comboName = "\(String(localized: String.LocalizationValue(group.labelKey))) (\(groupMeals.count))"
+                                                store.attempt {
+                                                    try store.saveMealCombo(PhoneMealCombo(
+                                                        name: comboName,
+                                                        calories: subKcal,
+                                                        protein: subP,
+                                                        carbs: groupMeals.reduce(0) { $0 + $1.carbs },
+                                                        fat: groupMeals.reduce(0) { $0 + $1.fat }
+                                                    ))
+                                                }
+                                            } label: {
+                                                Image(systemName: "bookmark.fill")
+                                                    .font(.caption)
+                                                    .foregroundStyle(FormaTheme.secondary)
+                                            }
+                                            .accessibilityLabel(Text("save_meal_combo"))
+                                        }
                                     }
-                                    Spacer()
-                                    FormaPill(text: "\(Int(meal.calories.rounded())) kcal")
-                                    Button(role: .destructive) { store.attempt { try store.deleteMeal(meal.id) } } label: {
-                                        Image(systemName: "trash").font(.caption)
+                                    Divider().overlay(FormaTheme.border)
+                                    ForEach(groupMeals) { meal in
+                                        HStack {
+                                            Button {
+                                                FormaHaptics.tap()
+                                                editingMeal = meal
+                                            } label: {
+                                                VStack(alignment: .leading, spacing: 2) {
+                                                    Text(meal.name)
+                                                        .font(.subheadline.weight(.bold))
+                                                        .foregroundStyle(FormaTheme.textPrimary)
+                                                    Text("\(Int(meal.protein))g P · \(Int(meal.carbs))g C · \(Int(meal.fat))g F")
+                                                        .font(.caption2)
+                                                        .foregroundStyle(FormaTheme.textMuted)
+                                                }
+                                                .frame(maxWidth: .infinity, alignment: .leading)
+                                            }
+                                            .buttonStyle(.plain)
+                                            FormaPill(text: "\(Int(meal.calories.rounded())) kcal")
+                                            Button(role: .destructive) { store.attempt { try store.deleteMeal(meal.id) } } label: {
+                                                Image(systemName: "trash").font(.caption)
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -1734,49 +1887,50 @@ private struct MealSlotOption: Identifiable {
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("tab_eat")
             .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        FormaHaptics.tap()
-                        useLb.toggle()
-                    } label: {
-                        FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
-                    }
-                    Button {
-                        FormaHaptics.tap()
-                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
-                        themeModeRaw = next.rawValue
-                    } label: {
-                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
-                    }
-                    .accessibilityLabel(Text("appearance_label"))
+                ToolbarItem(placement: .topBarTrailing) {
                     Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
                         .accessibilityLabel(Text("settings_title"))
                 }
             }
             .sheet(isPresented: $addingMeal) {
-                PhoneMealEditor(slot: selectedSlot) { meal in
+                PhoneMealEditor(date: dayKey, slot: selectedSlot) { meal in
                     store.attempt { try store.addMeal(meal); addingMeal = false }
                 }
                 .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
             }
+            .sheet(item: $editingMeal) { existing in
+                PhoneMealEditor(existing: existing, date: existing.date, slot: existing.slot) { updated in
+                    store.attempt { try store.updateMeal(updated); editingMeal = nil }
+                }
+                .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
+                .tint(FormaTheme.primary)
+            }
+            .sheet(isPresented: $showGoals) {
+                PhoneGoalsSheet(store: store)
+                    .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
+                    .tint(FormaTheme.primary)
+            }
             .sheet(isPresented: $showOnlineFood) {
                 PhoneOnlineFoodSheet(slot: selectedSlot, initialQuery: scannedBarcode) { meal in
-                    store.attempt { try store.addMeal(meal) }
+                    var dated = meal; dated.date = dayKey
+                    store.attempt { try store.addMeal(dated) }
                 }
                 .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
             }
             .sheet(isPresented: $showStarterFoods) {
                 PhoneStarterFoodsSheet(slot: selectedSlot) { meal in
-                    store.attempt { try store.addMeal(meal) }
+                    var dated = meal; dated.date = dayKey
+                    store.attempt { try store.addMeal(dated) }
                 }
                 .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
             }
             .sheet(isPresented: $showFoodSwap) {
                 PhoneFoodSwapSheet(slot: selectedSlot) { meal in
-                    store.attempt { try store.addMeal(meal) }
+                    var dated = meal; dated.date = dayKey
+                    store.attempt { try store.addMeal(dated) }
                 }
                 .preferredColorScheme(FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme)
                 .tint(FormaTheme.primary)
@@ -1794,6 +1948,8 @@ private struct MealSlotOption: Identifiable {
 }
 
 @MainActor private struct PhoneMealEditor: View {
+    var existing: PhoneMeal? = nil
+    let date: String
     let slot: String
     let onSave: (PhoneMeal) -> Void
     @Environment(\.dismiss) private var dismiss
@@ -1802,11 +1958,28 @@ private struct MealSlotOption: Identifiable {
     @State private var protein = 30.0
     @State private var carbs = 35.0
     @State private var fat = 10.0
+    @State private var chosenSlot = "BREAKFAST"
+    @State private var initialized = false
+
+    private let slotOptions = [
+        MealSlotOption(id: "BREAKFAST", labelKey: "meal_breakfast"),
+        MealSlotOption(id: "LUNCH", labelKey: "meal_lunch"),
+        MealSlotOption(id: "DINNER", labelKey: "meal_dinner"),
+        MealSlotOption(id: "SNACK", labelKey: "meal_snack"),
+        MealSlotOption(id: "SUHOOR", labelKey: "meal_suhoor"),
+        MealSlotOption(id: "IFTAR", labelKey: "meal_iftar"),
+        MealSlotOption(id: "UNSPECIFIED", labelKey: "meal_unspecified"),
+    ]
 
     var body: some View {
         NavigationStack {
             Form {
                 TextField("meal_name", text: $name)
+                Picker("meal_slot_label", selection: $chosenSlot) {
+                    ForEach(slotOptions) { opt in
+                        Text(LocalizedStringKey(opt.labelKey)).tag(opt.id)
+                    }
+                }
                 Stepper("\(String(localized: "calories_label")): \(Int(kcal))", value: $kcal, in: 0...5000, step: 25)
                 Stepper("\(String(localized: "protein_label")): \(Int(protein))g", value: $protein, in: 0...500, step: 2)
                 Stepper("\(String(localized: "carbs_label")): \(Int(carbs))g", value: $carbs, in: 0...500, step: 5)
@@ -1815,16 +1988,38 @@ private struct MealSlotOption: Identifiable {
                     kcal = (protein * 4.0) + (carbs * 4.0) + (fat * 9.0)
                 }
             }
-            .navigationTitle("log_meal")
+            .navigationTitle(existing == nil ? "log_meal" : "edit_meal_title")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("save") {
                         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !trimmed.isEmpty else { return }
-                        onSave(PhoneMeal(date: LocalStore.todayString(), name: trimmed, calories: kcal, protein: protein, carbs: carbs, fat: fat, slot: slot))
+                        onSave(PhoneMeal(
+                            id: existing?.id ?? UUID().uuidString,
+                            date: date,
+                            name: trimmed,
+                            calories: kcal,
+                            protein: protein,
+                            carbs: carbs,
+                            fat: fat,
+                            slot: chosenSlot
+                        ))
                     }
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+            .onAppear {
+                if !initialized {
+                    initialized = true
+                    chosenSlot = existing?.slot ?? slot
+                    if let existing {
+                        name = existing.name
+                        kcal = existing.calories
+                        protein = existing.protein
+                        carbs = existing.carbs
+                        fat = existing.fat
+                    }
                 }
             }
         }
@@ -2126,21 +2321,7 @@ private struct MealSlotOption: Identifiable {
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("tab_progress")
             .toolbar {
-                ToolbarItemGroup(placement: .topBarTrailing) {
-                    Button {
-                        FormaHaptics.tap()
-                        useLb.toggle()
-                    } label: {
-                        FormaPill(text: useLb ? String(localized: "unit_lb") : String(localized: "unit_kg"))
-                    }
-                    Button {
-                        FormaHaptics.tap()
-                        let next = FormaThemeMode.resolved(rawValue: themeModeRaw).next
-                        themeModeRaw = next.rawValue
-                    } label: {
-                        Image(systemName: FormaThemeMode.resolved(rawValue: themeModeRaw).toolbarIcon)
-                    }
-                    .accessibilityLabel(Text("appearance_label"))
+                ToolbarItem(placement: .topBarTrailing) {
                     Button { onOpenBridge() } label: { Image(systemName: "gearshape") }
                         .accessibilityLabel(Text("settings_title"))
                 }
