@@ -233,3 +233,8 @@
 "supplements_name_label" = "اسم المكمل أو الفيتامين";
 "supplements_dose_label" = "ملاحظة الجرعة (اختياري، مثل ٥ جم)";
 "supplements_disclaimer" = "قائمة متابعة شخصية فقط — ليست نصيحة طبية أو جرعة موصى بها.";
+"dumbbell_per_hand_hint" = "وزن الدمبل الواحد";
+"dumbbell_pair_total" = "الإجمالي لليدين:";
+"weekly_muscle_split_title" = "مجموعات العمل (آخر ٧ جلسات — بدون الإحماء)";
+"primary_short" = "أساسي";
+"supporting_short" = "مساعد";

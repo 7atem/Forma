@@ -40,4 +40,19 @@ class TrainingToolsTest {
         assertTrue(ExerciseMuscles.of(Exercise.DEAD_BUG).secondary.isEmpty())
         assertTrue(ExerciseCatalog.of(Exercise.REVERSE_LUNGE).perSide)
     }
+    @Test fun nutritionAndMeasurementsCsvExportEscapeFormulasAndIncludeHydration() {
+        val day = LocalDate.of(2026, 11, 24)
+        val data = FitnessSnapshot(
+            meals = listOf(Meal("m1", day, "=SUM(A1)", 320.0, 25.0, 30.0, 10.0, slot = MealSlot.IFTAR)),
+            measurements = listOf(Measurement(day, weightKg = 78.5, waistCm = 84.0, chestCm = 101.0)),
+            hydration = listOf(Hydration(day, 2500)),
+        )
+        val nCsv = NutritionCsv.export(data)
+        assertTrue(nCsv.startsWith("\uFEFFmeal_id,"))
+        assertTrue(nCsv.contains("\"'=SUM(A1)\""))
+        assertTrue(nCsv.contains("\"IFTAR\""))
+        val mCsv = MeasurementsCsv.export(data)
+        assertTrue(mCsv.startsWith("\uFEFFdate,weight_kg,"))
+        assertTrue(mCsv.contains("\"78.5\",\"84.0\",\"\",\"101.0\",\"\",\"\",\"\",\"2500\""))
+    }
 }

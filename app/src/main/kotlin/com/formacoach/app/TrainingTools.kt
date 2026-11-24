@@ -31,6 +31,43 @@ internal fun TrainingExport(state:AppState,vm:FitnessViewModel) {
 }
 
 @Composable
+internal fun NutritionAndMeasurementsExport(state: AppState, vm: FitnessViewModel) {
+    val context = LocalContext.current
+    var pendingText by remember { mutableStateOf<String?>(null) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        val text = pendingText; pendingText = null
+        if (uri != null) vm.write {
+            checkNotNull(text)
+            withContext(Dispatchers.IO) {
+                checkNotNull(context.contentResolver.openOutputStream(uri, "wt")).use { it.write(text.toByteArray(Charsets.UTF_8)) }
+            }
+        }
+    }
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(
+            onClick = {
+                vm.write {
+                    pendingText = withContext(Dispatchers.Default) { NutritionCsv.export(state.snapshot) }
+                    launcher.launch("forma-nutrition.csv")
+                }
+            },
+            enabled = !state.busy && state.snapshot.meals.isNotEmpty(),
+            modifier = Modifier.weight(1f).testTag("export_nutrition_csv"),
+        ) { Text(stringResource(R.string.export_nutrition_csv)) }
+        OutlinedButton(
+            onClick = {
+                vm.write {
+                    pendingText = withContext(Dispatchers.Default) { MeasurementsCsv.export(state.snapshot) }
+                    launcher.launch("forma-measurements.csv")
+                }
+            },
+            enabled = !state.busy && (state.snapshot.measurements.isNotEmpty() || state.snapshot.hydration.isNotEmpty()),
+            modifier = Modifier.weight(1f).testTag("export_measurements_csv"),
+        ) { Text(stringResource(R.string.export_measurements_csv)) }
+    }
+}
+
+@Composable
 internal fun PlateCalculatorButton() {
     var show by remember {mutableStateOf(false)}
     OutlinedButton(onClick={show=true},modifier=Modifier.fillMaxWidth().testTag("plate_calculator")) {Text(stringResource(R.string.plate_calculator))}

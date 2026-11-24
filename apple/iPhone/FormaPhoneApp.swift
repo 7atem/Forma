@@ -731,6 +731,18 @@ private struct MealSlotOption: Identifiable {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(FormaTheme.textPrimary)
                 }
+                if ExerciseCatalog.of(exercise).equipment.contains(.dumbbells) {
+                    let perSide = ExerciseCatalog.of(exercise).perSide
+                    if kg > 0 && !perSide {
+                        Text("\(String(localized: "dumbbell_per_hand_hint")) · \(String(localized: "dumbbell_pair_total")) \(FormaTheme.formatWeight(kg * 2.0, useLb: useLb))")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(FormaTheme.secondary)
+                    } else {
+                        Text("dumbbell_per_hand_hint")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(FormaTheme.secondary)
+                    }
+                }
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
                         if let lastSet = exSets.last {
@@ -1833,6 +1845,8 @@ private struct MealSlotOption: Identifiable {
     @State private var scrubbedIndex: Int?
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_use_lb") private var useLb = false
+    @Environment(\.locale) private var locale
+    private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
 
     private func parseCm(_ raw: String) -> Double? {
         let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -2032,10 +2046,11 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    // 7-Day Body Muscle Heat Map
+                    // 7-Day Body Muscle Heat Map + Primary vs Supporting Breakdown
+                    let recentWorkouts = Array(store.state.workouts.suffix(7))
                     let muscleCounts: [Muscle: Int] = {
                         var counts: [Muscle: Int] = [:]
-                        for workout in store.state.workouts.suffix(7) {
+                        for workout in recentWorkouts {
                             for set in workout.sets where set.kind == .working {
                                 let act = ExerciseMuscles.of(set.exercise)
                                 for m in act.primary + act.secondary { counts[m, default: 0] += 1 }
@@ -2043,7 +2058,46 @@ private struct MealSlotOption: Identifiable {
                         }
                         return counts
                     }()
-                    FormaCard { WeeklyMuscleHeatMapView(setsByMuscle: muscleCounts) }
+                    let muscleSplit: [(muscle: Muscle, primary: Int, supporting: Int)] = {
+                        var prim: [Muscle: Int] = [:]
+                        var supp: [Muscle: Int] = [:]
+                        for workout in recentWorkouts {
+                            for set in workout.sets where set.kind == .working {
+                                let act = ExerciseMuscles.of(set.exercise)
+                                for m in act.primary { prim[m, default: 0] += 1 }
+                                for m in act.secondary { supp[m, default: 0] += 1 }
+                            }
+                        }
+                        return Muscle.allCases
+                            .map { ($0, prim[$0] ?? 0, supp[$0] ?? 0) }
+                            .filter { $0.1 > 0 || $0.2 > 0 }
+                            .sorted { ($0.1, $0.2) > ($1.1, $1.2) }
+                    }()
+                    FormaCard {
+                        WeeklyMuscleHeatMapView(setsByMuscle: muscleCounts)
+                        if !muscleSplit.isEmpty {
+                            Divider().overlay(FormaTheme.border)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("weekly_muscle_split_title")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(FormaTheme.textMuted)
+                                ForEach(muscleSplit.prefix(8), id: \.muscle) { row in
+                                    HStack {
+                                        Text(row.muscle.label(arabic: arabic))
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(FormaTheme.textPrimary)
+                                        Spacer()
+                                        if row.primary > 0 {
+                                            FormaPill(text: "\(row.primary) \(String(localized: "primary_short"))", background: FormaTheme.primaryContainer, foreground: FormaTheme.primary)
+                                        }
+                                        if row.supporting > 0 {
+                                            FormaPill(text: "\(row.supporting) \(String(localized: "supporting_short"))", background: FormaTheme.surfaceHigh, foreground: FormaTheme.textMuted)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
 
                     // 12-Week GitHub-Style Training Grid + Streak
                     let countsByDate: [String: Int] = {

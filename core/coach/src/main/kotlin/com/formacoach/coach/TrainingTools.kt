@@ -39,20 +39,76 @@ object PlateCalculator {
     }
 }
 
+private fun csvCell(value: String): String {
+    val safe = if (value.trimStart().firstOrNull() in listOf('=', '+', '-', '@') || value.startsWith('\t') || value.startsWith('\r') || value.startsWith('\n')) "'" + value else value
+    return "\"" + safe.replace("\"", "\"\"") + "\""
+}
+
 /** Portable, canonical kg values; spreadsheet-sensitive user cells are neutralized. */
 object TrainingCsv {
     fun export(data:FitnessSnapshot):String {
-        fun cell(value:String):String {
-            val safe=if(value.trimStart().firstOrNull() in listOf('=','+','-','@') || value.startsWith('\t') || value.startsWith('\r') || value.startsWith('\n')) "'"+value else value
-            return "\""+safe.replace("\"","\"\"")+"\""
-        }
         val sessions=data.sessions.filter {it.completedAt!=null}.associateBy {it.id}
         return buildString {
             append('\uFEFF')
             append("session_id,date,session_label,source,exercise_id,reps,weight_kg,set_kind,rpe\r\n")
             for(set in data.sets) {
                 val s=sessions[set.sessionId]?:continue
-                append(listOf(s.id,s.date.toString(),s.label,s.source.name,set.exercise.name,set.reps.toString(),set.weightKg.toString(),set.kind.name,set.rpe?.toString().orEmpty()).joinToString(",",transform=::cell));append("\r\n")
+                append(listOf(s.id,s.date.toString(),s.label,s.source.name,set.exercise.name,set.reps.toString(),set.weightKg.toString(),set.kind.name,set.rpe?.toString().orEmpty()).joinToString(",",transform=::csvCell));append("\r\n")
+            }
+        }
+    }
+}
+
+/** Portable nutrition diary CSV; preserves recorded snapshots and neutralizes formula cells. */
+object NutritionCsv {
+    fun export(data: FitnessSnapshot): String = buildString {
+        append('\uFEFF')
+        append("meal_id,date,slot,name,calories_kcal,protein_g,carbs_g,fat_g,source\r\n")
+        for (meal in data.meals.sortedBy { it.date }) {
+            append(
+                listOf(
+                    meal.id,
+                    meal.date.toString(),
+                    meal.slot.name,
+                    meal.name,
+                    meal.calories.toString(),
+                    meal.protein.toString(),
+                    meal.carbs.toString(),
+                    meal.fat.toString(),
+                    meal.source,
+                ).joinToString(",", transform = ::csvCell),
+            )
+            append("\r\n")
+        }
+    }
+}
+
+/** Portable body measurements & daily hydration CSV in canonical kg, cm, and ml. */
+object MeasurementsCsv {
+    fun export(data: FitnessSnapshot): String {
+        val hydrationByDate = data.hydration.associate { it.date to it.milliliters }
+        val allDates = (data.measurements.map { it.date } + data.hydration.map { it.date }).distinct().sorted()
+        val measureByDate = data.measurements.associateBy { it.date }
+        return buildString {
+            append('\uFEFF')
+            append("date,weight_kg,waist_cm,neck_cm,chest_cm,arms_cm,hips_cm,thighs_cm,water_ml\r\n")
+            for (date in allDates) {
+                val m = measureByDate[date]
+                val w = hydrationByDate[date]
+                append(
+                    listOf(
+                        date.toString(),
+                        m?.weightKg?.toString().orEmpty(),
+                        m?.waistCm?.toString().orEmpty(),
+                        m?.neckCm?.toString().orEmpty(),
+                        m?.chestCm?.toString().orEmpty(),
+                        m?.armsCm?.toString().orEmpty(),
+                        m?.hipsCm?.toString().orEmpty(),
+                        m?.thighsCm?.toString().orEmpty(),
+                        w?.toString().orEmpty(),
+                    ).joinToString(",", transform = ::csvCell),
+                )
+                append("\r\n")
             }
         }
     }

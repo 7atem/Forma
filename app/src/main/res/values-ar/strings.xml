@@ -404,4 +404,8 @@
     <string name="supplements_name_label">اسم المكمل أو الفيتامين</string>
     <string name="supplements_dose_label">ملاحظة الجرعة (اختياري، مثل ٥ جم)</string>
     <string name="supplements_disclaimer">قائمة متابعة شخصية فقط — ليست نصيحة طبية أو جرعة موصى بها.</string>
+    <string name="export_nutrition_csv">تصدير التغذية CSV</string>
+    <string name="export_measurements_csv">تصدير القياسات والماء CSV</string>
+    <string name="dumbbell_per_hand_hint">سجّل وزن الدمبل الواحد (لكل يد).</string>
+    <string name="dumbbell_per_hand_total">وزن الدمبل الواحد · الإجمالي لليدين: %1$s %2$s</string>
 </resources>

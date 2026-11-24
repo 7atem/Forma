@@ -699,6 +699,21 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
             },
         )
 
+        if (Equipment.DUMBBELLS in ExerciseCatalog.of(exercise).equipment) {
+            val enteredVal = NumericInput.decimal(weight)
+            val pairNote = if (enteredVal != null && enteredVal > 0.0 && !ExerciseCatalog.of(exercise).perSide) {
+                stringResource(R.string.dumbbell_per_hand_total, number(enteredVal * 2.0, 1), unitLabel)
+            } else {
+                stringResource(R.string.dumbbell_per_hand_hint)
+            }
+            Text(
+                pairNote,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary,
+                fontWeight = FontWeight.Medium,
+            )
+        }
+
         // Quick Rep & Weight Preset Chips + Same-as-Last + Live Barbell Preview
         val lastThisSession = remember(sets, exercise) { sets.lastOrNull { it.exercise == exercise } }
         FlowRow(

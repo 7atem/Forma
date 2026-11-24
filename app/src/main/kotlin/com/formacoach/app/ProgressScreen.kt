@@ -292,6 +292,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     if (state.snapshot.measurements.size > limit) {
         TextButton(onClick = { limit += 14 }) { Text(stringResource(R.string.show_more)) }
     }
+    NutritionAndMeasurementsExport(state, vm)
 }
 
 @Composable
