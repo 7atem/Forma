@@ -247,6 +247,36 @@ class EncryptedStorageTest {
         directory.deleteRecursively()
     }
 
+    @Test fun newDatabaseUsesTheStoredKeyAsRawKeyAndStaysEncrypted() = runBlocking {
+        database=FitnessDatabase.open(context)
+        database!!.dao().saveProfile(ProfileRow(name="Raw",goal="FAT_LOSS",sessionsPerWeek=3,caloriesTarget=null,proteinTarget=null))
+        database!!.close();database=null
+        assertEquals("raw-v1",File(context.filesDir,"forma_db_key_mode").readText())
+        val file=context.getDatabasePath("forma.db")
+        assertFalse(String(file.readBytes().copyOf(15),Charsets.US_ASCII).startsWith("SQLite format"))
+        val key=KeystoreManager(context).getOrCreateDatabasePassphrase()
+        val raw=("x'"+key.joinToString("") {"%02x".format(it)}+"'").toByteArray(Charsets.US_ASCII)
+        fun opens(secret:ByteArray)=runCatching {
+            // A no-op error handler: a wrong key must never let SQLite treat the file as corrupt and delete it.
+            val db=net.zetetic.database.sqlcipher.SQLiteDatabase.openDatabase(file.path,secret,null,net.zetetic.database.sqlcipher.SQLiteDatabase.OPEN_READWRITE,{_,_->},null)
+            try {db.rawQuery("SELECT count(*) FROM profile").use {it.moveToFirst();it.getInt(0)}} finally {db.close()}
+        }.getOrNull()
+        assertEquals(1,opens(raw))
+        assertEquals(null,opens(key))
+        assertTrue(file.exists())
+        database=FitnessDatabase.open(context)
+        assertEquals("Raw",database!!.dao().readSnapshot().profile?.name)
+    }
+    @Test fun existingPassphraseDatabaseIsNeverRekeyedOrMarkedRaw() = runBlocking {
+        val helper=createLegacy(8)
+        helper.writableDatabase.execSQL("INSERT INTO meals(id,day,name,calories,protein,carbs,fat,source,slot) VALUES('legacy',20760,'Kept',100,1,1,1,'','UNSPECIFIED')")
+        helper.close()
+        database=FitnessDatabase.open(context)
+        assertEquals("Kept",database!!.dao().readSnapshot().meals.single().name)
+        assertFalse(File(context.filesDir,"forma_db_key_mode").exists())
+        database!!.close();database=FitnessDatabase.open(context)
+        assertEquals(1,database!!.dao().readSnapshot().meals.size)
+    }
     @Test fun encryptedDataSurvivesReopenAndDraftsCannotFinishEmpty() = runBlocking {
         database=FitnessDatabase.open(context)
         val dao=database!!.dao()

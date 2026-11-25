@@ -4,7 +4,7 @@
 
 ## Assets and editorial references
 
-Canonical assets: `assets/exercises/res/drawable-nodpi/exercise_*.png`. Each is a compressed 960×640 quantized PNG (downscaled from 1536×1024 originals, ~18.09 MB total across all 50 assets) with two side-by-side panels. Start is physically left and movement physically right; the image and its phase labels are intentionally not mirrored in Arabic. The generated subjects are adult mannequins in neutral gym clothing. Equipment is representative and simplified.
+Canonical assets: `assets/exercises/res/drawable-nodpi/exercise_*.webp`. Each is a 960×640 WebP at quality 92 made from the PNG original by `scripts/convert_exercise_art.py` (about 2.5 MB for all 69, down from 30 MB of PNGs; worst sample PSNR about 44 dB) with two side-by-side panels. Start is physically left and movement physically right; the image and its phase labels are intentionally not mirrored in Arabic. The generated subjects are adult mannequins in neutral gym clothing. Equipment is representative and simplified.
 
 | Original stable exercise ID | Illustrated variation | Technique reference |
 |---|---|---|
@@ -51,6 +51,6 @@ python scripts/check_exercise_art.py
 python scripts/check_apple_sources.py
 ```
 
-These verify keys, catalog coverage, exact PNG integrity/dimensions, generated outputs and packaging references. They do not validate the movement scientifically. Current executed UI/build results and visual evidence are in [validation](VALIDATION.md).
+These verify keys, catalog coverage, exact WebP integrity/dimensions, generated outputs and packaging references. They do not validate the movement scientifically. Current executed UI/build results and visual evidence are in [validation](VALIDATION.md).
 
 Alpha05 extends this foundation with 32 named variations, combined equipment/muscle/favorites/previously logged filters, personal exercise notes and a compact three-column tablet library (two columns on phones). See [expansion contract](ALPHA05_EXPANSION.md).

@@ -20,7 +20,7 @@
 - **50 Exercises & Compressed 3D Illustrations:** Expanded from 40 → 50 exercises (`BARBELL_BENCH_PRESS`, `INCLINE_BARBELL_PRESS`, `DIP`, `CONVENTIONAL_DEADLIFT`, `BARBELL_ROW`, `BARBELL_OVERHEAD_PRESS`, `CABLE_LATERAL_RAISE`, `BARBELL_CURL`, `SKULL_CRUSHER`, `HANGING_LEG_RAISE`), compressed all 50 two-phase PNGs to `960×640` quantized PNGs (`69.90 MB → 18.09 MB`; `FormaPhone-unsigned.ipa` shrunk from ~153 MB → ~40 MB).
 - **XML Escaping Fix:** Fixed `scripts/generate_exercise_guides.py` and `scripts/generate_exercise_catalog.py` to escape Android XML special characters (`'`, `"`, `\`, leading `@`/`?`).
 - **UI/UX Overhaul (Round 1) on Android & iOS:** Deep Forest + Lime Dark & Light themes, tabular numbers, scrubbable charts, workout victory summary with session muscle heat map, ghost previous-set values, undo snackbar, quick-log sheet, haptics, PR detection (Weight + Epley e1RM, excluding first-ever set), 12-week consistency grid, radial rest timer, Olympic barbell plate visualizer + warm-up ramp, 3-segment macro donut, 30 USDA CC0 starter whole foods, `Clock` injected via Hilt, `Mutex`-queued writes in `FitnessViewModel`.
-- **iOS 3D Image Fix:** `FormaExerciseImage` + `ExerciseImageCache` loads PNGs from `drawable-nodpi/` subdirectory in the `.app` bundle.
+- **iOS 3D Image Fix:** `FormaExerciseImage` + `ExerciseImageCache` loads the exercise stills (WebP, PNG fallback) from `drawable-nodpi/` subdirectory in the `.app` bundle.
 
 ### Commit `a64ba35` + `c3118c9` (CI ✅ Green on Android + `macos-15`)
 - **Full `kg / lb` Weight Unit Toggle (Android & iOS):**
@@ -87,7 +87,7 @@
    - Never leave trailing commas before `)` in Swift calls/initializers.
    - Never use tuple keypaths in `ForEach`.
    - Explicitly cast `Double` to `CGFloat` when mixing with `GeometryReader`.
-   - Always load 3D PNGs via `FormaExerciseImage` (`drawable-nodpi/` subdirectory), never bare `Image(asset)`.
+   - Always load 3D stills via `FormaExerciseImage` (`drawable-nodpi/` subdirectory), never bare `Image(asset)`.
    - Verify CI via `Invoke-RestMethod "https://api.github.com/repos/7atem/Forma/actions/runs?per_page=6"`.
 4. **Hard Product Rules (`AGENTS.md`):**
    - No `INTERNET` permission, no cloud provider. Apple Health is **read-only** on iPhone (`HealthImporter.swift` only); no share/write permission, `HKWorkoutSession` or sensor recording — `check_apple_sources.py` enforces this.

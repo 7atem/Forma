@@ -4,6 +4,11 @@ Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schem
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
 
+## App size and database unlock (25 November 2026)
+
+- **Exercise stills:** the 69 two-phase images ship as 960×640 WebP at quality 92 (`scripts/convert_exercise_art.py`), 2.5 MB instead of 30 MB of PNG; worst sampled PSNR against the PNG originals about 44 dB. `check_exercise_art.py` parses WebP headers without Pillow and rejects unlisted files. Android loads them by resource name; the iPhone/watch loader tries WebP then PNG (native decoding on iOS 17 / watchOS 10). **Not yet viewed on an iPhone or watch.**
+- **Database unlock (Android):** measured on the API 35 emulator, opening with the stored key as a passphrase took 1.0–1.35 s (SQLCipher PBKDF2); the same key as a raw key took about 20 ms. New databases now use raw mode (marker `forma_db_key_mode`, written before creation); existing databases keep passphrase mode and are never re-keyed. `EncryptedStorageTest`: 21/21, including `newDatabaseUsesTheStoredKeyAsRawKeyAndStaysEncrypted` (file is not plaintext, passphrase-mode key is rejected, reopen works) and `existingPassphraseDatabaseIsNeverRekeyedOrMarkedRaw`. First-run Keystore key creation (about 2.3 s on the emulator) is unchanged. **Not measured on a physical phone.**
+
 ## UI/UX pass 4 (25 November 2026)
 
 Audit on the API 35 emulator at phone size (1080×2400, 420 dpi), release build, fresh install, English. Fixes (Android):

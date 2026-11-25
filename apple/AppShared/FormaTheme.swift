@@ -61,8 +61,11 @@ final class ExerciseImageCache: @unchecked Sendable {
     func loadAsync(_ asset: String, maxPixelSize: Int? = nil) async -> UIImage? {
         if let existing = cached(asset, maxPixelSize: maxPixelSize) { return existing }
         let key = cacheKey(asset, maxPixelSize: maxPixelSize)
-        let url = Bundle.main.url(forResource: asset, withExtension: "png", subdirectory: "drawable-nodpi")
-            ?? Bundle.main.url(forResource: asset, withExtension: "png")
+        // Shipped stills are WebP (decoded natively on iOS 17 / watchOS 10); PNG stays as a fallback.
+        let url = ["webp", "png"].lazy.compactMap { ext in
+            Bundle.main.url(forResource: asset, withExtension: ext, subdirectory: "drawable-nodpi")
+                ?? Bundle.main.url(forResource: asset, withExtension: ext)
+        }.first
         let decoded: UIImage? = await Task.detached(priority: .userInitiated) {
             if let url {
                 if let maxPx = maxPixelSize, let source = CGImageSourceCreateWithURL(url as CFURL, nil) {

@@ -324,3 +324,5 @@
 "frequent_meals_title" = "إعادة تسجيل سريعة";
 "frequent_meal_chip" = "%@ · %ld سعرة";
 "share_workout_summary" = "مشاركة الملخص";
+"play_video" = "تشغيل الفيديو";
+"pause_video" = "إيقاف الفيديو";

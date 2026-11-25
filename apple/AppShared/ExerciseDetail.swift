@@ -14,6 +14,8 @@ struct ExerciseDetail: View {
     @State private var muscles = false
     @State private var phase = 0
     @State private var animating = true
+    /// With Reduce Motion on, the video never starts by itself; it plays only after the user taps Play.
+    @State private var videoStartedByUser = false
     @State private var showSecondPhase = false
     /// 0 = 3D motion, 1 = video, 2 = photos; nil picks the richest available.
     @State private var mode: Int?
@@ -113,17 +115,20 @@ struct ExerciseDetail: View {
                     // Placed cleanly outside the exercise media frame so it never blocks watching the movement.
                     MuscleHighlightControl(isOn: $showMuscleHighlights)
                     if current == 1 {
-                        ExerciseVideoView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)
+                        let videoPlaying = reduceMotion ? videoStartedByUser : animating
+                        ExerciseVideoView(exercise: exercise, playing: videoPlaying, showMuscleHighlights: showMuscleHighlights)
                         HStack {
                             Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
                             Spacer()
-                            if !reduceMotion {
-                                Button { animating.toggle() } label: {
-                                    FormaPill(text: animating ? String(localized: "pause_demo") : String(localized: "play_demo"),
-                                              background: animating ? FormaTheme.secondary : FormaTheme.primaryContainer,
-                                              foreground: animating ? FormaTheme.onPrimary : FormaTheme.primary)
-                                }
+                            // Always offer the control: under Reduce Motion it is the only way to start the clip.
+                            Button {
+                                if reduceMotion { videoStartedByUser.toggle() } else { animating.toggle() }
+                            } label: {
+                                FormaPill(text: videoPlaying ? String(localized: "pause_video") : String(localized: "play_video"),
+                                          background: videoPlaying ? FormaTheme.secondary : FormaTheme.primaryContainer,
+                                          foreground: videoPlaying ? FormaTheme.onPrimary : FormaTheme.primary)
                             }
+                            .accessibilityIdentifier("exercise_video_play_toggle")
                         }
                     }
                     if current == 0 {

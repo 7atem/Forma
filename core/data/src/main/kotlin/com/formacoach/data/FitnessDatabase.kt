@@ -5,6 +5,7 @@ import androidx.room.*
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.formacoach.data.security.DatabaseKeyMode
 import com.formacoach.data.security.KeystoreManager
 import com.formacoach.model.*
 import kotlinx.coroutines.flow.Flow
@@ -352,9 +353,10 @@ abstract class FitnessDatabase:RoomDatabase() {
         }
         fun open(context:Context):FitnessDatabase {
             System.loadLibrary("sqlcipher")
-            val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
-            return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6,MIGRATION_6_7,MIGRATION_7_8,MIGRATION_8_9).build()
+            val app=context.applicationContext
+            val key=KeystoreManager(app).getOrCreateDatabasePassphrase()
+            return Room.databaseBuilder(app,FitnessDatabase::class.java,"forma.db")
+                .openHelperFactory(SupportOpenHelperFactory(DatabaseKeyMode.sqlcipherKey(app,key))).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6,MIGRATION_6_7,MIGRATION_7_8,MIGRATION_8_9).build()
         }
     }
 }

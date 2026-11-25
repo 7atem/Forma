@@ -1,416 +1,416 @@
 [
   {
     "id": "squat",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_squat.png",
-    "bytes": 385542,
-    "sha256": "d9712b59f8377dd62875f989cab16af18df26b7ed91011cd9be24e4de393b1b4"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_squat.webp",
+    "bytes": 28248,
+    "sha256": "afbcf286148a8f7882d2dc34eafb64f91747996862b77a29c8216f156f90af2a"
   },
   {
     "id": "leg_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_leg_press.png",
-    "bytes": 359917,
-    "sha256": "307c849117a797be761a61de1d1857478f6fa26a0d06f2d97376ef7f439ec380"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_leg_press.webp",
+    "bytes": 53484,
+    "sha256": "2be7fee06a1a90a35a764794c8cf63d67ad3826474222eaabd8a829e3cf72b1b"
   },
   {
     "id": "chest_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_chest_press.png",
-    "bytes": 384214,
-    "sha256": "c73df7b5b4405fbe49e9f758dad622367f25fbdd00bfa7d6b976ab16f19617a8"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_chest_press.webp",
+    "bytes": 50530,
+    "sha256": "eb5abbcd4823616ac9667a3079be13883f07ecd1ca147d51857ab7afbc356f01"
   },
   {
     "id": "row",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_row.png",
-    "bytes": 395792,
-    "sha256": "19fa02e145d13cfe686fcc6559c8996916528b182613d01961ed26bf0cd26beb"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_row.webp",
+    "bytes": 47436,
+    "sha256": "bea8175a1549e17986aed4b5033d8f194f4e3f78777371b2882253cc5b33718c"
   },
   {
     "id": "lat_pulldown",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_lat_pulldown.png",
-    "bytes": 366294,
-    "sha256": "75396c631659443e06fd557b55f9fdec97fc5ed5d1315077cfdfa589ed3a83b1"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_lat_pulldown.webp",
+    "bytes": 48774,
+    "sha256": "cbc8457f7bcae0c064db459c2127457ae12e6fcb7e46cee6e9806f128345e902"
   },
   {
     "id": "hip_hinge",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_hip_hinge.png",
-    "bytes": 398908,
-    "sha256": "13620bae680dfd3231bc6a72ba3615cec9a3b098e39f65698d9e657e4bea48fe"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hip_hinge.webp",
+    "bytes": 30162,
+    "sha256": "4b569054829d9c950e02da29221c7742fe4e3ea84bed86fef45e218516136b1d"
   },
   {
     "id": "shoulder_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_shoulder_press.png",
-    "bytes": 389497,
-    "sha256": "411a55a2c66c80e6b9b7bdbfa0a1d0e1535bcae58acf7e35ea6edc0023e0384e"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_shoulder_press.webp",
+    "bytes": 49786,
+    "sha256": "b599ef1232c7d25c6afb1781835ba633323e4bf30b3b6774a2027b02cf099dca"
   },
   {
     "id": "split_squat",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_split_squat.png",
-    "bytes": 361996,
-    "sha256": "02cc80e397e162834bc667bebe9f6b6f0217953609d1b69c1024c70f04aafe0f"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_split_squat.webp",
+    "bytes": 33180,
+    "sha256": "e19979d3ee7c4afe3a78bb8f9f9b2f9c7feda76ed479c668a93a8af804dcefb2"
   },
   {
     "id": "goblet_squat",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_goblet_squat.png",
-    "bytes": 398399,
-    "sha256": "e49a9aa646f25b212997e4688557458a82dfe71d1bf198858ebe47bbb135ca5f"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_goblet_squat.webp",
+    "bytes": 31384,
+    "sha256": "3241c1fe0d2b7baa8ca28ef91356b63289c8dd783b68314d4f675160ba2f9668"
   },
   {
     "id": "barbell_back_squat",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_back_squat.png",
-    "bytes": 368713,
-    "sha256": "94b45b6f15fbcee948390a360b049fc81990fc3289accd4fab76cee62eae2d36"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_back_squat.webp",
+    "bytes": 47884,
+    "sha256": "74e6a34cf1f5a80cc6e0763bc2673e3630863d153133fc3cb0aa50ec4ca6db22"
   },
   {
     "id": "reverse_lunge",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_reverse_lunge.png",
-    "bytes": 392597,
-    "sha256": "f3c0592b48b8b0af333ec85354efa58a4f4c528d2cadd24c8689e2d6a65d7e96"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_reverse_lunge.webp",
+    "bytes": 32170,
+    "sha256": "9af697c789c929a83bb5e85a7b85ac1d020739d906fc738449f1ca911a5b961e"
   },
   {
     "id": "step_up",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_step_up.png",
-    "bytes": 387379,
-    "sha256": "daa510b07283ab648d024e77bd47bae815f5eb55d50f3caa07251c3d76e9b38c"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_step_up.webp",
+    "bytes": 28642,
+    "sha256": "1d0a19fab827f82da4839b3ae8fb5795c9bf6e6c6dbfbd2e0403719d7a667f5c"
   },
   {
     "id": "leg_extension",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_leg_extension.png",
-    "bytes": 383675,
-    "sha256": "db448efebf0a38c19d00887ae1e260ef9a3354886ac57cea391a2eb28150f52b"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_leg_extension.webp",
+    "bytes": 48834,
+    "sha256": "54433da0f3fe338a577e6a5f824c99ef517b8d6ae14ff5377d0323c5668b0885"
   },
   {
     "id": "seated_leg_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_seated_leg_curl.png",
-    "bytes": 389785,
-    "sha256": "c9c2280426e3e675066329619048740a855667b4a2de1fed670d9fb6dd92c65b"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_seated_leg_curl.webp",
+    "bytes": 49178,
+    "sha256": "532c1ed46fef72af0b75ef4c8c77605a1669cbf7da13452b66c0b7adc929ad81"
   },
   {
     "id": "standing_calf_raise",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_standing_calf_raise.png",
-    "bytes": 390638,
-    "sha256": "d13a26afd2de4a09d93654e0d5138ff3dfa4bfc5f49641b03abefb51cc88ecce"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_standing_calf_raise.webp",
+    "bytes": 31740,
+    "sha256": "fb640744632a7fdf4c722036942563cc1a08c823f6729c173194c7b55f3cc7b2"
   },
   {
     "id": "seated_calf_raise",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_seated_calf_raise.png",
-    "bytes": 381454,
-    "sha256": "7942b41aab5df1f93b121cbb2da293d09449df1771ef44d9d76bbb931f28d0ed"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_seated_calf_raise.webp",
+    "bytes": 44276,
+    "sha256": "621421e523e3af1141ccb2dec0526904a41ef29fbe69c6b8a3764c1c08590510"
   },
   {
     "id": "barbell_hip_thrust",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_hip_thrust.png",
-    "bytes": 383369,
-    "sha256": "28025664b263e4be9a28dd8dcb4d68520d22f3ce5b5965dcbc65b64ca46d485a"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_hip_thrust.webp",
+    "bytes": 33824,
+    "sha256": "6d22169abd28082f04758369284a989941d7160cd728910b130e20185b07abf3"
   },
   {
     "id": "glute_bridge",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_glute_bridge.png",
-    "bytes": 380955,
-    "sha256": "92a6ca14593735b59d58b90df2d4a0b0ec99d65fbcaa5b8948187d0a9802ec08"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_glute_bridge.webp",
+    "bytes": 24460,
+    "sha256": "5c370d279cb05c871758b410d18045172bcf6e8c52095c90f5bfac3c2ae2a49f"
   },
   {
     "id": "barbell_romanian_deadlift",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_romanian_deadlift.png",
-    "bytes": 397977,
-    "sha256": "2e8d84ef51ffc3edfcffa66eb079ba04d35adc4cf2e2838e2021ce7c242b5b5e"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_romanian_deadlift.webp",
+    "bytes": 33058,
+    "sha256": "437dd00b9fa328e4681b83dda8d5bf79a14f95a7e5651157d6269319187c24f6"
   },
   {
     "id": "dumbbell_bench_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_bench_press.png",
-    "bytes": 373905,
-    "sha256": "e38a6d68d7810c6eb1353e44163114519d08d72ae72535440896cc6c5a733be8"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_bench_press.webp",
+    "bytes": 35210,
+    "sha256": "353eef64c75e8d1a9c3efe0a6d296087ade34148f25fffc143a839ad696b86ce"
   },
   {
     "id": "incline_dumbbell_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_dumbbell_press.png",
-    "bytes": 378137,
-    "sha256": "210623084d484c7ce6f09612425a63c7c98dff4a20c1618a964926debe0f655a"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_dumbbell_press.webp",
+    "bytes": 42640,
+    "sha256": "c462e153af3974d58253e6bbf11705be7d35f08d2054daec5ab11d263737a4fd"
   },
   {
     "id": "push_up",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_push_up.png",
-    "bytes": 384523,
-    "sha256": "dc9b21e6e3328fa1211caa38778e65c7e23d497f0cc11cd7e4f294893ede2460"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_push_up.webp",
+    "bytes": 24990,
+    "sha256": "24e551b225e4524edcfcd71aa0f317154005b23d2e6fedb8dc97b8abc1a47f7e"
   },
   {
     "id": "knee_push_up",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_knee_push_up.png",
-    "bytes": 363378,
-    "sha256": "d1c01292cd5f8d8480dabf35933659e2715220a105f4e8b1752499409afee607"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_knee_push_up.webp",
+    "bytes": 29828,
+    "sha256": "d7fc3b348517ca7447023e167c61f293580e46c3ecf615b4255f303c54a891df"
   },
   {
     "id": "cable_chest_fly",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_chest_fly.png",
-    "bytes": 391600,
-    "sha256": "5140d206c9a5dceb0e08e16a7f2f4780e5d65cac1810ee8e7edb66f94c51a542"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_chest_fly.webp",
+    "bytes": 45142,
+    "sha256": "49270cedaf60caa93f5c2a3e596b36b5eca53861f45717ee6ee28abfe112ce35"
   },
   {
     "id": "single_arm_dumbbell_row",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_single_arm_dumbbell_row.png",
-    "bytes": 373909,
-    "sha256": "97f8166ee32094e67785587cebadd598343c6993fa93b1d95441eb7257ef19ad"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_single_arm_dumbbell_row.webp",
+    "bytes": 33344,
+    "sha256": "6cf993d10c6e50e20f80ad896479df9ae9478c5e26847a8e7d3c0fcdc2ab58bd"
   },
   {
     "id": "chest_supported_row",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_chest_supported_row.png",
-    "bytes": 377038,
-    "sha256": "443924e9f915d8bbbe51dd852a51a58987a546c8b41ee34eadd8c346e1024aab"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_chest_supported_row.webp",
+    "bytes": 39572,
+    "sha256": "4e5f154771bb8a2d5cbdecc3b532f971b4c499539bc94a04e6f26f8c13093a5e"
   },
   {
     "id": "pull_up",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_pull_up.png",
-    "bytes": 383280,
-    "sha256": "4df9ec9fd4e69f46c46b9782ed358f1d4c32fdfe9dfa4881094e7d1d119cc8f6"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_pull_up.webp",
+    "bytes": 35164,
+    "sha256": "53ecba21ed3ed096d93f837c68c256f0a7c26b70a7a30f142e2cd701d114d7e0"
   },
   {
     "id": "face_pull",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_face_pull.png",
-    "bytes": 417097,
-    "sha256": "e2edcc099a3f14b8a1d408c995a02f3dbc1109a14d8cf15cc3f48679222530d8"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_face_pull.webp",
+    "bytes": 40984,
+    "sha256": "f5fb2bb17c69ee8ad18dc556778753904897d2d44d363eb4f0ba599bee5e61f2"
   },
   {
     "id": "dumbbell_shoulder_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_shoulder_press.png",
-    "bytes": 382088,
-    "sha256": "ba45f05b1ea688b2b60a35c818c6972dbf3ef99478aabfb6ef22ed4186d5fa87"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_shoulder_press.webp",
+    "bytes": 39084,
+    "sha256": "e1c21bd0aef354a2e41720f48e5499b14841494cbf7d3f3371a8d66b762b2fc2"
   },
   {
     "id": "lateral_raise",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_lateral_raise.png",
-    "bytes": 384800,
-    "sha256": "84bdc3130d7221fdf5c997bdd61a80979480049122d76d5e6dae85a20544a715"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_lateral_raise.webp",
+    "bytes": 31444,
+    "sha256": "6839f74d3675e30263911f18a19f09c65636e6245137d86638ae3f2fef15c32f"
   },
   {
     "id": "rear_delt_fly",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_rear_delt_fly.png",
-    "bytes": 381977,
-    "sha256": "983cec4401d8165332d48de6a3c6b54cae5891d3013e07c10a44260ee8a1c2f2"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_rear_delt_fly.webp",
+    "bytes": 31148,
+    "sha256": "69f97ef101faf1b2e74ede97a3b1cabb6a5afa26ecf6314177a680970261ca38"
   },
   {
     "id": "dumbbell_shrug",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_shrug.png",
-    "bytes": 402541,
-    "sha256": "99806278e1e3819562a8d088da71ba9041a7d42cdd848b59153ec6e07659b0cc"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_shrug.webp",
+    "bytes": 27500,
+    "sha256": "62031675478af811f574f1221fec0c4358936d027326c18e137c6ae4a8f646c0"
   },
   {
     "id": "dumbbell_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_curl.png",
-    "bytes": 374256,
-    "sha256": "0d2830344eed20a4127378bd87da4ae450a77c5249ef6c7fe1fff5503bce0a72"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_curl.webp",
+    "bytes": 42688,
+    "sha256": "9c6dfad679ee09dc4583febc72b8bdb53dd0087a42fbec198c0fa62f59ea826d"
   },
   {
     "id": "hammer_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_hammer_curl.png",
-    "bytes": 413088,
-    "sha256": "22cd68d4962de30aa343968bc2eb75682854bba9c96ee50b8a171847a34cef20"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hammer_curl.webp",
+    "bytes": 32250,
+    "sha256": "ec2fce65903bf32d402df1098b66cfc7acfeb4bc7336956117ae083f7433a9e7"
   },
   {
     "id": "machine_preacher_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_machine_preacher_curl.png",
-    "bytes": 392877,
-    "sha256": "e9f28cb720a2dfb6963d7aa8d9462d2576d2abd7e9fe0c6dc34bce4d1a1e7444"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_machine_preacher_curl.webp",
+    "bytes": 54746,
+    "sha256": "1d211edb70b9d6666c6a6fcdab778e3a60a95cccd14bbf3cead03ac98305d6fa"
   },
   {
     "id": "triceps_pushdown",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_triceps_pushdown.png",
-    "bytes": 404155,
-    "sha256": "ad0c590be932e521d46ca1f0d597f290f2b1bfc4b6b0a1b597048c1bcc4ef546"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_triceps_pushdown.webp",
+    "bytes": 41148,
+    "sha256": "fe390d8e17562785b31071926a73c6029c4267246de6616917fcab7cd298d6fc"
   },
   {
     "id": "overhead_triceps_extension",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_overhead_triceps_extension.png",
-    "bytes": 364381,
-    "sha256": "1e2f86c06cf3c97831595045b1e87a6e415297f03aacae35f38a51c7a7fac28d"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_overhead_triceps_extension.webp",
+    "bytes": 35926,
+    "sha256": "2c94d5b3ecd599a6c2c3600ac47a87434d72b1c349cff8e75af7740cb37f3d05"
   },
   {
     "id": "dead_bug",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_dead_bug.png",
-    "bytes": 396672,
-    "sha256": "ea1c238450aee52c0fe5bef3d454ee211cf32af940cb26dd373d42e8dac94f3d"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dead_bug.webp",
+    "bytes": 34280,
+    "sha256": "ec614f053603c83b2e6e4c7b2c8898a3e22c19df4a545c34c40e1576c8ad0eec"
   },
   {
     "id": "reverse_crunch",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_reverse_crunch.png",
-    "bytes": 356248,
-    "sha256": "9b9a620b94267046f4b0ab6e8c270511fec33a7fe0939a51c7011e56349a5704"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_reverse_crunch.webp",
+    "bytes": 23292,
+    "sha256": "cbbc84fcf043b27dcf213d6bd33409a54176589896db62c5cd7bb6bc59ed95dc"
   },
   {
     "id": "cable_crunch",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_crunch.png",
-    "bytes": 395620,
-    "sha256": "b1e665fa8a708772539ae8ecdef72163fc97420b8b6dfff3ac9c0e9735716f41"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_crunch.webp",
+    "bytes": 42700,
+    "sha256": "ac14f2d53357d011ed99ea5045c62947a7be7f159c7d7c4f989a70dc40411dff"
   },
   {
     "id": "barbell_bench_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_bench_press.png",
-    "bytes": 290276,
-    "sha256": "d41b2a817fd7c857f7161ddf93b92c1d3a7a71c7535ad267b24da709205e6e51"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_bench_press.webp",
+    "bytes": 27284,
+    "sha256": "8f69eb5c45134adfc8b8473ab5b9fe7baaf702b32911634ab876db1bd50fdbf6"
   },
   {
     "id": "incline_barbell_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_barbell_press.png",
-    "bytes": 426842,
-    "sha256": "1b8b0f9d639d1c4cc3a3486189451d79be08afa3d30fb6256d180326d1e4fa81"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_barbell_press.webp",
+    "bytes": 36894,
+    "sha256": "f73e76b570c52a8ef8505e198c83387ecc2ff1413af2885f5ee61d2fdd6c7048"
   },
   {
     "id": "dip",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_dip.png",
-    "bytes": 316250,
-    "sha256": "06fe3b8cd0690d2fc548a8d97653236cb877ff7ae2e970de690c4ef119b35550"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dip.webp",
+    "bytes": 25056,
+    "sha256": "b74f6568c3b37288f52ed87602126ff037384fde1124edcd272b06ac3d31b33d"
   },
   {
     "id": "conventional_deadlift",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_conventional_deadlift.png",
-    "bytes": 404433,
-    "sha256": "9ec0999671a056bc4f3e386b1b617b86024baad36ef2520c30a6f466b99cc4d5"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_conventional_deadlift.webp",
+    "bytes": 34080,
+    "sha256": "080d94dde19bf7f9f84f5cccd141883a5a77ff1ff376c896df1199fe059c5899"
   },
   {
     "id": "barbell_row",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_row.png",
-    "bytes": 407234,
-    "sha256": "b9b26499d92d21e2a15c724ce3d32c28d0edb5d394381dda3f95a62d686cc741"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_row.webp",
+    "bytes": 32120,
+    "sha256": "ff9ccea3f647d360ee75e9a019b997fe44546927b866a7c186c3dad2c6077ef3"
   },
   {
     "id": "barbell_overhead_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_overhead_press.png",
-    "bytes": 332137,
-    "sha256": "948bd05e702492098631502f4953b37874f3acbfc349a3290e2c11fa22f267d0"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_overhead_press.webp",
+    "bytes": 26838,
+    "sha256": "f69e1ef7f4a3a4c386e1f0fd1f280e896a6ea5a79306a5b0ac88c0bff3852768"
   },
   {
     "id": "cable_lateral_raise",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_lateral_raise.png",
-    "bytes": 356123,
-    "sha256": "6d01d9b04e3819c9694d4abe24268b08d983dd262926e25fab6045a439f282cd"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_lateral_raise.webp",
+    "bytes": 34706,
+    "sha256": "fd46708f90f4f8172838cfa376e6a728d15953cc4c2d37d43e50a43c3d5bcfb4"
   },
   {
     "id": "barbell_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_curl.png",
-    "bytes": 329260,
-    "sha256": "c950c3acb2e3984b363e1d9d10b2c02c1182d095b91daa7a661d1eabfb885c5f"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_curl.webp",
+    "bytes": 27222,
+    "sha256": "e62e96a8e91a2b77143548079d56d6f7c94dc13aa2044d3a5ac2bf576bc5ab9e"
   },
   {
     "id": "skull_crusher",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_skull_crusher.png",
-    "bytes": 382495,
-    "sha256": "002ab3705ba5525c65359bd740998150a02804ef18536e0b4e6b817b57a71a2c"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_skull_crusher.webp",
+    "bytes": 29016,
+    "sha256": "fafb11b83141be19dae2fae5633ca574af74e8ab0b37e5141218a06e3260ff59"
   },
   {
     "id": "hanging_leg_raise",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_hanging_leg_raise.png",
-    "bytes": 331419,
-    "sha256": "808b29c826559c722bf334d6844a3d87850724e180674705fd64a3d6965dc470"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hanging_leg_raise.webp",
+    "bytes": 31760,
+    "sha256": "b45882dc709ae37c9545eb0eed1529266bee928543487ff4455c599362a11e8e"
   },
   {
     "id": "dumbbell_chest_fly",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_chest_fly.png",
-    "bytes": 531666,
-    "sha256": "9945444e0a145a9ae29f7c5725d1f3aba1d1adc046085c566d6271f352302466"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_dumbbell_chest_fly.webp",
+    "bytes": 23364,
+    "sha256": "9ea6820833878a39d4b3652297280e03aae1d53432fe20f5b3b13259dece9be0"
   },
   {
     "id": "pec_deck_fly",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_pec_deck_fly.png",
-    "bytes": 610002,
-    "sha256": "e0adfe7ada2e40d37d68dcbaae2e392a43cfc1f04c1b518f6eb9bded18748b52"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_pec_deck_fly.webp",
+    "bytes": 32238,
+    "sha256": "e18e1c4328da7644a5d3b5e5510e0bcf1d0e6e6f69cc808f792abb53a324aec0"
   },
   {
     "id": "straight_arm_pulldown",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_straight_arm_pulldown.png",
-    "bytes": 494247,
-    "sha256": "ed481c47c117743e546a88a013448042adbedee5a9a9e68d6bebc07ff9cfbf38"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_straight_arm_pulldown.webp",
+    "bytes": 25092,
+    "sha256": "7c92cc591703fbafa1685001a3a0d0a8aca148785298c7fb4ed83fd6ebf3124f"
   },
   {
     "id": "pendlay_row",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_pendlay_row.png",
-    "bytes": 519050,
-    "sha256": "a14f730983af893bde57aa7ff23d1e7344fc6ede912223b61fb43314f173bffa"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_pendlay_row.webp",
+    "bytes": 20498,
+    "sha256": "9b02034f4c263b85fb8b12db26c7e5bae31aee80cf7b6f31d771a0f6f442e27f"
   },
   {
     "id": "back_extension",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_back_extension.png",
-    "bytes": 551421,
-    "sha256": "13bf93043623652f33cb649869c4ae768eca5493bf84ece2b0b9205ddccf1b99"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_back_extension.webp",
+    "bytes": 25364,
+    "sha256": "d5cc0f9e256af24160f58221c780f16f38b01a332ed20ecf60109524fd00b385"
   },
   {
     "id": "front_raise",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_front_raise.png",
-    "bytes": 549874,
-    "sha256": "5bb098faf8ef2b84ab43124aeadfc5e1cdd73521bcac14080bfa39912d1ed096"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_front_raise.webp",
+    "bytes": 22494,
+    "sha256": "824288b049f697a948c860921f95cbaf1c5ae640dce8bc6e1d0e7450635ae951"
   },
   {
     "id": "incline_dumbbell_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_dumbbell_curl.png",
-    "bytes": 604651,
-    "sha256": "0a414e14a2e681cc6e3c2cddfae0a0f396c7a680c1057b02451c3b2ded8765ca"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_incline_dumbbell_curl.webp",
+    "bytes": 27184,
+    "sha256": "907ad86b7aee82778fb06acee121e2314c9ff31fb0d4533706e3ed7099542869"
   },
   {
     "id": "concentration_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_concentration_curl.png",
-    "bytes": 614014,
-    "sha256": "8859be9b7580c3372282b9536d30bcd724497e325d74778bf08c7b6f65daf450"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_concentration_curl.webp",
+    "bytes": 36106,
+    "sha256": "d605aa967cc354d30f15dc7b20af44b60b4d5a0f0523cfd13f4212ef8ac18874"
   },
   {
     "id": "bulgarian_split_squat",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_bulgarian_split_squat.png",
-    "bytes": 548244,
-    "sha256": "b4f2b0d79fcf0d549dde160ff594a1dcf5adbbc248dcb0b684563f43120b175b"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_bulgarian_split_squat.webp",
+    "bytes": 24410,
+    "sha256": "f74519cd187c88cbe3393dc24f337ed4e46fe6601b0e272571bc333ea99da647"
   },
   {
     "id": "front_squat",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_front_squat.png",
-    "bytes": 563564,
-    "sha256": "b4fc3cb65a71a85403344ff9082a216f8da6a53b77d417215042f4adb6adde40"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_front_squat.webp",
+    "bytes": 26996,
+    "sha256": "96d7d2f89056d0774f2f636a078a6da7e906e3fffd40507e7d3b2948874e60dd"
   },
   {
     "id": "plank",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_plank.png",
-    "bytes": 525834,
-    "sha256": "2a9309a72c12585e58a0a9b65b94a9da2d2d89317eebec904f79d83f4c17187e"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_plank.webp",
+    "bytes": 20640,
+    "sha256": "fe9348b44b4de5577e7a5c8db07eacff32b384d3f1e9f325582bd24849a6f61f"
   },
   {
     "id": "hack_squat",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_hack_squat.png",
-    "bytes": 775186,
-    "sha256": "4c07bd627a75841606a20e039a6cb0882a531f35693099c4b57aa07a71afa330"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hack_squat.webp",
+    "bytes": 51218,
+    "sha256": "caa7efbe59cc66d02945c906bc8a10f334533b91292e3aec3647f71955481594"
   },
   {
     "id": "sumo_deadlift",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_sumo_deadlift.png",
-    "bytes": 590457,
-    "sha256": "efe033eea9da283ccc25ab293b12810351e2803f9b517a67246e286352ab02d9"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_sumo_deadlift.webp",
+    "bytes": 29358,
+    "sha256": "281ea422d6351f5a8834f38efdf25464199ff62a55221b5c0f1cbf7e63e4c114"
   },
   {
     "id": "chin_up",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_chin_up.png",
-    "bytes": 595185,
-    "sha256": "33f56d8ca7ad2eff3ff3d5ca8116bc159d81e389c1df695f044a5880306cb077"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_chin_up.webp",
+    "bytes": 30694,
+    "sha256": "280ae5f3461c0091b7f3b18af35702c948fb5372a78b9c63f154d07aa22303ed"
   },
   {
     "id": "arnold_press",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_arnold_press.png",
-    "bytes": 577891,
-    "sha256": "50469694b6dfa68aa7d366e8859ae8b5d220f6f6a791732c0e6c247482890eeb"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_arnold_press.webp",
+    "bytes": 34004,
+    "sha256": "c8f898a4c04e822f89675166332697f0fa82561dc5e4989f8d490f9134e8750a"
   },
   {
     "id": "ez_bar_curl",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_ez_bar_curl.png",
-    "bytes": 569627,
-    "sha256": "eaeb05361f49df0fef9692ac03ba7188774787f1759afac52821f20d73a9bb63"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_ez_bar_curl.webp",
+    "bytes": 28698,
+    "sha256": "1a4117243e49313e823131185e5b72b4c0bac5e4c9e9c344a208d608bfb9548e"
   },
   {
     "id": "triceps_kickback",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_triceps_kickback.png",
-    "bytes": 620942,
-    "sha256": "61c64c490fd05d9786f147eb600cd336d97e827fe404c9e9e205b574aae3f65c"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_triceps_kickback.webp",
+    "bytes": 30420,
+    "sha256": "ab1a99364dd41403b8bc7e7548dac6722269eb8857ab931ed9ee61f75f211fea"
   },
   {
     "id": "walking_lunge",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_walking_lunge.png",
-    "bytes": 529091,
-    "sha256": "11c2200d5e2c789bba7e50a155c30e46ed8b976429fa239dd0233bae332cf521"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_walking_lunge.webp",
+    "bytes": 23086,
+    "sha256": "6803af75da7e3c1b5a9928b1c9902258bb02a687fe26f3730206aba87416fb70"
   },
   {
     "id": "ab_wheel_rollout",
-    "file": "assets/exercises/res/drawable-nodpi/exercise_ab_wheel_rollout.png",
-    "bytes": 666235,
-    "sha256": "5c830c2e687b5a48f03deeb7466b1702bbed82c9fdb0a3e26f55c95330c26127"
+    "file": "assets/exercises/res/drawable-nodpi/exercise_ab_wheel_rollout.webp",
+    "bytes": 32006,
+    "sha256": "051fd3d928fc0e8a5fee581667e1ade61e61d0db5939dccfb46fe81005fbd113"
   }
 ]

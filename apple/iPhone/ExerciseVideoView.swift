@@ -22,12 +22,12 @@ struct ExerciseVideoView: View {
     let exercise: Exercise
     var playing: Bool = true
     var showMuscleHighlights: Bool = true
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.locale) private var locale
 
+    /// `playing` is already resolved by the caller: autoplay is off under Reduce Motion, but an explicit tap may start it.
     var body: some View {
         if let url = ExerciseVideoLibrary.url(exercise) {
-            let play = playing && !reduceMotion
+            let play = playing
             ZStack(alignment: .topTrailing) {
                 LoopingVideoPlayer(url: url, playing: play)
                     .id(url)

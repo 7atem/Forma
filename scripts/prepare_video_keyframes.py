@@ -32,7 +32,7 @@ def edge_colour(panel: Image.Image):
 
 
 for cid in wanted:
-    source = ROOT / f'assets/exercises/res/drawable-nodpi/exercise_{cid.lower()}.png'
+    source = ROOT / f'assets/exercises/res/drawable-nodpi/exercise_{cid.lower()}.webp'
     image = Image.open(source).convert('RGB')
     w, h = image.size
     out = ROOT / 'artifacts/video-keyframes' / cid
