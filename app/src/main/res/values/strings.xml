@@ -516,4 +516,6 @@
     <string name="frequent_meals_title">Quick re-log</string>
     <string name="frequent_meal_chip">%1$s · %2$s kcal</string>
     <string name="show_all_prs">Show all (%1$s)</string>
+    <string name="copy_workout_summary">Copy summary</string>
+    <string name="copied_workout_summary">Copied!</string>
 </resources>

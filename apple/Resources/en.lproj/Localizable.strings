@@ -328,3 +328,5 @@
 "show_less_prs" = "Show less";
 "frequent_meals_title" = "Quick re-log";
 "frequent_meal_chip" = "%@ · %ld kcal";
+"share_workout_summary" = "Share summary";
+"session_elapsed" = "Elapsed %@";

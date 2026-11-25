@@ -1169,6 +1169,42 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                 if (sessionMuscles.isNotEmpty()) {
                     WeeklyMuscleHeatMap(sessionMuscles)
                 }
+                if (latest != null && workingSets.isNotEmpty()) {
+                    val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+                    val res = LocalContext.current.resources
+                    val unit = LocalWeightUnit.current
+                    val unitText = weightUnitLabel()
+                    var copied by remember(latest.id) { mutableStateOf(false) }
+                    val title = sessionTitle(latest, state.snapshot.programs)
+                    val dateStr = dateLabel(latest.date)
+                    val summarySetsLabel = stringResource(R.string.session_summary_sets, number(workingSets.size.toDouble(), 0))
+                    val summaryTonnageLabel = stringResource(R.string.session_tonnage, formatWeight(tonnage, 0))
+                    FilledTonalButton(
+                        onClick = {
+                            val recap = WorkoutInsights.formatRecap(
+                                title = title,
+                                dateLabel = dateStr,
+                                sets = latestSets,
+                                exerciseName = { res.getString(exerciseLabel(it)) },
+                                formatLoad = { kg ->
+                                    val v = WeightUnits.fromKg(kg, unit)
+                                    val s = if (v == kotlin.math.floor(v)) v.toInt().toString() else "%.1f".format(v)
+                                    "$s $unitText"
+                                },
+                                workingSetsLabel = { summarySetsLabel },
+                                volumeLabel = { summaryTonnageLabel },
+                            )
+                            clipboard.setText(androidx.compose.ui.text.AnnotatedString(recap))
+                            copied = true
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.testTag("copy_workout_summary"),
+                    ) {
+                        Icon(if (copied) Icons.Default.Check else Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(if (copied) R.string.copied_workout_summary else R.string.copy_workout_summary), fontWeight = FontWeight.SemiBold)
+                    }
+                }
             }
         }
     }

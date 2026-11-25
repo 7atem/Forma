@@ -52,4 +52,33 @@ public enum WorkoutInsights {
             return a.weightKg > b.weightKg
         }
     }
+
+    /// Formats a clean, shareable plain-text workout recap (working sets only).
+    public static func formatRecap(
+        workout: WatchWorkout,
+        arabic: Bool,
+        useLb: Bool
+    ) -> String {
+        let working = workout.sets.filter { $0.kind == .working }
+        var lines = ["Forma · \(workout.programName) (\(workout.date))"]
+        var seen: [Exercise] = []
+        for s in working where !seen.contains(s.exercise) { seen.append(s.exercise) }
+        let unit = useLb ? "lb" : "kg"
+        let factor = useLb ? 2.2046226218 : 1.0
+        for ex in seen {
+            let exSets = working.filter { $0.exercise == ex }.map { s in
+                let w = s.weightKg * factor
+                let wStr = w.rounded() == w ? "\(Int(w))" : String(format: "%.1f", w)
+                return "\(wStr) \(unit) × \(s.reps)"
+            }.joined(separator: ", ")
+            lines.append("• \(ex.label(arabic: arabic)): \(exSets)")
+        }
+        let vol = working.reduce(0.0) { $0 + $1.weightKg * Double($1.reps) } * factor
+        if vol > 0 {
+            lines.append("\(working.count) sets · \(Int(vol.rounded())) \(unit)")
+        } else {
+            lines.append("\(working.count) sets")
+        }
+        return lines.joined(separator: "\n")
+    }
 }

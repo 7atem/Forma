@@ -328,3 +328,5 @@
 "show_less_prs" = "عرض أقل";
 "frequent_meals_title" = "إعادة تسجيل سريعة";
 "frequent_meal_chip" = "%@ · %ld سعرة";
+"share_workout_summary" = "مشاركة الملخص";
+"session_elapsed" = "المدة %@";

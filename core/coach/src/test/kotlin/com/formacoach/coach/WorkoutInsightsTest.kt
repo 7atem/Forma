@@ -77,4 +77,25 @@ class WorkoutInsightsTest {
         assertEquals(550.0, summary.totalVolumeKg, 0.01)
         assertEquals(listOf(Exercise.SQUAT), summary.newPrExercises)
     }
+
+    @Test fun formatRecapListsWorkingSetsAndExcludesWarmups() {
+        val sets = listOf(
+            TrainingSet("1", "s1", Exercise.BARBELL_BENCH_PRESS, 8, 80.0, SetKind.WORKING),
+            TrainingSet("2", "s1", Exercise.BARBELL_BENCH_PRESS, 10, 40.0, SetKind.WARM_UP),
+            TrainingSet("3", "s1", Exercise.BARBELL_ROW, 10, 70.0, SetKind.WORKING),
+        )
+        val text = WorkoutInsights.formatRecap(
+            title = "Upper A",
+            dateLabel = "2026-11-25",
+            sets = sets,
+            exerciseName = { it.name },
+            formatLoad = { "${it.toInt()} kg" },
+            workingSetsLabel = { "$it sets" },
+            volumeLabel = { "${it.toInt()} kg" },
+        )
+        assertTrue(text.contains("Forma · Upper A (2026-11-25)"))
+        assertTrue(text.contains("• BARBELL_BENCH_PRESS: 80 kg × 8"))
+        assertFalse(text.contains("40 kg × 10"))
+        assertTrue(text.contains("2 sets · 1340 kg"))
+    }
 }

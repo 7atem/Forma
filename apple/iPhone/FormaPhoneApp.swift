@@ -338,6 +338,11 @@ private struct MealSlotOption: Identifiable {
                                         }
                                     }
                                     HStack(spacing: 12) {
+                                        ShareLink(item: WorkoutInsights.formatRecap(workout: workout, arabic: arabic, useLb: useLb)) {
+                                            Label("share_workout_summary", systemImage: "square.and.arrow.up")
+                                                .font(.subheadline.weight(.semibold))
+                                                .foregroundStyle(FormaTheme.primary)
+                                        }
                                         Spacer()
                                         Button("delete", role: .destructive) { onDelete(workout.id) }
                                             .font(.subheadline)
@@ -506,6 +511,7 @@ private struct MealSlotOption: Identifiable {
     @State private var showSwap = false
     @State private var confirmFinish = false
     @State private var confirmDiscard = false
+    @State private var sessionStartedAt = Date()
     @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
@@ -532,9 +538,17 @@ private struct MealSlotOption: Identifiable {
                         Text(draft.program.name)
                             .font(.title2.weight(.bold))
                             .foregroundStyle(FormaTheme.textPrimary)
-                        Text("\(draft.sets.count) \(String(localized: "sets"))")
-                            .font(.caption)
-                            .foregroundStyle(FormaTheme.textMuted)
+                        TimelineView(.periodic(from: sessionStartedAt, by: 1)) { ctx in
+                            let sec = max(0, Int(ctx.date.timeIntervalSince(sessionStartedAt)))
+                            let h = sec / 3600
+                            let m = (sec % 3600) / 60
+                            let s = sec % 60
+                            let clock = h > 0 ? String(format: "%d:%02d:%02d", h, m, s) : String(format: "%02d:%02d", m, s)
+                            Text("\(draft.sets.count) \(String(localized: "sets")) · \(String(format: String(localized: "session_elapsed"), clock))")
+                                .font(.caption)
+                                .monospacedDigit()
+                                .foregroundStyle(FormaTheme.textMuted)
+                        }
                     }
                     Spacer()
                     if tonnage > 0 {

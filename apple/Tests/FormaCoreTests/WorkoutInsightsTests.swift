@@ -42,4 +42,23 @@ final class WorkoutInsightsTests: XCTestCase {
         let prs = WorkoutInsights.personalRecords(workouts: [w1, w2])
         XCTAssertEqual(prs.map(\.exercise), [.barbell_row, .squat])
     }
+
+    func testFormatRecapExcludesWarmupsAndComputesVolume() {
+        let p = WatchProgram(id: "p1", name: "Upper A", exercises: [.barbell_bench_press])
+        let w = WatchWorkout(
+            id: "w1",
+            date: "2026-11-25",
+            program: p,
+            completedAtMillis: 2000,
+            sets: [
+                WatchSet(id: "s1", exercise: .barbell_bench_press, reps: 8, weightKg: 80, kind: .working),
+                WatchSet(id: "s2", exercise: .barbell_bench_press, reps: 10, weightKg: 40, kind: .warmUp),
+            ]
+        )
+        let recap = WorkoutInsights.formatRecap(workout: w, arabic: false, useLb: false)
+        XCTAssertTrue(recap.contains("Forma · Upper A (2026-11-25)"))
+        XCTAssertTrue(recap.contains("80 kg × 8"))
+        XCTAssertFalse(recap.contains("40 kg"))
+        XCTAssertTrue(recap.contains("1 sets · 640 kg"))
+    }
 }

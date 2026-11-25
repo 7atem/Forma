@@ -516,4 +516,6 @@
     <string name="frequent_meals_title">إعادة تسجيل سريعة</string>
     <string name="frequent_meal_chip">%1$s · %2$s سعرة</string>
     <string name="show_all_prs">عرض الكل (%1$s)</string>
+    <string name="copy_workout_summary">نسخ الملخص</string>
+    <string name="copied_workout_summary">تم النسخ!</string>
 </resources>
