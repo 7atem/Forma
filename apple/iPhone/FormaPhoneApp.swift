@@ -2451,7 +2451,7 @@ private struct MealSlotOption: Identifiable {
         let ranked = groups.values.sorted { a, b in
             a.count != b.count ? a.count > b.count : a.latest.date > b.latest.date
         }
-        return Array(ranked.prefix(8).map(\.latest))
+        return ranked.prefix(8).map { $0.latest }
     }
 
     var body: some View {
@@ -2490,7 +2490,7 @@ private struct MealSlotOption: Identifiable {
             .padding(.vertical, 8)
             .frame(minHeight: 44)
             .background(FormaTheme.surface, in: Capsule())
-            .overlay(Capsule().stroke(FormaTheme.outline, lineWidth: 1))
+            .overlay(Capsule().stroke(FormaTheme.border, lineWidth: 1))
             .foregroundStyle(FormaTheme.textPrimary)
         }
         .buttonStyle(.plain)
