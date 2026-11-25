@@ -31,6 +31,8 @@ internal fun SettingsSheet(
     onProfile: () -> Unit,
     onWatch: () -> Unit,
     onBackup: () -> Unit,
+    onReminders: () -> Unit,
+    onHealthConnect: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -131,6 +133,18 @@ internal fun SettingsSheet(
                 title = stringResource(R.string.profile),
                 tag = "settings_profile",
                 onClick = { onDismiss(); onProfile() },
+            )
+            SettingsRow(
+                icon = Icons.Default.Notifications,
+                title = stringResource(R.string.reminders_title),
+                tag = "reminders_settings",
+                onClick = { onDismiss(); onReminders() },
+            )
+            SettingsRow(
+                icon = Icons.Default.Favorite,
+                title = stringResource(R.string.health_connect_title),
+                tag = "health_connect_settings",
+                onClick = { onDismiss(); onHealthConnect() },
             )
             SettingsRow(
                 icon = Icons.Default.Watch,

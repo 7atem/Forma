@@ -297,3 +297,12 @@
 "training_trend_this_week" = "مجموعات العمل هذا الأسبوع · %@ جلسات";
 "training_trend_average" = "المتوسط الأسبوعي (١٢ أسبوعًا)";
 "training_trend_volume" = "حجم الحمل الخارجي هذا الأسبوع: %@";
+"reminders_title" = "التذكيرات";
+"reminder_meals" = "سجّل وجباتك";
+"reminder_water" = "سجّل الماء";
+"reminder_workout" = "سجّل تمرينًا";
+"reminder_meals_body" = "وقت مناسب لتسجيل ما أكلته، إذا أردت.";
+"reminder_water_body" = "وقت مناسب لتسجيل الماء، إذا أردت.";
+"reminder_workout_body" = "تمرين النهارده؟ فورمة جاهزة لما تكون جاهز. أيام الراحة مهمة كمان.";
+"reminders_permission_note" = "الإشعارات مغلقة لفورمة. اسمح بها من الإعدادات لتصلك التذكيرات.";
+"reminders_privacy" = "اختيارية ومغلقة افتراضيًا. تُجدول على هذا الآيفون فقط ولا تتضمن بياناتك المسجلة.";

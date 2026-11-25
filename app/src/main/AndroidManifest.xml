@@ -5,6 +5,14 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Opt-in lock-screen countdown for active workout rest timers on Android 13+. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Re-arms the user's own opt-in logging reminders after a restart. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Optional, read-only Health Connect import after explicit permission. Forma never writes health data. -->
+    <uses-permission android:name="android.permission.health.READ_WEIGHT" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+    </queries>
     <application
         android:name=".FormaApplication"
         android:allowBackup="false"
@@ -22,7 +30,32 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Health Connect permission rationale (Android 13 and lower). -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
         </activity>
+        <!-- Health Connect permission usage (Android 14+). -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+        <receiver
+            android:name=".ReminderReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".FormaWidgetProvider"
             android:exported="false">

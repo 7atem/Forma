@@ -13,6 +13,18 @@ import kotlinx.coroutines.withContext
 class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=DeviceClock) {
     companion object {fun open(context:Context)=FitnessRepository({FitnessDatabase.open(context).dao()})}
     private val dao by lazy(daoProvider)
+    /** Read-only Health Connect copies; separate from the snapshot, backups, logs and stats. */
+    val healthImports=kotlinx.coroutines.flow.combine(flow {emitAll(dao.healthWeights())},flow {emitAll(dao.healthWorkouts())}) {w,x ->
+        HealthImports(
+            w.map {ImportedWeight(it.id,LocalDate.ofEpochDay(it.day),it.weightKg,it.source)},
+            x.map {ImportedWorkout(it.id,LocalDate.ofEpochDay(it.day),it.startAt,it.endAt,it.exerciseType,it.title,it.source)},
+        )
+    }.flowOn(Dispatchers.IO)
+    suspend fun importHealth(weights:List<ImportedWeight>,workouts:List<ImportedWorkout>)=withContext(Dispatchers.IO) {
+        dao.importHealth(weights.map {HealthWeightRow(it.id,it.date.toEpochDay(),it.weightKg,it.source)},
+            workouts.map {HealthWorkoutRow(it.id,it.date.toEpochDay(),it.startEpochMs,it.endEpochMs,it.exerciseType,it.title,it.source)})
+    }
+    suspend fun removeHealthImports()=withContext(Dispatchers.IO) {dao.removeHealthImports()}
     val snapshot=flow {emitAll(dao.changes(SimpleSQLiteQuery("SELECT 1")).map {dao.readSnapshot()})}.flowOn(Dispatchers.IO)
     private fun checkDate(date:LocalDate) {require(date in LocalDate.of(1970,1,1)..LocalDate.now(clock))}
     suspend fun saveProfile(profile:Profile)=dao.saveProfile(profile.row())

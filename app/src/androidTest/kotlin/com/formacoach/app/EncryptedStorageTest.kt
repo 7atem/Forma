@@ -28,6 +28,26 @@ import org.json.JSONArray
 
 @RunWith(AndroidJUnit4::class)
 class EncryptedStorageTest {
+    @Test fun schemaSevenUpgradeKeepsDataAndHealthCopiesStaySeparateAndDeduplicated()=runBlocking {
+        val helper=createLegacy(7)
+        helper.writableDatabase.execSQL("INSERT INTO supplements VALUES('sup','Creatine','')")
+        helper.close()
+        val repo=repository()
+        assertEquals("Creatine",database!!.dao().readSnapshot().supplements.single().name)
+        val weight=ImportedWeight("hc-w1",LocalDate.of(2026,11,2),81.5,"com.example.scale")
+        val workout=ImportedWorkout("hc-x1",LocalDate.of(2026,11,2),1_000L,1_000L+45*60_000L,56,"Run","com.example.watch")
+        repo.importHealth(listOf(weight),listOf(workout))
+        repo.importHealth(listOf(weight.copy(weightKg=81.0)),listOf(workout)) // same IDs update, never duplicate
+        val imported=repo.healthImports.first()
+        assertEquals(listOf(81.0),imported.weights.map {it.weightKg})
+        assertEquals(45L,imported.workouts.single().minutes)
+        // Copies never enter Forma logs, stats or backups.
+        val snapshot=database!!.dao().readSnapshot()
+        assertTrue(snapshot.measurements.isEmpty()&&snapshot.sessions.isEmpty())
+        repo.removeHealthImports()
+        assertTrue(repo.healthImports.first().let {it.weights.isEmpty()&&it.workouts.isEmpty()})
+        assertEquals("Creatine",database!!.dao().readSnapshot().supplements.single().name)
+    }
     @Test fun schemaSixUpgradeKeepsHistoryAndStoresCustomExercisesAndSupplementsInBackup()=runBlocking {
         val helper=createLegacy(6)
         helper.writableDatabase.execSQL("INSERT INTO hydration VALUES(20759,1500)")

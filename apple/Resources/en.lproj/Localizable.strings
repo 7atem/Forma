@@ -297,3 +297,12 @@
 "training_trend_this_week" = "Working sets this week · %@ sessions";
 "training_trend_average" = "Weekly average (12 weeks)";
 "training_trend_volume" = "External-load volume this week: %@";
+"reminders_title" = "Reminders";
+"reminder_meals" = "Log meals";
+"reminder_water" = "Log water";
+"reminder_workout" = "Log a workout";
+"reminder_meals_body" = "A good moment to log what you ate, if you want to.";
+"reminder_water_body" = "A good moment to log water, if you want to.";
+"reminder_workout_body" = "Training today? Forma is ready when you are. Rest days count too.";
+"reminders_permission_note" = "Notifications are off for Forma. Allow them in Settings to receive reminders.";
+"reminders_privacy" = "Optional and off by default. Scheduled on this iPhone only; reminders never include your logged data.";

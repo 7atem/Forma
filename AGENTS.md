@@ -2,7 +2,7 @@
 
 Independent Android project, working name Forma / فورمة. Nemory is a separate product and remains at `D:\Vault Brain`. Never rename, rewrite, migrate or delete that checkout as part of Forma work. See `docs/NEMORY_PRESERVATION.md` before proposing shared-source changes.
 
-- Kotlin, Jetpack Compose, Hilt, Room v7 with SQLCipher and explicit 1→2→3→4→5→6→7 migrations. Native iPhone/watchOS source under apple/ is unbuilt on this Windows host. Never claim Apple runtime validation without Mac/paired-device evidence.
+- Kotlin, Jetpack Compose, Hilt, Room v8 with SQLCipher and explicit 1→2→3→4→5→6→7→8 migrations. Native iPhone/watchOS source under apple/ is unbuilt on this Windows host. Never claim Apple runtime validation without Mac/paired-device evidence.
 - Separate ID `com.formacoach.app`, database `forma.db`, key filename and Keystore alias. Never reuse Nemory signing credentials or read its database.
 - New typed fitness entities; do not use VaultItem, lens IDs or arbitrary metadata as the fitness schema.
 - All Android strings in matching `values/*.xml` and `values-ar/*.xml`; Apple strings in `apple/Resources/en.lproj` and `ar.lproj`. Support RTL and localized numeric input.
@@ -33,3 +33,5 @@ Independent Android project, working name Forma / فورمة. Nemory is a separa
 - Program targets/rest/linked groups/notes are user-entered, snapshotted into sessions and retained in backup/repeat. Warm-ups never satisfy working-set targets. Log-and-read counts transactionally before advancing; switching exercises clears stale load input.
 - Transfer writers use protocol v2 for plan snapshots; readers retain v1 support. Never silently downgrade/drop targets or groups. Keep Kotlin/Swift fixtures and closed nested-field checks aligned; Apple source checks are not native tests.
 - Meal categories default UNSPECIFIED for legacy records. Never infer meal times or retag history. Calendar days count recorded completed workouts only and do not establish adherence.
+- Android Health Connect is read-only (weight, exercise sessions) after explicit permission. Imported copies live in separate encrypted tables keyed by record ID, are labelled, never enter Forma logs, stats or FORMABK1 backups, and are removable in one step. Never request write permissions.
+- Logging reminders are opt-in, off by default, local only, and never include logged data. Trends describe logged data only: unlogged days are unknown (excluded from averages), comparisons use only user-entered targets, and nothing recommends intake or training changes.

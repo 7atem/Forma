@@ -37,6 +37,8 @@ import SwiftUI
                     .pickerStyle(.segmented)
                 }
 
+                PhoneRemindersSection()
+
                 Section("units_label") {
                     Picker("units_label", selection: $useLb) {
                         Text("unit_kg").tag(false)

@@ -1,8 +1,16 @@
 # Validation record — current branch (post-alpha06)
 
-Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schema 7 (explicit `1→2→3→4→5→6→7` migrations). Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise/video approval remain pending.
+Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schema 8 (explicit `1→2→3→4→5→6→7→8` migrations). Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise/video approval remain pending.
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
+
+## Feature set: trends, reminders, Health Connect (25 November 2026)
+
+- **Nutrition trends (Android + iPhone):** 7/30-day logged calories with the user's own calorie-target line, average macros per logged day, days within 10% of the calorie target and at/above the protein target. Unlogged days are dashed outlines, excluded from averages. Shared logic tested in `core:coach` (`TrendsTest`) and `FormaCore` (`TrendsTests`).
+- **Training trends (Android + iPhone):** 12 rolling weeks of working sets, sessions and external-load volume; warm-ups and unfinished sessions excluded.
+- **Logging reminders (Android + iPhone):** meals, water, workout; off by default; per-kind time; Android uses inexact daily alarms re-armed after reboot/time-zone change (`ReminderTime` unit-tested; UI test toggles one on/off); iPhone uses repeating local notifications after permission.
+- **Health Connect (Android):** read-only weight and exercise sessions for the last 90 days after permission; copies stored in separate encrypted tables (schema 8), de-duplicated by record ID, excluded from logs/stats/backups, removable; rationale screen wired. Storage/migration covered by `EncryptedStorageTest`. **Not tested against a device with real Health Connect data.**
+- **CI:** trends commit passed GitHub iOS (`swift test`, simulator builds) and Android workflows.
 
 ## UI/UX pass 3 (24 November 2026)
 

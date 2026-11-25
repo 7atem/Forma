@@ -107,6 +107,21 @@ class FitnessFlowTest {
         rule.onNodeWithTag("confirm_destructive").performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithText("UI cable pullover").fetchSemanticsNodes().isEmpty()}
     }
+    @Test fun remindersAreOffByDefaultAndSwitchOnAndOff() {
+        val instrumentation=androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
+        if(android.os.Build.VERSION.SDK_INT>=33) instrumentation.uiAutomation.grantRuntimePermission(rule.activity.packageName,android.Manifest.permission.POST_NOTIFICATIONS)
+        ensureProfile()
+        rule.onNodeWithTag("open_settings").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("reminders_settings").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("reminders_settings").performScrollTo().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("reminder_switch_WATER").fetchSemanticsNodes().isNotEmpty()}
+        ReminderKind.entries.forEach {rule.onNodeWithTag("reminder_switch_${it.name}").assertIsOff()}
+        rule.onNodeWithTag("reminder_switch_WATER").performClick().assertIsOn()
+        rule.runOnIdle {check(LogReminders.read(rule.activity,ReminderKind.WATER).enabled)}
+        rule.onNodeWithTag("reminder_switch_WATER").performClick().assertIsOff()
+        rule.runOnIdle {check(!LogReminders.read(rule.activity,ReminderKind.WATER).enabled)}
+        rule.onNodeWithTag("reminders_done").performClick()
+    }
     @Test fun ArabicExerciseSearchWorksInEnglishInterface() {
         ensureProfile();rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_1").performClick()
         rule.onNodeWithTag("exercise_search").performTextInput("الحَشَرة المَيّتة")

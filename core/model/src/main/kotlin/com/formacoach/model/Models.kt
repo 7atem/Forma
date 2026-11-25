@@ -234,3 +234,24 @@ object NumericInput {
         }
     }
 }
+
+/** A body-weight reading copied read-only from Health Connect. Kept apart from Forma measurements. */
+data class ImportedWeight(val id: String, val date: LocalDate, val weightKg: Double, val source: String) {
+    init {
+        require(id.isNotBlank() && id.length <= 128)
+        require(weightKg.isFinite() && weightKg > 0 && weightKg <= 1000)
+        require(source.length <= 200)
+    }
+}
+
+/** A workout session copied read-only from Health Connect. Never counted as a Forma session. */
+data class ImportedWorkout(val id: String, val date: LocalDate, val startEpochMs: Long, val endEpochMs: Long, val exerciseType: Int, val title: String, val source: String) {
+    init {
+        require(id.isNotBlank() && id.length <= 128)
+        require(endEpochMs >= startEpochMs)
+        require(title.length <= 200 && source.length <= 200)
+    }
+    val minutes: Long get() = (endEpochMs - startEpochMs) / 60_000
+}
+
+data class HealthImports(val weights: List<ImportedWeight> = emptyList(), val workouts: List<ImportedWorkout> = emptyList())

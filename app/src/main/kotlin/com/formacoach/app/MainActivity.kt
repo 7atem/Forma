@@ -85,6 +85,15 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
     var showSettings by rememberSaveable { mutableStateOf(false) }
     var editingProfile by rememberSaveable { mutableStateOf(false) }
     var showWatch by rememberSaveable { mutableStateOf(false) }
+    var showReminders by rememberSaveable { mutableStateOf(false) }
+    // Opened directly when Health Connect asks Forma to explain why it requests access.
+    var showHealthConnect by rememberSaveable {
+        mutableStateOf(
+            (context as? android.app.Activity)?.intent?.action in setOf("androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE", "android.intent.action.VIEW_PERMISSION_USAGE"),
+        )
+    }
+    // Re-arm opt-in reminders on start so a missed reboot broadcast or clock change self-heals.
+    LaunchedEffect(Unit) { LogReminders.scheduleAll(context) }
     var showBackup by rememberSaveable { mutableStateOf(false) }
     var language by remember { mutableStateOf(AppLocaleHelper.current(context)) }
     var generation by rememberSaveable { mutableIntStateOf(0) }
@@ -387,10 +396,14 @@ fun FormaApp(vm: FitnessViewModel = viewModel()) {
                     onProfile = { editingProfile = true },
                     onWatch = { showWatch = true },
                     onBackup = { showBackup = true },
+                    onReminders = { showReminders = true },
+                    onHealthConnect = { showHealthConnect = true },
                     onDismiss = { showSettings = false },
                 )
             }
             if (showWatch) WatchTransferDialog(vm, state) { showWatch = false }
+            if (showReminders) RemindersDialog { showReminders = false }
+            if (showHealthConnect) HealthConnectDialog(vm, state.busy) { showHealthConnect = false }
             if (showBackup) {
                 BackupDialog(
                     vm,
