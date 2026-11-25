@@ -49,7 +49,7 @@ targets:
       path: Generated/Phone-Info.plist
       properties:
         CFBundleDisplayName: Forma
-        NSHealthShareUsageDescription: Forma reads the workouts and body weight you choose to share, to show them next to your own logs. Forma never writes to Apple Health.
+        NSHealthShareUsageDescription: Forma reads the workouts, body weight and sleep you choose to share, to show them next to your own logs. Forma never writes to Apple Health.
         NSCameraUsageDescription: Forma uses the camera only when you tap Scan Barcode to look up packaged food nutrition via Open Food Facts.
         UILaunchScreen: {}
         LSSupportsOpeningDocumentsInPlace: true

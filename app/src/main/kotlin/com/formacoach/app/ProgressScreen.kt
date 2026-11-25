@@ -206,11 +206,9 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     }
     val weekStreak = remember(state.snapshot, today) { TrainingHistory.activeWeekStreak(state.snapshot, today) }
     InfoCard {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.activity_heatmap_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            if (weekStreak > 0) {
-                PillBadge(stringResource(R.string.week_streak_badge, number(weekStreak.toDouble(), 0)))
-            }
+        Text(stringResource(R.string.activity_heatmap_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        if (weekStreak > 0) {
+            PillBadge(stringResource(R.string.week_streak_badge, number(weekStreak.toDouble(), 0)))
         }
         ActivityHeatmapGrid(today = today, countsByDate = countsByDate)
     }

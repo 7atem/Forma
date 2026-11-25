@@ -4,6 +4,13 @@ Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schem
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
 
+## Large-text and Arabic sweep (25 November 2026)
+
+All four tabs captured at **200% system text** on the phone image, plus the new cards in Arabic RTL. Fixes:
+- New shared `FitText` label: navigation items and segmented tabs step down in size only as needed instead of truncating ("Progre…") or breaking mid-word ("Program/s").
+- 12-week grid title no longer collapses beside its streak badge; macro rows give the label the free width so it never collides with its value; the water buttons move under the title with large text.
+- Arabic: numeric fractions ("2 / 7", "20 / 150 g") are wrapped in left-to-right isolates (the app's existing convention) so RTL no longer reverses them; new Arabic strings use the app's Western digits, and the training-trends title uses parentheses because a middle dot beside the number read like an Arabic zero ("120").
+
 ## Feature set: trends, reminders, Health Connect (25 November 2026)
 
 - **Nutrition trends (Android + iPhone):** 7/30-day logged calories with the user's own calorie-target line, average macros per logged day, days within 10% of the calorie target and at/above the protein target. Unlogged days are dashed outlines, excluded from averages. Shared logic tested in `core:coach` (`TrendsTest`) and `FormaCore` (`TrendsTests`).

@@ -138,3 +138,79 @@ struct PhoneTrainingTrendCard: View {
         }
     }
 }
+
+/// BMI from the latest weight the user logged and the height they entered. A number only: no category labels,
+/// because BMI is a population screening measure that does not account for muscle, frame or age.
+struct PhoneBmiCard: View {
+    @ObservedObject var store: LocalStore
+
+    var body: some View {
+        let latest = store.state.weights.max(by: { $0.date < $1.date })
+        FormaCard {
+            Text("bmi_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+            if let height = store.state.heightCm, let weight = latest, let bmi = BodyMetrics.bmi(weightKg: weight.weightKg, heightCm: height) {
+                Text(String(format: "%.1f", bmi)).font(.title.weight(.bold)).foregroundStyle(FormaTheme.primary)
+                Text(String(format: String(localized: "bmi_from"), weight.date, "\(Int(height.rounded()))"))
+                    .font(.caption).foregroundStyle(FormaTheme.textMuted)
+            } else {
+                Text(store.state.heightCm == nil ? "bmi_need_height" : "bmi_need_weight").font(.subheadline).foregroundStyle(FormaTheme.textMuted)
+            }
+            Text("bmi_note").font(.caption2).foregroundStyle(FormaTheme.textMuted)
+        }
+    }
+}
+
+/// Nightly sleep copied read-only from Apple Health: duration and stages only, no score or assessment.
+struct PhoneSleepCard: View {
+    @ObservedObject var store: LocalStore
+
+    var body: some View {
+        let today = LocalStore.todayString()
+        let keys = (0..<7).compactMap { TrendDates.add($0 - 6, to: today) }
+        let byDate = Dictionary(store.state.healthSleep.map { ($0.date, $0) }, uniquingKeysWith: { _, b in b })
+        let recorded = keys.compactMap { byDate[$0] }
+        if !store.state.healthSleep.isEmpty {
+            FormaCard {
+                Text("sleep_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                Text(String(format: String(localized: "sleep_nights_recorded"), "\(recorded.count)"))
+                    .font(.caption.weight(.semibold)).foregroundStyle(FormaTheme.primary)
+                let maxMinutes = max(recorded.map(\.asleepMinutes).max() ?? 0, 60)
+                GeometryReader { geo in
+                    HStack(alignment: .bottom, spacing: 4) {
+                        ForEach(keys, id: \.self) { key in
+                            if let night = byDate[key] {
+                                RoundedRectangle(cornerRadius: 4).fill(FormaTheme.tertiary)
+                                    .frame(height: max(2, geo.size.height * night.asleepMinutes / maxMinutes))
+                            } else {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(FormaTheme.textMuted, style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                                    .frame(height: geo.size.height * 0.15)
+                            }
+                        }
+                    }
+                }
+                .frame(height: 100)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(format: String(localized: "sleep_nights_recorded"), "\(recorded.count)"))
+                if !recorded.isEmpty {
+                    let average = recorded.reduce(0) { $0 + $1.asleepMinutes } / Double(recorded.count)
+                    Text(String(format: String(localized: "sleep_average"), Self.duration(average))).font(.subheadline)
+                }
+                if let last = store.state.healthSleep.last {
+                    Text(String(format: String(localized: "sleep_last_night"), last.date, Self.duration(last.asleepMinutes), last.sourceName))
+                        .font(.caption).foregroundStyle(FormaTheme.textMuted)
+                    if let deep = last.deepMinutes, let rem = last.remMinutes {
+                        Text(String(format: String(localized: "sleep_stages"), Self.duration(deep), Self.duration(rem), Self.duration(last.coreMinutes ?? 0)))
+                            .font(.caption).foregroundStyle(FormaTheme.textMuted)
+                    }
+                }
+                Text("sleep_note").font(.caption2).foregroundStyle(FormaTheme.textMuted)
+            }
+        }
+    }
+
+    static func duration(_ minutes: Double) -> String {
+        let total = Int(minutes.rounded())
+        return String(format: String(localized: "duration_hm"), "\(total / 60)", "\(total % 60)")
+    }
+}

@@ -7,7 +7,7 @@ import FormaCore
     @ObservedObject var importer: HealthImporter
     @State private var confirmingRemove = false
 
-    private var hasImported: Bool { !store.state.healthWorkouts.isEmpty || !store.state.healthWeights.isEmpty }
+    private var hasImported: Bool { !store.state.healthWorkouts.isEmpty || !store.state.healthWeights.isEmpty || !store.state.healthSleep.isEmpty }
 
     var body: some View {
         FormaCard {
@@ -40,6 +40,8 @@ import FormaCore
                 if let result = importer.lastResult {
                     Text(String(format: String(localized: "health_result_format"), result.workouts, result.weights))
                         .font(.caption.weight(.semibold)).foregroundStyle(FormaTheme.primary)
+                    Text(String(format: String(localized: "health_result_sleep"), result.nights))
+                        .font(.caption).foregroundStyle(FormaTheme.primary)
                 }
                 if importer.failed {
                     Text(importer.signingFailed ? String(localized: "health_signing_failed") : String(localized: "health_failed"))

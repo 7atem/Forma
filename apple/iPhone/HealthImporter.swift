@@ -5,7 +5,7 @@ import FormaCore
 /// Reads (never writes) workouts and body mass from Apple Health, only after the user taps Connect.
 /// Apple does not reveal whether read access was denied, so "nothing found" is reported neutrally.
 @MainActor final class HealthImporter: ObservableObject {
-    struct Result: Equatable { let workouts: Int; let weights: Int }
+    struct Result: Equatable { let workouts: Int; let weights: Int; let nights: Int }
 
     @Published private(set) var syncing = false
     @Published private(set) var lastResult: Result?
@@ -20,7 +20,7 @@ import FormaCore
     static var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
 
     private var readTypes: Set<HKObjectType> {
-        [HKObjectType.workoutType(), HKQuantityType(.bodyMass), HKQuantityType(.heartRate), HKQuantityType(.activeEnergyBurned)]
+        [HKObjectType.workoutType(), HKQuantityType(.bodyMass), HKQuantityType(.heartRate), HKQuantityType(.activeEnergyBurned), HKCategoryType(.sleepAnalysis)]
     }
 
     /// First sync looks back one year; later syncs re-read the last week so late-arriving samples are caught.
@@ -38,8 +38,9 @@ import FormaCore
                 ?? calendar.date(byAdding: .year, value: -1, to: now) ?? now
             let workouts = try await readWorkouts(from: start, to: now)
             let weights = try await readWeights(from: start, to: now)
-            let added = try store.mergeHealth(workouts: workouts, weights: weights, syncedAt: now)
-            lastResult = Result(workouts: added.workouts, weights: added.weights)
+            let nights = SleepNights.summarize(try await readSleep(from: start, to: now))
+            let added = try store.mergeHealth(workouts: workouts, weights: weights, sleep: nights, syncedAt: now)
+            lastResult = Result(workouts: added.workouts, weights: added.weights, nights: nights.count)
         } catch {
             failed = true
             let detail = error.localizedDescription
@@ -90,6 +91,34 @@ import FormaCore
                 weightKg: sample.quantity.doubleValue(for: .gramUnit(with: .kilo)),
                 measuredAtMillis: Int64(sample.startDate.timeIntervalSince1970 * 1000)
             )
+        }
+    }
+
+    /// Sleep-analysis segments (in bed, awake, asleep stages). Apple's Sleep Score is not available to apps,
+    /// so Forma only shows durations from these samples and never computes a score of its own.
+    private func readSleep(from start: Date, to end: Date) async throws -> [SleepSegment] {
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end)
+        let descriptor = HKSampleQueryDescriptor(
+            predicates: [.categorySample(type: HKCategoryType(.sleepAnalysis), predicate: predicate)],
+            sortDescriptors: [SortDescriptor(\.startDate, order: .reverse)],
+            limit: 20000
+        )
+        return try await descriptor.result(for: healthStore).compactMap { sample in
+            guard let stage = Self.sleepStage(sample.value) else { return nil }
+            return SleepSegment(start: sample.startDate, end: sample.endDate, stage: stage,
+                                source: String(sample.sourceRevision.source.name.prefix(120)))
+        }
+    }
+
+    nonisolated static func sleepStage(_ value: Int) -> SleepStage? {
+        switch HKCategoryValueSleepAnalysis(rawValue: value) {
+        case .inBed: return .inBed
+        case .awake: return .awake
+        case .asleepUnspecified: return .asleep
+        case .asleepCore: return .core
+        case .asleepDeep: return .deep
+        case .asleepREM: return .rem
+        default: return nil
         }
     }
 

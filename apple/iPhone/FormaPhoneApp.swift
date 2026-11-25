@@ -2315,6 +2315,8 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    PhoneBmiCard(store: store)
+                    PhoneSleepCard(store: store)
                     PhoneNutritionTrendCard(store: store)
                     PhoneTrainingTrendCard(store: store, useLb: useLb)
 

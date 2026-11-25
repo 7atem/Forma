@@ -15,7 +15,7 @@
     <string name="link_previous_exercise">اربطه بالتمرين السابق</string>
     <string name="plan_group_edit_note">تظل التمارين المرتبطة متجاورة. نقل التمارين أو حذفها قد يفصل المجموعة أو يلغي ارتباطها.</string>
     <string name="edit_plan_details">ضبط الأهداف والراحة والملاحظات</string>
-    <string name="exercise_set_progress">المجموعات الأساسية المسجلة: %1$s / %2$s مخططة</string>
+    <string name="exercise_set_progress">المجموعات الأساسية المسجلة: ⁦%1$s / %2$s⁩ مخططة</string>
     <string name="user_plan_done">وصلت لنهاية ترتيب التمارين. راجع المجموعات أو أضف المزيد، ثم أنهِ الحصة عندما تكون جاهزًا.</string>
     <string name="next_in_linked_group">التمرين التالي في مجموعتك المرتبطة. أدخل تكرارات هذا التمرين ووزنه.</string>
     <string name="next_in_plan">التمرين التالي في برنامجك المحفوظ. أدخل تكراراته ووزنه.</string>

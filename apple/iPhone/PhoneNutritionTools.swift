@@ -402,6 +402,7 @@ import FormaCore
     @State private var carbsText = ""
     @State private var fatText = ""
     @State private var waterText = ""
+    @State private var heightText = ""
     @State private var initialized = false
 
     private func parseOptionalDouble(_ raw: String) -> Double? {
@@ -436,6 +437,12 @@ import FormaCore
                     TextField("goal_water_placeholder", text: $waterText)
                         .keyboardType(.numberPad)
                 }
+                Section {
+                    TextField("height_placeholder", text: $heightText)
+                        .keyboardType(.decimalPad)
+                } footer: {
+                    Text("height_note")
+                }
                 if store.state.calorieTarget != nil || store.state.proteinTarget != nil || store.state.carbsTarget != nil || store.state.fatTarget != nil || store.state.waterGoalMl != nil {
                     Section {
                         Button("clear_personal_goals", role: .destructive) {
@@ -462,6 +469,7 @@ import FormaCore
                                 fat: parseOptionalDouble(fatText),
                                 waterMl: parseOptionalInt(waterText)
                             )
+                            try store.saveHeight(parseOptionalDouble(heightText))
                         }
                         dismiss()
                     }
@@ -475,6 +483,7 @@ import FormaCore
                     carbsText = store.state.carbsTarget.map { String(Int($0.rounded())) } ?? ""
                     fatText = store.state.fatTarget.map { String(Int($0.rounded())) } ?? ""
                     waterText = store.state.waterGoalMl.map(String.init) ?? ""
+                    heightText = store.state.heightCm.map { String(Int($0.rounded())) } ?? ""
                 }
             }
         }

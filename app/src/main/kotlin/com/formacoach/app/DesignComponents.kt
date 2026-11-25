@@ -318,16 +318,16 @@ internal fun SegmentedTabs(
                         Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(vertical = 8.dp, horizontal = 6.dp),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(
-                            stringResource(label),
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            // Large text can wrap a label; keep both lines centred in the segment.
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        )
+                        androidx.compose.material3.ProvideTextStyle(MaterialTheme.typography.labelLarge) {
+                            // Large text may wrap a label onto two centred lines, but never mid-word.
+                            FitText(
+                                stringResource(label),
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            )
+                        }
                     }
                 }
             }
@@ -806,3 +806,44 @@ internal fun rememberReduceMotion(): Boolean {
         }.getOrDefault(false)
     }
 }
+
+/**
+ * A short label (tab, navigation item) that keeps every word whole at very large text sizes: if a word would be
+ * cut or broken mid-word, the label steps down in size (to [minScale] at most) instead of truncating.
+ */
+@Composable
+internal fun FitText(
+    text: String,
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null,
+    color: Color = Color.Unspecified,
+    maxLines: Int = 1,
+    textAlign: androidx.compose.ui.text.style.TextAlign? = null,
+    minScale: Float = 0.7f,
+) {
+    val base = androidx.compose.material3.LocalTextStyle.current
+    var scale by remember(text, base.fontSize) { androidx.compose.runtime.mutableFloatStateOf(1f) }
+    val style = if (base.fontSize != androidx.compose.ui.unit.TextUnit.Unspecified) base.copy(fontSize = base.fontSize * scale, lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified) else base
+    Text(
+        text,
+        modifier,
+        color = color,
+        fontWeight = fontWeight,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        softWrap = maxLines > 1,
+        overflow = if (scale <= minScale) TextOverflow.Ellipsis else TextOverflow.Clip,
+        style = style,
+        onTextLayout = { result ->
+            if (scale > minScale && (result.hasVisualOverflow || breaksInsideWord(result, text))) {
+                scale = (scale - 0.08f).coerceAtLeast(minScale)
+            }
+        },
+    )
+}
+
+private fun breaksInsideWord(result: androidx.compose.ui.text.TextLayoutResult, text: String): Boolean =
+    (0 until result.lineCount - 1).any { line ->
+        val end = result.getLineEnd(line, visibleEnd = false)
+        end in 1 until text.length && text[end - 1].isLetterOrDigit() && text[end].isLetterOrDigit()
+    }

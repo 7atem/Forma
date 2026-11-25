@@ -279,17 +279,8 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
     val waterAdd250 = stringResource(R.string.water_add_a11y, number(250.0, 0))
     val waterAdd500 = stringResource(R.string.water_add_a11y, number(500.0, 0))
     InfoCard(Modifier.testTag("hydration_card")) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(Icons.Default.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.hydration_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                Text(
-                    if (waterGoal != null) stringResource(R.string.hydration_goal_progress, number(waterMl.toDouble(), 0), number(waterGoal.toDouble(), 0))
-                    else stringResource(R.string.hydration_value, number(waterMl.toDouble(), 0)),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.tertiary,
-                )
-            }
+        val stackWater = androidx.compose.ui.platform.LocalDensity.current.fontScale > 1.3f
+        val waterButtons: @Composable () -> Unit = {
             FilledTonalButton(
                 onClick = { vm.saveHydration(Hydration(date, (waterMl + 250).coerceAtMost(20000))) },
                 enabled = !state.busy && waterMl < 20000,
@@ -315,6 +306,20 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
                 }
             }
         }
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(Icons.Default.WaterDrop, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(18.dp))
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.hydration_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(
+                    if (waterGoal != null) stringResource(R.string.hydration_goal_progress, number(waterMl.toDouble(), 0), number(waterGoal.toDouble(), 0))
+                    else stringResource(R.string.hydration_value, number(waterMl.toDouble(), 0)),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+            if (!stackWater) waterButtons()
+        }
+        if (stackWater) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) { waterButtons() }
         if (waterGoal != null && waterGoal > 0) {
             LinearProgressIndicator(
                 progress = { (waterMl.toFloat() / waterGoal).coerceIn(0f, 1f) },
@@ -1166,8 +1171,8 @@ private fun RecipeDialog(foods: List<Food>, busy: Boolean, onDismiss: () -> Unit
 @Composable
 private fun MacroProgressRow(label: String, valueText: String, progress: Float, color: Color) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(label, Modifier.weight(1f), style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
             Text(valueText, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = color)
         }
         LinearProgressIndicator(

@@ -63,7 +63,7 @@ internal fun FormaScaffold(
                             selected = tab == index,
                             onClick = { onTab(index) },
                             icon = { Icon(icons[index], null) },
-                            label = { Text(stringResource(label), fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                            label = { FitText(stringResource(label), fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Normal) },
                             colors = NavigationRailItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
@@ -161,11 +161,9 @@ internal fun FormaScaffold(
                                         onClick = { onTab(index) },
                                         icon = { Icon(icons[index], null) },
                                         label = {
-                                            Text(
+                                            FitText(
                                                 stringResource(label),
                                                 fontWeight = if (tab == index) FontWeight.Bold else FontWeight.Medium,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
                                             )
                                         },
                                         colors = NavigationBarItemDefaults.colors(

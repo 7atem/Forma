@@ -97,7 +97,11 @@ struct SavedState: Codable {
     /// Read-only copies imported from Apple Health; kept apart from Forma-logged workouts and weights.
     var healthWorkouts: [HealthWorkoutRecord] = []
     var healthWeights: [HealthWeightRecord] = []
+    /// Read-only nightly sleep copied from Apple Health; shown separately, never used in Forma calculations.
+    var healthSleep: [HealthSleepRecord] = []
     var healthLastSync: Date?
+    /// Optional height the user entered, used only to show BMI.
+    var heightCm: Double?
 
     init() {}
 
@@ -127,6 +131,8 @@ struct SavedState: Codable {
         healthWorkouts = try c.decodeIfPresent([HealthWorkoutRecord].self, forKey: .healthWorkouts) ?? []
         healthWeights = try c.decodeIfPresent([HealthWeightRecord].self, forKey: .healthWeights) ?? []
         healthLastSync = try c.decodeIfPresent(Date.self, forKey: .healthLastSync)
+        healthSleep = try c.decodeIfPresent([HealthSleepRecord].self, forKey: .healthSleep) ?? []
+        heightCm = try c.decodeIfPresent(Double.self, forKey: .heightCm)
     }
 }
 
@@ -165,7 +171,11 @@ struct SavedState: Codable {
               Set(state.pendingIDs).isSubset(of: Set(state.workouts.map(\.id))),
               state.healthWorkouts.count <= HealthMerge.maximumWorkouts, state.healthWeights.count <= HealthMerge.maximumWeights,
               Set(state.healthWorkouts.map(\.id)).count == state.healthWorkouts.count,
-              Set(state.healthWeights.map(\.date)).count == state.healthWeights.count else { throw TransferError.invalid }
+              Set(state.healthWeights.map(\.date)).count == state.healthWeights.count,
+              state.healthSleep.count <= SleepNights.maximumNights,
+              Set(state.healthSleep.map(\.date)).count == state.healthSleep.count,
+              state.healthSleep.allSatisfy({ $0.asleepMinutes.isFinite && (0...1440).contains($0.asleepMinutes) }),
+              state.heightCm.map({ $0.isFinite && (50...272).contains($0) }) ?? true else { throw TransferError.invalid }
         try state.healthWorkouts.forEach { try $0.validate() }
         try state.healthWeights.forEach { try $0.validate() }
         try state.programs.forEach { try $0.validate() }
@@ -428,13 +438,14 @@ struct SavedState: Codable {
 
     /// Stores newly read Apple Health samples. Never touches Forma workouts, sets, meals or user weights.
     @discardableResult
-    func mergeHealth(workouts: [HealthWorkoutRecord], weights: [HealthWeightRecord], syncedAt: Date) throws -> (workouts: Int, weights: Int) {
+    func mergeHealth(workouts: [HealthWorkoutRecord], weights: [HealthWeightRecord], sleep: [HealthSleepRecord] = [], syncedAt: Date) throws -> (workouts: Int, weights: Int) {
         var added = (workouts: 0, weights: 0)
         try commit { state in
             let w = HealthMerge.workouts(existing: state.healthWorkouts, incoming: workouts)
             let b = HealthMerge.weights(existing: state.healthWeights, incoming: weights)
             state.healthWorkouts = w.records
             state.healthWeights = b.records
+            state.healthSleep = SleepNights.merge(existing: state.healthSleep, incoming: sleep)
             state.healthLastSync = syncedAt
             added = (w.added, b.added)
         }
@@ -446,8 +457,15 @@ struct SavedState: Codable {
         try commit {
             $0.healthWorkouts = []
             $0.healthWeights = []
+            $0.healthSleep = []
             $0.healthLastSync = nil
         }
+    }
+
+    /// Height used only for BMI; nil clears it.
+    func saveHeight(_ cm: Double?) throws {
+        if let cm { guard cm.isFinite, (50...272).contains(cm) else { throw TransferError.invalid } }
+        try commit { $0.heightCm = cm }
     }
 
     func saveHydration(_ milliliters: Int, date: String = LocalStore.todayString()) throws {

@@ -23,7 +23,7 @@
     <string name="remove_favorite">★ في المفضلة</string>
     <string name="exercise_results">%1$s من %2$s تمرين</string>
     <string name="personal_notes">ملاحظاتي على التمرين</string>
-    <string name="notes_limit">%1$s / 2,000 حرف</string>
+    <string name="notes_limit">⁦%1$s / 2,000⁩ حرف</string>
     <string name="similar_focus">استكشف تمارين بعضلات مشابهة</string>
     <string name="similar_note">تشترك في عضلة أساسية واحدة على الأقل. تختلف المعدات ومتطلبات الحركة؛ اختيار تمرين هنا لا يغيّر برنامجك.</string>
     <string name="per_side_note">سجّل التكرارات لكل جانب. في تمرين الدمبل بذراع واحدة سجّل وزن ذلك الدمبل.</string>
