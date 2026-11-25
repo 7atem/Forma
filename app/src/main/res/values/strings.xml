@@ -474,7 +474,7 @@
     <string name="reminders_permission_note">Notifications are off for Forma. Allow them when asked, or in system settings, to receive reminders.</string>
     <string name="reminders_privacy">Reminders are scheduled on this device only and never include your logged data. Delivery time can vary slightly to save battery.</string>
     <string name="health_connect_title">Health Connect</string>
-    <string name="health_connect_intro">Optionally copy your body weight and workout sessions from Health Connect. Forma only reads, never writes, and asks first.</string>
+    <string name="health_connect_intro">Optionally copy your body weight, workout sessions and sleep from Health Connect. Forma only reads, never writes, and asks first.</string>
     <string name="health_connect_unavailable">Health Connect is not available on this device.</string>
     <string name="health_connect_update">Health Connect needs to be installed or updated first.</string>
     <string name="health_connect_open_store">Open Play Store</string>
@@ -484,11 +484,26 @@
     <string name="health_connect_importing">Importing…</string>
     <string name="health_connect_imported">Imported. Repeat imports update copies without duplicating them.</string>
     <string name="health_connect_failed">Import failed. Your Forma logs were not changed. Try again later.</string>
-    <string name="health_connect_counts">Imported copies: %1$s weights · %2$s workouts</string>
+    <string name="health_connect_counts">Imported copies: %1$s weights · %2$s workouts · %3$s nights of sleep</string>
     <string name="health_connect_weight_row">%1$s · %2$s · from Health Connect</string>
     <string name="health_connect_workout_row">%1$s · %2$s · %3$s min · from Health Connect</string>
     <string name="health_connect_workout">Workout</string>
     <string name="health_connect_remove">Remove imported copies</string>
     <string name="health_connect_remove_note">Deletes the copies Forma imported from Health Connect. Your Forma logs and the data in Health Connect stay as they are.</string>
     <string name="health_connect_privacy">Imported copies are stored encrypted on this device, labelled, and kept apart from your Forma logs, stats and backups. They are never sent anywhere.</string>
+    <string name="height_cm_optional">Height · cm, optional</string>
+    <string name="height_note">Used only to show BMI. Leave blank to hide it.</string>
+    <string name="height_error">Enter a height from 50 to 272 cm.</string>
+    <string name="bmi_title">BMI</string>
+    <string name="bmi_from">From your logged weight on %1$s and height %2$s cm.</string>
+    <string name="bmi_need_height">Add your height in Profile to see BMI.</string>
+    <string name="bmi_need_weight">Log a body weight to see BMI.</string>
+    <string name="bmi_note">BMI is a population screening number. It does not account for muscle, frame or age and is not a diagnosis.</string>
+    <string name="sleep_title">Sleep · from Health Connect</string>
+    <string name="sleep_nights_recorded">Nights with sleep data in the last 7: %1$s</string>
+    <string name="sleep_average">Average asleep per recorded night: %1$s</string>
+    <string name="sleep_last_night">Latest night %1$s: %2$s asleep</string>
+    <string name="sleep_stages">Deep %1$s · REM %2$s · Light %3$s</string>
+    <string name="duration_hm">%1$s h %2$s min</string>
+    <string name="sleep_note">Read-only copy from Health Connect. Missing nights are unknown. Forma shows duration and stages only; it does not score or assess sleep.</string>
 </resources>

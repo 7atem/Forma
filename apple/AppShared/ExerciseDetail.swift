@@ -1,6 +1,12 @@
 import SwiftUI
 import FormaCore
 
+/// Feature flags for exercise guide presentation.
+enum ExerciseGuideFlags {
+    /// Procedural 3D mannequin is hidden so the app shows Videos, Photos, and 2D muscle highlights only.
+    static let enableProcedural3DMotion = false
+}
+
 struct ExerciseDetail: View {
     let exercise: Exercise
     var onRecordSet: (() -> Void)?
@@ -82,7 +88,7 @@ struct ExerciseDetail: View {
                     MuscleDiagram(exercise: exercise)
                 } else {
                     #if os(iOS)
-                    let hasMotion = ExerciseMotionCatalog.of(exercise) != nil
+                    let hasMotion = ExerciseGuideFlags.enableProcedural3DMotion && ExerciseMotionCatalog.of(exercise) != nil
                     let hasVideo = ExerciseVideoLibrary.url(exercise) != nil
                     let modes = [hasMotion ? 0 : nil, hasVideo ? 1 : nil, 2].compactMap { $0 }
                     let current = mode.flatMap { modes.contains($0) ? $0 : nil } ?? modes[0]

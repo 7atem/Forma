@@ -474,7 +474,7 @@
     <string name="reminders_permission_note">الإشعارات مغلقة لفورمة. اسمح بها عند الطلب أو من إعدادات النظام لتصلك التذكيرات.</string>
     <string name="reminders_privacy">التذكيرات تُجدول على هذا الجهاز فقط ولا تتضمن بياناتك المسجلة. قد يختلف وقت الوصول قليلًا لتوفير البطارية.</string>
     <string name="health_connect_title">Health Connect</string>
-    <string name="health_connect_intro">انسخ اختياريًا وزنك وجلسات تمرينك من Health Connect. فورمة تقرأ فقط ولا تكتب، وتطلب إذنك أولًا.</string>
+    <string name="health_connect_intro">انسخ اختياريًا وزنك وجلسات تمرينك ونومك من Health Connect. فورمة تقرأ فقط ولا تكتب، وتطلب إذنك أولًا.</string>
     <string name="health_connect_unavailable">Health Connect غير متاح على هذا الجهاز.</string>
     <string name="health_connect_update">يلزم تثبيت Health Connect أو تحديثه أولًا.</string>
     <string name="health_connect_open_store">افتح متجر Play</string>
@@ -484,11 +484,26 @@
     <string name="health_connect_importing">جارٍ الاستيراد…</string>
     <string name="health_connect_imported">تم الاستيراد. تكرار الاستيراد يحدّث النسخ بدون تكرارها.</string>
     <string name="health_connect_failed">فشل الاستيراد. سجلات فورمة لم تتغير. حاول لاحقًا.</string>
-    <string name="health_connect_counts">النسخ المستوردة: %1$s أوزان · %2$s تمارين</string>
+    <string name="health_connect_counts">النسخ المستوردة: %1$s أوزان · %2$s تمارين · %3$s ليالي نوم</string>
     <string name="health_connect_weight_row">%1$s · %2$s · من Health Connect</string>
     <string name="health_connect_workout_row">%1$s · %2$s · %3$s دقيقة · من Health Connect</string>
     <string name="health_connect_workout">تمرين</string>
     <string name="health_connect_remove">احذف النسخ المستوردة</string>
     <string name="health_connect_remove_note">يحذف النسخ التي استوردتها فورمة من Health Connect. سجلات فورمة والبيانات في Health Connect تبقى كما هي.</string>
     <string name="health_connect_privacy">النسخ المستوردة محفوظة ومشفّرة على هذا الجهاز، وموسومة، ومنفصلة عن سجلات فورمة وإحصاءاتها والنسخ الاحتياطية. لا تُرسل لأي مكان.</string>
+    <string name="height_cm_optional">الطول · سم، اختياري</string>
+    <string name="height_note">يُستخدم فقط لعرض مؤشر كتلة الجسم. اتركه فارغًا لإخفائه.</string>
+    <string name="height_error">أدخل طولًا من 50 إلى 272 سم.</string>
+    <string name="bmi_title">مؤشر كتلة الجسم</string>
+    <string name="bmi_from">من وزنك المسجل يوم %1$s وطول %2$s سم.</string>
+    <string name="bmi_need_height">أضف طولك في الملف الشخصي لعرض المؤشر.</string>
+    <string name="bmi_need_weight">سجّل وزنك لعرض المؤشر.</string>
+    <string name="bmi_note">مؤشر كتلة الجسم رقم فحص سكاني. لا يراعي العضلات أو البنية أو العمر وليس تشخيصًا.</string>
+    <string name="sleep_title">النوم · من Health Connect</string>
+    <string name="sleep_nights_recorded">ليالٍ فيها بيانات نوم من آخر 7: %1$s</string>
+    <string name="sleep_average">متوسط النوم لكل ليلة مسجلة: %1$s</string>
+    <string name="sleep_last_night">آخر ليلة %1$s: %2$s نوم</string>
+    <string name="sleep_stages">عميق %1$s · حركة العين السريعة %2$s · خفيف %3$s</string>
+    <string name="duration_hm">%1$s س %2$s د</string>
+    <string name="sleep_note">نسخة للقراءة فقط من Health Connect. الليالي الناقصة غير معروفة. فورمة تعرض المدة والمراحل فقط ولا تقيّم النوم.</string>
 </resources>

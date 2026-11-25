@@ -18,6 +18,8 @@ data class Profile(
     val carbsTarget: Double? = null,
     val fatTarget: Double? = null,
     val waterGoalMl: Int? = null,
+    /** Optional height the user entered, used only to show BMI. */
+    val heightCm: Double? = null,
 ) {
     init {
         require(name.length <= 80) // optional: a blank name only changes the greeting
@@ -27,6 +29,7 @@ data class Profile(
         require(carbsTarget == null || carbsTarget.isFinite() && carbsTarget > 0 && carbsTarget <= 2000)
         require(fatTarget == null || fatTarget.isFinite() && fatTarget > 0 && fatTarget <= 1000)
         require(waterGoalMl == null || waterGoalMl in 250..15000)
+        require(heightCm == null || heightCm.isFinite() && heightCm in 50.0..272.0)
     }
 }
 
@@ -254,4 +257,24 @@ data class ImportedWorkout(val id: String, val date: LocalDate, val startEpochMs
     val minutes: Long get() = (endEpochMs - startEpochMs) / 60_000
 }
 
-data class HealthImports(val weights: List<ImportedWeight> = emptyList(), val workouts: List<ImportedWorkout> = emptyList())
+/** One night of sleep copied read-only from Health Connect, keyed by local wake-up date. No score or assessment. */
+data class ImportedSleep(
+    val date: LocalDate,
+    val asleepMinutes: Double,
+    val deepMinutes: Double? = null,
+    val remMinutes: Double? = null,
+    val lightMinutes: Double? = null,
+    val awakeMinutes: Double? = null,
+    val source: String,
+) {
+    init {
+        require(asleepMinutes.isFinite() && asleepMinutes > 0 && asleepMinutes <= 1440)
+        require(source.length <= 200)
+    }
+}
+
+data class HealthImports(
+    val weights: List<ImportedWeight> = emptyList(),
+    val workouts: List<ImportedWorkout> = emptyList(),
+    val sleep: List<ImportedSleep> = emptyList(),
+)

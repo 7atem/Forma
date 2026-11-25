@@ -1264,7 +1264,7 @@ private struct MealSlotOption: Identifiable {
                                                     .frame(maxWidth: .infinity)
                                                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                                                 let hasVideo = ExerciseVideoLibrary.url(exercise) != nil
-                                                let hasMotion = ExerciseMotionCatalog.of(exercise) != nil
+                                                let hasMotion = ExerciseGuideFlags.enableProcedural3DMotion && ExerciseMotionCatalog.of(exercise) != nil
                                                 if hasVideo || hasMotion {
                                                     Text(LocalizedStringKey(hasVideo ? "badge_video_short" : "badge_3d_short"))
                                                         .font(.caption2.weight(.bold))

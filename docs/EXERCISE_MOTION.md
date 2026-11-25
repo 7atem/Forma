@@ -1,10 +1,13 @@
 # 3D exercise motion
 
-Twelve exercises show a looping, rotatable 3D figure in the exercise guide instead of only the two
-still photos: **Squat, Barbell bench press, Barbell row, Conventional deadlift, Barbell overhead press,
+> **Status:** Hidden in the app UI (`ENABLE_PROCEDURAL_3D_MOTION = false` on Android,
+> `ExerciseGuideFlags.enableProcedural3DMotion = false` on Apple). Both apps currently present
+> **Video**, **Photos**, and **2D muscle highlights** only; the procedural 3D mannequin and its
+> deterministic motion tests remain gated behind that flag.
+
+Twelve exercises have a looping, rotatable 3D figure in the motion catalog: **Squat, Barbell bench press, Barbell row, Conventional deadlift, Barbell overhead press,
 Barbell curl, Skull crusher, Dumbbell curl, Hammer curl, Dumbbell shrug, Barbell back squat, and
 Barbell Romanian deadlift**.
-On iPhone, users can switch among **3D motion**, **Video** when a bundled clip exists, and **Photos**.
 
 ## What it is
 - An original, code-built mannequin with volumetric body segments, drawn with Compose `Canvas` on

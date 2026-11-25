@@ -57,6 +57,9 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+/** Procedural 3D mannequin is hidden so the app shows Videos, Photos, and 2D muscle highlights only. */
+private const val ENABLE_PROCEDURAL_3D_MOTION = false
+
 private val thumbnailCache=LruCache<Int,ImageBitmap>(8)
 
 /** Small cached previews decode off the main thread; full resolution is reserved for the guide. */
@@ -131,9 +134,9 @@ internal fun ExerciseGuideSheet(
                 val reduceMotion = rememberReduceMotion()
                 var animating by rememberSaveable(exercise) { mutableStateOf(!reduceMotion) }
                 val context = LocalContext.current
-                val hasMotion = remember(exercise) { ExerciseMotionCatalog.of(exercise) != null }
+                val hasMotion = remember(exercise) { ENABLE_PROCEDURAL_3D_MOTION && ExerciseMotionCatalog.of(exercise) != null }
                 val hasVideo = remember(exercise) { exerciseVideoResource(context, exercise) != 0 }
-                // 0 = 3D motion, 1 = video, 2 = photos. Only offer what exists for this exercise.
+                // 0 = 3D motion (hidden behind flag), 1 = video, 2 = photos. Only offer what exists for this exercise.
                 val modes = remember(exercise) { listOfNotNull(0.takeIf { hasMotion }, 1.takeIf { hasVideo }, 2) }
                 var mode by rememberSaveable(exercise) { mutableIntStateOf(modes.first()) }
                 var showMuscleHighlights by rememberSaveable(exercise) { mutableStateOf(true) }
@@ -496,7 +499,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
                 Box(Modifier.fillMaxWidth()) {
                     ExerciseThumbnail(exercise,Modifier.fillMaxWidth())
                     val hasVideoClip = remember(exercise) { exerciseVideoResource(context, exercise) != 0 }
-                    val hasMotionClip = remember(exercise) { ExerciseMotionCatalog.of(exercise) != null }
+                    val hasMotionClip = remember(exercise) { ENABLE_PROCEDURAL_3D_MOTION && ExerciseMotionCatalog.of(exercise) != null }
                     if (hasVideoClip || hasMotionClip) {
                         Surface(
                             shape = RoundedCornerShape(8.dp),

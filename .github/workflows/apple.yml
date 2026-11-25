@@ -42,6 +42,8 @@ jobs:
           grep -q "com.apple.developer.healthkit" apple/FormaPhone.entitlements.plist || { echo "::error::Exportable HealthKit entitlements missing"; exit 1; }
           # The paired-watch install needs the watch app embedded under Watch/; fail loudly if it is not.
           test -f "$APP/Watch/FormaWatch.app/Info.plist" || { echo "::error::FormaWatch.app is not embedded in the IPA"; exit 1; }
+          # Verify bundled exercise videos are actually copied into FormaPhone.app.
+          ls "$APP"/exercise_video_*.mp4 "$APP"/raw/exercise_video_*.mp4 >/dev/null 2>&1 || { echo "::error::Bundled exercise MP4 videos missing from FormaPhone.app"; exit 1; }
           {
             echo "### IPA contents"
             echo "- iPhone app: \`$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")\`"

@@ -14,15 +14,18 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     companion object {fun open(context:Context)=FitnessRepository({FitnessDatabase.open(context).dao()})}
     private val dao by lazy(daoProvider)
     /** Read-only Health Connect copies; separate from the snapshot, backups, logs and stats. */
-    val healthImports=kotlinx.coroutines.flow.combine(flow {emitAll(dao.healthWeights())},flow {emitAll(dao.healthWorkouts())}) {w,x ->
+    val healthImports=kotlinx.coroutines.flow.combine(flow {emitAll(dao.healthWeights())},flow {emitAll(dao.healthWorkouts())},flow {emitAll(dao.healthSleep())}) {w,x,z ->
         HealthImports(
             w.map {ImportedWeight(it.id,LocalDate.ofEpochDay(it.day),it.weightKg,it.source)},
             x.map {ImportedWorkout(it.id,LocalDate.ofEpochDay(it.day),it.startAt,it.endAt,it.exerciseType,it.title,it.source)},
+            z.map {ImportedSleep(LocalDate.ofEpochDay(it.day),it.asleepMinutes,it.deepMinutes,it.remMinutes,it.lightMinutes,it.awakeMinutes,it.source)},
         )
     }.flowOn(Dispatchers.IO)
-    suspend fun importHealth(weights:List<ImportedWeight>,workouts:List<ImportedWorkout>)=withContext(Dispatchers.IO) {
+    /** Re-imported nights replace the stored night for that date (late samples update it). */
+    suspend fun importHealth(weights:List<ImportedWeight>,workouts:List<ImportedWorkout>,sleep:List<ImportedSleep> = emptyList())=withContext(Dispatchers.IO) {
         dao.importHealth(weights.map {HealthWeightRow(it.id,it.date.toEpochDay(),it.weightKg,it.source)},
-            workouts.map {HealthWorkoutRow(it.id,it.date.toEpochDay(),it.startEpochMs,it.endEpochMs,it.exerciseType,it.title,it.source)})
+            workouts.map {HealthWorkoutRow(it.id,it.date.toEpochDay(),it.startEpochMs,it.endEpochMs,it.exerciseType,it.title,it.source)},
+            sleep.map {HealthSleepRow(it.date.toEpochDay(),it.asleepMinutes,it.deepMinutes,it.remMinutes,it.lightMinutes,it.awakeMinutes,it.source)})
     }
     suspend fun removeHealthImports()=withContext(Dispatchers.IO) {dao.removeHealthImports()}
     val snapshot=flow {emitAll(dao.changes(SimpleSQLiteQuery("SELECT 1")).map {dao.readSnapshot()})}.flowOn(Dispatchers.IO)

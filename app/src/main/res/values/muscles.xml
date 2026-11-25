@@ -96,4 +96,12 @@
     <string name="catalog_exercise_bulgarian_split_squat">Bulgarian split squat</string>
     <string name="catalog_exercise_front_squat">Barbell front squat</string>
     <string name="catalog_exercise_plank">Forearm plank</string>
+    <string name="catalog_exercise_hack_squat">Hack squat</string>
+    <string name="catalog_exercise_sumo_deadlift">Sumo deadlift</string>
+    <string name="catalog_exercise_chin_up">Chin-up</string>
+    <string name="catalog_exercise_arnold_press">Arnold press</string>
+    <string name="catalog_exercise_ez_bar_curl">EZ-bar curl</string>
+    <string name="catalog_exercise_triceps_kickback">Triceps kickback</string>
+    <string name="catalog_exercise_walking_lunge">Walking lunge</string>
+    <string name="catalog_exercise_ab_wheel_rollout">Ab wheel rollout</string>
 </resources>

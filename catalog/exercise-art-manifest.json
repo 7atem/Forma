@@ -364,5 +364,53 @@
     "file": "assets/exercises/res/drawable-nodpi/exercise_plank.png",
     "bytes": 525834,
     "sha256": "2a9309a72c12585e58a0a9b65b94a9da2d2d89317eebec904f79d83f4c17187e"
+  },
+  {
+    "id": "hack_squat",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hack_squat.png",
+    "bytes": 775186,
+    "sha256": "4c07bd627a75841606a20e039a6cb0882a531f35693099c4b57aa07a71afa330"
+  },
+  {
+    "id": "sumo_deadlift",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_sumo_deadlift.png",
+    "bytes": 590457,
+    "sha256": "efe033eea9da283ccc25ab293b12810351e2803f9b517a67246e286352ab02d9"
+  },
+  {
+    "id": "chin_up",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_chin_up.png",
+    "bytes": 595185,
+    "sha256": "33f56d8ca7ad2eff3ff3d5ca8116bc159d81e389c1df695f044a5880306cb077"
+  },
+  {
+    "id": "arnold_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_arnold_press.png",
+    "bytes": 577891,
+    "sha256": "50469694b6dfa68aa7d366e8859ae8b5d220f6f6a791732c0e6c247482890eeb"
+  },
+  {
+    "id": "ez_bar_curl",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_ez_bar_curl.png",
+    "bytes": 569627,
+    "sha256": "eaeb05361f49df0fef9692ac03ba7188774787f1759afac52821f20d73a9bb63"
+  },
+  {
+    "id": "triceps_kickback",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_triceps_kickback.png",
+    "bytes": 620942,
+    "sha256": "61c64c490fd05d9786f147eb600cd336d97e827fe404c9e9e205b574aae3f65c"
+  },
+  {
+    "id": "walking_lunge",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_walking_lunge.png",
+    "bytes": 529091,
+    "sha256": "11c2200d5e2c789bba7e50a155c30e46ed8b976429fa239dd0233bae332cf521"
+  },
+  {
+    "id": "ab_wheel_rollout",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_ab_wheel_rollout.png",
+    "bytes": 666235,
+    "sha256": "5c830c2e687b5a48f03deeb7466b1702bbed82c9fdb0a3e26f55c95330c26127"
   }
 ]

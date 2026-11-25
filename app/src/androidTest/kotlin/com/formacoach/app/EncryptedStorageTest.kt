@@ -28,6 +28,27 @@ import org.json.JSONArray
 
 @RunWith(AndroidJUnit4::class)
 class EncryptedStorageTest {
+    @Test fun schemaEightUpgradeAddsHeightAndSleepWithoutTouchingData()=runBlocking {
+        val helper=createLegacy(8)
+        helper.writableDatabase.execSQL("INSERT INTO profile (id,name,goal,sessionsPerWeek,caloriesTarget,proteinTarget) VALUES(1,'Legacy v8','BUILD_HABIT',3,NULL,NULL)")
+        helper.writableDatabase.execSQL("INSERT INTO health_weights VALUES('hc-w','20759',80.0,'scale')")
+        helper.close()
+        val repo=repository()
+        val migrated=database!!.dao().readSnapshot()
+        assertEquals("Legacy v8",migrated.profile?.name)
+        assertNull(migrated.profile?.heightCm)
+        assertEquals(1,repo.healthImports.first().weights.size)
+        repo.saveProfile(migrated.profile!!.copy(heightCm=178.0))
+        val night=ImportedSleep(LocalDate.of(2026,11,2),390.0,deepMinutes=60.0,remMinutes=80.0,source="com.example.ring")
+        repo.importHealth(emptyList(),emptyList(),listOf(night))
+        repo.importHealth(emptyList(),emptyList(),listOf(night.copy(asleepMinutes=410.0))) // re-read night replaces
+        assertEquals(listOf(410.0),repo.healthImports.first().sleep.map {it.asleepMinutes})
+        val archive=repo.export("schema nine backup round trip".toCharArray())
+        repo.restore(repo.previewRestore(archive,"schema nine backup round trip".toCharArray()))
+        assertEquals(178.0,database!!.dao().readSnapshot().profile?.heightCm!!,0.0)
+        repo.removeHealthImports()
+        assertTrue(repo.healthImports.first().sleep.isEmpty())
+    }
     @Test fun schemaSevenUpgradeKeepsDataAndHealthCopiesStaySeparateAndDeduplicated()=runBlocking {
         val helper=createLegacy(7)
         helper.writableDatabase.execSQL("INSERT INTO supplements VALUES('sup','Creatine','')")

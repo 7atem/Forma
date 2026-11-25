@@ -498,6 +498,7 @@ private fun ProfileForm(
     var carbs by rememberSaveable { mutableStateOf(profile?.carbsTarget?.toString().orEmpty()) }
     var fat by rememberSaveable { mutableStateOf(profile?.fatTarget?.toString().orEmpty()) }
     var waterGoal by rememberSaveable { mutableStateOf(profile?.waterGoalMl?.toString().orEmpty()) }
+    var height by rememberSaveable { mutableStateOf(profile?.heightCm?.let { kotlin.math.round(it).toInt().toString() }.orEmpty()) }
     val nameInvalid = name.length > 80
     val calorieValue = if (calories.isBlank()) null else NumericInput.integer(calories)
     val proteinValue = if (protein.isBlank()) null else NumericInput.decimal(protein)
@@ -509,6 +510,8 @@ private fun ProfileForm(
     val carbsInvalid = carbs.isNotBlank() && (carbsValue == null || carbsValue !in 0.0001..2000.0)
     val fatInvalid = fat.isNotBlank() && (fatValue == null || fatValue !in 0.0001..1000.0)
     val waterInvalid = waterGoal.isNotBlank() && (waterValue == null || waterValue !in 250..15000)
+    val heightValue = if (height.isBlank()) null else NumericInput.decimal(height)
+    val heightInvalid = height.isNotBlank() && (heightValue == null || heightValue !in 50.0..272.0)
     val candidate = runCatching {
         Profile(
             name.trim(),
@@ -519,6 +522,7 @@ private fun ProfileForm(
             if (carbs.isBlank()) null else requireNotNull(carbsValue),
             if (fat.isBlank()) null else requireNotNull(fatValue),
             if (waterGoal.isBlank()) null else requireNotNull(waterValue),
+            if (height.isBlank()) null else requireNotNull(heightValue),
         )
     }.getOrNull()
     Column(
@@ -636,6 +640,14 @@ private fun ProfileForm(
                 { waterGoal = it },
                 "profile_water_goal",
                 error = waterInvalid,
+            )
+            Input(
+                R.string.height_cm_optional,
+                height,
+                { height = it },
+                "profile_height",
+                error = heightInvalid,
+                supportingText = stringResource(if (heightInvalid) R.string.height_error else R.string.height_note),
             )
         }
         if (error) Text(stringResource(R.string.save_failed), color = MaterialTheme.colorScheme.error)

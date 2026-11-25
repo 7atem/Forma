@@ -96,4 +96,12 @@
     <string name="catalog_exercise_bulgarian_split_squat">سكوات بلغاري برجل واحدة</string>
     <string name="catalog_exercise_front_squat">سكوات أمامي بالبار</string>
     <string name="catalog_exercise_plank">بلانك على الساعدين</string>
+    <string name="catalog_exercise_hack_squat">سكوات هاك على الجهاز</string>
+    <string name="catalog_exercise_sumo_deadlift">رفعة ميتة سومو بالبار</string>
+    <string name="catalog_exercise_chin_up">عقلة بقبضة سفلية</string>
+    <string name="catalog_exercise_arnold_press">ضغط أرنولد بالدمبل</string>
+    <string name="catalog_exercise_ez_bar_curl">مرجحة بايسبس بالبار المتعرج</string>
+    <string name="catalog_exercise_triceps_kickback">رفس ترايسبس بالدمبل</string>
+    <string name="catalog_exercise_walking_lunge">طعن متحرك بالدمبل</string>
+    <string name="catalog_exercise_ab_wheel_rollout">تدحرج عجلة البطن على الركبتين</string>
 </resources>

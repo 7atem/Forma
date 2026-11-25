@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.formacoach.coach.NutritionTrends
 import com.formacoach.coach.TrainingTrends
 import com.formacoach.model.FitnessSnapshot
@@ -171,4 +172,87 @@ internal fun TrainingTrendCard(snapshot: FitnessSnapshot, today: LocalDate) {
         )
         Text(stringResource(R.string.training_trend_volume, formatWeight(latest.volumeKg, 0)), style = MaterialTheme.typography.bodyMedium)
     }
+}
+
+/** BMI from the latest weight the user logged and the height they entered: a number only, no category labels. */
+@Composable
+internal fun BmiCard(snapshot: FitnessSnapshot) {
+    val height = snapshot.profile?.heightCm
+    val latest = snapshot.measurements.filter { it.weightKg != null }.maxByOrNull { it.date }
+    val bmi = if (height != null && latest?.weightKg != null) com.formacoach.coach.BodyMetrics.bmi(latest.weightKg!!, height) else null
+    InfoCard(Modifier.testTag("bmi_card")) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.bmi_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            ScopeInfoButton(R.string.bmi_title, R.string.bmi_note)
+        }
+        when {
+            bmi != null && latest != null && height != null -> {
+                Text(number(bmi, 1), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.bmi_from, dateLabel(latest.date), number(height, 0)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            height == null -> Text(stringResource(R.string.bmi_need_height), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            else -> Text(stringResource(R.string.bmi_need_weight), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Text(stringResource(R.string.bmi_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** Nightly sleep copied read-only from Health Connect: duration and stages only; hidden until something is imported. */
+@Composable
+internal fun SleepCard(vm: FitnessViewModel, today: LocalDate) {
+    val imports by vm.healthImports.collectAsStateWithLifecycle()
+    if (imports.sleep.isEmpty()) return
+    val days = (6 downTo 0).map { today.minusDays(it.toLong()) }
+    val byDate = imports.sleep.associateBy { it.date }
+    val recorded = days.mapNotNull { byDate[it] }
+    val description = stringResource(R.string.sleep_nights_recorded, number(recorded.size.toDouble(), 0))
+    val bar = MaterialTheme.colorScheme.tertiary
+    val outline = MaterialTheme.colorScheme.outline
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    InfoCard(Modifier.testTag("sleep_card")) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.sleep_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            ScopeInfoButton(R.string.sleep_title, R.string.sleep_note)
+        }
+        Text(description, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+        Canvas(Modifier.fillMaxWidth().height(100.dp).clearAndSetSemantics { contentDescription = description }) {
+            val maxMinutes = maxOf(recorded.maxOfOrNull { it.asleepMinutes } ?: 0.0, 60.0)
+            val slot = size.width / days.size
+            val w = slot * 0.6f
+            days.forEachIndexed { i, day ->
+                val index = if (rtl) days.lastIndex - i else i
+                val left = index * slot + (slot - w) / 2
+                val night = byDate[day]
+                if (night != null) {
+                    val h = (night.asleepMinutes / maxMinutes * size.height).toFloat().coerceAtLeast(2f)
+                    drawRoundRect(bar, Offset(left, size.height - h), Size(w, h), CornerRadius(6f, 6f))
+                } else {
+                    val h = size.height * 0.15f
+                    drawRoundRect(outline, Offset(left, size.height - h), Size(w, h), CornerRadius(6f, 6f),
+                        style = Stroke(width = 1.5f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(5f, 4f))))
+                }
+            }
+        }
+        if (recorded.isNotEmpty()) {
+            Text(stringResource(R.string.sleep_average, sleepDuration(recorded.sumOf { it.asleepMinutes } / recorded.size)), style = MaterialTheme.typography.bodyMedium)
+        }
+        val last = imports.sleep.maxByOrNull { it.date }
+        if (last != null) {
+            Text(stringResource(R.string.sleep_last_night, dateLabel(last.date), sleepDuration(last.asleepMinutes)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (last.deepMinutes != null && last.remMinutes != null) {
+                Text(
+                    stringResource(R.string.sleep_stages, sleepDuration(last.deepMinutes!!), sleepDuration(last.remMinutes!!), sleepDuration(last.lightMinutes ?: 0.0)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Text(stringResource(R.string.sleep_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun sleepDuration(minutes: Double): String {
+    val total = kotlin.math.round(minutes).toInt()
+    return stringResource(R.string.duration_hm, number((total / 60).toDouble(), 0), number((total % 60).toDouble(), 0))
 }

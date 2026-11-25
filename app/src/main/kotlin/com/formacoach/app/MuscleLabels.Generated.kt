@@ -105,6 +105,14 @@ internal fun exerciseLabel(exercise:com.formacoach.model.Exercise):Int=when(exer
     com.formacoach.model.Exercise.BULGARIAN_SPLIT_SQUAT->R.string.catalog_exercise_bulgarian_split_squat
     com.formacoach.model.Exercise.FRONT_SQUAT->R.string.catalog_exercise_front_squat
     com.formacoach.model.Exercise.PLANK->R.string.catalog_exercise_plank
+    com.formacoach.model.Exercise.HACK_SQUAT->R.string.catalog_exercise_hack_squat
+    com.formacoach.model.Exercise.SUMO_DEADLIFT->R.string.catalog_exercise_sumo_deadlift
+    com.formacoach.model.Exercise.CHIN_UP->R.string.catalog_exercise_chin_up
+    com.formacoach.model.Exercise.ARNOLD_PRESS->R.string.catalog_exercise_arnold_press
+    com.formacoach.model.Exercise.EZ_BAR_CURL->R.string.catalog_exercise_ez_bar_curl
+    com.formacoach.model.Exercise.TRICEPS_KICKBACK->R.string.catalog_exercise_triceps_kickback
+    com.formacoach.model.Exercise.WALKING_LUNGE->R.string.catalog_exercise_walking_lunge
+    com.formacoach.model.Exercise.AB_WHEEL_ROLLOUT->R.string.catalog_exercise_ab_wheel_rollout
 }
 
 internal fun equipmentLabel(value:com.formacoach.model.Equipment):Int=when(value) {

@@ -121,8 +121,8 @@ class FitnessViewModel @Inject constructor(
     /** Read-only Health Connect copies, observed only while a screen collects them. */
     val healthImports: StateFlow<HealthImports> =
         repository.healthImports.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HealthImports())
-    fun importHealth(weights: List<ImportedWeight>, workouts: List<ImportedWorkout>, done: () -> Unit) =
-        write(done) { repository.importHealth(weights, workouts) }
+    fun importHealth(weights: List<ImportedWeight>, workouts: List<ImportedWorkout>, sleep: List<ImportedSleep>, done: () -> Unit) =
+        write(done) { repository.importHealth(weights, workouts, sleep) }
     fun removeHealthImports() = write { repository.removeHealthImports() }
     fun saveCustomExercise(value: CustomExercise, done: () -> Unit = {}) = write(done) { repository.saveCustomExercise(value) }
     fun deleteCustomExercise(id: String) = write { repository.deleteCustomExercise(id) }

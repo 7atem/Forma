@@ -189,6 +189,8 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         HistoryChart(weightPoints, unitStr, trendPoints = trendPoints)
     }
 
+    BmiCard(state.snapshot)
+    SleepCard(vm, today)
     NutritionTrendCard(state.snapshot, today)
 
     // 7-Day Body Muscle Heat Map

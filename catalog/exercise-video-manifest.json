@@ -15,6 +15,19 @@
       "reviewNote": ""
     },
     {
+      "id": "BARBELL_BENCH_PRESS",
+      "file": "assets/exercises/res/raw/exercise_video_barbell_bench_press.mp4",
+      "bytes": 191618,
+      "sha256": "e97ecc41d708b75fb4b9ae3710a4457c16f8466446a2636d050df17f66e955d7",
+      "seconds": 5.5,
+      "width": 720,
+      "height": 720,
+      "tool": "Veo 3 (Gemini Web)",
+      "looped": "source",
+      "reviewed": false,
+      "reviewNote": ""
+    },
+    {
       "id": "BARBELL_HIP_THRUST",
       "file": "assets/exercises/res/raw/exercise_video_barbell_hip_thrust.mp4",
       "bytes": 176875,
@@ -23,6 +36,19 @@
       "width": 720,
       "height": 720,
       "tool": "Kimi (720p)",
+      "looped": "forward+reverse",
+      "reviewed": false,
+      "reviewNote": ""
+    },
+    {
+      "id": "BARBELL_OVERHEAD_PRESS",
+      "file": "assets/exercises/res/raw/exercise_video_barbell_overhead_press.mp4",
+      "bytes": 252905,
+      "sha256": "4606b341366d7364bd8fc3f1c5a8589ae87eb575e9aaf06f3a071f03f7e9b3a8",
+      "seconds": 6.6,
+      "width": 720,
+      "height": 720,
+      "tool": "Veo 3 (Gemini Web)",
       "looped": "forward+reverse",
       "reviewed": false,
       "reviewNote": ""
@@ -37,6 +63,19 @@
       "height": 720,
       "tool": "Kimi (720p)",
       "looped": "forward+reverse",
+      "reviewed": false,
+      "reviewNote": ""
+    },
+    {
+      "id": "BARBELL_ROW",
+      "file": "assets/exercises/res/raw/exercise_video_barbell_row.mp4",
+      "bytes": 216690,
+      "sha256": "8f64d2c5bf7ea7d51f56f3c8402106910d75e5a166cbf028371a1f1a9c5ee5da",
+      "seconds": 5.5,
+      "width": 720,
+      "height": 720,
+      "tool": "Veo 3 (Gemini Web)",
+      "looped": "source",
       "reviewed": false,
       "reviewNote": ""
     },
@@ -75,6 +114,19 @@
       "width": 720,
       "height": 720,
       "tool": "Kimi (720p)",
+      "looped": "forward+reverse",
+      "reviewed": false,
+      "reviewNote": ""
+    },
+    {
+      "id": "CONVENTIONAL_DEADLIFT",
+      "file": "assets/exercises/res/raw/exercise_video_conventional_deadlift.mp4",
+      "bytes": 247738,
+      "sha256": "54fc1531f4af3805b9563867562383a89b9ad39e842719ebd7203805526499f4",
+      "seconds": 6.4,
+      "width": 720,
+      "height": 720,
+      "tool": "Veo 3 (Gemini Web)",
       "looped": "forward+reverse",
       "reviewed": false,
       "reviewNote": ""

@@ -63,6 +63,14 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
     case bulgarian_split_squat = "BULGARIAN_SPLIT_SQUAT"
     case front_squat = "FRONT_SQUAT"
     case plank = "PLANK"
+    case hack_squat = "HACK_SQUAT"
+    case sumo_deadlift = "SUMO_DEADLIFT"
+    case chin_up = "CHIN_UP"
+    case arnold_press = "ARNOLD_PRESS"
+    case ez_bar_curl = "EZ_BAR_CURL"
+    case triceps_kickback = "TRICEPS_KICKBACK"
+    case walking_lunge = "WALKING_LUNGE"
+    case ab_wheel_rollout = "AB_WHEEL_ROLLOUT"
     public func label(arabic: Bool) -> String {
         switch self {
         case .squat: return arabic ? "سكوات" : "Squat"
@@ -126,6 +134,14 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
         case .bulgarian_split_squat: return arabic ? "سكوات بلغاري برجل واحدة" : "Bulgarian split squat"
         case .front_squat: return arabic ? "سكوات أمامي بالبار" : "Barbell front squat"
         case .plank: return arabic ? "بلانك على الساعدين" : "Forearm plank"
+        case .hack_squat: return arabic ? "سكوات هاك على الجهاز" : "Hack squat"
+        case .sumo_deadlift: return arabic ? "رفعة ميتة سومو بالبار" : "Sumo deadlift"
+        case .chin_up: return arabic ? "عقلة بقبضة سفلية" : "Chin-up"
+        case .arnold_press: return arabic ? "ضغط أرنولد بالدمبل" : "Arnold press"
+        case .ez_bar_curl: return arabic ? "مرجحة بايسبس بالبار المتعرج" : "EZ-bar curl"
+        case .triceps_kickback: return arabic ? "رفس ترايسبس بالدمبل" : "Triceps kickback"
+        case .walking_lunge: return arabic ? "طعن متحرك بالدمبل" : "Walking lunge"
+        case .ab_wheel_rollout: return arabic ? "تدحرج عجلة البطن على الركبتين" : "Ab wheel rollout"
         }
     }
 }
@@ -212,6 +228,14 @@ public enum ExerciseCatalog {public static func of(_ exercise:Exercise)->Exercis
     case .bulgarian_split_squat:return .init(equipment:[.dumbbells,.bench],perSide:true,singleDumbbell:false)
     case .front_squat:return .init(equipment:[.barbell],perSide:false,singleDumbbell:false)
     case .plank:return .init(equipment:[.bodyweight],perSide:false,singleDumbbell:false)
+    case .hack_squat:return .init(equipment:[.machine],perSide:false,singleDumbbell:false)
+    case .sumo_deadlift:return .init(equipment:[.barbell],perSide:false,singleDumbbell:false)
+    case .chin_up:return .init(equipment:[.bodyweight,.pull_up_bar],perSide:false,singleDumbbell:false)
+    case .arnold_press:return .init(equipment:[.dumbbells,.bench],perSide:false,singleDumbbell:false)
+    case .ez_bar_curl:return .init(equipment:[.barbell],perSide:false,singleDumbbell:false)
+    case .triceps_kickback:return .init(equipment:[.dumbbells,.bench],perSide:true,singleDumbbell:false)
+    case .walking_lunge:return .init(equipment:[.dumbbells],perSide:true,singleDumbbell:false)
+    case .ab_wheel_rollout:return .init(equipment:[.bodyweight],perSide:false,singleDumbbell:false)
 }}}
 public enum Muscle: String, Codable, CaseIterable, Sendable {
     case chest = "CHEST"
@@ -442,6 +466,14 @@ public enum ExerciseMuscles {
         case .bulgarian_split_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.adductors, .hamstrings, .core], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.glute_med, .adductors, .hamstrings, .rectus_abdominis, .obliques], reference: "https://www.nasm.org/resource-center/exercise-library/bulgarian-split-squat")
         case .front_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.core, .erectors, .upper_back, .adductors], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.rectus_abdominis, .obliques, .spinal_erectors, .mid_back, .adductors], reference: "https://www.nasm.org/resource-center/exercise-library/barbell-front-squat")
         case .plank: return .init(primary: [.core], secondary: [.front_delts], primaryDetail: [.rectus_abdominis, .obliques], secondaryDetail: [.front_delt], reference: "https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/")
+        case .hack_squat: return .init(primary: [.quadriceps, .glutes], secondary: [.hamstrings, .adductors], primaryDetail: [.quadriceps, .glute_max], secondaryDetail: [.hamstrings, .adductors], reference: "https://exrx.net/WeightExercises/Quadriceps/SLHackSquat")
+        case .sumo_deadlift: return .init(primary: [.glutes, .quadriceps, .adductors], secondary: [.hamstrings, .erectors, .upper_back], primaryDetail: [.glute_max, .quadriceps, .adductors], secondaryDetail: [.hamstrings, .spinal_erectors, .upper_traps], reference: "https://exrx.net/WeightExercises/GluteusMaximus/BBSumoDeadlift")
+        case .chin_up: return .init(primary: [.lats, .biceps], secondary: [.upper_back, .core], primaryDetail: [.lats, .biceps, .forearms], secondaryDetail: [.mid_back, .rectus_abdominis], reference: "https://exrx.net/WeightExercises/LatissimusDorsi/BWUnderhandChinup")
+        case .arnold_press: return .init(primary: [.front_delts], secondary: [.triceps, .upper_back], primaryDetail: [.front_delt, .side_delt], secondaryDetail: [.triceps, .upper_traps], reference: "https://exrx.net/WeightExercises/DeltoidAnterior/DBArnoldPress")
+        case .ez_bar_curl: return .init(primary: [.biceps], secondary: [.front_delts], primaryDetail: [.biceps, .forearms], secondaryDetail: [.front_delt], reference: "https://exrx.net/WeightExercises/Biceps/BBEZBarCurl")
+        case .triceps_kickback: return .init(primary: [.triceps], secondary: [.rear_delts], primaryDetail: [.triceps], secondaryDetail: [.rear_delt], reference: "https://exrx.net/WeightExercises/Triceps/DBKickback")
+        case .walking_lunge: return .init(primary: [.quadriceps, .glutes], secondary: [.hamstrings, .adductors, .core], primaryDetail: [.quadriceps, .glute_max, .glute_med], secondaryDetail: [.hamstrings, .adductors, .rectus_abdominis], reference: "https://exrx.net/WeightExercises/Quadriceps/DBWalkingLunge")
+        case .ab_wheel_rollout: return .init(primary: [.core], secondary: [.lats, .front_delts], primaryDetail: [.rectus_abdominis, .obliques], secondaryDetail: [.lats, .front_delt], reference: "https://exrx.net/WeightExercises/RectusAbdominis/BWWheelRollout")
         }
     }
 }

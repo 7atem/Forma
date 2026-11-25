@@ -94,14 +94,17 @@ private struct LoopingVideoPlayer: UIViewRepresentable {
 
 final class LoopingPlayerView: UIView {
     override static var layerClass: AnyClass { AVPlayerLayer.self }
-    private let player = AVQueuePlayer()
-    private var looper: AVPlayerLooper?
+    private let player: AVPlayer
+    private let playerItem: AVPlayerItem
     private var statusObserver: NSKeyValueObservation?
-    private var itemObserver: NSKeyValueObservation?
+    private var endObserver: NSObjectProtocol?
     private var foregroundToken: NSObjectProtocol?
     private var desiredPlaying = false
 
     init(url: URL) {
+        let asset = AVURLAsset(url: url)
+        self.playerItem = AVPlayerItem(asset: asset)
+        self.player = AVPlayer(playerItem: playerItem)
         super.init(frame: .zero)
         // A silent demo must not stop the user's music or podcast.
         try? AVAudioSession.sharedInstance().setCategory(.ambient, options: [.mixWithOthers])
@@ -111,19 +114,28 @@ final class LoopingPlayerView: UIView {
         player.preventsDisplaySleepDuringVideoPlayback = false
         player.actionAtItemEnd = .none
 
-        let asset = AVURLAsset(url: url)
-        let templateItem = AVPlayerItem(asset: asset)
-        looper = AVPlayerLooper(player: player, templateItem: templateItem)
-
         if let layer = layer as? AVPlayerLayer {
             layer.player = player
             layer.videoGravity = .resizeAspectFill
         }
 
-        // Observe item readiness so playback starts reliably once AVPlayerLooper enqueues the item.
-        itemObserver = player.observe(\.currentItem, options: [.initial, .new]) { [weak self] player, _ in
-            DispatchQueue.main.async {
-                self?.observeCurrentItem(player.currentItem)
+        // Start playback reliably once the item is ready to play.
+        statusObserver = playerItem.observe(\.status, options: [.initial, .new]) { [weak self] item, _ in
+            if item.status == .readyToPlay {
+                DispatchQueue.main.async {
+                    self?.resumeIfNeeded()
+                }
+            }
+        }
+        // Seamless loop via explicit seek-to-zero (avoids AVQueuePlayer/AVPlayerLooper actionAtItemEnd conflicts).
+        endObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self, self.desiredPlaying, self.window != nil else { return }
+            self.player.seek(to: .zero, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] _ in
+                self?.resumeIfNeeded()
             }
         }
         foregroundToken = NotificationCenter.default.addObserver(
@@ -151,27 +163,10 @@ final class LoopingPlayerView: UIView {
         }
     }
 
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        layer.frame = bounds
-    }
-
-    private func observeCurrentItem(_ item: AVPlayerItem?) {
-        statusObserver?.invalidate()
-        guard let item else { return }
-        statusObserver = item.observe(\.status, options: [.initial, .new]) { [weak self] observed, _ in
-            if observed.status == .readyToPlay {
-                DispatchQueue.main.async {
-                    self?.resumeIfNeeded()
-                }
-            }
-        }
-    }
-
     private func resumeIfNeeded() {
         guard desiredPlaying, window != nil else { return }
         if player.timeControlStatus != .playing {
-            player.playImmediately(atRate: 1.0)
+            player.play()
         }
     }
 
@@ -188,14 +183,15 @@ final class LoopingPlayerView: UIView {
         desiredPlaying = false
         statusObserver?.invalidate()
         statusObserver = nil
-        itemObserver?.invalidate()
-        itemObserver = nil
+        if let token = endObserver {
+            NotificationCenter.default.removeObserver(token)
+            endObserver = nil
+        }
         if let token = foregroundToken {
             NotificationCenter.default.removeObserver(token)
             foregroundToken = nil
         }
         player.pause()
-        looper?.disableLooping()
-        looper = nil
+        player.replaceCurrentItem(with: nil)
     }
 }

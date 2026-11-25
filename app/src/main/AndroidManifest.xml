@@ -10,6 +10,7 @@
     <!-- Optional, read-only Health Connect import after explicit permission. Forma never writes health data. -->
     <uses-permission android:name="android.permission.health.READ_WEIGHT" />
     <uses-permission android:name="android.permission.health.READ_EXERCISE" />
+    <uses-permission android:name="android.permission.health.READ_SLEEP" />
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
     </queries>

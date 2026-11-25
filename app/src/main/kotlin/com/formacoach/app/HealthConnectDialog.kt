@@ -70,8 +70,8 @@ internal fun HealthConnectDialog(vm: FitnessViewModel, busy: Boolean, onDismiss:
                                     message = null
                                     scope.launch {
                                         val result = runCatching { HealthConnectImport.read(context) }
-                                        result.onSuccess { (weights, workouts) ->
-                                            vm.importHealth(weights, workouts) { message = R.string.health_connect_imported }
+                                        result.onSuccess { imported ->
+                                            vm.importHealth(imported.weights, imported.workouts, imported.sleep) { message = R.string.health_connect_imported }
                                         }.onFailure { message = R.string.health_connect_failed }
                                         working = false
                                     }
@@ -84,7 +84,7 @@ internal fun HealthConnectDialog(vm: FitnessViewModel, busy: Boolean, onDismiss:
                 }
                 message?.let { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary) }
                 Text(
-                    stringResource(R.string.health_connect_counts, number(imports.weights.size.toDouble(), 0), number(imports.workouts.size.toDouble(), 0)),
+                    stringResource(R.string.health_connect_counts, number(imports.weights.size.toDouble(), 0), number(imports.workouts.size.toDouble(), 0), number(imports.sleep.size.toDouble(), 0)),
                     style = MaterialTheme.typography.labelLarge,
                 )
                 imports.weights.take(5).forEach {
@@ -96,7 +96,7 @@ internal fun HealthConnectDialog(vm: FitnessViewModel, busy: Boolean, onDismiss:
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
-                if (imports.weights.isNotEmpty() || imports.workouts.isNotEmpty()) {
+                if (imports.weights.isNotEmpty() || imports.workouts.isNotEmpty() || imports.sleep.isNotEmpty()) {
                     ConfirmButton(R.string.health_connect_remove, stringResource(R.string.health_connect_remove_note), !busy, tag = "health_connect_remove") {
                         vm.removeHealthImports()
                     }

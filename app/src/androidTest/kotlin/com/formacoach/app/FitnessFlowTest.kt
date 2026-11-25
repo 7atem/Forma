@@ -122,6 +122,22 @@ class FitnessFlowTest {
         rule.runOnIdle {check(!LogReminders.read(rule.activity,ReminderKind.WATER).enabled)}
         rule.onNodeWithTag("reminders_done").performClick()
     }
+    @Test fun heightInProfileShowsBmiFromLoggedWeight() {
+        ensureProfile()
+        rule.onNodeWithTag("tab_3").performClick()
+        rule.onNodeWithTag("body_weight").performScrollTo().performTextReplacement("80")
+        rule.onNodeWithTag("save_measurement").performScrollTo().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("bmi_card").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithText(rule.activity.getString(R.string.bmi_need_height)).performScrollTo().assertExists()
+        rule.onNodeWithContentDescription(rule.activity.getString(R.string.profile)).performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("profile_height").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("profile_height").performScrollTo().performTextReplacement("180")
+        rule.onNodeWithTag("save_profile").performScrollTo().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("tab_3").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("tab_3").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithText("24.7").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithText("24.7").performScrollTo().assertExists()
+    }
     @Test fun ArabicExerciseSearchWorksInEnglishInterface() {
         ensureProfile();rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_1").performClick()
         rule.onNodeWithTag("exercise_search").performTextInput("الحَشَرة المَيّتة")

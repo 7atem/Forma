@@ -2045,6 +2045,216 @@
         "FRONT_DELT"
       ],
       "reference": "https://www.acefitness.org/resources/everyone/exercise-library/32/front-plank/"
+    },
+    {
+      "id": "HACK_SQUAT",
+      "en": "Hack squat",
+      "ar": "سكوات هاك على الجهاز",
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false,
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "HAMSTRINGS",
+        "ADDUCTORS"
+      ],
+      "primaryDetail": [
+        "QUADRICEPS",
+        "GLUTE_MAX"
+      ],
+      "secondaryDetail": [
+        "HAMSTRINGS",
+        "ADDUCTORS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/Quadriceps/SLHackSquat"
+    },
+    {
+      "id": "SUMO_DEADLIFT",
+      "en": "Sumo deadlift",
+      "ar": "رفعة ميتة سومو بالبار",
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "primary": [
+        "GLUTES",
+        "QUADRICEPS",
+        "ADDUCTORS"
+      ],
+      "secondary": [
+        "HAMSTRINGS",
+        "ERECTORS",
+        "UPPER_BACK"
+      ],
+      "primaryDetail": [
+        "GLUTE_MAX",
+        "QUADRICEPS",
+        "ADDUCTORS"
+      ],
+      "secondaryDetail": [
+        "HAMSTRINGS",
+        "SPINAL_ERECTORS",
+        "UPPER_TRAPS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/GluteusMaximus/BBSumoDeadlift"
+    },
+    {
+      "id": "CHIN_UP",
+      "en": "Chin-up",
+      "ar": "عقلة بقبضة سفلية",
+      "equipment": [
+        "BODYWEIGHT",
+        "PULL_UP_BAR"
+      ],
+      "perSide": false,
+      "primary": [
+        "LATS",
+        "BICEPS"
+      ],
+      "secondary": [
+        "UPPER_BACK",
+        "CORE"
+      ],
+      "primaryDetail": [
+        "LATS",
+        "BICEPS",
+        "FOREARMS"
+      ],
+      "secondaryDetail": [
+        "MID_BACK",
+        "RECTUS_ABDOMINIS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/LatissimusDorsi/BWUnderhandChinup"
+    },
+    {
+      "id": "ARNOLD_PRESS",
+      "en": "Arnold press",
+      "ar": "ضغط أرنولد بالدمبل",
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": false,
+      "primary": [
+        "FRONT_DELTS"
+      ],
+      "secondary": [
+        "TRICEPS",
+        "UPPER_BACK"
+      ],
+      "primaryDetail": [
+        "FRONT_DELT",
+        "SIDE_DELT"
+      ],
+      "secondaryDetail": [
+        "TRICEPS",
+        "UPPER_TRAPS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/DeltoidAnterior/DBArnoldPress"
+    },
+    {
+      "id": "EZ_BAR_CURL",
+      "en": "EZ-bar curl",
+      "ar": "مرجحة بايسبس بالبار المتعرج",
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "primary": [
+        "BICEPS"
+      ],
+      "secondary": [
+        "FRONT_DELTS"
+      ],
+      "primaryDetail": [
+        "BICEPS",
+        "FOREARMS"
+      ],
+      "secondaryDetail": [
+        "FRONT_DELT"
+      ],
+      "reference": "https://exrx.net/WeightExercises/Biceps/BBEZBarCurl"
+    },
+    {
+      "id": "TRICEPS_KICKBACK",
+      "en": "Triceps kickback",
+      "ar": "رفس ترايسبس بالدمبل",
+      "equipment": [
+        "DUMBBELLS",
+        "BENCH"
+      ],
+      "perSide": true,
+      "primary": [
+        "TRICEPS"
+      ],
+      "secondary": [
+        "REAR_DELTS"
+      ],
+      "primaryDetail": [
+        "TRICEPS"
+      ],
+      "secondaryDetail": [
+        "REAR_DELT"
+      ],
+      "reference": "https://exrx.net/WeightExercises/Triceps/DBKickback"
+    },
+    {
+      "id": "WALKING_LUNGE",
+      "en": "Walking lunge",
+      "ar": "طعن متحرك بالدمبل",
+      "equipment": [
+        "DUMBBELLS"
+      ],
+      "perSide": true,
+      "primary": [
+        "QUADRICEPS",
+        "GLUTES"
+      ],
+      "secondary": [
+        "HAMSTRINGS",
+        "ADDUCTORS",
+        "CORE"
+      ],
+      "primaryDetail": [
+        "QUADRICEPS",
+        "GLUTE_MAX",
+        "GLUTE_MED"
+      ],
+      "secondaryDetail": [
+        "HAMSTRINGS",
+        "ADDUCTORS",
+        "RECTUS_ABDOMINIS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/Quadriceps/DBWalkingLunge"
+    },
+    {
+      "id": "AB_WHEEL_ROLLOUT",
+      "en": "Ab wheel rollout",
+      "ar": "تدحرج عجلة البطن على الركبتين",
+      "equipment": [
+        "BODYWEIGHT"
+      ],
+      "perSide": false,
+      "primary": [
+        "CORE"
+      ],
+      "secondary": [
+        "LATS",
+        "FRONT_DELTS"
+      ],
+      "primaryDetail": [
+        "RECTUS_ABDOMINIS",
+        "OBLIQUES"
+      ],
+      "secondaryDetail": [
+        "LATS",
+        "FRONT_DELT"
+      ],
+      "reference": "https://exrx.net/WeightExercises/RectusAbdominis/BWWheelRollout"
     }
   ]
 }

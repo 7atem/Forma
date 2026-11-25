@@ -14,7 +14,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import java.time.LocalDate
 
 @Entity(tableName="profile")
-data class ProfileRow(@PrimaryKey val id:Int=1,val name:String,val goal:String,val sessionsPerWeek:Int,val caloriesTarget:Int?,val proteinTarget:Double?,val carbsTarget:Double?=null,val fatTarget:Double?=null,val waterGoalMl:Int?=null)
+data class ProfileRow(@PrimaryKey val id:Int=1,val name:String,val goal:String,val sessionsPerWeek:Int,val caloriesTarget:Int?,val proteinTarget:Double?,val carbsTarget:Double?=null,val fatTarget:Double?=null,val waterGoalMl:Int?=null,val heightCm:Double?=null)
 @Entity(tableName="exercise_preferences")
 data class ExercisePreferenceRow(@PrimaryKey val exercise:String,val favorite:Boolean,val notes:String)
 @Entity(tableName="sessions",indices=[Index("day")])
@@ -48,6 +48,8 @@ data class SupplementIntakeRow(val day:Long,val supplementId:String)
 data class HealthWeightRow(@PrimaryKey val id:String,val day:Long,val weightKg:Double,val source:String)
 @Entity(tableName="health_workouts",indices=[Index("day")])
 data class HealthWorkoutRow(@PrimaryKey val id:String,val day:Long,val startAt:Long,val endAt:Long,val exerciseType:Int,val title:String,val source:String)
+@Entity(tableName="health_sleep")
+data class HealthSleepRow(@PrimaryKey val day:Long,val asleepMinutes:Double,val deepMinutes:Double?,val remMinutes:Double?,val lightMinutes:Double?,val awakeMinutes:Double?,val source:String)
 @Entity(tableName="programs")
 data class ProgramRow(@PrimaryKey val id:String,val name:String,val exercises:String,val restSeconds:Int,
     @ColumnInfo(defaultValue="'[]'") val prescriptions:String="[]")
@@ -108,13 +110,16 @@ interface FitnessDao {
     @Query("DELETE FROM supplements") suspend fun clearSupplements()
     @Query("SELECT * FROM health_weights ORDER BY day DESC") fun healthWeights():kotlinx.coroutines.flow.Flow<List<HealthWeightRow>>
     @Query("SELECT * FROM health_workouts ORDER BY startAt DESC") fun healthWorkouts():kotlinx.coroutines.flow.Flow<List<HealthWorkoutRow>>
+    @Query("SELECT * FROM health_sleep ORDER BY day DESC") fun healthSleep():kotlinx.coroutines.flow.Flow<List<HealthSleepRow>>
+    @Upsert suspend fun upsertHealthSleep(rows:List<HealthSleepRow>)
+    @Query("DELETE FROM health_sleep") suspend fun clearHealthSleep()
     @Upsert suspend fun upsertHealthWeights(rows:List<HealthWeightRow>)
     @Upsert suspend fun upsertHealthWorkouts(rows:List<HealthWorkoutRow>)
     @Query("DELETE FROM health_weights") suspend fun clearHealthWeights()
     @Query("DELETE FROM health_workouts") suspend fun clearHealthWorkouts()
     /** Imported copies are keyed by their Health Connect record ID, so re-importing never duplicates. */
-    @Transaction suspend fun importHealth(weights:List<HealthWeightRow>,workouts:List<HealthWorkoutRow>) {upsertHealthWeights(weights);upsertHealthWorkouts(workouts)}
-    @Transaction suspend fun removeHealthImports() {clearHealthWeights();clearHealthWorkouts()}
+    @Transaction suspend fun importHealth(weights:List<HealthWeightRow>,workouts:List<HealthWorkoutRow>,sleep:List<HealthSleepRow>) {upsertHealthWeights(weights);upsertHealthWorkouts(workouts);upsertHealthSleep(sleep)}
+    @Transaction suspend fun removeHealthImports() {clearHealthWeights();clearHealthWorkouts();clearHealthSleep()}
     /** One-time copy of records older builds kept in plain preferences; upserts by ID so repeating it is harmless. */
     @Transaction suspend fun importLocalRecords(exercises:List<CustomExerciseRow>,sets:List<CustomSetRow>,supplements:List<SupplementRow>,intakes:List<SupplementIntakeRow>) {
         exercises.forEach {saveCustomExercise(it)};sets.forEach {addCustomSet(it)}
@@ -130,7 +135,7 @@ interface FitnessDao {
     }
     @Transaction
     suspend fun readSnapshot():FitnessSnapshot=FitnessSnapshot(
-        readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget,it.carbsTarget,it.fatTarget,it.waterGoalMl)},
+        readProfile()?.let {Profile(it.name,Goal.valueOf(it.goal),it.sessionsPerWeek,it.caloriesTarget,it.proteinTarget,it.carbsTarget,it.fatTarget,it.waterGoalMl,it.heightCm)},
         allSessions().map {Session(it.id,LocalDate.ofEpochDay(it.day),it.templateId,it.completedAt,it.label,Json.decodeFromString(it.exerciseOrder),it.restSeconds,SessionSource.valueOf(it.source),it.averageHeartRateBpm,it.activeEnergyKcal,it.healthKitWorkoutId,Json.decodeFromString(it.prescriptions))},
         allSets().map {TrainingSet(it.id,it.sessionId,Exercise.valueOf(it.exercise),it.reps,it.weightKg,SetKind.valueOf(it.kind),it.rpe)},
         allMeals().map {Meal(it.id,LocalDate.ofEpochDay(it.day),it.name,it.calories,it.protein,it.carbs,it.fat,it.foodId,it.quantity,it.unit?.let(NutritionUnit::valueOf),it.source,MealSlot.valueOf(it.slot))},
@@ -260,7 +265,7 @@ interface FitnessDao {
     }
 }
 
-internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget,carbsTarget=carbsTarget,fatTarget=fatTarget,waterGoalMl=waterGoalMl)
+internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget,carbsTarget=carbsTarget,fatTarget=fatTarget,waterGoalMl=waterGoalMl,heightCm=heightCm)
 internal fun CustomExercise.row()=CustomExerciseRow(id,name,equipment.name,primaryMuscle.name,notes)
 internal fun CustomExerciseSet.row()=CustomSetRow(id,exerciseId,date.toEpochDay(),reps,weightKg,warmUp)
 internal fun Supplement.row()=SupplementRow(id,name,dose)
@@ -273,10 +278,15 @@ internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
 internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
 internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
-@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class,HealthWeightRow::class,HealthWorkoutRow::class],version=8,exportSchema=true)
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class,HealthWeightRow::class,HealthWorkoutRow::class,HealthSleepRow::class],version=9,exportSchema=true)
 abstract class FitnessDatabase:RoomDatabase() {
     abstract fun dao():FitnessDao
     companion object {
+        val MIGRATION_8_9=object:Migration(8,9) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                MIGRATION_8_9_SQL.forEach(db::execSQL)
+            }
+        }
         val MIGRATION_7_8=object:Migration(7,8) {
             override fun migrate(db:SupportSQLiteDatabase) {
                 MIGRATION_7_8_SQL.forEach(db::execSQL)
@@ -344,7 +354,7 @@ abstract class FitnessDatabase:RoomDatabase() {
             System.loadLibrary("sqlcipher")
             val key=KeystoreManager(context.applicationContext).getOrCreateDatabasePassphrase()
             return Room.databaseBuilder(context.applicationContext,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6,MIGRATION_6_7,MIGRATION_7_8).build()
+                .openHelperFactory(SupportOpenHelperFactory(key)).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6,MIGRATION_6_7,MIGRATION_7_8,MIGRATION_8_9).build()
         }
     }
 }
@@ -366,4 +376,10 @@ internal val MIGRATION_7_8_SQL=listOf(
     "CREATE INDEX IF NOT EXISTS `index_health_weights_day` ON `health_weights` (`day`)",
     "CREATE TABLE IF NOT EXISTS `health_workouts` (`id` TEXT NOT NULL, `day` INTEGER NOT NULL, `startAt` INTEGER NOT NULL, `endAt` INTEGER NOT NULL, `exerciseType` INTEGER NOT NULL, `title` TEXT NOT NULL, `source` TEXT NOT NULL, PRIMARY KEY(`id`))",
     "CREATE INDEX IF NOT EXISTS `index_health_workouts_day` ON `health_workouts` (`day`)",
+)
+
+/** Must match the Room v9 schema export exactly (schemas/com.formacoach.data.FitnessDatabase/9.json). */
+internal val MIGRATION_8_9_SQL=listOf(
+    "ALTER TABLE profile ADD COLUMN heightCm REAL",
+    "CREATE TABLE IF NOT EXISTS `health_sleep` (`day` INTEGER NOT NULL, `asleepMinutes` REAL NOT NULL, `deepMinutes` REAL, `remMinutes` REAL, `lightMinutes` REAL, `awakeMinutes` REAL, `source` TEXT NOT NULL, PRIMARY KEY(`day`))",
 )

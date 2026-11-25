@@ -1220,6 +1220,166 @@
           "تنفّس بانتظام من غير هبوط الحوض أو رفعه للأعلى."
         ]
       }
+    },
+    {
+      "id": "HACK_SQUAT",
+      "variant": {
+        "en": "Machine hack squat",
+        "ar": "سكوات هاك على الجهاز المائل"
+      },
+      "reference": "https://exrx.net/WeightExercises/Quadriceps/SLHackSquat",
+      "cues": {
+        "en": [
+          "Rest your back flat against the pad, secure shoulders under pads, and plant feet on the platform.",
+          "Lower the sled under control until thighs are near parallel while keeping heels flat.",
+          "Drive through the whole foot to stand without snapping or locking the knees."
+        ],
+        "ar": [
+          "أسند ظهرك بالكامل على المسند وثبّت الكتفين تحت الوسادات وضع قدميك بثبات على المنصة.",
+          "انزل بالزلاجة بتحكم حتى تقارب الفخذان التوازي مع إبقاء الكعبين ثابتين.",
+          "ادفع بكامل القدم للصعود دون قفل مفاجئ للركبتين."
+        ]
+      }
+    },
+    {
+      "id": "SUMO_DEADLIFT",
+      "variant": {
+        "en": "Sumo barbell deadlift",
+        "ar": "رفعة ميتة سومو بالبار"
+      },
+      "reference": "https://exrx.net/WeightExercises/GluteusMaximus/BBSumoDeadlift",
+      "cues": {
+        "en": [
+          "Take a wide stance with toes angled out and grip the bar inside your knees with straight arms.",
+          "Keep your chest proud and back flat as you push the floor apart with your legs.",
+          "Stand tall to full hip lockout without leaning backward, then lower with control."
+        ],
+        "ar": [
+          "قف بوقفة واسعة مع توجيه أصابع القدم للخارج وأمسك البار من داخل الركبتين بذراعين مستقيمين.",
+          "أبقِ صدرك مرفوعًا وظهرك مستقيمًا أثناء الدفع بالساقين لرفع البار قريبًا من الساقين.",
+          "قف باستقامة كاملة عند القمة دون إمالة الظهر للخلف ثم أنزل البار بتحكم."
+        ]
+      }
+    },
+    {
+      "id": "CHIN_UP",
+      "variant": {
+        "en": "Underhand chin-up",
+        "ar": "عقلة بقبضة سفلية ضيقة"
+      },
+      "reference": "https://exrx.net/WeightExercises/LatissimusDorsi/BWUnderhandChinup",
+      "cues": {
+        "en": [
+          "Grip the bar shoulder-width with palms facing you and hang with engaged shoulders.",
+          "Drive your elbows down toward your ribs until your chin clears the bar.",
+          "Lower smoothly under control to a full straight-arm hang without swinging."
+        ],
+        "ar": [
+          "أمسك البار بعرض الكتفين وراحتا اليدين باتجاهك وتعلّق مع تثبيت الكتفين.",
+          "اسحب المرفقين لأسفل باتجاه الأضلاع حتى يرتفع الذقن فوق البار.",
+          "انزل ببطء وتحكم حتى استقامة الذراعين بالكامل دون أرجحة."
+        ]
+      }
+    },
+    {
+      "id": "ARNOLD_PRESS",
+      "variant": {
+        "en": "Seated Arnold dumbbell press",
+        "ar": "ضغط أرنولد جالسًا بالدمبل"
+      },
+      "reference": "https://exrx.net/WeightExercises/DeltoidAnterior/DBArnoldPress",
+      "cues": {
+        "en": [
+          "Sit upright with back supported and hold dumbbells in front of shoulders, palms facing you.",
+          "Rotate palms forward smoothly as you press the dumbbells overhead.",
+          "Lower with control while rotating palms back toward your chest."
+        ],
+        "ar": [
+          "اجلس باستقامة مع إسناد الظهر واحمل الدمبل أمام الكتفين وراحتا اليدين باتجاهك.",
+          "أدر راحتي اليدين للأمام بسلاسة أثناء دفع الدمبل لأعلى فوق الرأس.",
+          "أنزل الدمبل بتحكم مع إعادة تدوير راحتي اليدين باتجاه الصدر."
+        ]
+      }
+    },
+    {
+      "id": "EZ_BAR_CURL",
+      "variant": {
+        "en": "Standing EZ-bar biceps curl",
+        "ar": "مرجحة بايسبس واقفًا بالبار المتعرج"
+      },
+      "reference": "https://exrx.net/WeightExercises/Biceps/BBEZBarCurl",
+      "cues": {
+        "en": [
+          "Stand tall holding the angled inner grips of the EZ-bar with elbows tucked beside your ribs.",
+          "Curl the bar smoothly toward your shoulders without swinging your torso.",
+          "Lower slowly under control to comfortable full arm extension."
+        ],
+        "ar": [
+          "قف باستقامة ممسكًا بالمقبضين المائلين للبار المتعرج مع تثبيت المرفقين بجانب الأضلاع.",
+          "ارفع البار بسلاسة باتجاه الكتفين دون أرجحة الجذع.",
+          "أنزل البار ببطء وتحكم حتى امتداد الذراعين بارتياح."
+        ]
+      }
+    },
+    {
+      "id": "TRICEPS_KICKBACK",
+      "variant": {
+        "en": "Dumbbell triceps kickback",
+        "ar": "رفس ترايسبس بالدمبل على المقعد"
+      },
+      "reference": "https://exrx.net/WeightExercises/Triceps/DBKickback",
+      "cues": {
+        "en": [
+          "Support one knee and hand on a flat bench with a neutral spine and upper arm parallel to your torso.",
+          "Extend the elbow smoothly straight back while keeping the upper arm still.",
+          "Lower back to 90 degrees with control; log reps per side."
+        ],
+        "ar": [
+          "أسند ركبة ويدًا على مقعد مسطح مع استقامة الظهر وتثبيت العضد موازيًا للجذع.",
+          "افرد المرفق بسلاسة للخلف مع بقاء العضد ثابتًا بجانب الجذع.",
+          "أعد الساعد ببطء لزاوية قائمة؛ سجّل التكرارات لكل جانب."
+        ]
+      }
+    },
+    {
+      "id": "WALKING_LUNGE",
+      "variant": {
+        "en": "Dumbbell walking lunge",
+        "ar": "طعن متحرك للأمام بالدمبل"
+      },
+      "reference": "https://exrx.net/WeightExercises/Quadriceps/DBWalkingLunge",
+      "cues": {
+        "en": [
+          "Hold dumbbells at your sides and step forward into a controlled stride with an upright torso.",
+          "Lower the back knee gently toward the floor while keeping the front heel planted.",
+          "Drive through the front foot to step into the next rep; log reps per side."
+        ],
+        "ar": [
+          "احمل الدمبل بجانبيك واخطُ للأمام بخطوة متزنة مع إبقاء الجذع مستقيمًا.",
+          "اخفض الركبة الخلفية برفق نحو الأرض مع إبقاء كعب القدم الأمامية ثابتًا.",
+          "ادفع بالقدم الأمامية للانتقال للخطوة التالية؛ سجّل التكرارات لكل جانب."
+        ]
+      }
+    },
+    {
+      "id": "AB_WHEEL_ROLLOUT",
+      "variant": {
+        "en": "Kneeling ab wheel rollout",
+        "ar": "تدحرج عجلة البطن من الركوع"
+      },
+      "reference": "https://exrx.net/WeightExercises/RectusAbdominis/BWWheelRollout",
+      "cues": {
+        "en": [
+          "Kneel on a mat gripping the wheel under your shoulders with ribs tucked and glutes braced.",
+          "Roll forward slowly with straight arms as far as you can without letting the lower back sag.",
+          "Pull back smoothly through your core and lats to the kneeling start position."
+        ],
+        "ar": [
+          "اركع على بساط ممسكًا بالعجلة تحت الكتفين مع شد البطن والأرداف.",
+          "تدحرج للأمام ببطء بذراعين مستقيمين لأقصى مدى مريح دون تقوّس أسفل الظهر.",
+          "اسحب نفسك بسلاسة بالبطن والظهر للعودة إلى وضع البداية."
+        ]
+      }
     }
   ]
 }

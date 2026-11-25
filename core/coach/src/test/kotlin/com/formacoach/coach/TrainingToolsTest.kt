@@ -32,7 +32,7 @@ class TrainingToolsTest {
         assertFalse(csv.contains("draft"))
     }
     @Test fun similarFocusAndEquipmentPreserveCatalogIdentityAndAllowEmptySupportingRoles() {
-        assertEquals(61,Exercise.entries.size)
+        assertEquals(69,Exercise.entries.size)
         assertEquals(listOf(Exercise.SQUAT,Exercise.LEG_PRESS,Exercise.CHEST_PRESS,Exercise.ROW,Exercise.LAT_PULLDOWN,Exercise.HIP_HINGE,Exercise.SHOULDER_PRESS,Exercise.SPLIT_SQUAT),Exercise.entries.take(8))
         assertTrue(Equipment.BARBELL in ExerciseCatalog.of(Exercise.BARBELL_BACK_SQUAT).equipment)
         assertTrue(Exercise.PUSH_UP in ExerciseCatalog.similar(Exercise.DUMBBELL_BENCH_PRESS))

@@ -306,6 +306,46 @@
       "id": "plank",
       "tool": "image_gen (built-in)",
       "prompt": "Original Forma 3D two-phase demonstration render for Forearm plank (Braced forearm plank) in dark forest-green studio #10231D."
+    },
+    {
+      "id": "hack_squat",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: machine hack squat standing start on left, deep controlled squat on right."
+    },
+    {
+      "id": "sumo_deadlift",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: sumo barbell deadlift wide stance floor setup on left, upright lockout on right."
+    },
+    {
+      "id": "chin_up",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: underhand chin-up dead hang on left, chin above bar on right."
+    },
+    {
+      "id": "arnold_press",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: seated Arnold dumbbell press palms-in start on left, overhead press on right."
+    },
+    {
+      "id": "ez_bar_curl",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: standing EZ-bar curl arms down on left, curled to chest on right."
+    },
+    {
+      "id": "triceps_kickback",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: dumbbell triceps kickback on flat bench, 90-degree bent elbow on left, extended back on right."
+    },
+    {
+      "id": "walking_lunge",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: dumbbell walking lunge standing start on left, deep forward lunge on right."
+    },
+    {
+      "id": "ab_wheel_rollout",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: kneeling ab wheel rollout upright start on left, extended rollout on right."
     }
   ]
 }
