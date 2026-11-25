@@ -321,12 +321,6 @@
 "sleep_stages" = "عميق %@ · حركة العين السريعة %@ · أساسي %@";
 "duration_hm" = "%@ س %@ د";
 "sleep_note" = "نسخة للقراءة فقط من Apple Health. الليالي الناقصة غير معروفة. نتيجة النوم من Apple غير متاحة للتطبيقات، وفورمة لا تقيّم النوم.";
-"pr_wall_title" = "الأرقام القياسية";
-"pr_wall_empty" = "أنهِ تمرينًا بمجموعات أساسية لعرض أرقامك القياسية هنا.";
-"pr_entry_detail" = "%@ × %ld · حد أقصى تقديري %@ · %@";
-"show_all_prs" = "عرض الكل (%ld)";
-"show_less_prs" = "عرض أقل";
 "frequent_meals_title" = "إعادة تسجيل سريعة";
 "frequent_meal_chip" = "%@ · %ld سعرة";
 "share_workout_summary" = "مشاركة الملخص";
-"session_elapsed" = "المدة %@";

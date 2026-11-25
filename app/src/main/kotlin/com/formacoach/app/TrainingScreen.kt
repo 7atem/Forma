@@ -242,21 +242,6 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
     var timerDuration by rememberSaveable(session.id) { mutableIntStateOf(session.restSeconds) }
     var flowNotice by rememberSaveable(session.id) { mutableStateOf<Int?>(null) }
     var elapsed by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
-    val sessionStartElapsed = rememberSaveable(session.id) { SystemClock.elapsedRealtime() }
-    var sessionClockNow by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
-    LaunchedEffect(session.id) {
-        while (true) {
-            sessionClockNow = SystemClock.elapsedRealtime()
-            delay(1000)
-        }
-    }
-    val sessionElapsedSec = ((sessionClockNow - sessionStartElapsed).coerceAtLeast(0L) / 1000L).toInt()
-    val sessionElapsedText = remember(sessionElapsedSec) {
-        val h = sessionElapsedSec / 3600
-        val m = (sessionElapsedSec % 3600) / 60
-        val s = sessionElapsedSec % 60
-        if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
-    }
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val currentExerciseName = stringResource(exerciseLabel(exercise))
@@ -384,7 +369,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
                 Text(
-                    "${stringResource(R.string.session_status, number(sets.size.toDouble(), 0), dateLabel(session.date))} · ${stringResource(R.string.session_elapsed, sessionElapsedText)}",
+                    stringResource(R.string.session_status, number(sets.size.toDouble(), 0), dateLabel(session.date)),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -1174,6 +1159,7 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                     val res = LocalContext.current.resources
                     val unit = LocalWeightUnit.current
                     val unitText = weightUnitLabel()
+                    val bodyweightText = stringResource(R.string.bodyweight_load)
                     var copied by remember(latest.id) { mutableStateOf(false) }
                     val title = sessionTitle(latest, state.snapshot.programs)
                     val dateStr = dateLabel(latest.date)
@@ -1187,6 +1173,7 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
                                 sets = latestSets,
                                 exerciseName = { res.getString(exerciseLabel(it)) },
                                 formatLoad = { kg ->
+                                    if (kg <= 0.0) return@formatRecap bodyweightText
                                     val v = WeightUnits.fromKg(kg, unit)
                                     val s = if (v == kotlin.math.floor(v)) v.toInt().toString() else "%.1f".format(v)
                                     "$s $unitText"

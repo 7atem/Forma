@@ -506,16 +506,8 @@
     <string name="sleep_stages">عميق %1$s · حركة العين السريعة %2$s · خفيف %3$s</string>
     <string name="duration_hm">%1$s س %2$s د</string>
     <string name="sleep_note">نسخة للقراءة فقط من Health Connect. الليالي الناقصة غير معروفة. فورمة تعرض المدة والمراحل فقط ولا تقيّم النوم.</string>
-    <string name="session_elapsed">المدة %1$s</string>
-    <string name="pr_wall_title">الأرقام القياسية</string>
-    <string name="pr_wall_empty">أنهِ تمرينًا بمجموعات أساسية لعرض أرقامك القياسية هنا.</string>
-    <string name="pr_entry_detail">%1$s × %2$s · حد أقصى تقديري %3$s · %4$s</string>
-    <string name="weekly_muscle_volume_title">حجم العضلات (7 أيام)</string>
-    <string name="muscle_sets_primary_supporting">%1$s أساسية · %2$s مساعدة</string>
-    <string name="muscle_sets_primary_only">%1$s مجموعات أساسية</string>
     <string name="frequent_meals_title">إعادة تسجيل سريعة</string>
     <string name="frequent_meal_chip">%1$s · %2$s سعرة</string>
-    <string name="show_all_prs">عرض الكل (%1$s)</string>
     <string name="copy_workout_summary">نسخ الملخص</string>
     <string name="copied_workout_summary">تم النسخ!</string>
 </resources>

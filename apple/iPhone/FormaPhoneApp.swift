@@ -338,7 +338,7 @@ private struct MealSlotOption: Identifiable {
                                         }
                                     }
                                     HStack(spacing: 12) {
-                                        ShareLink(item: WorkoutInsights.formatRecap(workout: workout, arabic: arabic, useLb: useLb)) {
+                                        ShareLink(item: phoneWorkoutRecap(workout, arabic: arabic, useLb: useLb)) {
                                             Label("share_workout_summary", systemImage: "square.and.arrow.up")
                                                 .font(.subheadline.weight(.semibold))
                                                 .foregroundStyle(FormaTheme.primary)
@@ -511,7 +511,6 @@ private struct MealSlotOption: Identifiable {
     @State private var showSwap = false
     @State private var confirmFinish = false
     @State private var confirmDiscard = false
-    @State private var sessionStartedAt = Date()
     @AppStorage("forma_use_lb") private var useLb = false
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
@@ -538,17 +537,9 @@ private struct MealSlotOption: Identifiable {
                         Text(draft.program.name)
                             .font(.title2.weight(.bold))
                             .foregroundStyle(FormaTheme.textPrimary)
-                        TimelineView(.periodic(from: sessionStartedAt, by: 1)) { ctx in
-                            let sec = max(0, Int(ctx.date.timeIntervalSince(sessionStartedAt)))
-                            let h = sec / 3600
-                            let m = (sec % 3600) / 60
-                            let s = sec % 60
-                            let clock = h > 0 ? String(format: "%d:%02d:%02d", h, m, s) : String(format: "%02d:%02d", m, s)
-                            Text("\(draft.sets.count) \(String(localized: "sets")) · \(String(format: String(localized: "session_elapsed"), clock))")
-                                .font(.caption)
-                                .monospacedDigit()
-                                .foregroundStyle(FormaTheme.textMuted)
-                        }
+                        Text("\(draft.sets.count) \(String(localized: "sets"))")
+                            .font(.caption)
+                            .foregroundStyle(FormaTheme.textMuted)
                     }
                     Spacer()
                     if tonnage > 0 {
@@ -1687,62 +1678,7 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    // 1-Tap Frequent Meals Quick Re-log (mirrors Android NutritionScreen)
-                    let frequentMeals: [PhoneMeal] = {
-                        var grouped: [String: [PhoneMeal]] = [:]
-                        for m in store.state.meals {
-                            let key = "\(m.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(Int(m.calories.rounded()))"
-                            grouped[key, default: []].append(m)
-                        }
-                        return grouped.values
-                            .sorted { a, b in
-                                if a.count != b.count { return a.count > b.count }
-                                return (a.last?.date ?? "") > (b.last?.date ?? "")
-                            }
-                            .compactMap { $0.last }
-                            .prefix(8)
-                            .map { $0 }
-                    }()
-                    if !frequentMeals.isEmpty {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("frequent_meals_title")
-                                .font(.subheadline.weight(.bold))
-                                .foregroundStyle(FormaTheme.textPrimary)
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 8) {
-                                    ForEach(frequentMeals) { item in
-                                        Button {
-                                            FormaHaptics.success()
-                                            let quick = PhoneMeal(
-                                                date: dayKey,
-                                                name: item.name,
-                                                calories: item.calories,
-                                                protein: item.protein,
-                                                carbs: item.carbs,
-                                                fat: item.fat,
-                                                slot: selectedSlot
-                                            )
-                                            store.attempt { try store.addMeal(quick) }
-                                        } label: {
-                                            HStack(spacing: 6) {
-                                                Image(systemName: "arrow.counterclockwise")
-                                                    .font(.caption.weight(.bold))
-                                                Text(String(format: String(localized: "frequent_meal_chip"), item.name, Int(item.calories.rounded())))
-                                                    .font(.caption.weight(.semibold))
-                                                    .lineLimit(1)
-                                            }
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 8)
-                                            .background(FormaTheme.surface, in: Capsule())
-                                            .overlay(Capsule().stroke(FormaTheme.outline, lineWidth: 1))
-                                            .foregroundStyle(FormaTheme.textPrimary)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    PhoneQuickRelogRow(store: store, dayKey: dayKey, slot: selectedSlot)
 
                     // The day's diary comes right after the summary; entry tools follow (matches Android).
                     Text("logged_entries_heading").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
@@ -2386,7 +2322,6 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
-                    PhonePersonalRecordsCard(workouts: store.state.workouts, useLb: useLb)
                     PhoneBmiCard(store: store)
                     PhoneSleepCard(store: store)
                     PhoneNutritionTrendCard(store: store)
@@ -2486,63 +2421,78 @@ private struct MealSlotOption: Identifiable {
     }
 }
 
-/// Personal records trophy wall on the iPhone Progress tab (mirrors Android PersonalRecordsCard).
-@MainActor private struct PhonePersonalRecordsCard: View {
-    let workouts: [WatchWorkout]
-    let useLb: Bool
-    @State private var expanded = false
-    @Environment(\.locale) private var locale
-    private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
+/// Shareable plain-text recap of working sets, in the app language (warm-ups excluded).
+@MainActor private func phoneWorkoutRecap(_ workout: WatchWorkout, arabic: Bool, useLb: Bool) -> String {
+    WorkoutInsights.formatRecap(
+        workout: workout,
+        exerciseName: { $0.label(arabic: arabic) },
+        formatLoad: { $0 > 0 ? FormaTheme.formatWeight($0, useLb: useLb) : String(localized: "bodyweight_load") },
+        setsLabel: { "\($0) \(String(localized: "sets"))" },
+        volumeLabel: { FormaTheme.formatWeight($0, useLb: useLb) }
+    )
+}
+
+/// One-tap re-log of the most frequently logged meals; each tap adds a new meal for the shown day.
+@MainActor private struct PhoneQuickRelogRow: View {
+    @ObservedObject var store: LocalStore
+    let dayKey: String
+    let slot: String
+
+    private var frequent: [PhoneMeal] {
+        var groups: [String: (count: Int, latest: PhoneMeal)] = [:]
+        for meal in store.state.meals {
+            let key = "\(meal.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(Int(meal.calories.rounded()))"
+            if let current = groups[key] {
+                groups[key] = (current.count + 1, meal.date >= current.latest.date ? meal : current.latest)
+            } else {
+                groups[key] = (1, meal)
+            }
+        }
+        let ranked = groups.values.sorted { a, b in
+            a.count != b.count ? a.count > b.count : a.latest.date > b.latest.date
+        }
+        return Array(ranked.prefix(8).map(\.latest))
+    }
 
     var body: some View {
-        let prs = WorkoutInsights.personalRecords(workouts: workouts)
-        FormaCard {
-            HStack(spacing: 8) {
-                Image(systemName: "trophy.fill")
-                    .foregroundStyle(FormaTheme.primary)
-                Text("pr_wall_title")
-                    .font(.headline.weight(.bold))
+        let items = frequent
+        if !items.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("frequent_meals_title")
+                    .font(.subheadline.weight(.bold))
                     .foregroundStyle(FormaTheme.textPrimary)
-                Spacer()
-            }
-            if prs.isEmpty {
-                Text("pr_wall_empty")
-                    .font(.subheadline)
-                    .foregroundStyle(FormaTheme.textMuted)
-            } else {
-                let shown = expanded ? prs : Array(prs.prefix(5))
-                VStack(alignment: .leading, spacing: 10) {
-                    ForEach(shown) { pr in
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(pr.exercise.label(arabic: arabic))
-                                .font(.subheadline.weight(.bold))
-                                .foregroundStyle(FormaTheme.textPrimary)
-                                .lineLimit(1)
-                            Text(String(
-                                format: String(localized: "pr_entry_detail"),
-                                FormaTheme.formatWeight(pr.weightKg, useLb: useLb),
-                                pr.repsAtWeight,
-                                FormaTheme.formatWeight(pr.bestE1rmKg, useLb: useLb),
-                                pr.date
-                            ))
-                            .font(.caption)
-                            .foregroundStyle(FormaTheme.textMuted)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(items) { item in
+                            chip(item)
                         }
                     }
                 }
-                if prs.count > 5 {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
-                    } label: {
-                        Text(expanded
-                            ? String(localized: "show_less_prs")
-                            : String(format: String(localized: "show_all_prs"), prs.count))
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(FormaTheme.primary)
-                    }
-                    .buttonStyle(.plain)
-                }
             }
         }
+    }
+
+    private func chip(_ item: PhoneMeal) -> some View {
+        Button {
+            FormaHaptics.success()
+            let quick = PhoneMeal(date: dayKey, name: item.name, calories: item.calories, protein: item.protein,
+                                  carbs: item.carbs, fat: item.fat, slot: slot)
+            store.attempt { try store.addMeal(quick) }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.caption.weight(.bold))
+                Text(String(format: String(localized: "frequent_meal_chip"), item.name, Int(item.calories.rounded())))
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
+            .background(FormaTheme.surface, in: Capsule())
+            .overlay(Capsule().stroke(FormaTheme.outline, lineWidth: 1))
+            .foregroundStyle(FormaTheme.textPrimary)
+        }
+        .buttonStyle(.plain)
     }
 }

@@ -506,16 +506,8 @@
     <string name="sleep_stages">Deep %1$s · REM %2$s · Light %3$s</string>
     <string name="duration_hm">%1$s h %2$s min</string>
     <string name="sleep_note">Read-only copy from Health Connect. Missing nights are unknown. Forma shows duration and stages only; it does not score or assess sleep.</string>
-    <string name="session_elapsed">Elapsed %1$s</string>
-    <string name="pr_wall_title">Personal records</string>
-    <string name="pr_wall_empty">Complete a workout with working sets to see your records here.</string>
-    <string name="pr_entry_detail">%1$s × %2$s · est. 1RM %3$s · %4$s</string>
-    <string name="weekly_muscle_volume_title">7-day muscle volume</string>
-    <string name="muscle_sets_primary_supporting">%1$s main · %2$s supporting</string>
-    <string name="muscle_sets_primary_only">%1$s main sets</string>
     <string name="frequent_meals_title">Quick re-log</string>
     <string name="frequent_meal_chip">%1$s · %2$s kcal</string>
-    <string name="show_all_prs">Show all (%1$s)</string>
     <string name="copy_workout_summary">Copy summary</string>
     <string name="copied_workout_summary">Copied!</string>
 </resources>
