@@ -39,7 +39,7 @@ internal fun NutritionTrendCard(snapshot: FitnessSnapshot, today: LocalDate) {
     InfoCard(Modifier.testTag("nutrition_trend_card")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.nutrition_trends_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.nutrition_trends_title, R.string.trend_unlogged_note)
+            SectionInfoButton(InfoTopic.NUTRITION_TRENDS)
         }
         SegmentedTabs(
             selectedIndex = range,
@@ -129,7 +129,7 @@ internal fun TrainingTrendCard(snapshot: FitnessSnapshot, today: LocalDate) {
     InfoCard(Modifier.testTag("training_trend_card")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.training_trends_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.training_trends_title, R.string.training_trend_note)
+            SectionInfoButton(InfoTopic.TRAINING_TRENDS)
         }
         if (active.isEmpty()) {
             Text(stringResource(R.string.training_trend_empty), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -183,7 +183,7 @@ internal fun BmiCard(snapshot: FitnessSnapshot) {
     InfoCard(Modifier.testTag("bmi_card")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.bmi_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.bmi_title, R.string.bmi_note)
+            SectionInfoButton(InfoTopic.BMI)
         }
         when {
             bmi != null && latest != null && height != null -> {
@@ -212,7 +212,7 @@ internal fun SleepCard(vm: FitnessViewModel, today: LocalDate) {
     InfoCard(Modifier.testTag("sleep_card")) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.sleep_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.sleep_title, R.string.sleep_note)
+            SectionInfoButton(InfoTopic.SLEEP)
         }
         Text(description, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
         Canvas(Modifier.fillMaxWidth().height(100.dp).clearAndSetSemantics { contentDescription = description }) {

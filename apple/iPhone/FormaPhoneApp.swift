@@ -1,20 +1,28 @@
 import SwiftUI
 import FormaCore
+import UserNotifications
 
 @main @MainActor struct FormaPhoneApp: App {
     @StateObject private var store: LocalStore
     @StateObject private var bridge: WatchBridge
+    @StateObject private var notifications: PhoneNotificationDelegate
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @AppStorage("forma_lang") private var appLang = ""
     init() {
         let storage = LocalStore()
         _store = StateObject(wrappedValue: storage)
         _bridge = StateObject(wrappedValue: WatchBridge(store: storage))
+        // Set before launch finishes so a tap on a reminder that opened the app is still handled.
+        let delegate = PhoneNotificationDelegate()
+        delegate.store = storage
+        UNUserNotificationCenter.current().delegate = delegate
+        PhoneReminders.registerCategories()
+        _notifications = StateObject(wrappedValue: delegate)
     }
     var body: some Scene {
         let scheme = FormaThemeMode.resolved(rawValue: themeModeRaw).colorScheme
         WindowGroup {
-            PhoneRoot(store: store, bridge: bridge)
+            PhoneRoot(store: store, bridge: bridge, notifications: notifications)
                 .preferredColorScheme(scheme)
                 .environment(\.locale, appLang.isEmpty ? .current : Locale(identifier: appLang))
                 .environment(\.layoutDirection, appLang == "ar" ? .rightToLeft : (appLang == "en" ? .leftToRight : (Locale.current.language.languageCode?.identifier == "ar" ? .rightToLeft : .leftToRight)))
@@ -26,6 +34,8 @@ import FormaCore
 @MainActor private struct PhoneRoot: View {
     @ObservedObject var store: LocalStore
     @ObservedObject var bridge: WatchBridge
+    @ObservedObject var notifications: PhoneNotificationDelegate
+    @Environment(\.scenePhase) private var scenePhase
     @AppStorage(FormaThemeMode.storageKey) private var themeModeRaw = ""
     @State private var deleting: String?
     @State private var showBridge = false
@@ -70,6 +80,18 @@ import FormaCore
                 }
                 .tint(FormaTheme.primary)
             }
+        }
+        // A tapped reminder opens its tab: Train, Eat or Progress.
+        .onChange(of: notifications.requestedTab) { _, tab in
+            guard let tab else { return }
+            selectedTab = tab
+            notifications.requestedTab = nil
+        }
+        // Re-arm reminders when the app comes forward and whenever today's log gains or loses a record,
+        // so "skip if already logged" reflects what is on this iPhone.
+        .task(id: PhoneReminders.todaySignature(store: store)) { PhoneReminders.rescheduleAll(store: store) }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { PhoneReminders.rescheduleAll(store: store) }
         }
         .sheet(isPresented: $showSettings) {
             PhoneSettingsSheet(store: store, onOpenBridge: { showBridge = true })
@@ -213,9 +235,13 @@ private struct MealSlotOption: Identifiable {
                                 .map { PRCardItem(exercise: $0.exercise, weight: $0.weightKg, reps: $0.reps, e1rm: FormaTheme.estimatedOneRepMax(weightKg: $0.weightKg, reps: $0.reps)) }
                         }()
                         if !prs.isEmpty {
-                            Text("personal_records_title")
-                                .font(.title3.weight(.bold))
-                                .foregroundStyle(FormaTheme.textPrimary)
+                            HStack {
+                                Text("personal_records_title")
+                                    .font(.title3.weight(.bold))
+                                    .foregroundStyle(FormaTheme.textPrimary)
+                                Spacer()
+                                SectionInfoButton(topic: .personalRecords)
+                            }
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 10) {
                                     ForEach(prs) { item in
@@ -263,6 +289,7 @@ private struct MealSlotOption: Identifiable {
                             Text("programs")
                                 .font(.title2.weight(.bold))
                                 .foregroundStyle(FormaTheme.textPrimary)
+                            SectionInfoButton(topic: .programs)
                             Spacer()
                             Button { creatingProgram = true } label: {
                                 HStack(spacing: 4) {
@@ -541,6 +568,7 @@ private struct MealSlotOption: Identifiable {
                             .font(.caption)
                             .foregroundStyle(FormaTheme.textMuted)
                     }
+                    SectionInfoButton(topic: .logSets)
                     Spacer()
                     if tonnage > 0 {
                         VStack(alignment: .trailing, spacing: 2) {
@@ -1543,6 +1571,7 @@ private struct MealSlotOption: Identifiable {
                             Text(isToday ? LocalizedStringKey("food_today") : LocalizedStringKey(dayKey))
                                 .font(.headline.weight(.bold))
                                 .foregroundStyle(FormaTheme.textPrimary)
+                            SectionInfoButton(topic: .foodDay)
                             Spacer()
                             Button {
                                 FormaHaptics.tap()
@@ -1760,7 +1789,10 @@ private struct MealSlotOption: Identifiable {
                         HStack(spacing: 8) {
                             Image(systemName: "drop.fill").foregroundStyle(FormaTheme.tertiary)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text("hydration_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                                HStack(spacing: 0) {
+                                    Text("hydration_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                                    SectionInfoButton(topic: .hydration)
+                                }
                                 Text(waterGoal.map { "\(waterMl) / \($0) ml" } ?? "\(waterMl) ml")
                                     .font(.caption2.weight(.semibold))
                                     .foregroundStyle(FormaTheme.tertiary)
@@ -2094,6 +2126,7 @@ private struct MealSlotOption: Identifiable {
                     FormaCard {
                         HStack {
                             Text("body_weight").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                            SectionInfoButton(topic: .bodyWeight)
                             Spacer()
                             if let latest = store.combinedWeights.last {
                                 FormaPill(text: FormaTheme.formatWeight(latest.weightKg, useLb: useLb))
@@ -2179,6 +2212,7 @@ private struct MealSlotOption: Identifiable {
                         let activePoint = scrubbedIndex.flatMap { $0 < points.count ? points[$0] : nil }
                         HStack {
                             Text("weight_trend").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                            SectionInfoButton(topic: .weightTrend)
                             Spacer()
                             if trendValues.count >= 2 && activePoint == nil {
                                 FormaPill(text: String(localized: "weight_trend_7d"), background: FormaTheme.tertiary.opacity(0.2), foreground: FormaTheme.tertiary)
@@ -2301,9 +2335,12 @@ private struct MealSlotOption: Identifiable {
                         if !muscleSplit.isEmpty {
                             Divider().overlay(FormaTheme.border)
                             VStack(alignment: .leading, spacing: 6) {
-                                Text("weekly_muscle_split_title")
-                                    .font(.caption.weight(.bold))
-                                    .foregroundStyle(FormaTheme.textMuted)
+                                HStack(spacing: 0) {
+                                    Text("weekly_muscle_split_title")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(FormaTheme.textMuted)
+                                    SectionInfoButton(topic: .weeklyMuscles)
+                                }
                                 ForEach(muscleSplit.prefix(8), id: \.muscle) { row in
                                     HStack {
                                         Text(row.muscle.label(arabic: arabic))
@@ -2339,6 +2376,7 @@ private struct MealSlotOption: Identifiable {
                             Text("activity_heatmap_title")
                                 .font(.headline.weight(.bold))
                                 .foregroundStyle(FormaTheme.textPrimary)
+                            SectionInfoButton(topic: .activityGrid)
                             Spacer()
                             if streak > 0 {
                                 FormaPill(text: String(format: String(localized: "week_streak_badge"), "\(streak)"))
@@ -2458,9 +2496,12 @@ private struct MealSlotOption: Identifiable {
         let items = frequent
         if !items.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Text("frequent_meals_title")
-                    .font(.subheadline.weight(.bold))
-                    .foregroundStyle(FormaTheme.textPrimary)
+                HStack(spacing: 0) {
+                    Text("frequent_meals_title")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(FormaTheme.textPrimary)
+                    SectionInfoButton(topic: .quickRelog)
+                }
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(items) { item in

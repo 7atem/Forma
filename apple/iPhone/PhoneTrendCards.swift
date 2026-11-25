@@ -12,7 +12,11 @@ struct PhoneNutritionTrendCard: View {
         let trend = NutritionTrends.range(entries: entries, end: LocalStore.todayString(), length: range,
                                           calorieTarget: store.state.calorieTarget.map(Double.init), proteinTarget: store.state.proteinTarget)
         FormaCard {
-            Text("nutrition_trends_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+            HStack {
+                Text("nutrition_trends_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                Spacer()
+                SectionInfoButton(topic: .nutritionTrends)
+            }
             Picker("nutrition_trends_title", selection: $range) {
                 Text("trend_range_7").tag(7)
                 Text("trend_range_30").tag(30)
@@ -98,7 +102,11 @@ struct PhoneTrainingTrendCard: View {
     var body: some View {
         let weeks = TrainingTrends.weekly(workouts: store.state.workouts, end: LocalStore.todayString(), weeks: 12)
         FormaCard {
-            Text("training_trends_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+            HStack {
+                Text("training_trends_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                Spacer()
+                SectionInfoButton(topic: .trainingTrends)
+            }
             if weeks.allSatisfy({ $0.workingSets == 0 }) {
                 Text("training_trend_empty").font(.subheadline).foregroundStyle(FormaTheme.textMuted)
             } else {
@@ -147,7 +155,11 @@ struct PhoneBmiCard: View {
     var body: some View {
         let latest = store.state.weights.max(by: { $0.date < $1.date })
         FormaCard {
-            Text("bmi_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+            HStack {
+                Text("bmi_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                Spacer()
+                SectionInfoButton(topic: .bmi)
+            }
             if let height = store.state.heightCm, let weight = latest, let bmi = BodyMetrics.bmi(weightKg: weight.weightKg, heightCm: height) {
                 Text(String(format: "%.1f", bmi)).font(.title.weight(.bold)).foregroundStyle(FormaTheme.primary)
                 Text(String(format: String(localized: "bmi_from"), weight.date, "\(Int(height.rounded()))"))
@@ -171,7 +183,11 @@ struct PhoneSleepCard: View {
         let recorded = keys.compactMap { byDate[$0] }
         if !store.state.healthSleep.isEmpty {
             FormaCard {
-                Text("sleep_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                HStack {
+                    Text("sleep_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                    Spacer()
+                    SectionInfoButton(topic: .sleep)
+                }
                 Text(String(format: String(localized: "sleep_nights_recorded"), "\(recorded.count)"))
                     .font(.caption.weight(.semibold)).foregroundStyle(FormaTheme.primary)
                 let maxMinutes = max(recorded.map(\.asleepMinutes).max() ?? 0, 60)

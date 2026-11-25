@@ -24,6 +24,7 @@ jobs:
           python3 scripts/generate_exercise_catalog.py --check
           python3 scripts/check_apple_sources.py
           python3 scripts/generate_exercise_guides.py --check
+          python3 scripts/generate_section_info.py --check
           python3 scripts/check_exercise_art.py
           python3 scripts/generate_exercise_motion.py --check
           python3 scripts/check_exercise_video.py

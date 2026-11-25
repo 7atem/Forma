@@ -262,6 +262,7 @@ import FormaCore
             HStack(spacing: 8) {
                 Image(systemName: "pills.fill").foregroundStyle(FormaTheme.secondary)
                 Text("supplements_title").font(.subheadline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                SectionInfoButton(topic: .supplements)
                 Spacer()
                 if !items.isEmpty {
                     FormaPill(

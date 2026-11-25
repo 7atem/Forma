@@ -36,7 +36,7 @@ internal fun WorkoutCalendarPanel(data: FitnessSnapshot, today: LocalDate, selec
     InfoCard {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.workout_calendar), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.workout_calendar, R.string.calendar_scope_note)
+            SectionInfoButton(InfoTopic.WORKOUT_CALENDAR)
             TextButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("toggle_workout_calendar")) {
                 Text(stringResource(if (expanded) R.string.show_less else R.string.browse_dates), fontWeight = FontWeight.SemiBold)
             }

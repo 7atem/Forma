@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
+import com.formacoach.coach.ReminderTime
 import org.junit.runner.RunWith
 
 /** Run on a disposable emulator with fresh Forma application data. */
@@ -115,12 +116,26 @@ class FitnessFlowTest {
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("reminders_settings").fetchSemanticsNodes().isNotEmpty()}
         rule.onNodeWithTag("reminders_settings").performScrollTo().performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("reminder_switch_WATER").fetchSemanticsNodes().isNotEmpty()}
-        ReminderKind.entries.forEach {rule.onNodeWithTag("reminder_switch_${it.name}").assertIsOff()}
-        rule.onNodeWithTag("reminder_switch_WATER").performClick().assertIsOn()
+        ReminderKind.entries.forEach {rule.onNodeWithTag("reminder_switch_${it.name}").performScrollTo().assertIsOff()}
+        // Days, example and test button appear only once a reminder is on.
+        rule.onNodeWithTag("reminder_test_WATER").assertDoesNotExist()
+        rule.onNodeWithTag("reminder_switch_WATER").performScrollTo().performClick().assertIsOn()
         rule.runOnIdle {check(LogReminders.read(rule.activity,ReminderKind.WATER).enabled)}
-        rule.onNodeWithTag("reminder_switch_WATER").performClick().assertIsOff()
+        rule.waitUntil(5_000) {rule.onAllNodesWithTag("reminder_test_WATER").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("reminder_time_WATER").assertHeightIsAtLeast(48.dp)
+        // Turning off a weekday is saved; the last remaining day cannot be removed.
+        rule.onNodeWithTag("reminder_day_WATER_MONDAY").performScrollTo().assertHeightIsAtLeast(48.dp).performClick()
+        rule.runOnIdle {check(LogReminders.read(rule.activity,ReminderKind.WATER).days==ReminderTime.EVERY_DAY and ReminderTime.dayBit(java.time.DayOfWeek.MONDAY).inv())}
+        java.time.DayOfWeek.entries.filter {it!=java.time.DayOfWeek.MONDAY}.forEach {rule.onNodeWithTag("reminder_day_WATER_${it.name}").performScrollTo().performClick()}
+        rule.runOnIdle {check(LogReminders.read(rule.activity,ReminderKind.WATER).days!=0)}
+        // Skipping already-logged days is on by default and can be switched off.
+        rule.onNodeWithTag("reminders_skip_logged").performScrollTo().assertIsOn().performClick().assertIsOff()
+        rule.runOnIdle {check(!LogReminders.skipIfLogged(rule.activity))}
+        rule.onNodeWithTag("reminders_skip_logged").performClick().assertIsOn()
+        rule.onNodeWithTag("reminder_switch_WATER").performScrollTo().performClick().assertIsOff()
         rule.runOnIdle {check(!LogReminders.read(rule.activity,ReminderKind.WATER).enabled)}
-        rule.onNodeWithTag("reminders_done").performClick()
+        rule.runOnIdle {LogReminders.save(rule.activity,ReminderKind.WATER,LogReminders.read(rule.activity,ReminderKind.WATER).copy(days=ReminderTime.EVERY_DAY))}
+        rule.onNodeWithTag("reminders_done").performScrollTo().performClick()
     }
     @Test fun heightInProfileShowsBmiFromLoggedWeight() {
         ensureProfile()

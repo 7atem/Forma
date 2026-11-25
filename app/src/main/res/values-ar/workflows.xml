@@ -26,7 +26,6 @@
     <string name="previous_month">الشهر السابق</string>
     <string name="next_month">الشهر التالي</string>
     <string name="calendar_day_accessibility">%1$s؛ %2$s حصة مكتملة مسجلة</string>
-    <string name="calendar_scope_note">الأرقام الصغيرة تعرض الحصص المكتملة المسجلة في ذلك اليوم. غياب السجلات لا يثبت عدم التدريب.</string>
     <string name="meal_slot_unspecified">غير مصنّفة</string>
     <string name="meal_slot_breakfast">فطار</string>
     <string name="meal_slot_lunch">غداء</string>

@@ -57,6 +57,10 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+        <!-- Reminder alarms and notification buttons; private to Forma. -->
+        <receiver
+            android:name=".ReminderAlarmReceiver"
+            android:exported="false" />
         <receiver
             android:name=".FormaWidgetProvider"
             android:exported="false">

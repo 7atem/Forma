@@ -222,7 +222,7 @@ internal fun HistoryChart(
                     )
                 }
                 PillBadge("${number(activePoint?.value ?: latest)} $unit")
-                ScopeInfoButton(R.string.progress_title, R.string.chart_note)
+                SectionInfoButton(InfoTopic.CHART)
             }
         }
         Surface(

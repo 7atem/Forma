@@ -68,6 +68,10 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     suspend fun removeMeasurement(date:LocalDate)=dao.removeMeasurement(date.toEpochDay())
     suspend fun saveHydration(value:Hydration) {checkDate(value.date);dao.saveHydration(HydrationRow(value.date.toEpochDay(),value.milliliters))}
     suspend fun removeHydration(date:LocalDate)=dao.removeHydration(date.toEpochDay())
+    suspend fun addHydration(date:LocalDate,milliliters:Int):Int=withContext(Dispatchers.IO) {checkDate(date);dao.addHydration(date.toEpochDay(),milliliters,20_000)}
+    suspend fun hasMealsOn(date:LocalDate)=withContext(Dispatchers.IO) {dao.mealCountOn(date.toEpochDay())>0}
+    suspend fun hasHydrationOn(date:LocalDate)=withContext(Dispatchers.IO) {dao.hydrationOn(date.toEpochDay())>0}
+    suspend fun hasTrainingOn(date:LocalDate)=withContext(Dispatchers.IO) {dao.trainingCountOn(date.toEpochDay())>0}
     suspend fun saveCustomExercise(value:CustomExercise)=dao.saveCustomExercise(value.row())
     suspend fun deleteCustomExercise(id:String)=dao.deleteCustomExercise(id)
     suspend fun addCustomSet(value:CustomExerciseSet) {checkDate(value.date);dao.addCustomSet(value.row())}

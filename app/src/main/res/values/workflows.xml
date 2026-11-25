@@ -26,7 +26,6 @@
     <string name="previous_month">Previous month</string>
     <string name="next_month">Next month</string>
     <string name="calendar_day_accessibility">%1$s · %2$s completed workouts recorded</string>
-    <string name="calendar_scope_note">Small counts show completed workouts recorded that day. Missing logs do not prove that no training happened.</string>
     <string name="meal_slot_unspecified">Unassigned</string>
     <string name="meal_slot_breakfast">Breakfast</string>
     <string name="meal_slot_lunch">Lunch</string>

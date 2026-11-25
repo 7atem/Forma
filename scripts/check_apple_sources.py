@@ -29,6 +29,24 @@ for folder in ['AppShared', 'iPhone', 'Watch']:
         keys = re.findall(r'(?:Text|Button|Section|Picker|Toggle|NavigationLink|confirmationDialog|alert)\("([a-z][a-z_]+)"', source)
         keys += re.findall(r'String\(localized:\s*"([a-z_]+)"', source)
         assert all(k in en for k in keys), (file, set(keys) - en.keys())
+# Section info buttons: generated bilingual text, iPhone-only sheet, named for VoiceOver, kept out of the Watch target.
+info_button = (root / 'apple/iPhone/SectionInfoButton.swift').read_text(encoding='utf-8')
+assert 'SectionInfo.of(topic, arabic: arabic)' in info_button and 'labels.aboutFormat' in info_button and 'minWidth: 44, minHeight: 44' in info_button and '.presentationCompactAdaptation(.popover)' in info_button and 'labels.more' in info_button
+assert (root / 'apple/Sources/FormaCore/SectionInfo.Generated.swift').exists()
+# Reminders: opt-in, rotating bilingual copy that never includes logged data; the delegate is set before launch ends.
+reminders = (root / 'apple/iPhone/PhoneReminders.swift').read_text(encoding='utf-8')
+assert 'UNUserNotificationCenterDelegate' in reminders and 'removePendingNotificationRequests' in reminders and 'skipIfLogged' in reminders
+assert 'content.body = body(kind, weekday: weekday)' in reminders and 'content.subtitle' not in reminders
+phone_app = (root / 'apple/iPhone/FormaPhoneApp.swift').read_text(encoding='utf-8')
+assert 'UNUserNotificationCenter.current().delegate = delegate' in phone_app and 'PhoneReminders.rescheduleAll(store: store)' in phone_app
+for lang in ['en', 'ar']:
+    strings = (root / f'apple/Resources/{lang}.lproj/Localizable.strings').read_text(encoding='utf-8')
+    for kind, count in (('meals', 4), ('water', 4), ('workout', 4), ('weekly', 2)):
+        for key in [f'reminder_{kind}', f'reminder_{kind}_title'] + [f'reminder_{kind}_body_{n}' for n in range(1, count + 1)]:
+            assert f'"{key}" =' in strings, (lang, key)
+for shared in ('AppShared/ExerciseDetail.swift', 'AppShared/MuscleDiagram.swift'):
+    shared_source = (root / 'apple' / shared).read_text(encoding='utf-8')
+    assert all(shared_source[:index].rfind('#if os(iOS)') > shared_source[:index].rfind('#endif') for index in [m.start() for m in re.finditer('SectionInfoButton', shared_source)]), shared
 project = (root / 'apple/project.yml').read_text()
 assert 'WKCompanionAppBundleIdentifier: com.formacoach.apple' in project
 assert 'watchOS: "10.0"' in project and 'iOS: "17.0"' in project

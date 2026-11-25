@@ -9,7 +9,6 @@
     <string name="muscle_accessibility">%1$s. الأساسية: %2$s. المساعدة: %3$s.</string>
     <string name="muscle_note">رسم مبسط لمناطق العضلات للتوضيح، وليس قياسًا لنشاط العضلات. التظليل توضيحي فقط. المشاركة تتغير حسب الجهاز وطريقة الأداء. ثني الورك يمثل حركة شبيهة بالرفعة الرومانية.</string>
     <string name="weekly_muscles">العضلات • آخر 7 أيام</string>
-    <string name="weekly_muscles_note">مجموعات العمل في الجلسات المكتملة فقط. أعداد المشاركة الأساسية والمساعدة منفصلة، وليست درجات تعافٍ أو حجم تدريب فعّال يُجمع.</string>
     <string name="muscle_set_count">%1$s • %2$s أساسية / %3$s مساعدة</string>
     <string name="best_recorded_load">أعلى حمل عمل مسجل: %1$s × %2$s تكرار · %3$s</string>
     <string name="copy_previous_set">نسخ القيم السابقة</string>

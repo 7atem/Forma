@@ -81,6 +81,16 @@ interface FitnessDao {
     @Query("SELECT * FROM hydration ORDER BY day DESC") suspend fun allHydration():List<HydrationRow>
     @Upsert suspend fun saveHydration(row:HydrationRow)
     @Query("DELETE FROM hydration WHERE day=:day") suspend fun removeHydration(day:Long)
+    // Reminder checks: whether a record exists for a day. They read only counts and never leave the device.
+    @Query("SELECT COUNT(*) FROM meals WHERE day=:day") suspend fun mealCountOn(day:Long):Int
+    @Query("SELECT COALESCE(SUM(milliliters),0) FROM hydration WHERE day=:day") suspend fun hydrationOn(day:Long):Int
+    @Query("SELECT (SELECT COUNT(*) FROM sessions s WHERE s.day=:day AND (s.completedAt IS NOT NULL OR EXISTS (SELECT 1 FROM training_sets t WHERE t.sessionId=s.id)))+(SELECT COUNT(*) FROM custom_sets WHERE day=:day)") suspend fun trainingCountOn(day:Long):Int
+    /** Adds water to a day in one transaction so a notification action and the app cannot lose an update. */
+    @Transaction suspend fun addHydration(day:Long,milliliters:Int,max:Int):Int {
+        val next=(hydrationOn(day)+milliliters).coerceIn(0,max)
+        saveHydration(HydrationRow(day,next))
+        return next
+    }
     @Query("DELETE FROM hydration") suspend fun clearHydration()
     @Query("SELECT * FROM custom_exercises ORDER BY rowid") suspend fun allCustomExercises():List<CustomExerciseRow>
     @Query("SELECT * FROM custom_sets ORDER BY day,rowid") suspend fun allCustomSets():List<CustomSetRow>

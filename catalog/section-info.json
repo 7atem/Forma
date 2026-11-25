@@ -1,0 +1,790 @@
+{
+  "about": "Canonical in-app explanations behind each section's info button. Edit only here, then run python scripts/generate_section_info.py. Text must describe what the app does, never advise intake, training or health decisions.",
+  "labels": {
+    "about": {
+      "en": "About %1$s",
+      "ar": "حول %1$s"
+    },
+    "what": {
+      "en": "What it shows",
+      "ar": "ماذا يعرض"
+    },
+    "how": {
+      "en": "How it works",
+      "ar": "كيف يعمل"
+    },
+    "note": {
+      "en": "Good to know",
+      "ar": "معلومة مهمة"
+    },
+    "close": {
+      "en": "Close",
+      "ar": "إغلاق"
+    },
+    "more": {
+      "en": "More",
+      "ar": "المزيد"
+    }
+  },
+  "topics": [
+    {
+      "id": "week",
+      "title": {
+        "en": "Your week",
+        "ar": "أسبوعك"
+      },
+      "what": {
+        "en": "Workouts you finished in the last 7 days, compared with the sessions per week you chose in your profile.",
+        "ar": "التمارين التي أنهيتها خلال آخر 7 أيام، مقارنة بعدد الحصص الأسبوعية الذي اخترته في ملفك."
+      },
+      "how": {
+        "en": "A workout counts once you finish it. The ring fills toward your weekly number. The button starts a new workout or resumes the one in progress.",
+        "ar": "يُحتسب التمرين عند إنهائه. تمتلئ الدائرة نحو رقمك الأسبوعي. يبدأ الزر تمرينًا جديدًا أو يستأنف التمرين الجاري."
+      },
+      "note": {
+        "en": "The weekly number is your own choice, not a recommendation. Training you did not log is unknown, not missed.",
+        "ar": "الرقم الأسبوعي اختيارك أنت وليس توصية. التمرين غير المسجّل غير معروف، ولا يعني أنه فاتك."
+      }
+    },
+    {
+      "id": "food_today",
+      "title": {
+        "en": "Food today",
+        "ar": "طعام اليوم"
+      },
+      "what": {
+        "en": "Calories and protein from the meals you logged today, and how your logged calories split between protein, carbs and fat.",
+        "ar": "السعرات والبروتين من الوجبات التي سجّلتها اليوم، وكيف تتوزع سعراتك المسجّلة بين البروتين والكربوهيدرات والدهون."
+      },
+      "how": {
+        "en": "Totals add up every entry for today. Progress rings appear only when you enter your own calorie or protein target in your profile.",
+        "ar": "تُجمع كل إدخالات اليوم. تظهر دوائر التقدم فقط عندما تُدخل هدفك الخاص للسعرات أو البروتين في ملفك."
+      },
+      "note": {
+        "en": "A day may be only partly logged. Forma never sets or changes your targets.",
+        "ar": "قد يكون اليوم مسجّلًا جزئيًا فقط. فورمة لا تضع أهدافك ولا تغيّرها أبدًا."
+      }
+    },
+    {
+      "id": "next_step",
+      "title": {
+        "en": "A small next step",
+        "ar": "خطوة صغيرة تالية"
+      },
+      "what": {
+        "en": "One short suggestion about what to record next.",
+        "ar": "اقتراح قصير واحد حول ما يمكن تسجيله بعد ذلك."
+      },
+      "how": {
+        "en": "Fixed rules check the last 7 days in order: a first workout, food on at least 3 days, weight on at least 3 days, then workouts against your weekly number. It works offline, without AI.",
+        "ar": "تفحص قواعد ثابتة آخر 7 أيام بالترتيب: أول تمرين، ثم الطعام في 3 أيام على الأقل، ثم الوزن في 3 أيام على الأقل، ثم التمارين مقارنة برقمك الأسبوعي. تعمل دون إنترنت ودون ذكاء اصطناعي."
+      },
+      "note": {
+        "en": "It is about keeping records, not a training or diet instruction, and it never changes your plan.",
+        "ar": "يتعلق بالتسجيل فقط، وليس تعليمات تدريب أو تغذية، ولا يغيّر خطتك أبدًا."
+      }
+    },
+    {
+      "id": "milestones",
+      "title": {
+        "en": "Recorded milestones",
+        "ar": "الإنجازات المسجّلة"
+      },
+      "what": {
+        "en": "Badges for totals you have reached: your first finished workout and working-set counts such as 10, 100 and 1,000.",
+        "ar": "شارات للأعداد التي بلغتها: أول تمرين أنهيته، وأعداد المجموعات الأساسية مثل 10 و100 و1000."
+      },
+      "how": {
+        "en": "Counted from your log. Warm-up sets are not included.",
+        "ar": "تُحسب من سجلك. لا تُحتسب مجموعات الإحماء."
+      },
+      "note": {
+        "en": "Milestones count records. They do not measure fitness or progress.",
+        "ar": "الإنجازات تعدّ السجلات فقط، ولا تقيس اللياقة أو التقدم."
+      }
+    },
+    {
+      "id": "food_day",
+      "title": {
+        "en": "Food for the day",
+        "ar": "طعام اليوم المحدد"
+      },
+      "what": {
+        "en": "Totals for the selected date from the entries you logged, next to your own targets if you set them.",
+        "ar": "مجاميع التاريخ المحدد من الإدخالات التي سجّلتها، بجانب أهدافك الخاصة إن حددتها."
+      },
+      "how": {
+        "en": "Change the date to view or log another day. Each entry keeps the values it was logged with.",
+        "ar": "غيّر التاريخ لعرض يوم آخر أو التسجيل فيه. يحتفظ كل إدخال بالقيم التي سُجّل بها."
+      },
+      "note": {
+        "en": "Only what you logged is included. Missing entries are unknown, and a logged day may be incomplete.",
+        "ar": "يُحتسب ما سجّلته فقط. الإدخالات الناقصة غير معروفة، وقد يكون اليوم المسجّل غير مكتمل."
+      }
+    },
+    {
+      "id": "add_food",
+      "title": {
+        "en": "Add food",
+        "ar": "إضافة طعام"
+      },
+      "what": {
+        "en": "Ways to log food: quick re-log, your saved foods and recipes, online lookup, or typing the values yourself.",
+        "ar": "طرق تسجيل الطعام: إعادة التسجيل السريع، أو أطعمتك ووصفاتك المحفوظة، أو البحث عبر الإنترنت، أو كتابة القيم بنفسك."
+      },
+      "how": {
+        "en": "Pick the meal first (breakfast, lunch, dinner, snacks, suhoor, iftar or unassigned). Each entry saves its own copy of the nutrition values.",
+        "ar": "اختر الوجبة أولًا (فطور، غداء، عشاء، وجبات خفيفة، سحور، إفطار أو بدون تحديد). يحفظ كل إدخال نسخته الخاصة من القيم الغذائية."
+      },
+      "note": {
+        "en": "Older entries without a meal stay unassigned. Forma never guesses meal times.",
+        "ar": "تبقى الإدخالات القديمة بلا وجبة دون تحديد. فورمة لا تخمّن أوقات الوجبات أبدًا."
+      }
+    },
+    {
+      "id": "quick_relog",
+      "title": {
+        "en": "Quick re-log",
+        "ar": "إعادة التسجيل السريع"
+      },
+      "what": {
+        "en": "The meals you log most often for the chosen meal, ready to log again with one tap.",
+        "ar": "الوجبات التي تسجّلها أكثر من غيرها للوجبة المختارة، جاهزة لإعادة تسجيلها بلمسة واحدة."
+      },
+      "how": {
+        "en": "Ranked by how often you logged each name; ties keep the most recent. Tapping copies the values from your latest entry of that meal.",
+        "ar": "مرتبة حسب عدد مرات تسجيل كل اسم، وعند التساوي يتقدم الأحدث. اللمس ينسخ القيم من آخر إدخال لتلك الوجبة."
+      },
+      "note": {
+        "en": "Built only from your own history; nothing is suggested from outside.",
+        "ar": "مبنية من سجلك أنت فقط، ولا يُقترح شيء من الخارج."
+      }
+    },
+    {
+      "id": "online_food",
+      "title": {
+        "en": "Online food search",
+        "ar": "البحث عن الطعام عبر الإنترنت"
+      },
+      "what": {
+        "en": "Packaged foods found by name or barcode in Open Food Facts, a free public database.",
+        "ar": "أطعمة معلّبة يُعثر عليها بالاسم أو الباركود في Open Food Facts، وهي قاعدة بيانات عامة مجانية."
+      },
+      "how": {
+        "en": "Only your search words or barcode are sent. Choosing a result adds it to My foods, where you can check or edit it before logging a portion. It needs an internet connection.",
+        "ar": "تُرسل كلمات البحث أو الباركود فقط. اختيار نتيجة يضيفها إلى أطعمتي، حيث يمكنك مراجعتها أو تعديلها قبل تسجيل حصة. يحتاج إلى اتصال بالإنترنت."
+      },
+      "note": {
+        "en": "Entries are added by the public (ODbL licence) and may be wrong or incomplete, so compare them with the label. Logging works offline without this.",
+        "ar": "يضيف الجمهور هذه البيانات (رخصة ODbL) وقد تكون خاطئة أو ناقصة، فقارنها بالملصق. التسجيل يعمل دون إنترنت بدونها."
+      }
+    },
+    {
+      "id": "food_library",
+      "title": {
+        "en": "My foods and recipes",
+        "ar": "أطعمتي ووصفاتي"
+      },
+      "what": {
+        "en": "Foods you saved from labels and recipes you built from them.",
+        "ar": "الأطعمة التي حفظتها من الملصقات والوصفات التي بنيتها منها."
+      },
+      "how": {
+        "en": "A recipe adds up its ingredients and divides the total by the servings you enter. Logging a food copies its values into that meal.",
+        "ar": "تجمع الوصفة مكوناتها وتقسم المجموع على عدد الحصص الذي تدخله. تسجيل طعام ينسخ قيمه إلى تلك الوجبة."
+      },
+      "note": {
+        "en": "Editing or deleting a saved food never changes meals or recipes already saved. Nothing is preloaded.",
+        "ar": "تعديل طعام محفوظ أو حذفه لا يغيّر أبدًا الوجبات أو الوصفات المحفوظة سابقًا. لا توجد بيانات محمّلة مسبقًا."
+      }
+    },
+    {
+      "id": "hydration",
+      "title": {
+        "en": "Water",
+        "ar": "الماء"
+      },
+      "what": {
+        "en": "Water you logged for the selected day, next to your own daily water target if you set one.",
+        "ar": "الماء الذي سجّلته في اليوم المحدد، بجانب هدفك اليومي للماء إن حددته."
+      },
+      "how": {
+        "en": "Each button adds the amount shown to that day's total.",
+        "ar": "يضيف كل زر الكمية المعروضة إلى مجموع ذلك اليوم."
+      },
+      "note": {
+        "en": "The target is your own input. Forma does not suggest how much to drink.",
+        "ar": "الهدف من إدخالك أنت. فورمة لا تقترح كمية الشرب."
+      }
+    },
+    {
+      "id": "supplements",
+      "title": {
+        "en": "Supplements & vitamins",
+        "ar": "المكملات والفيتامينات"
+      },
+      "what": {
+        "en": "A personal daily checklist for the vitamins or supplements you choose to track.",
+        "ar": "قائمة يومية شخصية للفيتامينات أو المكملات التي تختار متابعتها."
+      },
+      "how": {
+        "en": "Add a name and an optional dose note, then tick it off each day.",
+        "ar": "أضف اسمًا وملاحظة جرعة اختيارية، ثم علّم عليه كل يوم."
+      },
+      "note": {
+        "en": "A checklist only, not medical or dosage advice. Deleting an item also removes its history.",
+        "ar": "قائمة تحقق فقط، وليست نصيحة طبية أو جرعات. حذف عنصر يحذف سجله أيضًا."
+      }
+    },
+    {
+      "id": "programs",
+      "title": {
+        "en": "Programs",
+        "ar": "البرامج"
+      },
+      "what": {
+        "en": "Workout templates: ready-made starter programs and programs you create.",
+        "ar": "قوالب تمارين: برامج بداية جاهزة وبرامج تنشئها بنفسك."
+      },
+      "how": {
+        "en": "Starting a program copies its exercises, targets, rest time and notes into a new workout, so later edits to the program do not change past workouts.",
+        "ar": "بدء برنامج ينسخ تمارينه وأهدافه ووقت الراحة والملاحظات إلى تمرين جديد، فلا تغيّر تعديلاتك اللاحقة على البرنامج التمارين السابقة."
+      },
+      "note": {
+        "en": "Starter programs are editable logging templates, not personal prescriptions. Choose exercises and loads that suit your routine.",
+        "ar": "برامج البداية قوالب تسجيل قابلة للتعديل، وليست وصفات شخصية. اختر التمارين والأوزان التي تناسب روتينك."
+      }
+    },
+    {
+      "id": "log_sets",
+      "title": {
+        "en": "Logging sets",
+        "ar": "تسجيل المجموعات"
+      },
+      "what": {
+        "en": "Record each set with reps, load and optional effort (RPE), and mark warm-up sets separately.",
+        "ar": "سجّل كل مجموعة بالتكرارات والوزن والجهد الاختياري (RPE)، وميّز مجموعات الإحماء على حدة."
+      },
+      "how": {
+        "en": "Warm-ups stay out of records, charts, volume and targets. In a superset or circuit, working sets move through the group and rest starts when the round ends. The rest timer uses the time you chose.",
+        "ar": "تبقى مجموعات الإحماء خارج الأرقام القياسية والرسوم والحجم والأهداف. في السوبر سِت أو الدائرة تنتقل المجموعات الأساسية عبر المجموعة وتبدأ الراحة عند انتهاء الجولة. يستخدم مؤقت الراحة الوقت الذي اخترته."
+      },
+      "note": {
+        "en": "RPE is how hard a set felt to you (0 to 10). Forma never prescribes a load from it.",
+        "ar": "RPE هو مدى صعوبة المجموعة بالنسبة لك (من 0 إلى 10). فورمة لا تحدد وزنًا بناءً عليه أبدًا."
+      }
+    },
+    {
+      "id": "finish_workout",
+      "title": {
+        "en": "Finish workout",
+        "ar": "إنهاء التمرين"
+      },
+      "what": {
+        "en": "Ends the current workout and saves it to your history.",
+        "ar": "ينهي التمرين الحالي ويحفظه في سجلك."
+      },
+      "how": {
+        "en": "Only finished workouts count in your week, calendar, records, muscle maps and trends. An unfinished workout stays open so you can resume it.",
+        "ar": "تُحتسب التمارين المنتهية فقط في أسبوعك والتقويم والأرقام القياسية وخرائط العضلات والاتجاهات. يبقى التمرين غير المنتهي مفتوحًا لتستأنفه."
+      },
+      "note": {
+        "en": "A workout needs at least one logged set before it can be finished.",
+        "ar": "يحتاج التمرين إلى مجموعة مسجّلة واحدة على الأقل قبل إنهائه."
+      }
+    },
+    {
+      "id": "exercise_guide",
+      "title": {
+        "en": "Exercise guide",
+        "ar": "دليل التمرين"
+      },
+      "what": {
+        "en": "How a movement looks: start and end images, a 3D figure or video for some exercises, form cues and the muscles involved.",
+        "ar": "شكل الحركة: صورتا البداية والنهاية، ونموذج ثلاثي الأبعاد أو فيديو لبعض التمارين، وإرشادات الأداء والعضلات المشاركة."
+      },
+      "how": {
+        "en": "Highlighted muscles come from Forma's exercise catalog, with primary and supporting muscles shown separately. With reduced motion on, moving guides stay still until you press play.",
+        "ar": "تأتي العضلات المميزة من كتالوج تمارين فورمة، مع عرض العضلات الأساسية والمساعدة كلٍّ على حدة. عند تفعيل تقليل الحركة تبقى الأدلة المتحركة ثابتة حتى تضغط تشغيل."
+      },
+      "note": {
+        "en": "Images are AI-generated illustrations, not personal coaching. Colours mark catalogued muscles, not measured activation.",
+        "ar": "الصور رسوم مولّدة بالذكاء الاصطناعي، وليست تدريبًا شخصيًا. الألوان تحدد العضلات المفهرسة، وليست تنشيطًا مقاسًا."
+      }
+    },
+    {
+      "id": "load_history",
+      "title": {
+        "en": "Exercise load history",
+        "ar": "سجل أوزان التمرين"
+      },
+      "what": {
+        "en": "One exercise over time: your heaviest working load or your estimated one-rep max for each workout.",
+        "ar": "تمرين واحد عبر الزمن: أثقل وزن أساسي أو الحد الأقصى المقدّر لتكرار واحد في كل تمرين."
+      },
+      "how": {
+        "en": "Estimated 1RM uses the Epley formula, load × (1 + reps ÷ 30), on loaded working sets of 1 to 15 reps. Each point is a recorded workout; gaps are not filled in.",
+        "ar": "يستخدم الحد الأقصى المقدّر معادلة إبلي: الوزن × (1 + التكرارات ÷ 30)، على المجموعات الأساسية بوزن إضافي ومن 1 إلى 15 تكرارًا. كل نقطة تمرين مسجّل، والفجوات لا تُملأ."
+      },
+      "note": {
+        "en": "An estimate is not a tested maximum. Warm-ups are excluded.",
+        "ar": "التقدير ليس حدًا أقصى مُختبرًا. مجموعات الإحماء مستبعدة."
+      }
+    },
+    {
+      "id": "weekly_muscles",
+      "title": {
+        "en": "Weekly muscles",
+        "ar": "عضلات الأسبوع"
+      },
+      "what": {
+        "en": "Working sets from finished workouts in the last 7 days, grouped by muscle.",
+        "ar": "المجموعات الأساسية من التمارين المنتهية خلال آخر 7 أيام، مجمّعة حسب العضلة."
+      },
+      "how": {
+        "en": "Each exercise counts toward its primary muscles and, separately, its supporting muscles from the catalog.",
+        "ar": "يُحتسب كل تمرين لعضلاته الأساسية، وبشكل منفصل لعضلاته المساعدة، حسب الكتالوج."
+      },
+      "note": {
+        "en": "These are catalog associations, not recovery scores, and the two counts should not be added together.",
+        "ar": "هذه ارتباطات من الكتالوج وليست مؤشرات تعافٍ، ولا يُجمع العددان معًا."
+      }
+    },
+    {
+      "id": "recent_sessions",
+      "title": {
+        "en": "Recent sessions",
+        "ar": "الحصص الأخيرة"
+      },
+      "what": {
+        "en": "Your latest finished workouts with their sets.",
+        "ar": "آخر تمارينك المنتهية مع مجموعاتها."
+      },
+      "how": {
+        "en": "Open a workout to review its sets, or repeat it to start a new workout with the same exercises, targets and rest time.",
+        "ar": "افتح تمرينًا لمراجعة مجموعاته، أو كرّره لبدء تمرين جديد بالتمارين والأهداف ووقت الراحة نفسها."
+      },
+      "note": {
+        "en": "A repeated workout starts with no sets, so you log what you actually do.",
+        "ar": "يبدأ التمرين المكرر دون مجموعات، فتسجّل ما تؤديه فعلًا."
+      }
+    },
+    {
+      "id": "custom_exercises",
+      "title": {
+        "en": "My custom exercises",
+        "ar": "تماريني المخصصة"
+      },
+      "what": {
+        "en": "Movements you add yourself, such as a specific machine or speciality lift.",
+        "ar": "حركات تضيفها بنفسك، مثل جهاز معيّن أو رفعة خاصة."
+      },
+      "how": {
+        "en": "Give it a name, primary muscle and equipment, then log sets for it like any other exercise.",
+        "ar": "أعطها اسمًا وعضلة أساسية وأداة، ثم سجّل مجموعاتها مثل أي تمرين آخر."
+      },
+      "note": {
+        "en": "Custom exercises have no guide images. Deleting one also deletes its recorded sets.",
+        "ar": "لا توجد صور دليل للتمارين المخصصة. حذف أحدها يحذف مجموعاته المسجّلة أيضًا."
+      }
+    },
+    {
+      "id": "workout_calendar",
+      "title": {
+        "en": "Workout calendar",
+        "ar": "تقويم التمارين"
+      },
+      "what": {
+        "en": "A month view of the days with finished workouts.",
+        "ar": "عرض شهري للأيام التي فيها تمارين منتهية."
+      },
+      "how": {
+        "en": "The small number on a day is how many workouts you recorded that day. Pick a day to see its workouts.",
+        "ar": "الرقم الصغير على اليوم هو عدد التمارين التي سجّلتها فيه. اختر يومًا لعرض تمارينه."
+      },
+      "note": {
+        "en": "An empty day only means nothing was recorded; it does not prove you did not train.",
+        "ar": "اليوم الفارغ يعني فقط أنه لم يُسجّل شيء، ولا يثبت أنك لم تتمرن."
+      }
+    },
+    {
+      "id": "measurements",
+      "platforms": [
+        "android"
+      ],
+      "title": {
+        "en": "Body measurements",
+        "ar": "قياسات الجسم"
+      },
+      "what": {
+        "en": "Your weight and optional body measurements for the selected date.",
+        "ar": "وزنك وقياسات الجسم الاختيارية للتاريخ المحدد."
+      },
+      "how": {
+        "en": "Enter at least one value. Saving replaces that date's record, including any field left blank.",
+        "ar": "أدخل قيمة واحدة على الأقل. الحفظ يستبدل سجل ذلك التاريخ، بما في ذلك أي حقل تُرك فارغًا."
+      },
+      "note": {
+        "en": "There is one record per date. Values show in the weight unit you chose in settings.",
+        "ar": "يوجد سجل واحد لكل تاريخ. تظهر القيم بوحدة الوزن التي اخترتها في الإعدادات."
+      }
+    },
+    {
+      "id": "weight_chart",
+      "platforms": [
+        "android"
+      ],
+      "title": {
+        "en": "Recorded body weight",
+        "ar": "وزن الجسم المسجّل"
+      },
+      "what": {
+        "en": "The weights you logged, over the last 90 days.",
+        "ar": "الأوزان التي سجّلتها خلال آخر 90 يومًا."
+      },
+      "how": {
+        "en": "Each point is one recorded weight. Dates without a weight are not filled in; the line only joins real records.",
+        "ar": "كل نقطة وزن واحد مسجّل. التواريخ بلا وزن لا تُملأ، والخط يصل السجلات الفعلية فقط."
+      },
+      "note": {
+        "en": "The chart describes your records. It does not explain why your weight changed.",
+        "ar": "الرسم يصف سجلاتك، ولا يفسّر سبب تغيّر وزنك."
+      }
+    },
+    {
+      "id": "body_weight",
+      "platforms": [
+        "apple"
+      ],
+      "title": {
+        "en": "Body weight",
+        "ar": "وزن الجسم"
+      },
+      "what": {
+        "en": "Today's weight, with optional tape measurements such as waist or chest.",
+        "ar": "وزن اليوم، مع قياسات اختيارية بالشريط مثل الخصر أو الصدر."
+      },
+      "how": {
+        "en": "Saving replaces the weight you already saved for today, including measurements left blank. On days that also have an Apple Health weight, your own entry is used.",
+        "ar": "الحفظ يستبدل الوزن الذي حفظته اليوم، بما في ذلك القياسات المتروكة فارغة. في الأيام التي فيها وزن من Apple Health أيضًا، يُستخدم إدخالك أنت."
+      },
+      "note": {
+        "en": "There is one record per day. Imported Apple Health weights stay labelled and separate.",
+        "ar": "يوجد سجل واحد لكل يوم. تبقى أوزان Apple Health المستوردة معلّمة ومنفصلة."
+      }
+    },
+    {
+      "id": "weight_trend",
+      "platforms": [
+        "apple"
+      ],
+      "title": {
+        "en": "Weight trend",
+        "ar": "اتجاه الوزن"
+      },
+      "what": {
+        "en": "Your last 30 days with a recorded weight, from your entries and labelled Apple Health copies, with a 7-day average line.",
+        "ar": "آخر 30 يومًا فيها وزن مسجّل، من إدخالاتك ونسخ Apple Health المعلّمة، مع خط متوسط 7 أيام."
+      },
+      "how": {
+        "en": "Each point is one day's weight. The trend line averages the weights in the 7 days up to each point; days without a weight are not filled in. Drag across the chart to read a point.",
+        "ar": "كل نقطة وزن يوم واحد. يحسب خط الاتجاه متوسط الأوزان في الأيام السبعة حتى كل نقطة، والأيام بلا وزن لا تُملأ. اسحب على الرسم لقراءة نقطة."
+      },
+      "note": {
+        "en": "The trend smooths your records. It does not explain why your weight changed.",
+        "ar": "الاتجاه يُنعّم سجلاتك، ولا يفسّر سبب تغيّر وزنك."
+      }
+    },
+    {
+      "id": "activity_grid",
+      "title": {
+        "en": "12-week training grid",
+        "ar": "شبكة تمارين 12 أسبوعًا"
+      },
+      "what": {
+        "en": "Each square is one day of the last 12 weeks. Filled squares had a finished workout.",
+        "ar": "كل مربع يوم من آخر 12 أسبوعًا. المربعات الملونة فيها تمرين منتهٍ."
+      },
+      "how": {
+        "en": "A stronger colour means two or more workouts that day. Today has an outline.",
+        "ar": "اللون الأقوى يعني تمرينين أو أكثر في ذلك اليوم. اليوم الحالي محاط بإطار."
+      },
+      "note": {
+        "en": "Empty squares are days without a record, not proof of rest.",
+        "ar": "المربعات الفارغة أيام بلا سجل، وليست دليلًا على الراحة."
+      }
+    },
+    {
+      "id": "personal_records",
+      "title": {
+        "en": "Personal records",
+        "ar": "الأرقام القياسية الشخصية"
+      },
+      "what": {
+        "en": "Your heaviest working set for each exercise, with an estimated one-rep max.",
+        "ar": "أثقل مجموعة أساسية لكل تمرين، مع حد أقصى مقدّر لتكرار واحد."
+      },
+      "how": {
+        "en": "The best set is the highest load, then the most reps at that load. Sets without added load are not ranked.",
+        "ar": "أفضل مجموعة هي الأعلى وزنًا، ثم الأكثر تكرارات بذلك الوزن. لا تُرتّب المجموعات بلا وزن إضافي."
+      },
+      "note": {
+        "en": "Warm-ups are excluded. Records reflect what you logged.",
+        "ar": "مجموعات الإحماء مستبعدة. الأرقام تعكس ما سجّلته."
+      }
+    },
+    {
+      "id": "muscle_map",
+      "title": {
+        "en": "Muscle map",
+        "ar": "خريطة العضلات"
+      },
+      "what": {
+        "en": "A body diagram coloured by the working sets that involved each muscle in the last 7 days.",
+        "ar": "رسم للجسم ملوّن حسب المجموعات الأساسية التي شاركت فيها كل عضلة خلال آخر 7 أيام."
+      },
+      "how": {
+        "en": "Counts come from finished workouts and the exercise catalog, with primary and supporting muscles kept separate.",
+        "ar": "تأتي الأعداد من التمارين المنتهية وكتالوج التمارين، مع فصل العضلات الأساسية عن المساعدة."
+      },
+      "note": {
+        "en": "Colours are not recovery or measured muscle activation.",
+        "ar": "الألوان ليست تعافيًا ولا تنشيطًا عضليًا مقاسًا."
+      }
+    },
+    {
+      "id": "weekly_review",
+      "title": {
+        "en": "Weekly review",
+        "ar": "المراجعة الأسبوعية"
+      },
+      "what": {
+        "en": "A summary of the last 7 days: finished workouts, days with food entries, average logged calories and recorded weight.",
+        "ar": "ملخص آخر 7 أيام: التمارين المنتهية، والأيام التي فيها إدخالات طعام، ومتوسط السعرات المسجّلة، والوزن المسجّل."
+      },
+      "how": {
+        "en": "Built from your records with fixed rules, offline. A weight comparison with the week before appears only when both weeks have at least 3 weights.",
+        "ar": "تُبنى من سجلاتك بقواعد ثابتة ودون إنترنت. لا تظهر مقارنة الوزن مع الأسبوع السابق إلا إذا كان في كل أسبوع 3 أوزان على الأقل."
+      },
+      "note": {
+        "en": "It never changes your targets or plan and does not explain the cause of weight changes.",
+        "ar": "لا تغيّر أهدافك أو خطتك أبدًا، ولا تفسّر سبب تغيّر الوزن."
+      }
+    },
+    {
+      "id": "nutrition_trends",
+      "title": {
+        "en": "Nutrition trends",
+        "ar": "اتجاهات التغذية"
+      },
+      "what": {
+        "en": "Logged calories per day over the range you choose.",
+        "ar": "السعرات المسجّلة يوميًا خلال الفترة التي تختارها."
+      },
+      "how": {
+        "en": "Days without entries are drawn as dashed outlines and left out of averages: they are unknown, not zero.",
+        "ar": "الأيام بلا إدخالات تظهر بحدود متقطعة وتُستبعد من المتوسطات، فهي غير معروفة وليست صفرًا."
+      },
+      "note": {
+        "en": "Comparisons use only targets you entered. Forma does not set or change them.",
+        "ar": "المقارنات تستخدم الأهداف التي أدخلتها فقط. فورمة لا تضعها ولا تغيّرها."
+      }
+    },
+    {
+      "id": "training_trends",
+      "title": {
+        "en": "Training trends",
+        "ar": "اتجاهات التمرين"
+      },
+      "what": {
+        "en": "Workouts, working sets and volume in rolling 7-day weeks.",
+        "ar": "التمارين والمجموعات الأساسية والحجم في أسابيع متتالية من 7 أيام."
+      },
+      "how": {
+        "en": "Each bar is the 7 days ending on the date shown, counting finished workouts only. Volume is reps × added load, so bodyweight sets add sets but no volume.",
+        "ar": "كل عمود هو الأيام السبعة المنتهية بالتاريخ المعروض، ويحتسب التمارين المنتهية فقط. الحجم = التكرارات × الوزن الإضافي، لذا تضيف مجموعات وزن الجسم مجموعات دون حجم."
+      },
+      "note": {
+        "en": "This describes your log. It is not a training recommendation.",
+        "ar": "هذا وصف لسجلك، وليس توصية تدريبية."
+      }
+    },
+    {
+      "id": "bmi",
+      "title": {
+        "en": "BMI",
+        "ar": "مؤشر كتلة الجسم"
+      },
+      "what": {
+        "en": "Body mass index from the height you entered and your latest logged weight.",
+        "ar": "مؤشر كتلة الجسم من الطول الذي أدخلته وآخر وزن سجّلته."
+      },
+      "how": {
+        "en": "Weight in kilograms divided by height in metres squared.",
+        "ar": "الوزن بالكيلوغرام مقسومًا على مربع الطول بالمتر."
+      },
+      "note": {
+        "en": "BMI is a population screening number. It does not account for muscle, frame or age, and it is not a diagnosis.",
+        "ar": "مؤشر كتلة الجسم رقم فحص سكاني، لا يراعي العضلات أو البنية أو العمر، وليس تشخيصًا."
+      }
+    },
+    {
+      "id": "sleep",
+      "title": {
+        "en": "Sleep",
+        "ar": "النوم"
+      },
+      "what": {
+        "en": "Nightly sleep duration and stages copied from your phone's health app (Health Connect or Apple Health).",
+        "ar": "مدة النوم ومراحله كل ليلة، منسوخة من تطبيق الصحة في هاتفك (Health Connect أو Apple Health)."
+      },
+      "how": {
+        "en": "Read-only, after you give permission. One source is used per night, and the copies stay separate from your Forma logs.",
+        "ar": "قراءة فقط بعد منح الإذن. يُستخدم مصدر واحد لكل ليلة، وتبقى النسخ منفصلة عن سجلات فورمة."
+      },
+      "note": {
+        "en": "Missing nights are unknown. Forma does not score or assess sleep.",
+        "ar": "الليالي الناقصة غير معروفة. فورمة لا تقيّم النوم ولا تمنحه درجة."
+      }
+    },
+    {
+      "id": "review_evidence",
+      "title": {
+        "en": "Records behind this review",
+        "ar": "السجلات وراء هذه المراجعة"
+      },
+      "what": {
+        "en": "The exact records the review used: workouts, meals and measurements with their dates.",
+        "ar": "السجلات التي استخدمتها المراجعة بالضبط: التمارين والوجبات والقياسات مع تواريخها."
+      },
+      "how": {
+        "en": "Every number in the review is computed from these records, so you can check where it came from.",
+        "ar": "كل رقم في المراجعة محسوب من هذه السجلات، لتتحقق من مصدره."
+      },
+      "note": {
+        "en": "If something looks wrong, correct the record itself; the review updates.",
+        "ar": "إذا بدا شيء خاطئًا، صحّح السجل نفسه وستتحدّث المراجعة."
+      }
+    },
+    {
+      "id": "check_in",
+      "title": {
+        "en": "Weekly check-in",
+        "ar": "المتابعة الأسبوعية"
+      },
+      "what": {
+        "en": "A short weekly note: how many sessions you can fit next week and whether your food log feels complete.",
+        "ar": "ملاحظة أسبوعية قصيرة: كم حصة يمكنك أداؤها الأسبوع القادم، وهل تشعر أن سجل طعامك مكتمل."
+      },
+      "how": {
+        "en": "If your number differs from your plan, Forma creates a proposal that you can confirm or cancel.",
+        "ar": "إذا اختلف رقمك عن خطتك، تنشئ فورمة اقتراحًا يمكنك تأكيده أو إلغاؤه."
+      },
+      "note": {
+        "en": "Nothing changes until you confirm.",
+        "ar": "لا يتغيّر شيء حتى تؤكد."
+      }
+    },
+    {
+      "id": "plan_proposal",
+      "title": {
+        "en": "Proposed schedule change",
+        "ar": "تغيير مقترح للجدول"
+      },
+      "what": {
+        "en": "A change to your weekly session number that comes from your own check-in answer.",
+        "ar": "تغيير في عدد حصصك الأسبوعية ناتج عن إجابتك في المتابعة."
+      },
+      "how": {
+        "en": "Confirm to apply it or cancel to keep your current number. Only the weekly number changes.",
+        "ar": "أكّد لتطبيقه أو ألغِ للإبقاء على رقمك الحالي. يتغيّر الرقم الأسبوعي فقط."
+      },
+      "note": {
+        "en": "Exercises, loads and nutrition targets stay as recorded. This reflects your availability, not a prescribed program.",
+        "ar": "تبقى التمارين والأوزان وأهداف التغذية كما سُجّلت. هذا يعكس وقتك المتاح، وليس برنامجًا موصوفًا."
+      }
+    },
+    {
+      "id": "local_ai",
+      "title": {
+        "en": "Optional local AI",
+        "ar": "الذكاء الاصطناعي المحلي الاختياري"
+      },
+      "what": {
+        "en": "On supported devices, on-device Gemini Nano can choose which already-computed facts to highlight.",
+        "ar": "على الأجهزة المدعومة، يمكن لـ Gemini Nano على الجهاز اختيار الحقائق المحسوبة مسبقًا التي تُبرز."
+      },
+      "how": {
+        "en": "It sees weekly statistics only, without your name, notes or meal descriptions. It runs on the device while the app is open, and nothing is sent online.",
+        "ar": "يرى الإحصاءات الأسبوعية فقط، دون اسمك أو ملاحظاتك أو أوصاف وجباتك. يعمل على الجهاز أثناء فتح التطبيق، ولا يُرسل شيء عبر الإنترنت."
+      },
+      "note": {
+        "en": "It cannot add claims or advice or change records. Everything else works without it.",
+        "ar": "لا يمكنه إضافة ادعاءات أو نصائح أو تغيير السجلات. كل شيء آخر يعمل بدونه."
+      }
+    },
+    {
+      "id": "chart",
+      "title": {
+        "en": "This chart",
+        "ar": "هذا الرسم"
+      },
+      "what": {
+        "en": "Your recorded values over time.",
+        "ar": "قيمك المسجّلة عبر الزمن."
+      },
+      "how": {
+        "en": "Each point is an actual record. Missing dates are not filled in; lines only connect observations.",
+        "ar": "كل نقطة سجل فعلي. التواريخ الناقصة لا تُملأ، والخطوط تصل الملاحظات فقط."
+      },
+      "note": {
+        "en": "With a single record, the value is shown as text instead of a line.",
+        "ar": "عند وجود سجل واحد فقط، تظهر القيمة نصًا بدل الخط."
+      }
+    },
+    {
+      "id": "apple_health",
+      "platforms": [
+        "apple"
+      ],
+      "title": {
+        "en": "Apple Health",
+        "ar": "Apple Health"
+      },
+      "what": {
+        "en": "Workouts and body weight copied from Apple Health after you allow access.",
+        "ar": "التمارين ووزن الجسم منسوخة من Apple Health بعد سماحك بالوصول."
+      },
+      "how": {
+        "en": "Forma only reads. Each copy is labelled, matched by its Health ID so it is not added twice, and kept apart from what you log here.",
+        "ar": "فورمة تقرأ فقط. كل نسخة معلّمة، وتُطابق بمعرّفها في Health حتى لا تُضاف مرتين، وتبقى منفصلة عمّا تسجّله هنا."
+      },
+      "note": {
+        "en": "Removing imported data deletes only Forma's copies; Apple Health itself is not changed.",
+        "ar": "إزالة البيانات المستوردة تحذف نسخ فورمة فقط، ولا يتغيّر Apple Health نفسه."
+      }
+    },
+    {
+      "id": "health_activity",
+      "platforms": [
+        "apple"
+      ],
+      "title": {
+        "en": "Activity from Apple Health",
+        "ar": "النشاط من Apple Health"
+      },
+      "what": {
+        "en": "Workouts recorded by other apps or devices and imported from Apple Health.",
+        "ar": "تمارين سجّلتها تطبيقات أو أجهزة أخرى واستُوردت من Apple Health."
+      },
+      "how": {
+        "en": "They are shown in their own list with their source.",
+        "ar": "تظهر في قائمة خاصة بها مع مصدرها."
+      },
+      "note": {
+        "en": "They are not counted in Forma workouts, records or muscle maps.",
+        "ar": "لا تُحتسب في تمارين فورمة أو أرقامها القياسية أو خرائط العضلات."
+      }
+    }
+  ]
+}

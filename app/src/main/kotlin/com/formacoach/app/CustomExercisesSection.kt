@@ -38,6 +38,7 @@ internal fun CustomExercisesSection(app: AppState, vm: FitnessViewModel, today: 
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
+            SectionInfoButton(InfoTopic.CUSTOM_EXERCISES)
             FilledTonalButton(
                 onClick = { showCreate = true },
                 enabled = !app.busy && exercises.size < MAX_CUSTOM_EXERCISES,

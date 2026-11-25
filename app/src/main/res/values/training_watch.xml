@@ -9,7 +9,6 @@
     <string name="muscle_accessibility">%1$s. Primary: %2$s. Supporting: %3$s.</string>
     <string name="muscle_note">Simplified muscle regions for orientation, not measured activation. Shading is illustrative. Equipment and technique change involvement. Hip hinge represents a Romanian-deadlift-style movement.</string>
     <string name="weekly_muscles">Muscles • last 7 days</string>
-    <string name="weekly_muscles_note">Completed working sets only. Primary and supporting counts are separate associations, not recovery scores or additive effective volume.</string>
     <string name="muscle_set_count">%1$s • %2$s primary / %3$s supporting</string>
     <string name="best_recorded_load">Best recorded working load: %1$s × %2$s reps · %3$s</string>
     <string name="copy_previous_set">Copy previous values</string>

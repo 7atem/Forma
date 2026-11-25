@@ -52,21 +52,40 @@ class MainActivity : ComponentActivity() {
         super.attachBaseContext(AppLocaleHelper.wrapContext(newBase))
     }
 
+    /** The tab a tapped reminder asked for (Train, Eat or Progress); consumed once shown. */
+    private val reminderTab = mutableStateOf<Int?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { FormaApp() }
+        if (savedInstanceState == null) reminderTab.value = tabFrom(intent)
+        setContent { FormaApp(openTab = reminderTab.value, onTabOpened = { reminderTab.value = null }) }
     }
+
+    override fun onNewIntent(intent: android.content.Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        tabFrom(intent)?.let { reminderTab.value = it }
+    }
+
+    private fun tabFrom(intent: android.content.Intent?): Int? =
+        intent?.getIntExtra(LogReminders.EXTRA_OPEN_TAB, -1)?.takeIf { it in 0..3 }
 }
 
 internal val LocalWeightUnit = compositionLocalOf { WeightUnit.KG }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FormaApp(vm: FitnessViewModel = viewModel()) {
+fun FormaApp(vm: FitnessViewModel = viewModel(), openTab: Int? = null, onTabOpened: () -> Unit = {}) {
     val state by vm.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("forma_ui_prefs", android.content.Context.MODE_PRIVATE) }
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(openTab) {
+        if (openTab != null) {
+            tab = openTab
+            onTabOpened()
+        }
+    }
     var themeMode by rememberSaveable { mutableStateOf(readThemeMode(prefs)) }
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
@@ -764,7 +783,10 @@ private fun TodayContent(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        PillBadge(stringResource(R.string.your_week))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            PillBadge(stringResource(R.string.your_week))
+                            SectionInfoButton(InfoTopic.WEEK)
+                        }
                         Text(
                             stringResource(
                                 R.string.workout_count,
@@ -900,7 +922,7 @@ private fun TodayContent(
     InfoCard {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.food_today), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.food_today, R.string.logged_only)
+            SectionInfoButton(InfoTopic.FOOD_TODAY)
             Icon(Icons.Default.Restaurant, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
         }
         if (profile.caloriesTarget != null || profile.proteinTarget != null) {
@@ -978,7 +1000,7 @@ private fun TodayContent(
                 Text(stringResource(R.string.next_step), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.tertiary, fontWeight = FontWeight.Bold)
                 Text(stringResource(actionLabel(review.nextAction)), style = MaterialTheme.typography.bodyMedium)
             }
-            ScopeInfoButton(R.string.app_name, R.string.alpha_note)
+            SectionInfoButton(InfoTopic.NEXT_STEP)
         }
     }
 }
@@ -993,7 +1015,8 @@ private fun MilestonesCard(snapshot: FitnessSnapshot) {
     InfoCard {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
-            Text(stringResource(R.string.milestones_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.milestones_title), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.MILESTONES)
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             if (completedSessions >= 1) {

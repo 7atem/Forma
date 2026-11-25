@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome Forma "F" for the status bar (same shape as the launcher foreground). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="60" android:viewportHeight="60">
+    <group android:translateX="-25.5" android:translateY="-24.5">
+        <path android:fillColor="#FFFFFFFF" android:pathData="M35,30 L76,30 L76,41 L47,41 L47,50 L69,50 L69,61 L47,61 L47,79 L35,79 Z" />
+    </group>
+</vector>

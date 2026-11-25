@@ -35,9 +35,15 @@ struct ExerciseDetail: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(guide.variant)
-                        .font(.headline.weight(.bold))
-                        .foregroundStyle(FormaTheme.textPrimary)
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(guide.variant)
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(FormaTheme.textPrimary)
+                        #if os(iOS)
+                        Spacer()
+                        SectionInfoButton(topic: .exerciseGuide)
+                        #endif
+                    }
                     HStack(spacing: 6) {
                         if let primary = activation.primaryDetail.first {
                             FormaPill(text: primary.label(arabic: arabic))

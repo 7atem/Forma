@@ -14,6 +14,7 @@ import FormaCore
             HStack(spacing: 10) {
                 Image(systemName: "heart.fill").foregroundStyle(.pink)
                 Text("health_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                SectionInfoButton(topic: .appleHealth)
                 Spacer()
                 if let last = store.state.healthLastSync {
                     FormaPill(text: last.formatted(date: .abbreviated, time: .shortened))
@@ -80,6 +81,7 @@ import FormaCore
             FormaCard {
                 HStack {
                     Text("health_activity_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                    SectionInfoButton(topic: .healthActivity)
                     Spacer()
                     FormaPill(text: "\(week.count) · \(minutes) \(String(localized: "minutes_short"))")
                 }

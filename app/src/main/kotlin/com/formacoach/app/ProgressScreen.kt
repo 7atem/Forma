@@ -125,7 +125,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     InfoCard {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.measure_for_date, dateLabel(date)), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.progress_title, R.string.measure_note)
+            SectionInfoButton(InfoTopic.MEASUREMENTS)
         }
         FormFieldPair(
             first = {
@@ -179,7 +179,10 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     }
 
     InfoCard {
-        Text(stringResource(R.string.weight_chart), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.weight_chart), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.WEIGHT_CHART)
+        }
         val weightPoints = remember(state.snapshot, today, unit) {
             TrainingHistory.weights(state.snapshot, today).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) }
         }
@@ -208,7 +211,10 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
     }
     val weekStreak = remember(state.snapshot, today) { TrainingHistory.activeWeekStreak(state.snapshot, today) }
     InfoCard {
-        Text(stringResource(R.string.activity_heatmap_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.activity_heatmap_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.ACTIVITY_GRID)
+        }
         if (weekStreak > 0) {
             PillBadge(stringResource(R.string.week_streak_badge, number(weekStreak.toDouble(), 0)))
         }
@@ -229,7 +235,8 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(22.dp))
-                Text(stringResource(R.string.personal_records_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.personal_records_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                SectionInfoButton(InfoTopic.PERSONAL_RECORDS)
             }
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 records.forEach { (ex, best, e1rm) ->
@@ -306,7 +313,7 @@ internal fun WeeklyReviewCard(snapshot: FitnessSnapshot, date: LocalDate, vm: Fi
     InfoCard {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(stringResource(R.string.weekly_review), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.weekly_review, R.string.logged_only, R.string.no_auto_change)
+            SectionInfoButton(InfoTopic.WEEKLY_REVIEW)
         }
         PillBadge(stringResource(R.string.date_range, dateLabel(review.start), dateLabel(review.end)))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {

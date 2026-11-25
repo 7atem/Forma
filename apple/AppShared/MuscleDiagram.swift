@@ -235,9 +235,15 @@ struct WeeklyMuscleHeatMapView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("muscle_heatmap_title")
-                .font(.headline.weight(.bold))
-                .foregroundStyle(FormaTheme.textPrimary)
+            HStack {
+                Text("muscle_heatmap_title")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(FormaTheme.textPrimary)
+                #if os(iOS)
+                Spacer()
+                SectionInfoButton(topic: .muscleMap)
+                #endif
+            }
             HStack {
                 ForEach([true, false], id: \.self) { front in
                     VStack {

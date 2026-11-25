@@ -10,6 +10,7 @@ jobs:
       - run: python3 scripts/generate_exercise_catalog.py --check
       - run: python3 scripts/check_apple_sources.py
       - run: python3 scripts/generate_exercise_guides.py --check
+      - run: python3 scripts/generate_section_info.py --check
       - run: python3 scripts/check_exercise_art.py
       - run: python3 scripts/generate_exercise_motion.py --check
       - run: python3 scripts/check_exercise_video.py

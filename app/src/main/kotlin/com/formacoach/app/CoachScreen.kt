@@ -62,7 +62,10 @@ internal fun CoachContent(state: AppState, today: LocalDate, vm: FitnessViewMode
         WeeklyReviewCard(state.snapshot, today, vm)
         val review = vm.reviewEngine.review(state.snapshot, today)
         InfoCard {
-            Text(stringResource(R.string.review_evidence), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.review_evidence), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                SectionInfoButton(InfoTopic.REVIEW_EVIDENCE)
+            }
             if (question == CoachQuestion.WEEK || question == CoachQuestion.TRAINING) {
                 state.snapshot.sessions.filter { it.id in review.sessionEvidence }.forEach { session ->
                     Text(
@@ -98,7 +101,10 @@ internal fun CoachContent(state: AppState, today: LocalDate, vm: FitnessViewMode
     }
 
     InfoCard {
-        Text(stringResource(R.string.check_in), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.check_in), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.CHECK_IN)
+        }
         Text(stringResource(R.string.check_in_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             (2..4).forEach { count ->
@@ -135,7 +141,10 @@ internal fun CoachContent(state: AppState, today: LocalDate, vm: FitnessViewMode
             shape = RoundedCornerShape(22.dp),
         ) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(stringResource(R.string.pending_plan_change), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(R.string.pending_plan_change), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    SectionInfoButton(InfoTopic.PLAN_PROPOSAL)
+                }
                 Text(
                     stringResource(R.string.plan_change, number(proposal.baseSessions.toDouble(), 0), number(proposal.proposedSessions.toDouble(), 0)),
                     style = MaterialTheme.typography.titleMedium,
@@ -194,6 +203,7 @@ private fun LocalAiPanel(state: AppState, today: LocalDate, vm: FitnessViewModel
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
             Text(stringResource(R.string.local_ai), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.LOCAL_AI)
         }
         Text(stringResource(R.string.local_ai_scope), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         PillBadge(stringResource(modelStatusLabel(state.modelAvailability)), modifier = Modifier.testTag("model_status"))

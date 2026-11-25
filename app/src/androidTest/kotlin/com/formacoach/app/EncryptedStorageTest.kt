@@ -322,6 +322,26 @@ class EncryptedStorageTest {
         return FitnessRepository({database!!.dao()},Clock.fixed(Instant.parse("2026-11-03T10:00:00Z"),ZoneOffset.UTC))
     }
 
+    @Test fun reminderChecksSeeOnlyThatDayAndWaterButtonAddsWithinLimit()=runBlocking {
+        val repo=repository()
+        val day=LocalDate.of(2026,11,3)
+        assertFalse(repo.hasMealsOn(day)); assertFalse(repo.hasHydrationOn(day)); assertFalse(repo.hasTrainingOn(day))
+        repo.addMeal(Meal(date=day.minusDays(1),name="Yesterday",calories=300.0,protein=20.0,carbs=30.0,fat=10.0))
+        assertFalse(repo.hasMealsOn(day))
+        repo.addMeal(Meal(date=day,name="Today",calories=300.0,protein=20.0,carbs=30.0,fat=10.0))
+        assertTrue(repo.hasMealsOn(day))
+        assertEquals(250,repo.addHydration(day,250))
+        assertEquals(500,repo.addHydration(day,250))
+        assertTrue(repo.hasHydrationOn(day))
+        repo.saveHydration(Hydration(day,19_900))
+        assertEquals(20_000,repo.addHydration(day,250))
+        // An empty draft is not a logged workout; a set in it is.
+        val session=repo.startEmptySession(day)
+        assertFalse(repo.hasTrainingOn(day))
+        repo.addSet(TrainingSet(sessionId=session,exercise=Exercise.entries.first(),reps=8,weightKg=20.0))
+        assertTrue(repo.hasTrainingOn(day))
+    }
+
     @Test fun portableBackupPreviewsWithoutWritingAndRestoresWithSameDeviceKey()=runBlocking {
         val repo=repository()
         repo.saveProfile(Profile("Original",Goal.FAT_LOSS,3,2200,130.0))

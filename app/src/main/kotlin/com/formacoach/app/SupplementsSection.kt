@@ -57,6 +57,7 @@ internal fun SupplementsVitaminsCard(app: AppState, vm: FitnessViewModel, date: 
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
+            SectionInfoButton(InfoTopic.SUPPLEMENTS)
             if (items.isNotEmpty()) {
                 PillBadge(
                     text = "${number(takenCount.toDouble(), 0)} / ${number(items.size.toDouble(), 0)}",

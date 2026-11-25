@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.filled.Insights
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -26,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +46,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
@@ -743,29 +750,78 @@ internal fun ActivityHeatmapGrid(
     }
 }
 
+/**
+ * The (i) button beside a section title. A tap shows a small bubble with what the section does; "More" opens
+ * the full explanation from catalog/section-info.json (what it shows, how it works, good to know).
+ * Reads as "About <title>" to screen readers.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ScopeInfoButton(title: Int, vararg notes: Int, modifier: Modifier = Modifier) {
-    var open by remember { mutableStateOf(false) }
-    IconButton(onClick = { open = true }, modifier = modifier) {
-        Icon(
-            Icons.Default.Info,
-            contentDescription = stringResource(title),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.72f),
-            modifier = Modifier.size(18.dp),
-        )
+internal fun SectionInfoButton(topic: InfoTopic, modifier: Modifier = Modifier) {
+    var open by rememberSaveable { mutableStateOf(false) }
+    val title = stringResource(topic.title)
+    val id = topic.name.lowercase()
+    val bubble = rememberTooltipState(isPersistent = true)
+    val scope = rememberCoroutineScope()
+    // Standard info pattern: a small bubble next to the (i) says what the section does; "More" opens the full details.
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberRichTooltipPositionProvider(),
+        state = bubble,
+        tooltip = {
+            RichTooltip(
+                modifier = Modifier.testTag("info_bubble_$id"),
+                title = { Text(title, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() }) },
+                action = {
+                    TextButton(
+                        onClick = { bubble.dismiss(); open = true },
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("info_more"),
+                    ) { Text(stringResource(R.string.info_label_more)) }
+                },
+            ) { Text(stringResource(topic.what), style = MaterialTheme.typography.bodyMedium) }
+        },
+    ) {
+        IconButton(onClick = { scope.launch { bubble.show() } }, modifier = modifier.size(48.dp).testTag("info_$id")) {
+            Icon(
+                Icons.Outlined.Info,
+                contentDescription = stringResource(R.string.info_label_about, title),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
     if (open) {
         AlertDialog(
             onDismissRequest = { open = false },
-            title = { Text(stringResource(title), fontWeight = FontWeight.Bold) },
+            icon = { Icon(Icons.Outlined.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text(title, fontWeight = FontWeight.Bold, modifier = Modifier.semantics { heading() }) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    notes.forEach { res ->
-                        Text(stringResource(res), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Column(
+                    Modifier.verticalScroll(rememberScrollState()).testTag("info_sheet_${topic.name.lowercase()}"),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    listOf(
+                        R.string.info_label_what to topic.what,
+                        R.string.info_label_how to topic.how,
+                        R.string.info_label_note to topic.note,
+                    ).forEach { (label, body) ->
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                stringResource(label),
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.semantics { heading() },
+                            )
+                            Text(stringResource(body), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                        }
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { open = false }) { Text(stringResource(R.string.close)) } },
+            confirmButton = {
+                TextButton(onClick = { open = false }, modifier = Modifier.heightIn(min = 48.dp).testTag("info_close")) {
+                    Text(stringResource(R.string.close))
+                }
+            },
         )
     }
 }

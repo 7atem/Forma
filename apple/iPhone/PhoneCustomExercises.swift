@@ -17,6 +17,7 @@ import FormaCore
                 Text("custom_exercises_title")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(FormaTheme.textPrimary)
+                SectionInfoButton(topic: .customExercises)
                 Spacer()
                 Button {
                     FormaHaptics.tap()

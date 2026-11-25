@@ -37,7 +37,7 @@ import SwiftUI
                     .pickerStyle(.segmented)
                 }
 
-                PhoneRemindersSection()
+                PhoneRemindersSection(store: store)
 
                 Section("units_label") {
                     Picker("units_label", selection: $useLb) {

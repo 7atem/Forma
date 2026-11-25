@@ -134,7 +134,7 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
                 }
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(stringResource(R.string.starter_programs), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                    ScopeInfoButton(R.string.starter_programs, R.string.template_note)
+                    SectionInfoButton(InfoTopic.PROGRAMS)
                 }
                 StarterTemplates.all.forEachIndexed { index, template ->
                     ProgramCard(
@@ -923,6 +923,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         InfoCard {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.logged_sets), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                SectionInfoButton(InfoTopic.LOG_SETS)
                 PillBadge(number(sets.size.toDouble(), 0))
             }
             (if (allSets) sets else sets.takeLast(4)).forEach { setItem ->
@@ -951,7 +952,8 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
         Spacer(Modifier.width(8.dp))
         Text(stringResource(R.string.finish_session), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     }
-    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        SectionInfoButton(InfoTopic.FINISH_WORKOUT)
         ConfirmButton(R.string.cancel_session, stringResource(R.string.delete_session_note), !state.busy) {
             vm.deleteSession(session.id)
         }
@@ -1200,7 +1202,10 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
     if (filterDay == null) {
         InfoCard {
             var chartMode by rememberSaveable { mutableIntStateOf(0) }
-            Text(stringResource(R.string.load_history), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.load_history), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                SectionInfoButton(InfoTopic.LOAD_HISTORY)
+            }
             ExercisePicker(exercise, { exercise = it })
             SegmentedTabs(
                 selectedIndex = chartMode,
@@ -1258,7 +1263,7 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
         InfoCard {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(stringResource(R.string.weekly_muscles), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                ScopeInfoButton(R.string.weekly_muscles, R.string.weekly_muscles_note)
+                SectionInfoButton(InfoTopic.WEEKLY_MUSCLES)
             }
             val counts = MuscleTraining.weekly(state.snapshot, today).filter { it.primarySets + it.secondarySets > 0 }
             if (counts.isEmpty()) Text(stringResource(R.string.no_sessions), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -1279,7 +1284,10 @@ private fun TrainingHistoryContent(state: AppState, today: LocalDate, vm: Fitnes
             }
         }
     }
-    Text(stringResource(R.string.recent_sessions), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.recent_sessions), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        SectionInfoButton(InfoTopic.RECENT_SESSIONS)
+    }
     Input(R.string.search_history, search, { search = it; limit = 10 }, "session_search", numeric = false)
     val names = Exercise.entries.associateWith { stringResource(exerciseLabel(it)) }
     val sessions = state.snapshot.sessions.filter {

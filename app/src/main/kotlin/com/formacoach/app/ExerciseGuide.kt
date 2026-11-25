@@ -112,6 +112,7 @@ internal fun ExerciseGuideSheet(
                     Text(stringResource(exerciseLabel(exercise)),style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
                     Text(stringResource(guide.variant),style=MaterialTheme.typography.bodyMedium,color=MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+                SectionInfoButton(InfoTopic.EXERCISE_GUIDE)
                 IconButton(onClick=onDismiss,modifier=Modifier.testTag("guide_close")) {Icon(Icons.Default.Close,stringResource(R.string.close))}
             }
             if (onRecord != null) {

@@ -128,7 +128,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
     InfoCard {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.food_for_date, dateLabel(date)), Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-            ScopeInfoButton(R.string.eat_title, R.string.logged_only)
+            SectionInfoButton(InfoTopic.FOOD_DAY)
         }
         val calTarget = state.snapshot.profile?.caloriesTarget
         val proTarget = state.snapshot.profile?.proteinTarget
@@ -318,6 +318,7 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
                     color = MaterialTheme.colorScheme.tertiary,
                 )
             }
+            SectionInfoButton(InfoTopic.HYDRATION)
             if (!stackWater) waterButtons()
         }
         if (stackWater) Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) { waterButtons() }
@@ -334,7 +335,10 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
 
     SupplementsVitaminsCard(state, vm, date)
 
-    Text(stringResource(R.string.add_food_heading), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.testTag("add_food_heading"))
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Text(stringResource(R.string.add_food_heading), Modifier.weight(1f).testTag("add_food_heading"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        SectionInfoButton(InfoTopic.ADD_FOOD)
+    }
 
     if (state.snapshot.foods.isEmpty()) {
         val arabic = LocalConfiguration.current.locales[0].language == "ar"
@@ -367,7 +371,10 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
     val frequent = remember(state.snapshot.meals) { WorkoutInsights.frequentMeals(state.snapshot, limit = 8) }
     if (frequent.isNotEmpty()) {
         Column(Modifier.fillMaxWidth().testTag("frequent_meals_section"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(stringResource(R.string.frequent_meals_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.frequent_meals_title), Modifier.weight(1f), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                SectionInfoButton(InfoTopic.QUICK_RELOG)
+            }
             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 frequent.forEach { item ->
                     val recent = item.template
@@ -696,6 +703,7 @@ private fun OnlineFoodSearchSheet(
         ) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(stringResource(R.string.online_food_search), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                SectionInfoButton(InfoTopic.ONLINE_FOOD)
                 FilledTonalButton(
                     onClick = ::scanBarcode,
                     enabled = !searching,
@@ -980,7 +988,10 @@ private fun FoodLibrary(state: AppState, vm: FitnessViewModel) {
     var recipe by rememberSaveable { mutableStateOf(false) }
     var search by rememberSaveable { mutableStateOf("") }
     InfoCard {
-        Text(stringResource(R.string.food_library), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.food_library), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.FOOD_LIBRARY)
+        }
         Text(stringResource(R.string.library_note), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             Button(onClick = { create = true }, shape = RoundedCornerShape(12.dp), modifier = Modifier.testTag("new_food")) {

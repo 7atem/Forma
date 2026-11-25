@@ -147,4 +147,30 @@ class AccessibilityTest {
         // No working sets: a sentence replaces two grey figures and a colour legend.
         rule.onNodeWithTag("muscle_heatmap_empty").assertExists()
     }
+
+    @Test fun sectionInfoBubbleShowsPurposeThenMoreOpensFullDetails() {
+        rule.setContent { MaterialTheme { SectionInfoButton(InfoTopic.WEEK) } }
+        // Named for the section it explains, not a bare "Info", and large enough to tap.
+        rule.onNodeWithContentDescription("About Your week").assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(48.dp).performClick()
+        // First a small bubble saying what the section does, with a way to the full details.
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag("info_bubble_week").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithText("sessions per week you chose", substring = true).assertExists()
+        rule.onNodeWithTag("info_sheet_week").assertDoesNotExist()
+        rule.onNodeWithTag("info_more").assertHeightIsAtLeast(48.dp).performClick()
+        rule.waitUntil(5_000) { rule.onAllNodesWithTag("info_sheet_week").fetchSemanticsNodes().isNotEmpty() }
+        rule.onNodeWithTag("info_bubble_week").assertDoesNotExist()
+        listOf("What it shows", "How it works", "Good to know").forEach { heading ->
+            rule.onNode(hasText(heading) and SemanticsMatcher.keyIsDefined(androidx.compose.ui.semantics.SemanticsProperties.Heading)).assertExists()
+        }
+        rule.onNodeWithText("sessions per week you chose", substring = true).assertExists()
+        rule.onNodeWithTag("info_close").assertHeightIsAtLeast(48.dp).performClick()
+        rule.onNodeWithTag("info_sheet_week").assertDoesNotExist()
+    }
+
+    @Test fun everySectionExplanationHasTextInEachPart() {
+        val context = androidx.test.platform.app.InstrumentationRegistry.getInstrumentation().targetContext
+        InfoTopic.entries.forEach { topic ->
+            listOf(topic.title, topic.what, topic.how, topic.note).forEach { check(context.getString(it).isNotBlank()) { topic.name } }
+        }
+    }
 }
