@@ -321,3 +321,10 @@
 "sleep_stages" = "Deep %@ · REM %@ · Core %@";
 "duration_hm" = "%@ h %@ min";
 "sleep_note" = "Read-only copy from Apple Health. Missing nights are unknown. Apple’s Sleep Score is not available to apps, and Forma does not score or assess sleep.";
+"pr_wall_title" = "Personal records";
+"pr_wall_empty" = "Complete a workout with working sets to see your records here.";
+"pr_entry_detail" = "%@ × %ld · est. 1RM %@ · %@";
+"show_all_prs" = "Show all (%ld)";
+"show_less_prs" = "Show less";
+"frequent_meals_title" = "Quick re-log";
+"frequent_meal_chip" = "%@ · %ld kcal";

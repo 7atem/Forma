@@ -1673,6 +1673,63 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    // 1-Tap Frequent Meals Quick Re-log (mirrors Android NutritionScreen)
+                    let frequentMeals: [PhoneMeal] = {
+                        var grouped: [String: [PhoneMeal]] = [:]
+                        for m in store.state.meals {
+                            let key = "\(m.name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased())|\(Int(m.calories.rounded()))"
+                            grouped[key, default: []].append(m)
+                        }
+                        return grouped.values
+                            .sorted { a, b in
+                                if a.count != b.count { return a.count > b.count }
+                                return (a.last?.date ?? "") > (b.last?.date ?? "")
+                            }
+                            .compactMap { $0.last }
+                            .prefix(8)
+                            .map { $0 }
+                    }()
+                    if !frequentMeals.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("frequent_meals_title")
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(FormaTheme.textPrimary)
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 8) {
+                                    ForEach(frequentMeals) { item in
+                                        Button {
+                                            FormaHaptics.success()
+                                            let quick = PhoneMeal(
+                                                date: dayKey,
+                                                name: item.name,
+                                                calories: item.calories,
+                                                protein: item.protein,
+                                                carbs: item.carbs,
+                                                fat: item.fat,
+                                                slot: selectedSlot
+                                            )
+                                            store.attempt { try store.addMeal(quick) }
+                                        } label: {
+                                            HStack(spacing: 6) {
+                                                Image(systemName: "arrow.counterclockwise")
+                                                    .font(.caption.weight(.bold))
+                                                Text(String(format: String(localized: "frequent_meal_chip"), item.name, Int(item.calories.rounded())))
+                                                    .font(.caption.weight(.semibold))
+                                                    .lineLimit(1)
+                                            }
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 8)
+                                            .background(FormaTheme.surface, in: Capsule())
+                                            .overlay(Capsule().stroke(FormaTheme.outline, lineWidth: 1))
+                                            .foregroundStyle(FormaTheme.textPrimary)
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     // The day's diary comes right after the summary; entry tools follow (matches Android).
                     Text("logged_entries_heading").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                     if meals.isEmpty {
@@ -2315,6 +2372,7 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    PhonePersonalRecordsCard(workouts: store.state.workouts, useLb: useLb)
                     PhoneBmiCard(store: store)
                     PhoneSleepCard(store: store)
                     PhoneNutritionTrendCard(store: store)
@@ -2410,6 +2468,67 @@ private struct MealSlotOption: Identifiable {
             }
             .background(FormaTheme.background.ignoresSafeArea())
             .navigationTitle("tab_bridge")
+        }
+    }
+}
+
+/// Personal records trophy wall on the iPhone Progress tab (mirrors Android PersonalRecordsCard).
+@MainActor private struct PhonePersonalRecordsCard: View {
+    let workouts: [WatchWorkout]
+    let useLb: Bool
+    @State private var expanded = false
+    @Environment(\.locale) private var locale
+    private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
+
+    var body: some View {
+        let prs = WorkoutInsights.personalRecords(workouts: workouts)
+        FormaCard {
+            HStack(spacing: 8) {
+                Image(systemName: "trophy.fill")
+                    .foregroundStyle(FormaTheme.primary)
+                Text("pr_wall_title")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(FormaTheme.textPrimary)
+                Spacer()
+            }
+            if prs.isEmpty {
+                Text("pr_wall_empty")
+                    .font(.subheadline)
+                    .foregroundStyle(FormaTheme.textMuted)
+            } else {
+                let shown = expanded ? prs : Array(prs.prefix(5))
+                VStack(alignment: .leading, spacing: 10) {
+                    ForEach(shown) { pr in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(pr.exercise.label(arabic: arabic))
+                                .font(.subheadline.weight(.bold))
+                                .foregroundStyle(FormaTheme.textPrimary)
+                                .lineLimit(1)
+                            Text(String(
+                                format: String(localized: "pr_entry_detail"),
+                                FormaTheme.formatWeight(pr.weightKg, useLb: useLb),
+                                pr.repsAtWeight,
+                                FormaTheme.formatWeight(pr.bestE1rmKg, useLb: useLb),
+                                pr.date
+                            ))
+                            .font(.caption)
+                            .foregroundStyle(FormaTheme.textMuted)
+                        }
+                    }
+                }
+                if prs.count > 5 {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
+                    } label: {
+                        Text(expanded
+                            ? String(localized: "show_less_prs")
+                            : String(format: String(localized: "show_all_prs"), prs.count))
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(FormaTheme.primary)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
     }
 }
