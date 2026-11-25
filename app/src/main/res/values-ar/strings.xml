@@ -438,4 +438,27 @@
     <string name="water_add_a11y">أضف %1$s مل من الماء</string>
     <string name="water_remove_a11y">احذف %1$s مل من الماء</string>
     <string name="muscle_set_split">%1$s أساسي · %2$s مساعد</string>
+    <string name="nutrition_trends_title">اتجاهات التغذية</string>
+    <string name="trend_range_7">٧ أيام</string>
+    <string name="trend_range_30">٣٠ يومًا</string>
+    <string name="trend_logged_days">أيام فيها تسجيل أكل: %1$s من %2$s</string>
+    <string name="trend_no_entries">مفيش تسجيلات أكل في الفترة دي لسه.</string>
+    <string name="trend_unlogged_note">الأعمدة تعرض السعرات المسجلة لكل يوم. الأيام بدون تسجيل تظهر كإطار متقطع ولا تدخل في المتوسط: هي غير معروفة وليست صفرًا. المقارنة تستخدم الأهداف التي أدخلتها فقط؛ فورمة لا تحددها ولا تغيرها.</string>
+    <string name="trend_chart_description">السعرات اليومية من %1$s إلى %2$s: %3$s أيام فيها تسجيل، بمتوسط %4$s سعرة لكل يوم مسجل.</string>
+    <string name="trend_target_line">الخط المتقطع: هدف السعرات الخاص بك، %1$s سعرة</string>
+    <string name="trend_avg_kcal">متوسط السعرات لكل يوم مسجل</string>
+    <string name="trend_avg_protein">متوسط البروتين لكل يوم مسجل</string>
+    <string name="trend_avg_carbs">متوسط الكربوهيدرات لكل يوم مسجل</string>
+    <string name="trend_avg_fat">متوسط الدهون لكل يوم مسجل</string>
+    <string name="trend_calorie_near">في حدود ١٠%% من هدف السعرات في %1$s من %2$s أيام مسجلة</string>
+    <string name="trend_protein_met">عند هدف البروتين أو أعلى في %1$s من %2$s أيام مسجلة</string>
+    <string name="trend_no_targets">أضف هدف السعرات أو البروتين الخاص بك من الملف الشخصي للمقارنة.</string>
+    <string name="training_trends_title">اتجاهات التمرين · ١٢ أسبوعًا</string>
+    <string name="training_trend_sets">مجموعات العمل كل أسبوع (بدون الإحماء)</string>
+    <string name="training_trend_empty">أنهِ تمرينًا لتبدأ اتجاهك الأسبوعي.</string>
+    <string name="training_trend_note">كل عمود أسبوع متحرك من ٧ أيام ينتهي بالتاريخ المعروض، ويحسب الجلسات المكتملة فقط. الحجم = التكرارات × الحمل الخارجي، فمجموعات وزن الجسم تضيف مجموعات بدون حجم. هذا وصف لسجلك وليس توصية تدريبية.</string>
+    <string name="training_chart_description">مجموعات العمل كل أسبوع خلال %1$s أسبوعًا؛ آخر أسبوع %2$s، والمتوسط الأسبوعي %3$s.</string>
+    <string name="training_trend_this_week">مجموعات العمل هذا الأسبوع · %1$s جلسات</string>
+    <string name="training_trend_average">المتوسط الأسبوعي (١٢ أسبوعًا)</string>
+    <string name="training_trend_volume">حجم الحمل الخارجي هذا الأسبوع: %1$s</string>
 </resources>

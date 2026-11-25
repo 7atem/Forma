@@ -438,4 +438,27 @@
     <string name="water_add_a11y">Add %1$s ml of water</string>
     <string name="water_remove_a11y">Remove %1$s ml of water</string>
     <string name="muscle_set_split">%1$s main · %2$s supporting sets</string>
+    <string name="nutrition_trends_title">Nutrition trends</string>
+    <string name="trend_range_7">7 days</string>
+    <string name="trend_range_30">30 days</string>
+    <string name="trend_logged_days">Days with food entries: %1$s of %2$s</string>
+    <string name="trend_no_entries">No food entries in this range yet.</string>
+    <string name="trend_unlogged_note">Bars show logged calories per day. Days without entries are drawn as dashed outlines and left out of averages: they are unknown, not zero. Comparisons use only the targets you entered; Forma does not set or change them.</string>
+    <string name="trend_chart_description">Calories per day from %1$s to %2$s: %3$s days with entries, average %4$s kcal per logged day.</string>
+    <string name="trend_target_line">Dashed line: your calorie target, %1$s kcal</string>
+    <string name="trend_avg_kcal">Avg kcal per logged day</string>
+    <string name="trend_avg_protein">Avg protein per logged day</string>
+    <string name="trend_avg_carbs">Avg carbs per logged day</string>
+    <string name="trend_avg_fat">Avg fat per logged day</string>
+    <string name="trend_calorie_near">Within 10%% of your calorie target on %1$s of %2$s logged days</string>
+    <string name="trend_protein_met">At or above your protein target on %1$s of %2$s logged days</string>
+    <string name="trend_no_targets">Add your own calorie or protein target in Profile to compare logged days against it.</string>
+    <string name="training_trends_title">Training trends · 12 weeks</string>
+    <string name="training_trend_sets">Working sets per week (warm-ups excluded)</string>
+    <string name="training_trend_empty">Finish a workout to start your weekly trend.</string>
+    <string name="training_trend_note">Each bar is a rolling 7-day week ending on the date shown, counting completed sessions only. Volume is reps × external load, so bodyweight sets add sets but no volume. This describes your log; it is not a training recommendation.</string>
+    <string name="training_chart_description">Working sets per week over %1$s weeks; latest week %2$s, weekly average %3$s.</string>
+    <string name="training_trend_this_week">Working sets this week · %1$s sessions</string>
+    <string name="training_trend_average">Weekly average (12 weeks)</string>
+    <string name="training_trend_volume">External-load volume this week: %1$s</string>
 </resources>

@@ -2315,6 +2315,9 @@ private struct MealSlotOption: Identifiable {
                         }
                     }
 
+                    PhoneNutritionTrendCard(store: store)
+                    PhoneTrainingTrendCard(store: store, useLb: useLb)
+
                     // 12-Week GitHub-Style Training Grid + Streak
                     let countsByDate: [String: Int] = {
                         var map: [String: Int] = [:]

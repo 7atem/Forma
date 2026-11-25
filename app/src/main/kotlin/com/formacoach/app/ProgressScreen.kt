@@ -189,6 +189,8 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         HistoryChart(weightPoints, unitStr, trendPoints = trendPoints)
     }
 
+    NutritionTrendCard(state.snapshot, today)
+
     // 7-Day Body Muscle Heat Map
     val weeklyCounts = remember(state.snapshot, today) { MuscleTraining.weekly(state.snapshot, today) }
     val weeklyMuscleMap = remember(weeklyCounts) { weeklyCounts.associate { it.muscle to (it.primarySets + it.secondarySets) } }
@@ -212,6 +214,8 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         }
         ActivityHeatmapGrid(today = today, countsByDate = countsByDate)
     }
+
+    TrainingTrendCard(state.snapshot, today)
 
     // Personal Records (PR) Trophy Wall
     val records = remember(state.snapshot, today) {
