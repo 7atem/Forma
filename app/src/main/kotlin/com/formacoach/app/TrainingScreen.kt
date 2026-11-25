@@ -242,6 +242,21 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
     var timerDuration by rememberSaveable(session.id) { mutableIntStateOf(session.restSeconds) }
     var flowNotice by rememberSaveable(session.id) { mutableStateOf<Int?>(null) }
     var elapsed by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    val sessionStartElapsed = rememberSaveable(session.id) { SystemClock.elapsedRealtime() }
+    var sessionClockNow by remember { mutableLongStateOf(SystemClock.elapsedRealtime()) }
+    LaunchedEffect(session.id) {
+        while (true) {
+            sessionClockNow = SystemClock.elapsedRealtime()
+            delay(1000)
+        }
+    }
+    val sessionElapsedSec = ((sessionClockNow - sessionStartElapsed).coerceAtLeast(0L) / 1000L).toInt()
+    val sessionElapsedText = remember(sessionElapsedSec) {
+        val h = sessionElapsedSec / 3600
+        val m = (sessionElapsedSec % 3600) / 60
+        val s = sessionElapsedSec % 60
+        if (h > 0) "%d:%02d:%02d".format(h, m, s) else "%02d:%02d".format(m, s)
+    }
     val context = LocalContext.current
     val haptics = LocalHapticFeedback.current
     val currentExerciseName = stringResource(exerciseLabel(exercise))
@@ -369,7 +384,7 @@ private fun SessionForm(session: Session, state: AppState, vm: FitnessViewModel,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
                 Text(
-                    stringResource(R.string.session_status, number(sets.size.toDouble(), 0), dateLabel(session.date)),
+                    "${stringResource(R.string.session_status, number(sets.size.toDouble(), 0), dateLabel(session.date))} · ${stringResource(R.string.session_elapsed, sessionElapsedText)}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )

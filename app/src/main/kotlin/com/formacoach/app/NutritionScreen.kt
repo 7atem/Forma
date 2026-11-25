@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.formacoach.coach.ExerciseSearch
 import com.formacoach.coach.FoodSwapCalculator
 import com.formacoach.coach.SwapMatchBy
+import com.formacoach.coach.WorkoutInsights
 import com.formacoach.model.*
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
@@ -191,6 +192,41 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
                     progress = if (fatTarget != null && fatTarget > 0) (totalFat / fatTarget).toFloat() else if (totalKcal > 0) ((totalFat * 9.0) / macroKcalTotal).toFloat() else 0f,
                     color = MaterialTheme.colorScheme.primary,
                 )
+            }
+        }
+    }
+
+    // 1-Tap Frequent Meals Quick Re-log
+    val frequent = remember(state.snapshot.meals) { WorkoutInsights.frequentMeals(state.snapshot, limit = 8) }
+    if (frequent.isNotEmpty()) {
+        Column(Modifier.fillMaxWidth().testTag("frequent_meals_section"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(stringResource(R.string.frequent_meals_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                frequent.forEachIndexed { idx, item ->
+                    AssistChip(
+                        onClick = {
+                            val quick = item.template.copy(
+                                id = java.util.UUID.randomUUID().toString(),
+                                date = date,
+                                slot = if (slot != MealSlot.UNSPECIFIED) slot else item.template.slot,
+                            )
+                            vm.addMeal(quick) { onMealLogged(quick) }
+                        },
+                        enabled = !state.busy,
+                        leadingIcon = { Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        label = {
+                            Text(
+                                stringResource(R.string.frequent_meal_chip, item.template.name, number(item.template.calories, 0)),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                        modifier = Modifier.testTag("frequent_meal_$idx"),
+                    )
+                }
             }
         }
     }

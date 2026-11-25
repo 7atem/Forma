@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.formacoach.coach.MuscleTraining
 import com.formacoach.coach.TrainingHistory
+import com.formacoach.coach.WorkoutInsights
 import com.formacoach.model.*
 import java.time.LocalDate
 
@@ -267,6 +268,8 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         }
     }
 
+    WeeklyMuscleVolumeCard(state.snapshot, today)
+    PersonalRecordsCard(state.snapshot, today)
     WeeklyReviewCard(state.snapshot, date, vm)
 
     Text(stringResource(R.string.measurement_history), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -365,5 +368,85 @@ internal fun WeeklyReviewCard(snapshot: FitnessSnapshot, date: LocalDate, vm: Fi
         }
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         Text(stringResource(actionLabel(review.nextAction)), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Composable
+private fun WeeklyMuscleVolumeCard(snapshot: FitnessSnapshot, today: LocalDate) {
+    val breakdown = remember(snapshot, today) { WorkoutInsights.weeklyMuscleVolume(snapshot, today) }
+    if (breakdown.isEmpty()) return
+    val maxSets = remember(breakdown) { breakdown.maxOf { it.primarySets + it.secondarySets }.coerceAtLeast(1) }
+    InfoCard(Modifier.testTag("weekly_muscle_volume_card")) {
+        Text(stringResource(R.string.weekly_muscle_volume_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        breakdown.forEach { row ->
+            val total = row.primarySets + row.secondarySets
+            val subtitle = if (row.secondarySets > 0) {
+                stringResource(R.string.muscle_sets_primary_supporting, number(row.primarySets.toDouble(), 0), number(row.secondarySets.toDouble(), 0))
+            } else {
+                stringResource(R.string.muscle_sets_primary_only, number(row.primarySets.toDouble(), 0))
+            }
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(muscleLabel(row.muscle)), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Text(subtitle, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                LinearProgressIndicator(
+                    progress = { (total.toFloat() / maxSets.toFloat()).coerceIn(0f, 1f) },
+                    modifier = Modifier.fillMaxWidth().height(8.dp),
+                    color = if (row.primarySets > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PersonalRecordsCard(snapshot: FitnessSnapshot, today: LocalDate) {
+    val prs = remember(snapshot, today) { WorkoutInsights.personalRecords(snapshot, today) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    InfoCard(Modifier.testTag("pr_wall_card")) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
+            Text(stringResource(R.string.pr_wall_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+        }
+        if (prs.isEmpty()) {
+            Text(stringResource(R.string.pr_wall_empty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        } else {
+            val shown = if (expanded) prs else prs.take(5)
+            shown.forEach { pr ->
+                Row(
+                    Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            stringResource(exerciseLabel(pr.exercise)),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            stringResource(
+                                R.string.pr_entry_detail,
+                                formatWeight(pr.weightKg, 1),
+                                number(pr.repsAtWeight.toDouble(), 0),
+                                formatWeight(pr.bestE1rmKg, 1),
+                                dateLabel(pr.date),
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+            if (prs.size > 5) {
+                TextButton(onClick = { expanded = !expanded }, modifier = Modifier.testTag("pr_wall_toggle")) {
+                    Text(if (expanded) stringResource(R.string.show_less) else stringResource(R.string.show_all_prs, number(prs.size.toDouble(), 0)))
+                }
+            }
+        }
     }
 }
