@@ -14,10 +14,10 @@
     <string name="goal_strength">Build strength</string>
     <string name="goal_habit">Build a consistent routine</string>
     <string name="sessions_per_week">Planned sessions per week</string>
-    <string name="manual_targets">Your own nutrition targets · optional</string>
+    <string name="manual_targets">Your own daily targets · optional</string>
     <string name="manual_targets_body">Enter targets you have already chosen, or leave them blank. Forma does not calculate or change them in this version.</string>
-    <string name="calorie_target">Daily calorie target · kcal</string>
-    <string name="protein_target">Daily protein target · g</string>
+    <string name="calorie_target">Calories · kcal</string>
+    <string name="protein_target">Protein · g</string>
     <string name="start_journey">Start my log</string>
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
@@ -77,10 +77,10 @@
     <string name="review_sessions">Completed sessions · %1$s</string>
     <string name="review_meal_days">Days with food entries · %1$s / 7</string>
     <string name="review_calories">Average logged calories per logged day · %1$s kcal</string>
-    <string name="review_weight">Average body weight · %1$s from %2$s observations</string>
+    <string name="review_weight">Average body weight · %1$s · recorded days: %2$s</string>
     <string name="review_waist">Average recorded waist · %1$s cm</string>
     <string name="review_delta">Average weight difference from the previous 7 days · %1$s</string>
-    <string name="comparison_range">Comparison window · %1$s – %2$s · %3$s weight observations</string>
+    <string name="comparison_range">Comparison window · %1$s – %2$s · weight records: %3$s</string>
     <string name="not_enough_weight">A weight comparison needs at least 3 recorded days in each 7-day window. This is a data coverage check, not a medical assessment.</string>
     <string name="no_auto_change">This review does not change your targets or plan. It describes the log without explaining the cause of weight changes.</string>
     <string name="measurement_history">Measurement history</string>
@@ -383,9 +383,9 @@
     <string name="discomfort_region_neck_upper_back">Neck / upper back</string>
     <string name="discomfort_region_shoulders">Shoulders</string>
     <string name="discomfort_region_lower_back">Lower back</string>
-    <string name="carbs_target">Carbs target (g, optional)</string>
-    <string name="fat_target">Fat target (g, optional)</string>
-    <string name="water_goal_ml">Daily water goal (ml, optional)</string>
+    <string name="carbs_target">Carbs · g</string>
+    <string name="fat_target">Fat · g</string>
+    <string name="water_goal_ml">Water · ml</string>
     <string name="hydration_title">Water logged</string>
     <string name="hydration_value">%1$s ml</string>
     <string name="hydration_goal_progress">%1$s / %2$s ml</string>
@@ -425,7 +425,7 @@
     <string name="review_tile_meal_days_value">%1$s / 7</string>
     <string name="review_tile_meal_days">Days with food entries</string>
     <string name="review_tile_calories">Average kcal per logged day</string>
-    <string name="review_tile_weight">Average body weight · %1$s observations</string>
+    <string name="review_tile_weight">Average body weight · recorded days: %1$s</string>
     <string name="logged_entries_heading">Logged entries</string>
     <string name="add_food_heading">Add food</string>
     <string name="weekly_muscle_split_title">Working sets this week (warm-ups excluded)</string>
@@ -491,7 +491,7 @@
     <string name="health_connect_remove">Remove imported copies</string>
     <string name="health_connect_remove_note">Deletes the copies Forma imported from Health Connect. Your Forma logs and the data in Health Connect stay as they are.</string>
     <string name="health_connect_privacy">Imported copies are stored encrypted on this device, labelled, and kept apart from your Forma logs, stats and backups. They are never sent anywhere.</string>
-    <string name="height_cm_optional">Height · cm, optional</string>
+    <string name="height_cm_optional">Height · cm (optional)</string>
     <string name="height_note">Used only to show BMI. Leave blank to hide it.</string>
     <string name="height_error">Enter a height from 50 to 272 cm.</string>
     <string name="bmi_title">BMI</string>
@@ -510,4 +510,6 @@
     <string name="frequent_meal_chip">%1$s · %2$s kcal</string>
     <string name="copy_workout_summary">Copy summary</string>
     <string name="copied_workout_summary">Copied!</string>
+    <string name="chart_one_point">One recorded day so far. Record another day to draw a line.</string>
+    <string name="muscle_heatmap_empty">No working sets in the last 7 days. Finish a workout to see the muscles it covered.</string>
 </resources>

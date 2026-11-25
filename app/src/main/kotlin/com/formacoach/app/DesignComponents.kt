@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
@@ -701,7 +702,6 @@ internal fun ActivityHeatmapGrid(
                         val color = when {
                             count >= 2 -> MaterialTheme.colorScheme.primary
                             count == 1 -> MaterialTheme.colorScheme.primary.copy(alpha = 0.62f)
-                            day == today -> MaterialTheme.colorScheme.primaryContainer
                             else -> MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
                         }
                         Box(
@@ -709,7 +709,12 @@ internal fun ActivityHeatmapGrid(
                                 .fillMaxWidth()
                                 .aspectRatio(1f)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(color),
+                                .background(color)
+                                // Today is marked by an outline only, so an empty day never looks like a recorded workout.
+                                .then(
+                                    if (day == today) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), RoundedCornerShape(4.dp))
+                                    else Modifier,
+                                ),
                         )
                     }
                 }

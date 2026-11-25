@@ -184,7 +184,8 @@ class FitnessFlowTest {
             rule.onNodeWithTag("profile_name").performTextInput("Forma Tester")
             rule.onNodeWithTag("save_profile").performScrollTo().performClick()
         }
-        rule.waitUntil(10_000) {rule.onAllNodesWithTag("tab_1").fetchSemanticsNodes().isNotEmpty()}
+        // The first save on a fresh install also creates the encrypted database, which is slow on loaded emulators.
+        rule.waitUntil(30_000) {rule.onAllNodesWithTag("tab_1").fetchSemanticsNodes().isNotEmpty()}
     }
 
     @Test fun profileTrainingFoodAndMeasurementPersistIntoReview() {

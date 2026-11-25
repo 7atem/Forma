@@ -9,7 +9,10 @@ data class FrequentMeal(
 )
 
 object WorkoutInsights {
-    /** Most frequently logged meals (case-insensitive trimmed name + rounded calories), newest entry kept as template. */
+    /**
+     * Most frequently logged meals (case-insensitive trimmed name + rounded calories). Ties keep the
+     * snapshot order (newest first), and each group's newest entry is the template.
+     */
     fun frequentMeals(data: FitnessSnapshot, limit: Int = 8): List<FrequentMeal> {
         if (limit <= 0 || data.meals.isEmpty()) return emptyList()
         return data.meals
@@ -18,7 +21,8 @@ object WorkoutInsights {
             }
             .values
             .map { group ->
-                val latest = group.maxWithOrNull(compareBy<Meal> { it.date }.thenBy { it.id }) ?: group.first()
+                // maxWith keeps the first of equal dates, i.e. the newest-ordered entry, never a random ID.
+                val latest = group.maxWithOrNull(compareBy { it.date }) ?: group.first()
                 FrequentMeal(template = latest, count = group.size)
             }
             .sortedWith(compareByDescending<FrequentMeal> { it.count }.thenByDescending { it.template.date })

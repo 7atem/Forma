@@ -4,6 +4,16 @@ Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schem
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
 
+## UI/UX pass 4 (25 November 2026)
+
+Audit on the API 35 emulator at phone size (1080×2400, 420 dpi), release build, fresh install, English. Fixes (Android):
+- **12-week grid:** today was filled with the "1 recorded workout" colour even with no workout; it is now outlined only.
+- **Eat:** two one-tap repeat rows did the same job (one unlabelled, no kcal unit). One labelled "Quick re-log" row remains under the meal-slot picker; it uses the chosen slot, ranks by frequency, keeps newest-first ties (no longer by random ID) and has 48 dp chips.
+- **Sparse data:** a single weigh-in shows its value and "record another day to draw a line" instead of a lone dot; an empty 7-day heat map is one sentence instead of two grey figures and a legend.
+- **Profile/onboarding:** height moved to the "about you" card; target labels share one short format ("Calories · kcal"); weekly review counts read "recorded days: 1" instead of "1 observations".
+- **Tests:** `frequentMealTiesKeepNewestFirstOrderAndTemplate` (unit) and `sparseDataExplainsWhatIsMissingInsteadOfDrawingEmptyGraphics` (component).
+- **Not changed:** the encrypted-database unlock showed for several seconds on this overloaded emulator (host RAM nearly exhausted, other apps also hit ANRs); not measured on a real device. iPhone needed none of these fixes except where noted earlier.
+
 ## Large-text and Arabic sweep (25 November 2026)
 
 All four tabs captured at **200% system text** on the phone image, plus the new cards in Arabic RTL. Fixes:

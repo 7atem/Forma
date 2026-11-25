@@ -104,6 +104,15 @@ internal fun WeeklyMuscleHeatMap(primarySetsByMuscle: Map<Muscle, Int>) {
             Text(stringResource(R.string.muscle_heatmap_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
             ScopeInfoButton(R.string.muscle_heatmap_title, R.string.muscle_heatmap_note)
         }
+        if (primarySetsByMuscle.values.none { it > 0 }) {
+            Text(
+                stringResource(R.string.muscle_heatmap_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.testTag("muscle_heatmap_empty"),
+            )
+            return@Column
+        }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             listOf(true, false).forEach { front ->
                 Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {

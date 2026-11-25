@@ -172,6 +172,19 @@ internal fun HistoryChart(
         Text(stringResource(R.string.no_chart_data), color = MaterialTheme.colorScheme.onSurfaceVariant)
         return
     }
+    if (points.size == 1) {
+        val only = points.single()
+        Column(Modifier.testTag("chart_single_point"), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                "${number(only.value)} $unit · ${dateLabel(only.date)}",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(stringResource(R.string.chart_one_point), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        return
+    }
     val allValues = points.map { it.value } + trendPoints.map { it.value }
     val min = allValues.min()
     val max = allValues.max()

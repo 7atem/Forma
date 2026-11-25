@@ -24,6 +24,20 @@ class WorkoutInsightsTest {
         assertEquals(1, top[1].count)
     }
 
+    @Test fun frequentMealTiesKeepNewestFirstOrderAndTemplate() {
+        // Snapshots list meals newest first; same-day entries must not be reordered by their random IDs.
+        val data = FitnessSnapshot(
+            meals = listOf(
+                Meal("zzz", day2, "Oats", 300.0, 10.0, 50.0, 6.0),
+                Meal("aaa", day2, "oats", 300.0, 12.0, 48.0, 6.0),
+                Meal("mmm", day2, "Eggs", 150.0, 12.0, 1.0, 10.0),
+            ),
+        )
+        val top = WorkoutInsights.frequentMeals(data)
+        assertEquals(listOf("zzz", "mmm"), top.map { it.template.id })
+        assertEquals(2, top[0].count)
+    }
+
     @Test fun formatRecapListsWorkingSetsAndExcludesWarmups() {
         val sets = listOf(
             TrainingSet("1", "s1", Exercise.BARBELL_BENCH_PRESS, 8, 80.0, SetKind.WORKING),

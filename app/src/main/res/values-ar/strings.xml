@@ -14,10 +14,10 @@
     <string name="goal_strength">زيادة القوة</string>
     <string name="goal_habit">بناء روتين منتظم</string>
     <string name="sessions_per_week">عدد التمارين المخطط لها أسبوعيًا</string>
-    <string name="manual_targets">أهداف التغذية اللي اخترتها · اختياري</string>
+    <string name="manual_targets">أهدافك اليومية اللي اخترتها · اختياري</string>
     <string name="manual_targets_body">اكتب أهدافك المحددة مسبقًا أو سيبها فاضية. فورمة مش بيحسبها أو يغيرها في النسخة دي.</string>
-    <string name="calorie_target">هدف السعرات اليومي · كيلوكالوري</string>
-    <string name="protein_target">هدف البروتين اليومي · جم</string>
+    <string name="calorie_target">السعرات · سعرة</string>
+    <string name="protein_target">البروتين · جم</string>
     <string name="start_journey">ابدأ سجلي</string>
     <string name="save">حفظ</string>
     <string name="cancel">إلغاء</string>
@@ -77,10 +77,10 @@
     <string name="review_sessions">التمارين المكتملة · %1$s</string>
     <string name="review_meal_days">أيام فيها أكل مسجل · ⁦%1$s / 7⁩</string>
     <string name="review_calories">متوسط السعرات المسجلة لكل يوم فيه تسجيل · %1$s كيلوكالوري</string>
-    <string name="review_weight">متوسط وزن الجسم · %1$s من %2$s قياسات</string>
+    <string name="review_weight">متوسط وزن الجسم · %1$s · أيام مسجّلة: %2$s</string>
     <string name="review_waist">متوسط محيط الخصر المسجل · %1$s سم</string>
     <string name="review_delta">فرق متوسط الوزن عن الـ7 أيام السابقة · %1$s</string>
-    <string name="comparison_range">فترة المقارنة · %1$s – %2$s · %3$s قياسات وزن</string>
+    <string name="comparison_range">فترة المقارنة · %1$s – %2$s · قياسات الوزن: %3$s</string>
     <string name="not_enough_weight">مقارنة الوزن محتاجة 3 أيام مسجلة على الأقل في كل فترة من 7 أيام. ده شرط لاكتمال البيانات، مش تقييم طبي.</string>
     <string name="no_auto_change">المراجعة دي مش بتغير أهدافك أو خطتك. بتوصف السجل بدون تحديد سبب تغير الوزن.</string>
     <string name="measurement_history">سجل القياسات</string>
@@ -383,9 +383,9 @@
     <string name="discomfort_region_neck_upper_back">الرقبة / أعلى الظهر</string>
     <string name="discomfort_region_shoulders">الكتفين</string>
     <string name="discomfort_region_lower_back">أسفل الظهر</string>
-    <string name="carbs_target">هدف الكارب (جم، اختياري)</string>
-    <string name="fat_target">هدف الدهون (جم، اختياري)</string>
-    <string name="water_goal_ml">هدف الماء اليومي (مل، اختياري)</string>
+    <string name="carbs_target">الكارب · جم</string>
+    <string name="fat_target">الدهون · جم</string>
+    <string name="water_goal_ml">الماء · مل</string>
     <string name="hydration_title">الماء المسجّل</string>
     <string name="hydration_value">%1$s مل</string>
     <string name="hydration_goal_progress">⁦%1$s / %2$s⁩ مل</string>
@@ -425,7 +425,7 @@
     <string name="review_tile_meal_days_value">⁦%1$s / 7⁩</string>
     <string name="review_tile_meal_days">أيام فيها أكل مسجل</string>
     <string name="review_tile_calories">متوسط السعرات لكل يوم مسجل</string>
-    <string name="review_tile_weight">متوسط وزن الجسم · %1$s قياسات</string>
+    <string name="review_tile_weight">متوسط وزن الجسم · أيام مسجّلة: %1$s</string>
     <string name="logged_entries_heading">ما سجلته</string>
     <string name="add_food_heading">أضف طعامًا</string>
     <string name="weekly_muscle_split_title">مجموعات العمل هذا الأسبوع (بدون الإحماء)</string>
@@ -491,7 +491,7 @@
     <string name="health_connect_remove">احذف النسخ المستوردة</string>
     <string name="health_connect_remove_note">يحذف النسخ التي استوردتها فورمة من Health Connect. سجلات فورمة والبيانات في Health Connect تبقى كما هي.</string>
     <string name="health_connect_privacy">النسخ المستوردة محفوظة ومشفّرة على هذا الجهاز، وموسومة، ومنفصلة عن سجلات فورمة وإحصاءاتها والنسخ الاحتياطية. لا تُرسل لأي مكان.</string>
-    <string name="height_cm_optional">الطول · سم، اختياري</string>
+    <string name="height_cm_optional">الطول · سم (اختياري)</string>
     <string name="height_note">يُستخدم فقط لعرض مؤشر كتلة الجسم. اتركه فارغًا لإخفائه.</string>
     <string name="height_error">أدخل طولًا من 50 إلى 272 سم.</string>
     <string name="bmi_title">مؤشر كتلة الجسم</string>
@@ -510,4 +510,6 @@
     <string name="frequent_meal_chip">%1$s · %2$s سعرة</string>
     <string name="copy_workout_summary">نسخ الملخص</string>
     <string name="copied_workout_summary">تم النسخ!</string>
+    <string name="chart_one_point">يوم واحد مسجّل لحد دلوقتي. سجّل يوم تاني عشان يظهر خط.</string>
+    <string name="muscle_heatmap_empty">مفيش مجموعات عمل في آخر 7 أيام. خلّص تمرين عشان تشوف العضلات اللي اشتغلت.</string>
 </resources>

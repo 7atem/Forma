@@ -130,4 +130,21 @@ class AccessibilityTest {
         rule.onNodeWithTag("confirm_destructive").assertTextEquals("Remove").assertHeightIsAtLeast(48.dp).performClick()
         rule.runOnIdle { check(removed) }
     }
+
+    @Test fun sparseDataExplainsWhatIsMissingInsteadOfDrawingEmptyGraphics() {
+        val day = LocalDate.of(2026, 11, 25)
+        rule.setContent {
+            MaterialTheme {
+                androidx.compose.foundation.layout.Column {
+                    HistoryChart(listOf(com.formacoach.coach.HistoryPoint(day, 80.0)), "kg")
+                    WeeklyMuscleHeatMap(emptyMap())
+                }
+            }
+        }
+        // One weigh-in shows its value and what a line needs, not a lone dot on a flat axis.
+        rule.onNodeWithTag("chart_single_point").assertExists()
+        rule.onNodeWithText("80 kg", substring = true).assertExists()
+        // No working sets: a sentence replaces two grey figures and a colour legend.
+        rule.onNodeWithTag("muscle_heatmap_empty").assertExists()
+    }
 }

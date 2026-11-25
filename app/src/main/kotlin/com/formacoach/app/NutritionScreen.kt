@@ -196,41 +196,6 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
         }
     }
 
-    // 1-Tap Frequent Meals Quick Re-log
-    val frequent = remember(state.snapshot.meals) { WorkoutInsights.frequentMeals(state.snapshot, limit = 8) }
-    if (frequent.isNotEmpty()) {
-        Column(Modifier.fillMaxWidth().testTag("frequent_meals_section"), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(stringResource(R.string.frequent_meals_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-            Row(
-                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                frequent.forEachIndexed { idx, item ->
-                    AssistChip(
-                        onClick = {
-                            val quick = item.template.copy(
-                                id = java.util.UUID.randomUUID().toString(),
-                                date = date,
-                                slot = if (slot != MealSlot.UNSPECIFIED) slot else item.template.slot,
-                            )
-                            vm.addMeal(quick) { onMealLogged(quick) }
-                        },
-                        enabled = !state.busy,
-                        leadingIcon = { Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(16.dp)) },
-                        label = {
-                            Text(
-                                stringResource(R.string.frequent_meal_chip, item.template.name, number(item.template.calories, 0)),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                        modifier = Modifier.testTag("frequent_meal_$idx"),
-                    )
-                }
-            }
-        }
-    }
-
     // The day's log comes right after the summary; entry tools follow below.
     Text(stringResource(R.string.logged_entries_heading), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.testTag("logged_entries_heading"))
     // Searching one day's entries only helps once the list is long.
@@ -398,21 +363,31 @@ internal fun EatContent(state: AppState, today: LocalDate, vm: FitnessViewModel,
 
     MealSlotPicker(slot) { slot = it }
 
-    val quickRepeats = state.snapshot.meals.distinctBy { listOf(it.name, it.calories, it.protein, it.carbs, it.fat, it.source) }.take(6)
-    if (quickRepeats.isNotEmpty()) {
-        Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            quickRepeats.forEach { recent ->
-                AssistChip(
-                    onClick = {
-                        // One tap logs immediately, so confirm it and offer Undo instead of failing silently.
-                        val repeated = recent.copy(id = java.util.UUID.randomUUID().toString(), date = date, slot = slot)
-                        vm.addMeal(repeated) { onMealLogged(repeated) }
-                    },
-                    enabled = !state.busy,
-                    modifier = Modifier.testTag("quick_repeat_${recent.name}"),
-                    leadingIcon = { Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(15.dp)) },
-                    label = { Text("${recent.name} · ${number(recent.calories, 0)}", maxLines = 1) },
-                )
+    // Most often logged meals first; one tap adds a new entry for this day under the chosen slot, with Undo.
+    val frequent = remember(state.snapshot.meals) { WorkoutInsights.frequentMeals(state.snapshot, limit = 8) }
+    if (frequent.isNotEmpty()) {
+        Column(Modifier.fillMaxWidth().testTag("frequent_meals_section"), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(stringResource(R.string.frequent_meals_title), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                frequent.forEach { item ->
+                    val recent = item.template
+                    AssistChip(
+                        onClick = {
+                            val repeated = recent.copy(id = java.util.UUID.randomUUID().toString(), date = date, slot = slot)
+                            vm.addMeal(repeated) { onMealLogged(repeated) }
+                        },
+                        enabled = !state.busy,
+                        modifier = Modifier.heightIn(min = 48.dp).testTag("quick_repeat_${recent.name}"),
+                        leadingIcon = { Icon(Icons.Default.Replay, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                        label = {
+                            Text(
+                                stringResource(R.string.frequent_meal_chip, recent.name, number(recent.calories, 0)),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
+                }
             }
         }
     }

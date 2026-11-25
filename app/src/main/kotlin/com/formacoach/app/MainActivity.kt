@@ -588,6 +588,14 @@ private fun ProfileForm(
                     )
                 }
             }
+            Input(
+                R.string.height_cm_optional,
+                height,
+                { height = it },
+                "profile_height",
+                error = heightInvalid,
+                supportingText = stringResource(if (heightInvalid) R.string.height_error else R.string.height_note),
+            )
         }
         InfoCard {
             Text(stringResource(R.string.manual_targets), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -640,14 +648,6 @@ private fun ProfileForm(
                 { waterGoal = it },
                 "profile_water_goal",
                 error = waterInvalid,
-            )
-            Input(
-                R.string.height_cm_optional,
-                height,
-                { height = it },
-                "profile_height",
-                error = heightInvalid,
-                supportingText = stringResource(if (heightInvalid) R.string.height_error else R.string.height_note),
             )
         }
         if (error) Text(stringResource(R.string.save_failed), color = MaterialTheme.colorScheme.error)
