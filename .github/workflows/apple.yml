@@ -43,7 +43,11 @@ jobs:
           # The paired-watch install needs the watch app embedded under Watch/; fail loudly if it is not.
           test -f "$APP/Watch/FormaWatch.app/Info.plist" || { echo "::error::FormaWatch.app is not embedded in the IPA"; exit 1; }
           # Verify bundled exercise videos are actually copied into FormaPhone.app.
-          ls "$APP"/exercise_video_*.mp4 "$APP"/raw/exercise_video_*.mp4 >/dev/null 2>&1 || { echo "::error::Bundled exercise MP4 videos missing from FormaPhone.app"; exit 1; }
+          # XcodeGen flattens the raw/ group into the bundle root; accept either location.
+          VIDEOS=$(find "$APP" -maxdepth 2 -name 'exercise_video_*.mp4' | wc -l | tr -d ' ')
+          EXPECTED=$(ls assets/exercises/res/raw/exercise_video_*.mp4 | wc -l | tr -d ' ')
+          [ "$VIDEOS" -ge "$EXPECTED" ] && [ "$VIDEOS" -gt 0 ] || { echo "::error::Bundled exercise MP4 videos missing from FormaPhone.app ($VIDEOS of $EXPECTED)"; exit 1; }
+          echo "- Exercise videos bundled: $VIDEOS" >> "$GITHUB_STEP_SUMMARY"
           {
             echo "### IPA contents"
             echo "- iPhone app: \`$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Info.plist")\`"
