@@ -132,6 +132,19 @@
       "reviewNote": ""
     },
     {
+      "id": "DIP",
+      "file": "assets/exercises/res/raw/exercise_video_dip.mp4",
+      "bytes": 214106,
+      "sha256": "b1b2ad167d1ee9a24364255f466682dd9274edb047deab47b056a9f4af3a1dcc",
+      "seconds": 6.33,
+      "width": 720,
+      "height": 720,
+      "tool": "Veo 3 (Gemini Web)",
+      "looped": "forward+reverse",
+      "reviewed": false,
+      "reviewNote": ""
+    },
+    {
       "id": "DUMBBELL_BENCH_PRESS",
       "file": "assets/exercises/res/raw/exercise_video_dumbbell_bench_press.mp4",
       "bytes": 238012,
@@ -205,6 +218,19 @@
       "width": 720,
       "height": 720,
       "tool": "Kimi (720p)",
+      "looped": "forward+reverse",
+      "reviewed": false,
+      "reviewNote": ""
+    },
+    {
+      "id": "INCLINE_BARBELL_PRESS",
+      "file": "assets/exercises/res/raw/exercise_video_incline_barbell_press.mp4",
+      "bytes": 196273,
+      "sha256": "27f355e483e6d6002aa1cd0a8adecf63df684ac13fc693af0d75e9e94d9715e6",
+      "seconds": 6.33,
+      "width": 720,
+      "height": 720,
+      "tool": "Veo 3 (Gemini Web)",
       "looped": "forward+reverse",
       "reviewed": false,
       "reviewNote": ""

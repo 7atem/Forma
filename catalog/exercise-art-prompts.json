@@ -346,6 +346,31 @@
       "id": "ab_wheel_rollout",
       "tool": "image-generator (built-in)",
       "prompt": "Two-panel 3:2 3D render on #10231D studio background: kneeling ab wheel rollout upright start on left, extended rollout on right."
+    },
+    {
+      "id": "close_grip_bench_press",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: close-grip barbell bench press arms extended on left, bar lowered to lower chest with tucked elbows on right."
+    },
+    {
+      "id": "cable_crossover",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: high-to-low cable crossover arms wide on left, hands brought together in front of hips on right."
+    },
+    {
+      "id": "barbell_shrug",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: standing barbell shrug relaxed shoulders on left, shrugged high toward ears on right."
+    },
+    {
+      "id": "good_morning",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: barbell good morning standing tall on left, 45-degree flat-back hip hinge on right."
+    },
+    {
+      "id": "hip_abduction",
+      "tool": "image-generator (built-in)",
+      "prompt": "Two-panel 3:2 3D render on #10231D studio background: seated hip abduction machine knees together on left, pressed wide apart on right."
     }
   ]
 }

@@ -412,5 +412,35 @@
     "file": "assets/exercises/res/drawable-nodpi/exercise_ab_wheel_rollout.webp",
     "bytes": 32006,
     "sha256": "051fd3d928fc0e8a5fee581667e1ade61e61d0db5939dccfb46fe81005fbd113"
+  },
+  {
+    "id": "close_grip_bench_press",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_close_grip_bench_press.webp",
+    "bytes": 34824,
+    "sha256": "39271f7f6a2a28f752e3a872fcf6ef02e709271d1d7aaaacfb9a578622593de4"
+  },
+  {
+    "id": "cable_crossover",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_cable_crossover.webp",
+    "bytes": 37482,
+    "sha256": "d3a4d1cd8eea4f2b46700899d73a4f4760d8c7ef5ec37bd84e54c0f843135d4f"
+  },
+  {
+    "id": "barbell_shrug",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_barbell_shrug.webp",
+    "bytes": 32040,
+    "sha256": "5100b62342ed6abf11f9bfd158b91a765262827a837363e1476922f3fe32978f"
+  },
+  {
+    "id": "good_morning",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_good_morning.webp",
+    "bytes": 32294,
+    "sha256": "d9f8908280b40f910b64d2697da6d9caa3a713228fef2c3782a0039da618a445"
+  },
+  {
+    "id": "hip_abduction",
+    "file": "assets/exercises/res/drawable-nodpi/exercise_hip_abduction.webp",
+    "bytes": 35334,
+    "sha256": "08660b350b412e98a5506ebc4d1ccf60f4d0a705d209872afa3b4d274196e9a3"
   }
 ]

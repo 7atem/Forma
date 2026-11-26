@@ -104,4 +104,9 @@
     <string name="catalog_exercise_triceps_kickback">Triceps kickback</string>
     <string name="catalog_exercise_walking_lunge">Walking lunge</string>
     <string name="catalog_exercise_ab_wheel_rollout">Ab wheel rollout</string>
+    <string name="catalog_exercise_close_grip_bench_press">Close-grip bench press</string>
+    <string name="catalog_exercise_cable_crossover">Cable crossover</string>
+    <string name="catalog_exercise_barbell_shrug">Barbell shrug</string>
+    <string name="catalog_exercise_good_morning">Barbell good morning</string>
+    <string name="catalog_exercise_hip_abduction">Hip abduction</string>
 </resources>

@@ -104,4 +104,9 @@
     <string name="catalog_exercise_triceps_kickback">رفس ترايسبس بالدمبل</string>
     <string name="catalog_exercise_walking_lunge">طعن متحرك بالدمبل</string>
     <string name="catalog_exercise_ab_wheel_rollout">تدحرج عجلة البطن على الركبتين</string>
+    <string name="catalog_exercise_close_grip_bench_press">ضغط صدر بالبار بقبضة ضيقة</string>
+    <string name="catalog_exercise_cable_crossover">تقاطع كابل علوي للصدر</string>
+    <string name="catalog_exercise_barbell_shrug">رفع الكتفين بالبار</string>
+    <string name="catalog_exercise_good_morning">تمرين صباح الخير بالبار</string>
+    <string name="catalog_exercise_hip_abduction">فتح الوركين على الجهاز</string>
 </resources>

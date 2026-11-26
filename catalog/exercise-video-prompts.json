@@ -349,6 +349,31 @@
       "id": "AB_WHEEL_ROLLOUT",
       "seconds": 4,
       "motion": "Kneeling ab wheel rollout. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Kneel on a mat gripping the wheel under your shoulders with ribs tucked and glutes braced. Roll forward slowly with straight arms as far as you can without letting the lower back sag. Pull back smoothly through your core and lats to the kneeling start position."
+    },
+    {
+      "id": "CLOSE_GRIP_BENCH_PRESS",
+      "seconds": 4,
+      "motion": "Close-grip barbell bench press. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Lie flat with feet planted and grip the barbell roughly shoulder-width apart. Lower the bar to the lower chest while keeping elbows tucked close to your ribs. Press smoothly back to straight arms without bouncing off the chest."
+    },
+    {
+      "id": "CABLE_CROSSOVER",
+      "seconds": 4,
+      "motion": "High-to-low cable crossover. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand in a staggered stance between high pulleys with a slight forward lean and soft elbows. Sweep both handles down and inward in a controlled arc until hands meet in front of your hips. Return slowly to a comfortable chest stretch without letting shoulders roll forward."
+    },
+    {
+      "id": "BARBELL_SHRUG",
+      "seconds": 4,
+      "motion": "Standing barbell shrug. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Stand tall holding a barbell in front of your thighs with straight arms and shoulder-width grip. Shrug your shoulders straight up toward your ears without bending your elbows or rolling your neck. Pause briefly at the top and lower your shoulders smoothly under control."
+    },
+    {
+      "id": "GOOD_MORNING",
+      "seconds": 4,
+      "motion": "Barbell good morning. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Rest the barbell securely across your upper back with feet hip-width and knees softly bent. Push your hips back and hinge your torso forward with a flat, braced spine. Drive hips forward smoothly to return upright without rounding your lower back."
+    },
+    {
+      "id": "HIP_ABDUCTION",
+      "seconds": 4,
+      "motion": "Seated hip abduction machine. Animate only the controlled phase between the exact start-frame and end-frame positions, with a brief natural hold at the end; do not add a return phase, another repetition, or a side switch. Preserve the athlete, equipment, grip, stance, contact points and locked camera from both supplied frames. Form constraints: Sit upright with your back supported against the pad and outer thighs resting on the levers. Press your knees smoothly outward against the pads without leaning back. Return slowly to the closed position with control."
     }
   ],
   "spec": {

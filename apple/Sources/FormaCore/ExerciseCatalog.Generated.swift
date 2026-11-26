@@ -71,6 +71,11 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
     case triceps_kickback = "TRICEPS_KICKBACK"
     case walking_lunge = "WALKING_LUNGE"
     case ab_wheel_rollout = "AB_WHEEL_ROLLOUT"
+    case close_grip_bench_press = "CLOSE_GRIP_BENCH_PRESS"
+    case cable_crossover = "CABLE_CROSSOVER"
+    case barbell_shrug = "BARBELL_SHRUG"
+    case good_morning = "GOOD_MORNING"
+    case hip_abduction = "HIP_ABDUCTION"
     public func label(arabic: Bool) -> String {
         switch self {
         case .squat: return arabic ? "سكوات" : "Squat"
@@ -142,6 +147,11 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
         case .triceps_kickback: return arabic ? "رفس ترايسبس بالدمبل" : "Triceps kickback"
         case .walking_lunge: return arabic ? "طعن متحرك بالدمبل" : "Walking lunge"
         case .ab_wheel_rollout: return arabic ? "تدحرج عجلة البطن على الركبتين" : "Ab wheel rollout"
+        case .close_grip_bench_press: return arabic ? "ضغط صدر بالبار بقبضة ضيقة" : "Close-grip bench press"
+        case .cable_crossover: return arabic ? "تقاطع كابل علوي للصدر" : "Cable crossover"
+        case .barbell_shrug: return arabic ? "رفع الكتفين بالبار" : "Barbell shrug"
+        case .good_morning: return arabic ? "تمرين صباح الخير بالبار" : "Barbell good morning"
+        case .hip_abduction: return arabic ? "فتح الوركين على الجهاز" : "Hip abduction"
         }
     }
 }
@@ -236,6 +246,11 @@ public enum ExerciseCatalog {public static func of(_ exercise:Exercise)->Exercis
     case .triceps_kickback:return .init(equipment:[.dumbbells,.bench],perSide:true,singleDumbbell:false)
     case .walking_lunge:return .init(equipment:[.dumbbells],perSide:true,singleDumbbell:false)
     case .ab_wheel_rollout:return .init(equipment:[.bodyweight],perSide:false,singleDumbbell:false)
+    case .close_grip_bench_press:return .init(equipment:[.barbell,.bench],perSide:false,singleDumbbell:false)
+    case .cable_crossover:return .init(equipment:[.cable],perSide:false,singleDumbbell:false)
+    case .barbell_shrug:return .init(equipment:[.barbell],perSide:false,singleDumbbell:false)
+    case .good_morning:return .init(equipment:[.barbell],perSide:false,singleDumbbell:false)
+    case .hip_abduction:return .init(equipment:[.machine],perSide:false,singleDumbbell:false)
 }}}
 public enum Muscle: String, Codable, CaseIterable, Sendable {
     case chest = "CHEST"
@@ -474,6 +489,11 @@ public enum ExerciseMuscles {
         case .triceps_kickback: return .init(primary: [.triceps], secondary: [.rear_delts], primaryDetail: [.triceps], secondaryDetail: [.rear_delt], reference: "https://exrx.net/WeightExercises/Triceps/DBKickback")
         case .walking_lunge: return .init(primary: [.quadriceps, .glutes], secondary: [.hamstrings, .adductors, .core], primaryDetail: [.quadriceps, .glute_max, .glute_med], secondaryDetail: [.hamstrings, .adductors, .rectus_abdominis], reference: "https://exrx.net/WeightExercises/Quadriceps/DBWalkingLunge")
         case .ab_wheel_rollout: return .init(primary: [.core], secondary: [.lats, .front_delts], primaryDetail: [.rectus_abdominis, .obliques], secondaryDetail: [.lats, .front_delt], reference: "https://exrx.net/WeightExercises/RectusAbdominis/BWWheelRollout")
+        case .close_grip_bench_press: return .init(primary: [.triceps, .chest], secondary: [.front_delts], primaryDetail: [.triceps, .mid_lower_chest], secondaryDetail: [.front_delt], reference: "https://exrx.net/WeightExercises/Triceps/BBCloseGripBenchPress")
+        case .cable_crossover: return .init(primary: [.chest], secondary: [.front_delts, .core], primaryDetail: [.mid_lower_chest], secondaryDetail: [.front_delt, .rectus_abdominis], reference: "https://exrx.net/WeightExercises/PectoralisSternal/CBStandingFly")
+        case .barbell_shrug: return .init(primary: [.upper_back], secondary: [.biceps], primaryDetail: [.upper_traps], secondaryDetail: [.forearms], reference: "https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug")
+        case .good_morning: return .init(primary: [.hamstrings, .glutes, .erectors], secondary: [.core], primaryDetail: [.hamstrings, .glute_max, .spinal_erectors], secondaryDetail: [.rectus_abdominis], reference: "https://exrx.net/WeightExercises/Hamstrings/BBGoodMorning")
+        case .hip_abduction: return .init(primary: [.glutes], secondary: [.core], primaryDetail: [.glute_med, .glute_max], secondaryDetail: [.obliques], reference: "https://exrx.net/WeightExercises/HipAbductor/LVSeatedHipAbduction")
         }
     }
 }

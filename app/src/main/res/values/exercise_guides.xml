@@ -276,4 +276,24 @@
     <string name="guide_ab_wheel_rollout_0">Kneel on a mat gripping the wheel under your shoulders with ribs tucked and glutes braced.</string>
     <string name="guide_ab_wheel_rollout_1">Roll forward slowly with straight arms as far as you can without letting the lower back sag.</string>
     <string name="guide_ab_wheel_rollout_2">Pull back smoothly through your core and lats to the kneeling start position.</string>
+    <string name="guide_close_grip_bench_press_variant">Close-grip barbell bench press</string>
+    <string name="guide_close_grip_bench_press_0">Lie flat with feet planted and grip the barbell roughly shoulder-width apart.</string>
+    <string name="guide_close_grip_bench_press_1">Lower the bar to the lower chest while keeping elbows tucked close to your ribs.</string>
+    <string name="guide_close_grip_bench_press_2">Press smoothly back to straight arms without bouncing off the chest.</string>
+    <string name="guide_cable_crossover_variant">High-to-low cable crossover</string>
+    <string name="guide_cable_crossover_0">Stand in a staggered stance between high pulleys with a slight forward lean and soft elbows.</string>
+    <string name="guide_cable_crossover_1">Sweep both handles down and inward in a controlled arc until hands meet in front of your hips.</string>
+    <string name="guide_cable_crossover_2">Return slowly to a comfortable chest stretch without letting shoulders roll forward.</string>
+    <string name="guide_barbell_shrug_variant">Standing barbell shrug</string>
+    <string name="guide_barbell_shrug_0">Stand tall holding a barbell in front of your thighs with straight arms and shoulder-width grip.</string>
+    <string name="guide_barbell_shrug_1">Shrug your shoulders straight up toward your ears without bending your elbows or rolling your neck.</string>
+    <string name="guide_barbell_shrug_2">Pause briefly at the top and lower your shoulders smoothly under control.</string>
+    <string name="guide_good_morning_variant">Barbell good morning</string>
+    <string name="guide_good_morning_0">Rest the barbell securely across your upper back with feet hip-width and knees softly bent.</string>
+    <string name="guide_good_morning_1">Push your hips back and hinge your torso forward with a flat, braced spine.</string>
+    <string name="guide_good_morning_2">Drive hips forward smoothly to return upright without rounding your lower back.</string>
+    <string name="guide_hip_abduction_variant">Seated hip abduction machine</string>
+    <string name="guide_hip_abduction_0">Sit upright with your back supported against the pad and outer thighs resting on the levers.</string>
+    <string name="guide_hip_abduction_1">Press your knees smoothly outward against the pads without leaning back.</string>
+    <string name="guide_hip_abduction_2">Return slowly to the closed position with control.</string>
 </resources>

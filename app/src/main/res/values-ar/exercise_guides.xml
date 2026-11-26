@@ -276,4 +276,24 @@
     <string name="guide_ab_wheel_rollout_0">اركع على بساط ممسكًا بالعجلة تحت الكتفين مع شد البطن والأرداف.</string>
     <string name="guide_ab_wheel_rollout_1">تدحرج للأمام ببطء بذراعين مستقيمين لأقصى مدى مريح دون تقوّس أسفل الظهر.</string>
     <string name="guide_ab_wheel_rollout_2">اسحب نفسك بسلاسة بالبطن والظهر للعودة إلى وضع البداية.</string>
+    <string name="guide_close_grip_bench_press_variant">ضغط بالبار على مقعد مسطح بقبضة ضيقة</string>
+    <string name="guide_close_grip_bench_press_0">استلقِ على مقعد مسطح مع تثبيت القدمين وأمسك البار بقبضة بعرض الكتفين تقريبًا.</string>
+    <string name="guide_close_grip_bench_press_1">أنزل البار نحو أسفل الصدر مع إبقاء المرفقين قريبين من الأضلاع.</string>
+    <string name="guide_close_grip_bench_press_2">ادفع البار بسلاسة لأعلى دون ارتداد عن الصدر.</string>
+    <string name="guide_cable_crossover_variant">تقاطع كابل من أعلى لأسفل</string>
+    <string name="guide_cable_crossover_0">قف بوقفة متوازنة بين بكرتين علويتين مع ميل خفيف للأمام وثني بسيط للمرفقين.</string>
+    <string name="guide_cable_crossover_1">اسحب المقبضين لأسفل وللداخل بقوس متحكّم حتى تلتقي اليدان أمام الوركين.</string>
+    <string name="guide_cable_crossover_2">عُد ببطء حتى تمدد مريح للصدر دون تقوّس الكتفين للأمام.</string>
+    <string name="guide_barbell_shrug_variant">رفع الكتفين واقفًا بالبار</string>
+    <string name="guide_barbell_shrug_0">قف باستقامة ممسكًا بالبار أمام الفخذين بذراعين مستقيمين وقبضة بعرض الكتفين.</string>
+    <string name="guide_barbell_shrug_1">ارفع كتفيك عموديًا باتجاه الأذنين دون ثني المرفقين أو تحريك الرقبة.</string>
+    <string name="guide_barbell_shrug_2">توقف لحظة بالأعلى ثم اخفض الكتفين ببطء وتحكم.</string>
+    <string name="guide_good_morning_variant">انحناء الورك بالبار على الظهر</string>
+    <string name="guide_good_morning_0">ضع البار بثبات على أعلى الظهر مع وقفة بعرض الوركين وثني خفيف للركبتين.</string>
+    <string name="guide_good_morning_1">ادفع الوركين للخلف وانحنِ بالجذع للأمام مع إبقاء الظهر مستقيمًا ومشدودًا.</string>
+    <string name="guide_good_morning_2">ادفع الوركين للأمام بسلاسة للعودة للاستقامة دون تقوّس أسفل الظهر.</string>
+    <string name="guide_hip_abduction_variant">فتح الوركين جالسًا على الجهاز</string>
+    <string name="guide_hip_abduction_0">اجلس باستقامة مع إسناد الظهر على المسند ووضع الجانب الخارجي للفخذين على الوسادات.</string>
+    <string name="guide_hip_abduction_1">ادفع الركبتين للخارج بسلاسة دون الميل للخلف.</string>
+    <string name="guide_hip_abduction_2">عُد ببطء وتحكم إلى وضع البداية.</string>
 </resources>

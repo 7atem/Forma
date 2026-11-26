@@ -2255,6 +2255,126 @@
         "FRONT_DELT"
       ],
       "reference": "https://exrx.net/WeightExercises/RectusAbdominis/BWWheelRollout"
+    },
+    {
+      "id": "CLOSE_GRIP_BENCH_PRESS",
+      "en": "Close-grip bench press",
+      "ar": "ضغط صدر بالبار بقبضة ضيقة",
+      "equipment": [
+        "BARBELL",
+        "BENCH"
+      ],
+      "perSide": false,
+      "primary": [
+        "TRICEPS",
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS"
+      ],
+      "primaryDetail": [
+        "TRICEPS",
+        "MID_LOWER_CHEST"
+      ],
+      "secondaryDetail": [
+        "FRONT_DELT"
+      ],
+      "reference": "https://exrx.net/WeightExercises/Triceps/BBCloseGripBenchPress"
+    },
+    {
+      "id": "CABLE_CROSSOVER",
+      "en": "Cable crossover",
+      "ar": "تقاطع كابل علوي للصدر",
+      "equipment": [
+        "CABLE"
+      ],
+      "perSide": false,
+      "primary": [
+        "CHEST"
+      ],
+      "secondary": [
+        "FRONT_DELTS",
+        "CORE"
+      ],
+      "primaryDetail": [
+        "MID_LOWER_CHEST"
+      ],
+      "secondaryDetail": [
+        "FRONT_DELT",
+        "RECTUS_ABDOMINIS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/PectoralisSternal/CBStandingFly"
+    },
+    {
+      "id": "BARBELL_SHRUG",
+      "en": "Barbell shrug",
+      "ar": "رفع الكتفين بالبار",
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "primary": [
+        "UPPER_BACK"
+      ],
+      "secondary": [
+        "BICEPS"
+      ],
+      "primaryDetail": [
+        "UPPER_TRAPS"
+      ],
+      "secondaryDetail": [
+        "FOREARMS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug"
+    },
+    {
+      "id": "GOOD_MORNING",
+      "en": "Barbell good morning",
+      "ar": "تمرين صباح الخير بالبار",
+      "equipment": [
+        "BARBELL"
+      ],
+      "perSide": false,
+      "primary": [
+        "HAMSTRINGS",
+        "GLUTES",
+        "ERECTORS"
+      ],
+      "secondary": [
+        "CORE"
+      ],
+      "primaryDetail": [
+        "HAMSTRINGS",
+        "GLUTE_MAX",
+        "SPINAL_ERECTORS"
+      ],
+      "secondaryDetail": [
+        "RECTUS_ABDOMINIS"
+      ],
+      "reference": "https://exrx.net/WeightExercises/Hamstrings/BBGoodMorning"
+    },
+    {
+      "id": "HIP_ABDUCTION",
+      "en": "Hip abduction",
+      "ar": "فتح الوركين على الجهاز",
+      "equipment": [
+        "MACHINE"
+      ],
+      "perSide": false,
+      "primary": [
+        "GLUTES"
+      ],
+      "secondary": [
+        "CORE"
+      ],
+      "primaryDetail": [
+        "GLUTE_MED",
+        "GLUTE_MAX"
+      ],
+      "secondaryDetail": [
+        "OBLIQUES"
+      ],
+      "reference": "https://exrx.net/WeightExercises/HipAbductor/LVSeatedHipAbduction"
     }
   ]
 }
