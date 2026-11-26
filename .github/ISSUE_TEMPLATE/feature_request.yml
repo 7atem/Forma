@@ -1,0 +1,43 @@
+name: Feature Request
+description: Propose an enhancement that fits Forma's offline-first, privacy-respecting design.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Forma is offline-first with no user accounts, no telemetry, no paid cloud APIs, and no automated medical/diet/training prescriptions.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Training & Exercise Library
+        - Nutrition & Hydration
+        - Progress, Measurements & Health Import
+        - Backup, CSV & Apple Bridge
+        - Localization / Arabic RTL
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Workflow Gap
+      description: Describe the daily workflow or limitation you want to solve.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: How should it work across Android and/or Apple?
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Boundary Check
+      options:
+        - label: Works offline (or uses only a free, public, keyless API with documented licensing)
+        - label: Does not diagnose conditions or automatically prescribe diet/training changes

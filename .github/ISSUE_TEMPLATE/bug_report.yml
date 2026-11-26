@@ -1,0 +1,55 @@
+name: Bug Report
+description: Report a crash, layout issue (including Arabic RTL), data bug, or build failure.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Android
+        - iPhone (iOS)
+        - Apple Watch (watchOS)
+        - Build / CI / Scripts
+    validations:
+      required: true
+  - type: dropdown
+    id: language
+    attributes:
+      label: App Language
+      options:
+        - English (LTR)
+        - العربية / Arabic (RTL)
+        - Both / N/A
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / Commit
+      placeholder: "e.g., 0.7.0-alpha07 or commit hash"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Open Train / Eat / Progress...
+        2. Tap...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Device, OS & Logs
+      description: Device model, Android/iOS version, screenshots, or stack trace (remove any personal data).

@@ -1,0 +1,30 @@
+name: Exercise Media / Technique Review
+description: Report pose, equipment, muscle-mapping, cue, or video feedback for a catalog exercise.
+title: "[Exercise Review]: "
+labels: ["exercise-review"]
+body:
+  - type: input
+    id: exercise_id
+    attributes:
+      label: Exercise ID or Name
+      placeholder: "e.g., BARBELL_BENCH_PRESS or Close-Grip Bench Press"
+    validations:
+      required: true
+  - type: dropdown
+    id: asset_type
+    attributes:
+      label: Asset Type
+      options:
+        - Two-phase WebP illustration
+        - Looping demonstration video (MP4)
+        - 2D muscle region mapping
+        - Movement cues / variants (EN or AR)
+    validations:
+      required: true
+  - type: textarea
+    id: feedback
+    attributes:
+      label: Detailed Feedback
+      description: Describe any anatomical, form, equipment, cue, or translation issues to fix.
+    validations:
+      required: true

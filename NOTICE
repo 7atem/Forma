@@ -1,3 +1,12 @@
+Forma / فورمة
+Copyright 2026 7atem
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+---
+Upstream & Adapted Software Notices
+---
+
 Forma includes code adapted from the Apache-2.0-licensed Nemory project.
 The original license is retained in LICENSE.
 
@@ -12,3 +21,11 @@ Alpha02 also adapts the text/status/download pattern from:
 core/ai/llm/src/main/java/com/vaultbrain/core/ai/llm/MlKitNanoRuntime.kt
 Destination: app/src/main/kotlin/com/formacoach/app/LocalNanoModel.kt
 Original checkpoint and license remain as listed above. No model weights are included.
+
+---
+Third-Party Libraries & Data Sources
+---
+
+See THIRD_PARTY_LICENSES.md for the full inventory of open-source library licenses
+(including SQLCipher BSD-style, AndroidX/Kotlin/Hilt Apache-2.0) and external data
+attributions (USDA FoodData Central CC0, FAO Near East references, Open Food Facts ODbL).
