@@ -1,6 +1,6 @@
 # Delivery plan
 
-Current development version: **0.6.0-alpha06**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
+Current development version: **0.7.0-alpha07**. Nemory remains an independent preserved project. Checked items describe implemented software and verified checks, not clinical review, market validation or a public-release approval.
 
 ## Completed foundation and daily workflow
 
@@ -36,11 +36,11 @@ Current development version: **0.6.0-alpha06**. Nemory remains an independent pr
 ## M3 optional intelligence and integrations
 
 - [x] Audit/adapt the narrow ML Kit local text/status/download path and verify fail-closed model output/cancellation behavior.
-- [x] Keep the record tools usable without a model and remove application INTERNET permission.
+- [x] Keep the record tools usable without a model. Application INTERNET permission is limited to the free, keyless Open Food Facts lookup; logging and reviews work offline.
 - [ ] Verify actual Nano download/inference on supported physical hardware; inspect SDK/service metadata and privacy disclosures before advertising support.
 - [ ] Evaluate a licensed downloadable text fallback for non-AICore devices with measured memory, latency and battery limits.
 - [ ] Add reviewed OCR/barcode or voice entry only when it reduces validated logging friction. Latin OCR does not imply Arabic OCR support.
-- [ ] Add user-chosen reminders and Health Connect through explicit permission/privacy flows when product scope calls for them.
+- [x] Opt-in local reminders (alpha07: chosen days/times, rotating encouraging messages, skip already-logged days, +250 ml button) and read-only Health Connect import (weight, exercise sessions, sleep). Device delivery on iPhone is unverified.
 - [ ] Keep full CPU vision out of normal production paths. A compatible licensed encoder needs its own audit and validation.
 
 ## Release and payment
@@ -57,7 +57,7 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [ ] Compile/test native apps on macOS and validate paired WatchConnectivity on physical devices.
 - [ ] Verify VoiceOver/RTL, interruptions/recovery, capacity, stale program delivery, background timers and file errors on Apple hardware.
 - [x] Read-only Apple Health import on iPhone (workouts, body mass), labelled and kept separate from Forma logs. Device validation pending.
-- [ ] Android Health Connect import with the same read-only rules.
+- [x] Android Health Connect import with the same read-only rules (weight, exercise sessions, sleep).
 - [ ] Add reviewed HealthKit lifecycle/sensors as a separate permission/product change. Current watch app is a manual logger.
 - [x] Add equipment-specific exercise variants and searchable selection in alpha05.
 - [ ] Qualified exercise review; evaluate supersets/custom exercises against actual study findings.
@@ -82,7 +82,7 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [x] Preview/confirm copy of a meal day, immutable portion/source snapshots and stale-source rollback.
 - [x] Official-source product review and explicit implementation/deferred-feature matrix in `COMPETITOR_REVIEW_2026_11_04.md`.
 - [x] Superset/circuit grouping and in-session round navigation implemented in alpha06 from explicit user plans.
-- [ ] Custom exercise record types and timed/cardio logging remain separate typed-model work.
+- [x] Custom exercises (Room v7) and timed/cardio entries (Room v10, alpha07) are separate typed records included in backup.
 - [ ] Qualified pose/cue review, real usability study, physical-device acceptance and Mac/Apple tests remain open gates.
 
 ## Alpha06 guided workflows
@@ -97,3 +97,13 @@ A minified unsigned release build is part of local engineering verification. Fin
 - [x] Version 2 workout-transfer contract preserving targets/groups, version 1 read compatibility, matching Apple source/fixtures.
 - [x] 71 Android/JVM automated cases, R8 candidate and bilingual static checks.
 - [ ] Swift/Xcode and paired physical Apple validation; qualified exercise review and public-release acceptance remain open.
+
+## Alpha07 cardio, reminders and iPhone parity
+
+- [x] Typed cardio/timed-activity entries (walk, run, cycle, row, swim, elliptical, stairs, jump rope, timed hold, other) with required time and optional distance; explicit encrypted Room 9→10 migration, FORMABK1 backup/restore and old-archive compatibility.
+- [x] Train-tab card with a 7-day total of logged entries and pace for walks/runs as plain arithmetic. No calorie, heart-rate or intensity estimates; unlogged days stay unknown.
+- [x] Cardio counts as a logged workout for the "skip if already logged" reminder rule on Android and iPhone.
+- [x] Info bubbles on every section and opt-in reminders with weekday choice, rotating messages and notification actions.
+- [x] iPhone source: cardio card, preview/confirm copy of a meal day, training CSV share (FormaCore `TrainingCsv`, Swift-tested in CI).
+- [ ] iPhone still lacks the Android weekly review, check-in/proposal flow and encrypted FORMABK1 backup.
+- [ ] Physical iPhone validation of reminders, cardio, copy-day and CSV sharing; qualified exercise review and the usability study remain open.

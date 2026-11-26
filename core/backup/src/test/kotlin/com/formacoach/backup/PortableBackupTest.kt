@@ -43,6 +43,20 @@ class PortableBackupTest {
         assertThrows(IllegalArgumentException::class.java) {CustomExerciseSet(exerciseId=exercise.id,date=date,reps=0,weightKg=10.0)}
         assertThrows(IllegalArgumentException::class.java) {Supplement(name=" ")}
     }
+    @Test fun cardioEntriesRoundTripAndInvalidValuesFail() {
+        val run=CardioEntry(date=date,activity=CardioActivity.RUN,durationSeconds=1_800,distanceMeters=5_000.0,note="جري الصباح")
+        val data=FitnessSnapshot(cardio=listOf(run,CardioEntry(date=date,activity=CardioActivity.HOLD,durationSeconds=60)))
+        assertEquals(data,PortableBackup.decrypt(PortableBackup.encrypt(data,password,1),password).data)
+        assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(data.copy(cardio=listOf(run,run)))}
+        assertThrows(IllegalArgumentException::class.java) {PortableBackup.validate(FitnessSnapshot(cardio=listOf(run.copy(date=LocalDate.of(1969,12,31)))))}
+        assertThrows(IllegalArgumentException::class.java) {run.copy(durationSeconds=0)}
+        assertThrows(IllegalArgumentException::class.java) {run.copy(durationSeconds=86_401)}
+        assertThrows(IllegalArgumentException::class.java) {run.copy(distanceMeters=0.0)}
+        assertThrows(IllegalArgumentException::class.java) {run.copy(distanceMeters=Double.NaN)}
+        assertThrows(IllegalArgumentException::class.java) {run.copy(note="x".repeat(61))}
+        // Archives written before cardio existed still decode with no entries.
+        assertTrue(kotlinx.serialization.json.Json.decodeFromString<FitnessSnapshot>("{}").cardio.isEmpty())
+    }
     private val password="a long test passphrase".toCharArray()
     private val date=LocalDate.of(2026,11,3)
     private fun sample()=FitnessSnapshot(profile=Profile("اختبار",Goal.FAT_LOSS,3),

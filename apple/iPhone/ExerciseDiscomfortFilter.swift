@@ -1,142 +1,114 @@
 import SwiftUI
 import FormaCore
 
+/// Short label for a library tag ("Works: Neck").
+func discomfortShortLabel(_ region: ExerciseDiscomfortRegion) -> String {
+    switch region {
+    case .neck: return String(localized: "discomfort_short_neck")
+    case .upperBack: return String(localized: "discomfort_short_upper_back")
+    case .shoulders: return String(localized: "discomfort_region_shoulders")
+    case .lowerBack: return String(localized: "discomfort_region_lower_back")
+    }
+}
+
+/// Personal library preferences: areas to go easy on (marked or hidden) and muscles the person wants to train more.
+/// Forma never links an area to suggested muscles; both choices are the person's own.
 struct ExerciseDiscomfortFilterButton: View {
     @AppStorage(ExerciseDiscomfortSelection.storageKey) private var storedRegions = ""
+    @AppStorage(ExerciseDiscomfortSelection.focusKey) private var storedFocus = ""
     @State private var presented = false
-    private var selectedRegions: Set<ExerciseDiscomfortRegion> {
-        ExerciseDiscomfortSelection.decode(storedRegions)
-    }
-
-    private func toggleInline(_ region: ExerciseDiscomfortRegion) {
-        var updated = selectedRegions
-        if updated.contains(region) { updated.remove(region) } else { updated.insert(region) }
-        storedRegions = ExerciseDiscomfortSelection.encode(updated)
+    private var chosenCount: Int {
+        ExerciseDiscomfortSelection.decode(storedRegions).count + ExerciseDiscomfortSelection.decodeFocus(storedFocus).count
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Button {
-                FormaHaptics.tap()
-                presented = true
-            } label: {
-                HStack(spacing: 10) {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(selectedRegions.isEmpty ? FormaTheme.surfaceHigh : FormaTheme.secondary.opacity(0.18))
-                            .frame(width: 34, height: 34)
-                        Image(systemName: selectedRegions.isEmpty ? "figure.mind.and.body" : "shield.lefthalf.filled")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(selectedRegions.isEmpty ? FormaTheme.primary : FormaTheme.secondary)
-                    }
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("discomfort_filters")
-                            .font(.subheadline.weight(.bold))
-                            .foregroundStyle(FormaTheme.textPrimary)
-                        Text(selectedRegions.isEmpty ? LocalizedStringKey("discomfort_filter_hint") : LocalizedStringKey("discomfort_active_summary"))
-                            .font(.caption)
-                            .foregroundStyle(FormaTheme.textMuted)
-                            .lineLimit(1)
-                    }
-                    Spacer()
-                    if !selectedRegions.isEmpty {
-                        Text(selectedRegions.count, format: .number)
-                            .font(.caption.weight(.bold))
-                            .foregroundStyle(FormaTheme.onPrimary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(FormaTheme.secondary, in: Capsule())
-                    }
+        Button {
+            FormaHaptics.tap()
+            presented = true
+        } label: {
+            HStack(spacing: 10) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(chosenCount == 0 ? FormaTheme.surfaceHigh : FormaTheme.secondary.opacity(0.18))
+                        .frame(width: 34, height: 34)
                     Image(systemName: "slider.horizontal.3")
-                        .font(.caption.weight(.bold))
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(chosenCount == 0 ? FormaTheme.primary : FormaTheme.secondary)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("discomfort_filters")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(FormaTheme.textPrimary)
+                    Text(chosenCount == 0 ? LocalizedStringKey("discomfort_filter_hint") : LocalizedStringKey("discomfort_active_summary"))
+                        .font(.caption)
                         .foregroundStyle(FormaTheme.textMuted)
+                        .lineLimit(2)
                 }
-                .padding(12)
-                .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .stroke(selectedRegions.isEmpty ? FormaTheme.border : FormaTheme.secondary.opacity(0.6), lineWidth: 1)
-                )
-            }
-            .buttonStyle(.plain)
-            .accessibilityHint("discomfort_filter_hint")
-
-            if !selectedRegions.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(ExerciseDiscomfortRegion.allCases.filter { selectedRegions.contains($0) }, id: \.self) { region in
-                            Button {
-                                FormaHaptics.tap()
-                                toggleInline(region)
-                            } label: {
-                                HStack(spacing: 5) {
-                                    Text(LocalizedStringKey("discomfort_region_\(region.rawValue.lowercased())"))
-                                    Image(systemName: "xmark.circle.fill")
-                                        .font(.caption2)
-                                }
-                                .font(.caption.weight(.semibold))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(FormaTheme.secondary.opacity(0.16), in: Capsule())
-                                .foregroundStyle(FormaTheme.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        Button {
-                            FormaHaptics.tap()
-                            storedRegions = ""
-                        } label: {
-                            Text("clear_discomfort_filters")
-                                .font(.caption.weight(.semibold))
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(FormaTheme.surfaceHigh, in: Capsule())
-                                .foregroundStyle(FormaTheme.textMuted)
-                        }
-                        .buttonStyle(.plain)
-                    }
+                Spacer()
+                if chosenCount > 0 {
+                    Text(chosenCount, format: .number)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(FormaTheme.onPrimary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(FormaTheme.secondary, in: Capsule())
                 }
+                Image(systemName: "chevron.forward")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(FormaTheme.textMuted)
             }
+            .padding(12)
+            .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(chosenCount == 0 ? FormaTheme.border : FormaTheme.secondary.opacity(0.6), lineWidth: 1)
+            )
         }
+        .buttonStyle(.plain)
         .sheet(isPresented: $presented) {
-            ExerciseDiscomfortFilterSheet(storedRegions: $storedRegions)
+            ExerciseDiscomfortFilterSheet()
                 .tint(FormaTheme.primary)
         }
     }
 }
 
 private struct ExerciseDiscomfortFilterSheet: View {
-    @Binding var storedRegions: String
+    @AppStorage(ExerciseDiscomfortSelection.storageKey) private var storedRegions = ""
+    @AppStorage(ExerciseDiscomfortSelection.modeKey) private var storedMode = ""
+    @AppStorage(ExerciseDiscomfortSelection.focusKey) private var storedFocus = ""
     @Environment(\.dismiss) private var dismiss
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
-    private var selectedRegions: Set<ExerciseDiscomfortRegion> {
-        ExerciseDiscomfortSelection.decode(storedRegions)
+    private var regions: Set<ExerciseDiscomfortRegion> { ExerciseDiscomfortSelection.decode(storedRegions) }
+    private var focus: Set<Muscle> { ExerciseDiscomfortSelection.decodeFocus(storedFocus) }
+    private var mode: Binding<DiscomfortMode> {
+        Binding(
+            get: { ExerciseDiscomfortSelection.decodeMode(storedMode, hasLegacySelection: !regions.isEmpty) },
+            set: { storedMode = $0.rawValue }
+        )
     }
 
     private func toggle(_ region: ExerciseDiscomfortRegion) {
         FormaHaptics.tap()
-        var updated = selectedRegions
+        // Pin the current mode so an older selection keeps its behaviour once edited.
+        storedMode = mode.wrappedValue.rawValue
+        var updated = regions
         if updated.contains(region) { updated.remove(region) } else { updated.insert(region) }
         storedRegions = ExerciseDiscomfortSelection.encode(updated)
     }
 
-    private func icon(for region: ExerciseDiscomfortRegion) -> String {
-        switch region {
-        case .neckUpperBack: return "figure.stand"
-        case .shoulders: return "figure.arms.open"
-        case .lowerBack: return "figure.core.training"
-        }
-    }
-
-    private func hiddenCount(for region: ExerciseDiscomfortRegion) -> Int {
-        Exercise.allCases.filter { !ExerciseDiscomfortRegion.includes($0, excluding: [region]) }.count
+    private func toggle(_ muscle: Muscle) {
+        FormaHaptics.tap()
+        var updated = focus
+        if updated.contains(muscle) { updated.remove(muscle) } else { updated.insert(muscle) }
+        storedFocus = ExerciseDiscomfortSelection.encodeFocus(updated)
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    Text("discomfort_areas_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
                     Text("discomfort_filter_explainer")
                         .font(.subheadline)
                         .foregroundStyle(FormaTheme.textMuted)
@@ -144,43 +116,25 @@ private struct ExerciseDiscomfortFilterSheet: View {
 
                     VStack(spacing: 10) {
                         ForEach(ExerciseDiscomfortRegion.allCases, id: \.self) { region in
-                            let active = selectedRegions.contains(region)
-                            let hidden = hiddenCount(for: region)
-                            Button {
-                                toggle(region)
-                            } label: {
+                            let active = regions.contains(region)
+                            let count = Exercise.allCases.filter { region.loads($0) }.count
+                            Button { toggle(region) } label: {
                                 HStack(spacing: 12) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                            .fill(active ? FormaTheme.secondary : FormaTheme.surfaceHigh)
-                                            .frame(width: 44, height: 44)
-                                        Image(systemName: icon(for: region))
-                                            .font(.title3.weight(.semibold))
-                                            .foregroundStyle(active ? FormaTheme.onPrimary : FormaTheme.primary)
-                                    }
                                     VStack(alignment: .leading, spacing: 4) {
-                                        HStack(spacing: 6) {
-                                            Text(LocalizedStringKey("discomfort_region_\(region.rawValue.lowercased())"))
-                                                .font(.headline.weight(.bold))
-                                                .foregroundStyle(FormaTheme.textPrimary)
-                                            Spacer()
-                                            Text("-\(hidden)")
-                                                .font(.caption.weight(.bold))
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 3)
-                                                .background(active ? FormaTheme.secondary.opacity(0.2) : FormaTheme.surfaceHigh, in: Capsule())
-                                                .foregroundStyle(active ? FormaTheme.secondary : FormaTheme.textMuted)
-                                        }
-                                        Text(region.directlyTargetedMuscles.map { $0.label(arabic: arabic) }.sorted().joined(separator: " · "))
+                                        Text(LocalizedStringKey("discomfort_region_\(region.rawValue.lowercased())"))
+                                            .font(.headline.weight(.bold))
+                                            .foregroundStyle(FormaTheme.textPrimary)
+                                        Text(String(format: String(localized: "discomfort_region_count"), count.formatted()))
                                             .font(.caption)
                                             .foregroundStyle(FormaTheme.textMuted)
-                                            .multilineTextAlignment(.leading)
                                     }
+                                    Spacer()
                                     Image(systemName: active ? "checkmark.circle.fill" : "circle")
                                         .font(.title3)
                                         .foregroundStyle(active ? FormaTheme.secondary : FormaTheme.border)
                                 }
                                 .padding(14)
+                                .frame(minHeight: 44)
                                 .background(active ? FormaTheme.secondary.opacity(0.08) : FormaTheme.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -188,6 +142,40 @@ private struct ExerciseDiscomfortFilterSheet: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .accessibilityAddTraits(active ? .isSelected : [])
+                        }
+                    }
+
+                    if !regions.isEmpty {
+                        Picker("discomfort_areas_title", selection: mode) {
+                            Text("discomfort_mode_mark").tag(DiscomfortMode.mark)
+                            Text("discomfort_mode_hide").tag(DiscomfortMode.hide)
+                        }
+                        .pickerStyle(.segmented)
+                        Text(mode.wrappedValue == .mark ? "discomfort_mode_mark_note" : "discomfort_mode_hide_note")
+                            .font(.footnote)
+                            .foregroundStyle(FormaTheme.textMuted)
+                    }
+
+                    Divider()
+                    Text("focus_title").font(.headline.weight(.bold)).foregroundStyle(FormaTheme.textPrimary)
+                    Text("focus_note")
+                        .font(.subheadline)
+                        .foregroundStyle(FormaTheme.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 8)], spacing: 8) {
+                        ForEach(Muscle.allCases, id: \.self) { muscle in
+                            let on = focus.contains(muscle)
+                            Button { toggle(muscle) } label: {
+                                Text(muscle.label(arabic: arabic))
+                                    .font(.subheadline.weight(.semibold))
+                                    .frame(maxWidth: .infinity, minHeight: 44)
+                                    .background(on ? FormaTheme.primary : FormaTheme.surface, in: Capsule())
+                                    .overlay(Capsule().stroke(on ? FormaTheme.primary : FormaTheme.border, lineWidth: 1))
+                                    .foregroundStyle(on ? FormaTheme.onPrimary : FormaTheme.textPrimary)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityAddTraits(on ? .isSelected : [])
                         }
                     }
 
@@ -204,10 +192,11 @@ private struct ExerciseDiscomfortFilterSheet: View {
                     .background(FormaTheme.surface, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.border.opacity(0.6), lineWidth: 1))
 
-                    if !selectedRegions.isEmpty {
+                    if !regions.isEmpty || !focus.isEmpty {
                         Button {
                             FormaHaptics.tap()
                             storedRegions = ""
+                            storedFocus = ""
                         } label: {
                             Text("clear_discomfort_filters")
                                 .font(.subheadline.weight(.bold))
@@ -230,6 +219,6 @@ private struct ExerciseDiscomfortFilterSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
     }
 }

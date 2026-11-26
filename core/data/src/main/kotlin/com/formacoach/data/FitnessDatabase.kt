@@ -41,6 +41,8 @@ data class HydrationRow(@PrimaryKey val day:Long,val milliliters:Int)
 data class CustomExerciseRow(@PrimaryKey val id:String,val name:String,val equipment:String,val primaryMuscle:String,val notes:String)
 @Entity(tableName="custom_sets",indices=[Index("exerciseId"),Index("day")])
 data class CustomSetRow(@PrimaryKey val id:String,val exerciseId:String,val day:Long,val reps:Int,val weightKg:Double,val warmUp:Boolean)
+@Entity(tableName="cardio_entries",indices=[Index("day")])
+data class CardioRow(@PrimaryKey val id:String,val day:Long,val activity:String,val durationSeconds:Int,val distanceMeters:Double?,val note:String)
 @Entity(tableName="supplements")
 data class SupplementRow(@PrimaryKey val id:String,val name:String,val dose:String)
 @Entity(tableName="supplement_intakes",primaryKeys=["day","supplementId"],indices=[Index("supplementId")])
@@ -63,7 +65,7 @@ data class ProposalRow(@PrimaryKey val id:String,val checkInId:String,val baseSe
 
 @Dao
 interface FitnessDao {
-    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class])
+    @RawQuery(observedEntities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class,CardioRow::class])
     fun changes(query:SupportSQLiteQuery):Flow<Int>
     @Query("SELECT * FROM profile WHERE id=1") fun profile():Flow<ProfileRow?>
     @Query("SELECT * FROM meals ORDER BY day DESC,rowid DESC") fun meals():Flow<List<MealRow>>
@@ -84,7 +86,7 @@ interface FitnessDao {
     // Reminder checks: whether a record exists for a day. They read only counts and never leave the device.
     @Query("SELECT COUNT(*) FROM meals WHERE day=:day") suspend fun mealCountOn(day:Long):Int
     @Query("SELECT COALESCE(SUM(milliliters),0) FROM hydration WHERE day=:day") suspend fun hydrationOn(day:Long):Int
-    @Query("SELECT (SELECT COUNT(*) FROM sessions s WHERE s.day=:day AND (s.completedAt IS NOT NULL OR EXISTS (SELECT 1 FROM training_sets t WHERE t.sessionId=s.id)))+(SELECT COUNT(*) FROM custom_sets WHERE day=:day)") suspend fun trainingCountOn(day:Long):Int
+    @Query("SELECT (SELECT COUNT(*) FROM sessions s WHERE s.day=:day AND (s.completedAt IS NOT NULL OR EXISTS (SELECT 1 FROM training_sets t WHERE t.sessionId=s.id)))+(SELECT COUNT(*) FROM custom_sets WHERE day=:day)+(SELECT COUNT(*) FROM cardio_entries WHERE day=:day)") suspend fun trainingCountOn(day:Long):Int
     /** Adds water to a day in one transaction so a notification action and the app cannot lose an update. */
     @Transaction suspend fun addHydration(day:Long,milliliters:Int,max:Int):Int {
         val next=(hydrationOn(day)+milliliters).coerceIn(0,max)
@@ -115,6 +117,10 @@ interface FitnessDao {
         check(supplementCount(id)==1)
         if(taken) insertSupplementIntake(SupplementIntakeRow(day,id)) else removeSupplementIntake(day,id)
     }
+    @Query("SELECT * FROM cardio_entries ORDER BY day,rowid") suspend fun allCardio():List<CardioRow>
+    @Upsert suspend fun saveCardio(row:CardioRow)
+    @Query("DELETE FROM cardio_entries WHERE id=:id") suspend fun removeCardio(id:String)
+    @Query("DELETE FROM cardio_entries") suspend fun clearCardio()
     @Query("DELETE FROM custom_sets") suspend fun clearCustomSets()
     @Query("DELETE FROM custom_exercises") suspend fun clearCustomExercises()
     @Query("DELETE FROM supplement_intakes") suspend fun clearSupplementIntakes()
@@ -161,6 +167,7 @@ interface FitnessDao {
         allCustomSets().map {CustomExerciseSet(it.id,it.exerciseId,LocalDate.ofEpochDay(it.day),it.reps,it.weightKg,it.warmUp)},
         allSupplements().map {Supplement(it.id,it.name,it.dose)},
         allSupplementIntakes().map {SupplementIntake(LocalDate.ofEpochDay(it.day),it.supplementId)},
+        allCardio().map {CardioEntry(it.id,LocalDate.ofEpochDay(it.day),CardioActivity.valueOf(it.activity),it.durationSeconds,it.distanceMeters,it.note)},
     )
     @Upsert suspend fun insertProfile(row:ProfileRow)
     @Transaction suspend fun saveProfile(row:ProfileRow) {insertProfile(row);supersedeMismatched(row.sessionsPerWeek)}
@@ -262,7 +269,7 @@ interface FitnessDao {
     @Query("DELETE FROM exercise_preferences") suspend fun clearExercisePreferences()
     @Insert suspend fun insertMeasurementRows(rows:List<MeasurementRow>)
     @Transaction suspend fun replaceSnapshot(data:FitnessSnapshot) {
-        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods();clearExercisePreferences();clearHydration();clearSupplementIntakes();clearSupplements();clearCustomSets();clearCustomExercises()
+        clearProposals();clearCheckIns();clearSets();clearSessions();clearProfile();clearMeals();clearMeasurements();clearPrograms();clearFoods();clearExercisePreferences();clearHydration();clearSupplementIntakes();clearSupplements();clearCustomSets();clearCustomExercises();clearCardio()
         data.profile?.let {insertProfile(it.row())}
         data.programs.forEach {saveProgram(it.row())};data.foods.forEach {saveFood(it.row())}
         data.sessions.forEach {insertSession(it.row())};data.sets.forEach {insertSet(it.row())}
@@ -273,12 +280,14 @@ interface FitnessDao {
         data.hydration.forEach {saveHydration(HydrationRow(it.date.toEpochDay(),it.milliliters))}
         data.customExercises.forEach {saveCustomExercise(it.row())};data.customSets.forEach {saveCustomSet(it.row())}
         data.supplements.forEach {saveSupplement(it.row())};data.supplementIntakes.forEach {insertSupplementIntake(it.row())}
+        data.cardio.forEach {saveCardio(it.row())}
     }
 }
 
 internal fun Profile.row()=ProfileRow(name=name,goal=goal.name,sessionsPerWeek=sessionsPerWeek,caloriesTarget=caloriesTarget,proteinTarget=proteinTarget,carbsTarget=carbsTarget,fatTarget=fatTarget,waterGoalMl=waterGoalMl,heightCm=heightCm)
 internal fun CustomExercise.row()=CustomExerciseRow(id,name,equipment.name,primaryMuscle.name,notes)
 internal fun CustomExerciseSet.row()=CustomSetRow(id,exerciseId,date.toEpochDay(),reps,weightKg,warmUp)
+internal fun CardioEntry.row()=CardioRow(id,date.toEpochDay(),activity.name,durationSeconds,distanceMeters,note)
 internal fun Supplement.row()=SupplementRow(id,name,dose)
 internal fun SupplementIntake.row()=SupplementIntakeRow(date.toEpochDay(),supplementId)
 internal fun Session.row()=SessionRow(id,date.toEpochDay(),templateId,completedAt,label,Json.encodeToString(plannedExercises),restSeconds,source.name,averageHeartRateBpm,activeEnergyKcal,healthKitWorkoutId,Json.encodeToString(prescriptions))
@@ -289,10 +298,15 @@ internal fun Food.row()=FoodRow(id,name,Json.encodeToString(this))
 internal fun WeeklyCheckIn.row()=CheckInRow(id,date.toEpochDay(),availableSessions,foodLogComplete,notes)
 internal fun PlanProposal.row()=ProposalRow(id,checkInId,baseSessions,proposedSessions,Json.encodeToString(sessionEvidence),status.name)
 
-@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class,HealthWeightRow::class,HealthWorkoutRow::class,HealthSleepRow::class],version=9,exportSchema=true)
+@Database(entities=[ProfileRow::class,SessionRow::class,SetRow::class,MealRow::class,MeasurementRow::class,ProgramRow::class,FoodRow::class,CheckInRow::class,ProposalRow::class,ExercisePreferenceRow::class,HydrationRow::class,CustomExerciseRow::class,CustomSetRow::class,SupplementRow::class,SupplementIntakeRow::class,HealthWeightRow::class,HealthWorkoutRow::class,HealthSleepRow::class,CardioRow::class],version=10,exportSchema=true)
 abstract class FitnessDatabase:RoomDatabase() {
     abstract fun dao():FitnessDao
     companion object {
+        val MIGRATION_9_10=object:Migration(9,10) {
+            override fun migrate(db:SupportSQLiteDatabase) {
+                MIGRATION_9_10_SQL.forEach(db::execSQL)
+            }
+        }
         val MIGRATION_8_9=object:Migration(8,9) {
             override fun migrate(db:SupportSQLiteDatabase) {
                 MIGRATION_8_9_SQL.forEach(db::execSQL)
@@ -366,7 +380,7 @@ abstract class FitnessDatabase:RoomDatabase() {
             val app=context.applicationContext
             val key=KeystoreManager(app).getOrCreateDatabasePassphrase()
             return Room.databaseBuilder(app,FitnessDatabase::class.java,"forma.db")
-                .openHelperFactory(SupportOpenHelperFactory(DatabaseKeyMode.sqlcipherKey(app,key))).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6,MIGRATION_6_7,MIGRATION_7_8,MIGRATION_8_9).build()
+                .openHelperFactory(SupportOpenHelperFactory(DatabaseKeyMode.sqlcipherKey(app,key))).addMigrations(MIGRATION_1_2,MIGRATION_2_3,MIGRATION_3_4,MIGRATION_4_5,MIGRATION_5_6,MIGRATION_6_7,MIGRATION_7_8,MIGRATION_8_9,MIGRATION_9_10).build()
         }
     }
 }
@@ -394,4 +408,10 @@ internal val MIGRATION_7_8_SQL=listOf(
 internal val MIGRATION_8_9_SQL=listOf(
     "ALTER TABLE profile ADD COLUMN heightCm REAL",
     "CREATE TABLE IF NOT EXISTS `health_sleep` (`day` INTEGER NOT NULL, `asleepMinutes` REAL NOT NULL, `deepMinutes` REAL, `remMinutes` REAL, `lightMinutes` REAL, `awakeMinutes` REAL, `source` TEXT NOT NULL, PRIMARY KEY(`day`))",
+)
+
+/** Must match the Room v10 schema export exactly (schemas/com.formacoach.data.FitnessDatabase/10.json). */
+internal val MIGRATION_9_10_SQL=listOf(
+    "CREATE TABLE IF NOT EXISTS `cardio_entries` (`id` TEXT NOT NULL, `day` INTEGER NOT NULL, `activity` TEXT NOT NULL, `durationSeconds` INTEGER NOT NULL, `distanceMeters` REAL, `note` TEXT NOT NULL, PRIMARY KEY(`id`))",
+    "CREATE INDEX IF NOT EXISTS `index_cardio_entries_day` ON `cardio_entries` (`day`)",
 )

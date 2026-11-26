@@ -138,6 +138,7 @@ enum PhoneReminders {
         case .workout:
             return state.workouts.contains { $0.date == today }
                 || state.customSets.contains { $0.date == today }
+                || state.cardio.contains { $0.date == today }
                 || (state.draft.map { $0.date == today && !$0.sets.isEmpty } ?? false)
         case .weekly: return false
         }
@@ -327,6 +328,61 @@ private struct PhoneWeekdayPicker: View {
                 .accessibilityLabel(Text(calendar.standaloneWeekdaySymbols[weekday - 1]))
                 .accessibilityAddTraits(on ? .isSelected : [])
                 .accessibilityIdentifier("reminder_day_\(kind.rawValue)_\(weekday)")
+            }
+        }
+    }
+}
+
+/// One-time card after the first logged meal or workout while every reminder is off. Reminders stay opt-in:
+/// nothing turns on without this tap and the system permission, and "No thanks" hides the card for good.
+@MainActor struct PhoneReminderOfferCard: View {
+    @ObservedObject var store: LocalStore
+    @AppStorage("reminder_offer_dismissed") private var dismissed = false
+    @AppStorage("reminder_MEALS_on") private var mealsOn = false
+    @AppStorage("reminder_WATER_on") private var waterOn = false
+    @AppStorage("reminder_WORKOUT_on") private var workoutOn = false
+    @AppStorage("reminder_WEEKLY_on") private var weeklyOn = false
+    @State private var denied = false
+
+    private var hasLogged: Bool {
+        !store.state.meals.isEmpty || !store.state.workouts.isEmpty || !store.state.cardio.isEmpty
+    }
+
+    private func time(_ kind: PhoneReminderKind) -> String {
+        let minute = PhoneReminders.minute(kind)
+        let date = Calendar.current.date(bySettingHour: minute / 60, minute: minute % 60, second: 0, of: Date()) ?? Date()
+        return date.formatted(date: .omitted, time: .shortened)
+    }
+
+    var body: some View {
+        if !dismissed && hasLogged && !(mealsOn || waterOn || workoutOn || weeklyOn) {
+            FormaCard {
+                Label("reminder_offer_title", systemImage: "bell.badge")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(FormaTheme.textPrimary)
+                Text(String(format: String(localized: "reminder_offer_body"), time(.meals), time(.workout)))
+                    .font(.subheadline)
+                    .foregroundStyle(FormaTheme.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                if denied {
+                    Text("reminder_offer_denied").font(.footnote).foregroundStyle(.red)
+                }
+                HStack(spacing: 10) {
+                    Button("reminder_offer_no") { dismissed = true }
+                        .buttonStyle(.bordered)
+                        .frame(minHeight: 44)
+                    Button("reminder_offer_yes") {
+                        Task {
+                            guard await PhoneReminders.requestPermission() else { denied = true; return }
+                            mealsOn = true
+                            workoutOn = true
+                            PhoneReminders.rescheduleAll(store: store)
+                            dismissed = true
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .frame(minHeight: 44)
+                }
             }
         }
     }

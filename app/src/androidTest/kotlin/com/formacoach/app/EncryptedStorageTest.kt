@@ -28,6 +28,30 @@ import org.json.JSONArray
 
 @RunWith(AndroidJUnit4::class)
 class EncryptedStorageTest {
+    @Test fun schemaNineUpgradeAddsCardioThatRoundTripsThroughBackupAndCountsAsTraining()=runBlocking {
+        val helper=createLegacy(9)
+        helper.writableDatabase.execSQL("INSERT INTO profile (id,name,goal,sessionsPerWeek,caloriesTarget,proteinTarget,heightCm) VALUES(1,'Legacy v9','BUILD_HABIT',3,NULL,NULL,170.0)")
+        helper.close()
+        val repo=repository()
+        val migrated=database!!.dao().readSnapshot()
+        assertEquals("Legacy v9",migrated.profile?.name)
+        assertTrue(migrated.cardio.isEmpty())
+        val day=LocalDate.of(2026,11,3)
+        assertFalse(repo.hasTrainingOn(day))
+        val run=CardioEntry(date=day,activity=CardioActivity.RUN,durationSeconds=1_830,distanceMeters=5_000.0,note="Park loop")
+        val hold=CardioEntry(date=day,activity=CardioActivity.HOLD,durationSeconds=45)
+        repo.saveCardio(run);repo.saveCardio(hold)
+        assertTrue(repo.hasTrainingOn(day))
+        assertFalse(repo.hasTrainingOn(day.plusDays(1)))
+        var futureRejected=false
+        try {repo.saveCardio(run.copy(id="future",date=LocalDate.now().plusDays(2)))} catch(_:IllegalArgumentException) {futureRejected=true}
+        assertTrue(futureRejected)
+        val archive=repo.export("schema ten backup round trip".toCharArray())
+        repo.removeCardio(run.id)
+        assertEquals(listOf(hold.id),database!!.dao().readSnapshot().cardio.map {it.id})
+        repo.restore(repo.previewRestore(archive,"schema ten backup round trip".toCharArray()))
+        assertEquals(setOf(run,hold),database!!.dao().readSnapshot().cardio.toSet())
+    }
     @Test fun schemaEightUpgradeAddsHeightAndSleepWithoutTouchingData()=runBlocking {
         val helper=createLegacy(8)
         helper.writableDatabase.execSQL("INSERT INTO profile (id,name,goal,sessionsPerWeek,caloriesTarget,proteinTarget) VALUES(1,'Legacy v8','BUILD_HABIT',3,NULL,NULL)")

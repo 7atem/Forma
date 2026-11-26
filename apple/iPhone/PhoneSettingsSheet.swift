@@ -1,4 +1,6 @@
 import SwiftUI
+import FormaCore
+import UniformTypeIdentifiers
 
 @MainActor struct PhoneSettingsSheet: View {
     @ObservedObject var store: LocalStore
@@ -39,6 +41,17 @@ import SwiftUI
 
                 PhoneRemindersSection(store: store)
 
+                Section {
+                    // Readable and unencrypted by design; the note says so before anything is shared.
+                    ShareLink(item: PhoneTrainingCsvFile(text: TrainingCsv.export(store.state.workouts)),
+                              preview: SharePreview("forma-training.csv")) {
+                        Label("export_training_csv", systemImage: "tablecells")
+                    }
+                    .disabled(store.state.workouts.isEmpty)
+                } footer: {
+                    Text("csv_export_note")
+                }
+
                 Section("units_label") {
                     Picker("units_label", selection: $useLb) {
                         Text("unit_kg").tag(false)
@@ -72,5 +85,14 @@ import SwiftUI
                     .tint(FormaTheme.primary)
             }
         }
+    }
+}
+
+/// Shares the CSV straight from memory; no staging file is written by Forma.
+struct PhoneTrainingCsvFile: Transferable {
+    let text: String
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .commaSeparatedText) { Data($0.text.utf8) }
+            .suggestedFileName("forma-training.csv")
     }
 }

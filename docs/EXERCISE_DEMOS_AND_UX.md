@@ -54,3 +54,12 @@ python scripts/check_apple_sources.py
 These verify keys, catalog coverage, exact WebP integrity/dimensions, generated outputs and packaging references. They do not validate the movement scientifically. Current executed UI/build results and visual evidence are in [validation](VALIDATION.md).
 
 Alpha05 extends this foundation with 32 named variations, combined equipment/muscle/favorites/previously logged filters, personal exercise notes and a compact three-column tablet library (two columns on phones). See [expansion contract](ALPHA05_EXPANSION.md).
+
+## Stills that need regenerating
+
+Found in the 26 November 2026 visual check of the five stills added in `d85bce5`. Replace each only through `python scripts/convert_exercise_art.py <id> <original.png>`, then run `check_exercise_art.py`.
+
+- `barbell_shrug`: the two phases look almost identical, so the shoulder elevation is not visible. The end phase should show the shoulders clearly raised toward the ears with straight arms.
+- `good_morning`: the end phase is a shallow hinge with deep knee bend that reads like a partial squat. It should show a clear hip hinge with soft knees and a near-horizontal, neutral back.
+
+The other three (`cable_crossover`, `close_grip_bench_press`, `hip_abduction`) show distinct, plausible phases. None of this is qualified pose review.

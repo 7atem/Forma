@@ -8,39 +8,50 @@ final class ExerciseDiscomfortTests: XCTestCase {
         }
     }
 
-    func testNeckUpperBackHidesPrimaryAndSupportingTargetsOnly() {
-        let regions: Set<ExerciseDiscomfortRegion> = [.neckUpperBack]
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.row, excluding: regions))
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.lat_pulldown, excluding: regions))
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.shoulder_press, excluding: regions))
-        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.dumbbell_curl, excluding: regions))
+    func testNeckMatchesUpperTrapWorkAndLeavesRowsAlone() {
+        let regions: Set<ExerciseDiscomfortRegion> = [.neck]
+        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.dumbbell_shrug, excluding: regions))
+        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.barbell_overhead_press, excluding: regions))
+        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.row, excluding: regions))
+        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.face_pull, excluding: regions))
     }
 
-    func testShouldersHidePrimaryAndSupportingTargetsOnly() {
-        let regions: Set<ExerciseDiscomfortRegion> = [.shoulders]
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.face_pull, excluding: regions))
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.chest_press, excluding: regions))
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.push_up, excluding: regions))
-        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.squat, excluding: regions))
+    func testUpperBackMatchesMidBack() {
+        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.barbell_row, excluding: [.upperBack]))
+        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.dumbbell_shrug, excluding: [.upperBack]))
     }
 
-    func testLowerBackHidesPrimaryAndSupportingTargetsOnly() {
-        let regions: Set<ExerciseDiscomfortRegion> = [.lowerBack]
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.hip_hinge, excluding: regions))
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.barbell_back_squat, excluding: regions))
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.barbell_row, excluding: regions))
-        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.leg_extension, excluding: regions))
+    func testShouldersAndLowerBackKeepGroupRules() {
+        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.chest_press, excluding: [.shoulders]))
+        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.squat, excluding: [.shoulders]))
+        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.hip_hinge, excluding: [.lowerBack]))
+        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.leg_extension, excluding: [.lowerBack]))
     }
 
-    func testMultipleRegionsCombineAndSelectionRoundTripsDeterministically() {
-        let regions: Set<ExerciseDiscomfortRegion> = [.lowerBack, .neckUpperBack, .shoulders]
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.barbell_row, excluding: regions))
-        XCTAssertFalse(ExerciseDiscomfortRegion.includes(.push_up, excluding: regions))
-        XCTAssertTrue(ExerciseDiscomfortRegion.includes(.leg_extension, excluding: regions))
-        let encoded = ExerciseDiscomfortSelection.encode(regions)
-        XCTAssertEqual(encoded, "LOWER_BACK,NECK_UPPER_BACK,SHOULDERS")
-        XCTAssertEqual(ExerciseDiscomfortSelection.decode(encoded), regions)
-        XCTAssertEqual(ExerciseDiscomfortSelection.decode("UNKNOWN"), [])
+    func testMarkingKeepsEverythingVisibleAndNamesAreas() {
+        let chosen: Set<ExerciseDiscomfortRegion> = [.neck, .shoulders]
+        XCTAssertTrue(Exercise.allCases.allSatisfy { ExerciseDiscomfortSelection.visible($0, chosen, mode: .mark) })
+        XCTAssertFalse(ExerciseDiscomfortSelection.visible(.dumbbell_shrug, chosen, mode: .hide))
+        XCTAssertEqual(ExerciseDiscomfortSelection.matches(.barbell_overhead_press, chosen), [.neck, .shoulders])
+    }
+
+    func testLegacyValueAndRoundTrip() {
+        let legacy = ExerciseDiscomfortSelection.decode("NECK_UPPER_BACK,SHOULDERS,UNKNOWN,")
+        XCTAssertEqual(legacy, [.neck, .upperBack, .shoulders])
+        XCTAssertEqual(ExerciseDiscomfortSelection.encode(legacy), "NECK,SHOULDERS,UPPER_BACK")
+        XCTAssertEqual(ExerciseDiscomfortSelection.decodeMode("", hasLegacySelection: true), .hide)
+        XCTAssertEqual(ExerciseDiscomfortSelection.decodeMode("", hasLegacySelection: false), .mark)
+        XCTAssertEqual(ExerciseDiscomfortSelection.decodeMode("MARK", hasLegacySelection: true), .mark)
         XCTAssertEqual(ExerciseDiscomfortSelection.decode(""), [])
+    }
+
+    func testFocusMusclesComeFirst() {
+        let focus: Set<Muscle> = [.upper_back, .rear_delts]
+        let ordered = ExerciseDiscomfortSelection.focusFirst(Exercise.allCases, focus)
+        let split = ordered.firstIndex { !ExerciseDiscomfortSelection.isFocus($0, focus) } ?? ordered.count
+        XCTAssertGreaterThan(split, 0)
+        XCTAssertTrue(ordered[split...].allSatisfy { !ExerciseDiscomfortSelection.isFocus($0, focus) })
+        XCTAssertEqual(ExerciseDiscomfortSelection.focusFirst(Exercise.allCases, []), Exercise.allCases)
+        XCTAssertEqual(ExerciseDiscomfortSelection.decodeFocus(ExerciseDiscomfortSelection.encodeFocus(focus) + ",NOPE"), focus)
     }
 }

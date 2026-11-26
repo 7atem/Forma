@@ -76,6 +76,8 @@ class FitnessRepository(daoProvider:()->FitnessDao,private val clock:Clock=Devic
     suspend fun deleteCustomExercise(id:String)=dao.deleteCustomExercise(id)
     suspend fun addCustomSet(value:CustomExerciseSet) {checkDate(value.date);dao.addCustomSet(value.row())}
     suspend fun removeCustomSet(id:String)=dao.removeCustomSet(id)
+    suspend fun saveCardio(value:CardioEntry) {checkDate(value.date);dao.saveCardio(value.row())}
+    suspend fun removeCardio(id:String)=dao.removeCardio(id)
     suspend fun saveSupplement(value:Supplement)=dao.saveSupplement(value.row())
     suspend fun deleteSupplement(id:String)=dao.deleteSupplement(id)
     suspend fun setSupplementTaken(date:LocalDate,id:String,taken:Boolean) {checkDate(date);dao.setSupplementTaken(date.toEpochDay(),id,taken)}

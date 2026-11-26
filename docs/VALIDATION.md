@@ -1,8 +1,26 @@
-# Validation record — current branch (post-alpha06)
+# Validation record — current branch (0.7.0-alpha07)
 
-Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schema 9 (explicit `1→2→3→4→5→6→7→8→9` migrations). Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise/video approval remain pending.
+Updated 24 November 2026. Application `com.formacoach.app`, encrypted Room schema 10 (explicit `1→2→3→4→5→6→7→8→9→10` migrations). Development candidate; public release, physical paired-device Apple testing, visual Apple UI acceptance, and qualified exercise/video approval remain pending.
 
 > **Note on UI preferences:** Display preferences (`kg`/`lb` weight unit toggle, Light/Dark theme, and in-app language `System`/`en`/`ar`) are stored in Android `SharedPreferences` (`forma_ui_prefs`) and iOS `@AppStorage` outside the encrypted Room database and portable backups. Canonical persisted training loads, body weights, backups (`FORMABK1`), and watch transfers remain in `kg`.
+
+## Review of commit d85bce5 (26 November 2026)
+
+Five stills (barbell shrug, cable crossover, close-grip bench press, good morning, hip abduction) and two unreviewed videos (dip, incline barbell press) were added by another session. Catalog, guide, art and video checks pass with 74 exercises and 37 videos, all `reviewed: false`. Corrections made in the catalog and regenerated: hip abduction no longer lists core/obliques, barbell shrug no longer lists forearms (which showed as biceps; matches dumbbell shrug and the deadlifts), cable crossover no longer lists core, and its Arabic name no longer says "upper" (the guide is the high-to-low variant). Shrug and good-morning stills are flagged for regeneration in `EXERCISE_DEMOS_AND_UX.md`.
+
+## Video, discomfort and focus, reminder offer, Progress (26 November 2026)
+
+- **Video player:** tap anywhere on the clip to play or pause, a large play button while paused, a control bar with play/pause, a progress line and a 1×/0.5× slow-motion switch (viewing speed only). Under Reduce Motion it starts paused and a tap starts it (Android and iPhone).
+- **Discomfort and focus:** neck (upper traps) and upper back (mid back) are separate areas; matches are marked by default or hidden by choice; "Muscles I want to train more" lists those exercises first. The legacy combined value keeps its old effect. Tests: `ExerciseDiscomfortTest` (JVM), `ExerciseDiscomfortTests` (Swift, CI).
+- **Reminder offer:** a one-time Today card (top of Train on iPhone) after the first logged meal, workout or cardio entry while all reminders are off. One tap turns on meal and workout reminders only after the system permission; "No thanks" hides it for good. Nothing turns on by itself.
+- **Progress:** opens on "Your last 7 days" (workouts vs plan, cardio time, average kcal on logged days with the user's target, 30-day weight change from logs, new bests this week), then records and charts; measurement entry moved to a sheet. Test: `ProgressHighlightsTest`. iPhone shows the same card without the plan and records lines.
+- **Not verified:** iPhone layouts and playback are compiled by CI only.
+
+## Cardio and iPhone parity (26 November 2026)
+
+- **Cardio/timed activity:** `CardioEntry` (1 s–24 h, optional distance up to 1 000 km, note ≤ 60 characters) in table `cardio_entries`, added by `MIGRATION_9_10` whose SQL matches the v10 schema export. Included in FORMABK1 backup validation (unique IDs, date range) and restore; `{}` archives decode with no entries. Counts as training for the reminder skip rule. Tests: `cardioEntriesRoundTripAndInvalidValuesFail` (JVM), `schemaNineUpgradeAddsCardioThatRoundTripsThroughBackupAndCountsAsTraining` and `cardioEntryAcceptsArabicDigitsPersistsAndRemovalNeedsConfirmation` (emulator).
+- **Emulator walkthrough (phone 1080×2400, EN and AR):** onboarding, Today, Train, Eat, Progress and the cardio dialog checked. Fixed: duplicate count in the Today ring, oversized activity chips, cardio placement above starters, Arabic `+250 مل` sign order, Arabic pace wording and a mixed-digit 7-day label.
+- **iPhone source:** `PhoneCardio.swift`, `PhoneCopyMealDay.swift` (copies exactly the reviewed meals, rejects a changed source day without partial writes) and a CSV share from memory using FormaCore `TrainingCsv` (`TrainingCsvTests`, columns match Android). **Compiled only by CI; not run on an iPhone.**
 
 ## Reminders and info bubbles (25 November 2026)
 

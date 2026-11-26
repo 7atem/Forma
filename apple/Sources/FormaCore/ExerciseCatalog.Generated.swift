@@ -148,7 +148,7 @@ public enum Exercise: String, Codable, CaseIterable, Sendable {
         case .walking_lunge: return arabic ? "طعن متحرك بالدمبل" : "Walking lunge"
         case .ab_wheel_rollout: return arabic ? "تدحرج عجلة البطن على الركبتين" : "Ab wheel rollout"
         case .close_grip_bench_press: return arabic ? "ضغط صدر بالبار بقبضة ضيقة" : "Close-grip bench press"
-        case .cable_crossover: return arabic ? "تقاطع كابل علوي للصدر" : "Cable crossover"
+        case .cable_crossover: return arabic ? "تقاطع الكابل للصدر" : "Cable crossover"
         case .barbell_shrug: return arabic ? "رفع الكتفين بالبار" : "Barbell shrug"
         case .good_morning: return arabic ? "تمرين صباح الخير بالبار" : "Barbell good morning"
         case .hip_abduction: return arabic ? "فتح الوركين على الجهاز" : "Hip abduction"
@@ -490,10 +490,10 @@ public enum ExerciseMuscles {
         case .walking_lunge: return .init(primary: [.quadriceps, .glutes], secondary: [.hamstrings, .adductors, .core], primaryDetail: [.quadriceps, .glute_max, .glute_med], secondaryDetail: [.hamstrings, .adductors, .rectus_abdominis], reference: "https://exrx.net/WeightExercises/Quadriceps/DBWalkingLunge")
         case .ab_wheel_rollout: return .init(primary: [.core], secondary: [.lats, .front_delts], primaryDetail: [.rectus_abdominis, .obliques], secondaryDetail: [.lats, .front_delt], reference: "https://exrx.net/WeightExercises/RectusAbdominis/BWWheelRollout")
         case .close_grip_bench_press: return .init(primary: [.triceps, .chest], secondary: [.front_delts], primaryDetail: [.triceps, .mid_lower_chest], secondaryDetail: [.front_delt], reference: "https://exrx.net/WeightExercises/Triceps/BBCloseGripBenchPress")
-        case .cable_crossover: return .init(primary: [.chest], secondary: [.front_delts, .core], primaryDetail: [.mid_lower_chest], secondaryDetail: [.front_delt, .rectus_abdominis], reference: "https://exrx.net/WeightExercises/PectoralisSternal/CBStandingFly")
-        case .barbell_shrug: return .init(primary: [.upper_back], secondary: [.biceps], primaryDetail: [.upper_traps], secondaryDetail: [.forearms], reference: "https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug")
+        case .cable_crossover: return .init(primary: [.chest], secondary: [.front_delts], primaryDetail: [.mid_lower_chest], secondaryDetail: [.front_delt], reference: "https://exrx.net/WeightExercises/PectoralisSternal/CBStandingFly")
+        case .barbell_shrug: return .init(primary: [.upper_back], secondary: [], primaryDetail: [.upper_traps], secondaryDetail: [], reference: "https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug")
         case .good_morning: return .init(primary: [.hamstrings, .glutes, .erectors], secondary: [.core], primaryDetail: [.hamstrings, .glute_max, .spinal_erectors], secondaryDetail: [.rectus_abdominis], reference: "https://exrx.net/WeightExercises/Hamstrings/BBGoodMorning")
-        case .hip_abduction: return .init(primary: [.glutes], secondary: [.core], primaryDetail: [.glute_med, .glute_max], secondaryDetail: [.obliques], reference: "https://exrx.net/WeightExercises/HipAbductor/LVSeatedHipAbduction")
+        case .hip_abduction: return .init(primary: [.glutes], secondary: [], primaryDetail: [.glute_med, .glute_max], secondaryDetail: [], reference: "https://exrx.net/WeightExercises/HipAbductor/LVSeatedHipAbduction")
         }
     }
 }

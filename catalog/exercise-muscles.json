@@ -2284,7 +2284,7 @@
     {
       "id": "CABLE_CROSSOVER",
       "en": "Cable crossover",
-      "ar": "تقاطع كابل علوي للصدر",
+      "ar": "تقاطع الكابل للصدر",
       "equipment": [
         "CABLE"
       ],
@@ -2293,15 +2293,13 @@
         "CHEST"
       ],
       "secondary": [
-        "FRONT_DELTS",
-        "CORE"
+        "FRONT_DELTS"
       ],
       "primaryDetail": [
         "MID_LOWER_CHEST"
       ],
       "secondaryDetail": [
-        "FRONT_DELT",
-        "RECTUS_ABDOMINIS"
+        "FRONT_DELT"
       ],
       "reference": "https://exrx.net/WeightExercises/PectoralisSternal/CBStandingFly"
     },
@@ -2316,15 +2314,11 @@
       "primary": [
         "UPPER_BACK"
       ],
-      "secondary": [
-        "BICEPS"
-      ],
+      "secondary": [],
       "primaryDetail": [
         "UPPER_TRAPS"
       ],
-      "secondaryDetail": [
-        "FOREARMS"
-      ],
+      "secondaryDetail": [],
       "reference": "https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug"
     },
     {
@@ -2364,16 +2358,12 @@
       "primary": [
         "GLUTES"
       ],
-      "secondary": [
-        "CORE"
-      ],
+      "secondary": [],
       "primaryDetail": [
         "GLUTE_MED",
         "GLUTE_MAX"
       ],
-      "secondaryDetail": [
-        "OBLIQUES"
-      ],
+      "secondaryDetail": [],
       "reference": "https://exrx.net/WeightExercises/HipAbductor/LVSeatedHipAbduction"
     }
   ]

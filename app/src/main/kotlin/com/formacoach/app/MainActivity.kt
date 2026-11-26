@@ -755,6 +755,8 @@ private fun TodayContent(
         }
     }
 
+    ReminderOfferCard(hasLogged = snapshot.meals.isNotEmpty() || activeDates.isNotEmpty() || snapshot.cardio.isNotEmpty())
+
     WeeklyActivityStrip(today = today, activeDates = activeDates)
 
     // Hero Weekly Training Card
@@ -810,6 +812,8 @@ private fun TodayContent(
                         size = 86.dp,
                         strokeWidth = 9.dp,
                         color = MaterialTheme.colorScheme.primary,
+                        // The count is already the headline beside the ring; the centre carries a symbol instead.
+                        icon = if (review.completedSessions >= profile.sessionsPerWeek) Icons.Default.Check else Icons.Default.FitnessCenter,
                     )
                 }
                 Button(

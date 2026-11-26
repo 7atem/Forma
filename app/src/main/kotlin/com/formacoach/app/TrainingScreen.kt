@@ -153,6 +153,7 @@ internal fun TrainContent(state: AppState, today: LocalDate, vm: FitnessViewMode
                         emphasized = index == 0 && state.snapshot.programs.isEmpty(),
                     )
                 }
+                CardioSection(state, vm, date, today)
             }
             1 -> ExerciseLibrary(state, vm)
             2 -> TrainingHistoryContent(state, today, vm, showVictory = justFinished, onDismissVictory = { justFinished = false })

@@ -127,6 +127,8 @@ class FitnessViewModel @Inject constructor(
     fun saveCustomExercise(value: CustomExercise, done: () -> Unit = {}) = write(done) { repository.saveCustomExercise(value) }
     fun deleteCustomExercise(id: String) = write { repository.deleteCustomExercise(id) }
     fun addCustomSet(value: CustomExerciseSet, done: () -> Unit = {}) = write(done) { repository.addCustomSet(value) }
+    fun saveCardio(value: CardioEntry, done: () -> Unit = {}) = write(done) { repository.saveCardio(value) }
+    fun removeCardio(id: String) = write { repository.removeCardio(id) }
     fun saveSupplement(value: Supplement, done: () -> Unit = {}) = write(done) { repository.saveSupplement(value) }
     fun deleteSupplement(id: String) = write { repository.deleteSupplement(id) }
     fun setSupplementTaken(date: LocalDate, id: String, taken: Boolean) = write { repository.setSupplementTaken(date, id, taken) }

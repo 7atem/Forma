@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -26,202 +27,16 @@ import java.time.LocalDate
 
 @Composable
 internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewModel) {
-    var day by rememberSaveable { mutableLongStateOf(today.toEpochDay()) }
-    val date = LocalDate.ofEpochDay(day)
-    val existing = state.snapshot.measurements.firstOrNull { it.date == date }
     val unit = LocalWeightUnit.current
     val unitStr = weightUnitLabel()
-    val locale = LocalConfiguration.current.locales[0]
-    var weight by rememberSaveable(day, existing?.weightKg) {
-        mutableStateOf(existing?.weightKg?.let { formatInputNumber(WeightUnits.fromKg(it, unit), locale, 2) }.orEmpty())
-    }
-    var inputUnit by rememberSaveable(day, existing?.weightKg) { mutableStateOf(unit) }
-    LaunchedEffect(unit) {
-        if (inputUnit != unit) {
-            NumericInput.decimal(weight)?.let { parsed ->
-                weight = formatInputNumber(WeightUnits.convert(parsed, inputUnit, unit), locale, 2)
-            }
-            inputUnit = unit
-        }
-    }
-    var waist by rememberSaveable(day, existing?.waistCm) {
-        mutableStateOf(existing?.waistCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
-    }
-    var neck by rememberSaveable(day, existing?.neckCm) {
-        mutableStateOf(existing?.neckCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
-    }
-    var chest by rememberSaveable(day, existing?.chestCm) {
-        mutableStateOf(existing?.chestCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
-    }
-    var arms by rememberSaveable(day, existing?.armsCm) {
-        mutableStateOf(existing?.armsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
-    }
-    var hips by rememberSaveable(day, existing?.hipsCm) {
-        mutableStateOf(existing?.hipsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
-    }
-    var thighs by rememberSaveable(day, existing?.thighsCm) {
-        mutableStateOf(existing?.thighsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
-    }
-    var showMoreTape by rememberSaveable { mutableStateOf(false) }
-    val weightKg = if (weight.isBlank()) null else NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) }
-    val waistValue = if (waist.isBlank()) null else NumericInput.decimal(waist)
-    val neckValue = if (neck.isBlank()) null else NumericInput.decimal(neck)
-    val chestValue = if (chest.isBlank()) null else NumericInput.decimal(chest)
-    val armsValue = if (arms.isBlank()) null else NumericInput.decimal(arms)
-    val hipsValue = if (hips.isBlank()) null else NumericInput.decimal(hips)
-    val thighsValue = if (thighs.isBlank()) null else NumericInput.decimal(thighs)
-    val weightInvalid = weight.isNotBlank() && (weightKg == null || weightKg !in 0.0001..1000.0)
-    val waistInvalid = waist.isNotBlank() && (waistValue == null || waistValue !in 0.0001..500.0)
-    val measure = runCatching {
-        Measurement(
-            date = date,
-            weightKg = if (weight.isBlank()) null else requireNotNull(weightKg),
-            waistCm = if (waist.isBlank()) null else requireNotNull(waistValue),
-            neckCm = if (neck.isBlank()) null else requireNotNull(neckValue),
-            chestCm = if (chest.isBlank()) null else requireNotNull(chestValue),
-            armsCm = if (arms.isBlank()) null else requireNotNull(armsValue),
-            hipsCm = if (hips.isBlank()) null else requireNotNull(hipsValue),
-            thighsCm = if (thighs.isBlank()) null else requireNotNull(thighsValue),
-        )
-    }.getOrNull()
     var limit by rememberSaveable { mutableIntStateOf(14) }
-    val latestWeight = state.snapshot.measurements.firstOrNull { it.weightKg != null }
-    val latestWaist = state.snapshot.measurements.firstOrNull { it.waistCm != null }
-    val weeklyVolume = TrainingHistory.weeklyTonnage(state.snapshot, today)
+
+    // Day being entered or edited in the measurement sheet; null when it is closed.
+    var measuringDay by rememberSaveable { mutableStateOf<Long?>(null) }
 
     PageHeading(R.string.progress_title)
 
-    if (latestWeight != null || latestWaist != null || weeklyVolume > 0.0) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            latestWeight?.weightKg?.let {
-                MetricTile(
-                    "${number(WeightUnits.fromKg(it, unit), 1)} $unitStr",
-                    stringResource(R.string.body_weight),
-                    Modifier.weight(1f),
-                    accent = MaterialTheme.colorScheme.primary,
-                )
-            }
-            latestWaist?.waistCm?.let {
-                MetricTile(
-                    number(it),
-                    stringResource(R.string.waist),
-                    Modifier.weight(1f),
-                    accent = MaterialTheme.colorScheme.tertiary,
-                )
-            }
-            if (weeklyVolume > 0.0) {
-                MetricTile(
-                    "${number(WeightUnits.fromKg(weeklyVolume, unit), 0)} $unitStr",
-                    stringResource(R.string.weekly_volume_label),
-                    Modifier.weight(1f),
-                    accent = MaterialTheme.colorScheme.secondary,
-                )
-            }
-        }
-    }
-
-    DateChoice(date, today, { day = it.toEpochDay() }, "measurement_date")
-
-    InfoCard {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.measure_for_date, dateLabel(date)), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            SectionInfoButton(InfoTopic.MEASUREMENTS)
-        }
-        FormFieldPair(
-            first = {
-                Input(
-                    if (unit == WeightUnit.KG) R.string.body_weight else R.string.body_weight_lb,
-                    weight,
-                    { weight = it },
-                    "body_weight",
-                    error = weightInvalid,
-                    supportingText = if (weightInvalid) stringResource(R.string.weight_error) else null,
-                )
-            },
-            second = {
-                Input(
-                    R.string.waist,
-                    waist,
-                    { waist = it },
-                    "waist",
-                    error = waistInvalid,
-                    supportingText = if (waistInvalid) stringResource(R.string.waist_error) else null,
-                )
-            },
-        )
-        FilterChip(
-            selected = showMoreTape,
-            onClick = { showMoreTape = !showMoreTape },
-            label = { Text(stringResource(R.string.more_measurements), fontWeight = FontWeight.SemiBold) },
-            modifier = Modifier.testTag("toggle_more_tape"),
-        )
-        if (showMoreTape) {
-            FormFieldPair(
-                first = { Input(R.string.neck_cm, neck, { neck = it }, "neck_cm") },
-                second = { Input(R.string.chest_cm, chest, { chest = it }, "chest_cm") },
-            )
-            FormFieldPair(
-                first = { Input(R.string.arms_cm, arms, { arms = it }, "arms_cm") },
-                second = { Input(R.string.hips_cm, hips, { hips = it }, "hips_cm") },
-            )
-            Input(R.string.thighs_cm, thighs, { thighs = it }, "thighs_cm")
-        }
-        Button(
-            onClick = { measure?.let { vm.measure(it) {} } },
-            enabled = measure != null && !state.busy,
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("save_measurement"),
-        ) {
-            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(stringResource(R.string.save_measurement), fontWeight = FontWeight.Bold)
-        }
-    }
-
-    InfoCard {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.weight_chart), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            SectionInfoButton(InfoTopic.WEIGHT_CHART)
-        }
-        val weightPoints = remember(state.snapshot, today, unit) {
-            TrainingHistory.weights(state.snapshot, today).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) }
-        }
-        val trendPoints = remember(weightPoints) {
-            TrainingHistory.rollingWeightTrend(weightPoints, windowDays = 7)
-        }
-        HistoryChart(weightPoints, unitStr, trendPoints = trendPoints)
-    }
-
-    BmiCard(state.snapshot)
-    SleepCard(vm, today)
-    NutritionTrendCard(state.snapshot, today)
-
-    // 7-Day Body Muscle Heat Map
-    val weeklyCounts = remember(state.snapshot, today) { MuscleTraining.weekly(state.snapshot, today) }
-    val weeklyMuscleMap = remember(weeklyCounts) { weeklyCounts.associate { it.muscle to (it.primarySets + it.secondarySets) } }
-    InfoCard {
-        WeeklyMuscleHeatMap(weeklyMuscleMap)
-        // The shading combines roles; main and supporting set counts stay listed separately.
-        WeeklyMuscleSplit(weeklyCounts)
-    }
-
-    // 12-Week GitHub-Style Training Consistency Grid + Streak
-    val countsByDate = remember(state.snapshot.sessions) {
-        state.snapshot.sessions.filter { it.completedAt != null }.groupingBy { it.date }.eachCount()
-    }
-    val weekStreak = remember(state.snapshot, today) { TrainingHistory.activeWeekStreak(state.snapshot, today) }
-    InfoCard {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text(stringResource(R.string.activity_heatmap_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            SectionInfoButton(InfoTopic.ACTIVITY_GRID)
-        }
-        if (weekStreak > 0) {
-            PillBadge(stringResource(R.string.week_streak_badge, number(weekStreak.toDouble(), 0)))
-        }
-        ActivityHeatmapGrid(today = today, countsByDate = countsByDate)
-    }
-
-    TrainingTrendCard(state.snapshot, today)
+    ProgressHighlightsCard(state.snapshot, today, onLogMeasurement = { measuringDay = today.toEpochDay() })
 
     // Personal Records (PR) Trophy Wall
     val records = remember(state.snapshot, today) {
@@ -274,7 +89,53 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         }
     }
 
-    WeeklyReviewCard(state.snapshot, date, vm)
+    InfoCard {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.weight_chart), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.WEIGHT_CHART)
+        }
+        val weightPoints = remember(state.snapshot, today, unit) {
+            TrainingHistory.weights(state.snapshot, today).map { it.copy(value = WeightUnits.fromKg(it.value, unit)) }
+        }
+        val trendPoints = remember(weightPoints) {
+            TrainingHistory.rollingWeightTrend(weightPoints, windowDays = 7)
+        }
+        HistoryChart(weightPoints, unitStr, trendPoints = trendPoints)
+    }
+
+    TrainingTrendCard(state.snapshot, today)
+    NutritionTrendCard(state.snapshot, today)
+
+    // 7-Day Body Muscle Heat Map
+    val weeklyCounts = remember(state.snapshot, today) { MuscleTraining.weekly(state.snapshot, today) }
+    val weeklyMuscleMap = remember(weeklyCounts) { weeklyCounts.associate { it.muscle to (it.primarySets + it.secondarySets) } }
+    InfoCard {
+        WeeklyMuscleHeatMap(weeklyMuscleMap)
+        // The shading combines roles; main and supporting set counts stay listed separately.
+        WeeklyMuscleSplit(weeklyCounts)
+    }
+
+    // 12-Week GitHub-Style Training Consistency Grid + Streak
+    val countsByDate = remember(state.snapshot.sessions) {
+        state.snapshot.sessions.filter { it.completedAt != null }.groupingBy { it.date }.eachCount()
+    }
+    val weekStreak = remember(state.snapshot, today) { TrainingHistory.activeWeekStreak(state.snapshot, today) }
+    InfoCard {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(stringResource(R.string.activity_heatmap_title), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            SectionInfoButton(InfoTopic.ACTIVITY_GRID)
+        }
+        if (weekStreak > 0) {
+            PillBadge(stringResource(R.string.week_streak_badge, number(weekStreak.toDouble(), 0)))
+        }
+        ActivityHeatmapGrid(today = today, countsByDate = countsByDate)
+    }
+
+    BmiCard(state.snapshot)
+    SleepCard(vm, today)
+
+
+    WeeklyReviewCard(state.snapshot, today, vm)
 
     Text(stringResource(R.string.measurement_history), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
     if (state.snapshot.measurements.isEmpty()) Text(stringResource(R.string.no_measurements), color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -294,7 +155,7 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
                         }
                     }
                 }
-                TextButton(onClick = { day = value.date.toEpochDay() }) { Text(stringResource(R.string.edit)) }
+                TextButton(onClick = { measuringDay = value.date.toEpochDay() }) { Text(stringResource(R.string.edit)) }
                 ConfirmButton(R.string.remove, stringResource(R.string.delete_measurement_note), !state.busy) {
                     vm.removeMeasurement(value.date)
                 }
@@ -305,6 +166,9 @@ internal fun ProgressContent(state: AppState, today: LocalDate, vm: FitnessViewM
         TextButton(onClick = { limit += 14 }) { Text(stringResource(R.string.show_more)) }
     }
     NutritionAndMeasurementsExport(state, vm)
+    measuringDay?.let { initial ->
+        MeasurementSheet(state, today, LocalDate.ofEpochDay(initial), vm) { measuringDay = null }
+    }
 }
 
 @Composable
@@ -375,3 +239,128 @@ internal fun WeeklyReviewCard(snapshot: FitnessSnapshot, date: LocalDate, vm: Fi
     }
 }
 
+/** Measurement entry in a sheet so the Progress tab opens on what changed, not on an empty form. */
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun MeasurementSheet(state: AppState, today: LocalDate, initialDay: LocalDate, vm: FitnessViewModel, onDismiss: () -> Unit) {
+    val unit = LocalWeightUnit.current
+    val locale = LocalConfiguration.current.locales[0]
+    var day by rememberSaveable { mutableLongStateOf(initialDay.toEpochDay()) }
+    val date = LocalDate.ofEpochDay(day)
+    val existing = state.snapshot.measurements.firstOrNull { it.date == date }
+    var weight by rememberSaveable(day, existing?.weightKg) {
+        mutableStateOf(existing?.weightKg?.let { formatInputNumber(WeightUnits.fromKg(it, unit), locale, 2) }.orEmpty())
+    }
+    var inputUnit by rememberSaveable(day, existing?.weightKg) { mutableStateOf(unit) }
+    LaunchedEffect(unit) {
+        if (inputUnit != unit) {
+            NumericInput.decimal(weight)?.let { parsed ->
+                weight = formatInputNumber(WeightUnits.convert(parsed, inputUnit, unit), locale, 2)
+            }
+            inputUnit = unit
+        }
+    }
+    var waist by rememberSaveable(day, existing?.waistCm) {
+        mutableStateOf(existing?.waistCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var neck by rememberSaveable(day, existing?.neckCm) {
+        mutableStateOf(existing?.neckCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var chest by rememberSaveable(day, existing?.chestCm) {
+        mutableStateOf(existing?.chestCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var arms by rememberSaveable(day, existing?.armsCm) {
+        mutableStateOf(existing?.armsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var hips by rememberSaveable(day, existing?.hipsCm) {
+        mutableStateOf(existing?.hipsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var thighs by rememberSaveable(day, existing?.thighsCm) {
+        mutableStateOf(existing?.thighsCm?.let { formatInputNumber(it, locale, 2) }.orEmpty())
+    }
+    var showMoreTape by rememberSaveable { mutableStateOf(false) }
+    val weightKg = if (weight.isBlank()) null else NumericInput.decimal(weight)?.let { WeightUnits.toKg(it, unit) }
+    val waistValue = if (waist.isBlank()) null else NumericInput.decimal(waist)
+    val neckValue = if (neck.isBlank()) null else NumericInput.decimal(neck)
+    val chestValue = if (chest.isBlank()) null else NumericInput.decimal(chest)
+    val armsValue = if (arms.isBlank()) null else NumericInput.decimal(arms)
+    val hipsValue = if (hips.isBlank()) null else NumericInput.decimal(hips)
+    val thighsValue = if (thighs.isBlank()) null else NumericInput.decimal(thighs)
+    val weightInvalid = weight.isNotBlank() && (weightKg == null || weightKg !in 0.0001..1000.0)
+    val waistInvalid = waist.isNotBlank() && (waistValue == null || waistValue !in 0.0001..500.0)
+    val measure = runCatching {
+        Measurement(
+            date = date,
+            weightKg = if (weight.isBlank()) null else requireNotNull(weightKg),
+            waistCm = if (waist.isBlank()) null else requireNotNull(waistValue),
+            neckCm = if (neck.isBlank()) null else requireNotNull(neckValue),
+            chestCm = if (chest.isBlank()) null else requireNotNull(chestValue),
+            armsCm = if (arms.isBlank()) null else requireNotNull(armsValue),
+            hipsCm = if (hips.isBlank()) null else requireNotNull(hipsValue),
+            thighsCm = if (thighs.isBlank()) null else requireNotNull(thighsValue),
+        )
+    }.getOrNull()
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(horizontal = 20.dp).padding(bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            DateChoice(date, today, { day = it.toEpochDay() }, "measurement_date")
+        InfoCard {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(stringResource(R.string.measure_for_date, dateLabel(date)), Modifier.weight(1f), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                SectionInfoButton(InfoTopic.MEASUREMENTS)
+            }
+            FormFieldPair(
+                first = {
+                    Input(
+                        if (unit == WeightUnit.KG) R.string.body_weight else R.string.body_weight_lb,
+                        weight,
+                        { weight = it },
+                        "body_weight",
+                        error = weightInvalid,
+                        supportingText = if (weightInvalid) stringResource(R.string.weight_error) else null,
+                    )
+                },
+                second = {
+                    Input(
+                        R.string.waist,
+                        waist,
+                        { waist = it },
+                        "waist",
+                        error = waistInvalid,
+                        supportingText = if (waistInvalid) stringResource(R.string.waist_error) else null,
+                    )
+                },
+            )
+            FilterChip(
+                selected = showMoreTape,
+                onClick = { showMoreTape = !showMoreTape },
+                label = { Text(stringResource(R.string.more_measurements), fontWeight = FontWeight.SemiBold) },
+                modifier = Modifier.testTag("toggle_more_tape"),
+            )
+            if (showMoreTape) {
+                FormFieldPair(
+                    first = { Input(R.string.neck_cm, neck, { neck = it }, "neck_cm") },
+                    second = { Input(R.string.chest_cm, chest, { chest = it }, "chest_cm") },
+                )
+                FormFieldPair(
+                    first = { Input(R.string.arms_cm, arms, { arms = it }, "arms_cm") },
+                    second = { Input(R.string.hips_cm, hips, { hips = it }, "hips_cm") },
+                )
+                Input(R.string.thighs_cm, thighs, { thighs = it }, "thighs_cm")
+            }
+            Button(
+                onClick = { measure?.let { vm.measure(it) { onDismiss() } } },
+                enabled = measure != null && !state.busy,
+                shape = RoundedCornerShape(14.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("save_measurement"),
+            ) {
+                Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(R.string.save_measurement), fontWeight = FontWeight.Bold)
+            }
+        }
+        }
+    }
+}

@@ -121,21 +121,14 @@ struct ExerciseDetail: View {
                     // Placed cleanly outside the exercise media frame so it never blocks watching the movement.
                     MuscleHighlightControl(isOn: $showMuscleHighlights)
                     if current == 1 {
-                        let videoPlaying = reduceMotion ? videoStartedByUser : animating
+                        // Controls live on the video (tap to play/pause, speed, progress). Under Reduce Motion
+                        // it starts paused and only a tap starts it.
+                        let videoPlaying = Binding(
+                            get: { reduceMotion ? videoStartedByUser : animating },
+                            set: { if reduceMotion { videoStartedByUser = $0 } else { animating = $0 } }
+                        )
                         ExerciseVideoView(exercise: exercise, playing: videoPlaying, showMuscleHighlights: showMuscleHighlights)
-                        HStack {
-                            Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
-                            Spacer()
-                            // Always offer the control: under Reduce Motion it is the only way to start the clip.
-                            Button {
-                                if reduceMotion { videoStartedByUser.toggle() } else { animating.toggle() }
-                            } label: {
-                                FormaPill(text: videoPlaying ? String(localized: "pause_video") : String(localized: "play_video"),
-                                          background: videoPlaying ? FormaTheme.secondary : FormaTheme.primaryContainer,
-                                          foreground: videoPlaying ? FormaTheme.onPrimary : FormaTheme.primary)
-                            }
-                            .accessibilityIdentifier("exercise_video_play_toggle")
-                        }
+                        Text("motion_video_note").font(.caption).foregroundStyle(FormaTheme.textMuted)
                     }
                     if current == 0 {
                         ExerciseMotion3DView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)

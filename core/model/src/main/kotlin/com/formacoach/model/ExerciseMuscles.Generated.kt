@@ -152,7 +152,7 @@ object ExerciseCatalog {
         Exercise.WALKING_LUNGE->"Walking lunge طعن متحرك بالدمبل WALKING LUNGE"
         Exercise.AB_WHEEL_ROLLOUT->"Ab wheel rollout تدحرج عجلة البطن على الركبتين AB WHEEL ROLLOUT"
         Exercise.CLOSE_GRIP_BENCH_PRESS->"Close-grip bench press ضغط صدر بالبار بقبضة ضيقة CLOSE GRIP BENCH PRESS"
-        Exercise.CABLE_CROSSOVER->"Cable crossover تقاطع كابل علوي للصدر CABLE CROSSOVER"
+        Exercise.CABLE_CROSSOVER->"Cable crossover تقاطع الكابل للصدر CABLE CROSSOVER"
         Exercise.BARBELL_SHRUG->"Barbell shrug رفع الكتفين بالبار BARBELL SHRUG"
         Exercise.GOOD_MORNING->"Barbell good morning تمرين صباح الخير بالبار GOOD MORNING"
         Exercise.HIP_ABDUCTION->"Hip abduction فتح الوركين على الجهاز HIP ABDUCTION"
@@ -292,9 +292,9 @@ object ExerciseMuscles {
         Exercise.WALKING_LUNGE -> MuscleActivation(listOf(Muscle.QUADRICEPS, Muscle.GLUTES), listOf(Muscle.HAMSTRINGS, Muscle.ADDUCTORS, Muscle.CORE), listOf(MuscleDetail.QUADRICEPS, MuscleDetail.GLUTE_MAX, MuscleDetail.GLUTE_MED), listOf(MuscleDetail.HAMSTRINGS, MuscleDetail.ADDUCTORS, MuscleDetail.RECTUS_ABDOMINIS), "https://exrx.net/WeightExercises/Quadriceps/DBWalkingLunge" )
         Exercise.AB_WHEEL_ROLLOUT -> MuscleActivation(listOf(Muscle.CORE), listOf(Muscle.LATS, Muscle.FRONT_DELTS), listOf(MuscleDetail.RECTUS_ABDOMINIS, MuscleDetail.OBLIQUES), listOf(MuscleDetail.LATS, MuscleDetail.FRONT_DELT), "https://exrx.net/WeightExercises/RectusAbdominis/BWWheelRollout" )
         Exercise.CLOSE_GRIP_BENCH_PRESS -> MuscleActivation(listOf(Muscle.TRICEPS, Muscle.CHEST), listOf(Muscle.FRONT_DELTS), listOf(MuscleDetail.TRICEPS, MuscleDetail.MID_LOWER_CHEST), listOf(MuscleDetail.FRONT_DELT), "https://exrx.net/WeightExercises/Triceps/BBCloseGripBenchPress" )
-        Exercise.CABLE_CROSSOVER -> MuscleActivation(listOf(Muscle.CHEST), listOf(Muscle.FRONT_DELTS, Muscle.CORE), listOf(MuscleDetail.MID_LOWER_CHEST), listOf(MuscleDetail.FRONT_DELT, MuscleDetail.RECTUS_ABDOMINIS), "https://exrx.net/WeightExercises/PectoralisSternal/CBStandingFly" )
-        Exercise.BARBELL_SHRUG -> MuscleActivation(listOf(Muscle.UPPER_BACK), listOf(Muscle.BICEPS), listOf(MuscleDetail.UPPER_TRAPS), listOf(MuscleDetail.FOREARMS), "https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug" )
+        Exercise.CABLE_CROSSOVER -> MuscleActivation(listOf(Muscle.CHEST), listOf(Muscle.FRONT_DELTS), listOf(MuscleDetail.MID_LOWER_CHEST), listOf(MuscleDetail.FRONT_DELT), "https://exrx.net/WeightExercises/PectoralisSternal/CBStandingFly" )
+        Exercise.BARBELL_SHRUG -> MuscleActivation(listOf(Muscle.UPPER_BACK), listOf(), listOf(MuscleDetail.UPPER_TRAPS), listOf(), "https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug" )
         Exercise.GOOD_MORNING -> MuscleActivation(listOf(Muscle.HAMSTRINGS, Muscle.GLUTES, Muscle.ERECTORS), listOf(Muscle.CORE), listOf(MuscleDetail.HAMSTRINGS, MuscleDetail.GLUTE_MAX, MuscleDetail.SPINAL_ERECTORS), listOf(MuscleDetail.RECTUS_ABDOMINIS), "https://exrx.net/WeightExercises/Hamstrings/BBGoodMorning" )
-        Exercise.HIP_ABDUCTION -> MuscleActivation(listOf(Muscle.GLUTES), listOf(Muscle.CORE), listOf(MuscleDetail.GLUTE_MED, MuscleDetail.GLUTE_MAX), listOf(MuscleDetail.OBLIQUES), "https://exrx.net/WeightExercises/HipAbductor/LVSeatedHipAbduction" )
+        Exercise.HIP_ABDUCTION -> MuscleActivation(listOf(Muscle.GLUTES), listOf(), listOf(MuscleDetail.GLUTE_MED, MuscleDetail.GLUTE_MAX), listOf(), "https://exrx.net/WeightExercises/HipAbductor/LVSeatedHipAbduction" )
     }
 }

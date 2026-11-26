@@ -167,7 +167,32 @@ data class FitnessSnapshot(
     val customSets: List<CustomExerciseSet> = emptyList(),
     val supplements: List<Supplement> = emptyList(),
     val supplementIntakes: List<SupplementIntake> = emptyList(),
+    val cardio: List<CardioEntry> = emptyList(),
 )
+
+/** Activity labels for timed entries. They describe what the user did; Forma estimates no energy or intensity. */
+enum class CardioActivity { WALK, RUN, CYCLE, ROW, SWIM, ELLIPTICAL, STAIRS, JUMP_ROPE, HOLD, OTHER }
+
+/**
+ * One user-entered timed activity (a run, a row, a plank hold) on a local calendar date.
+ * Duration is required; distance is optional and stored in metres. Nothing is estimated from it.
+ */
+@Serializable
+data class CardioEntry(
+    val id: String = UUID.randomUUID().toString(),
+    val date: LocalDate,
+    val activity: CardioActivity,
+    val durationSeconds: Int,
+    val distanceMeters: Double? = null,
+    val note: String = "",
+) {
+    init {
+        require(id.isNotBlank() && id.length <= 64)
+        require(durationSeconds in 1..86_400)
+        require(distanceMeters == null || distanceMeters.isFinite() && distanceMeters > 0 && distanceMeters <= 1_000_000)
+        require(note.length <= 60)
+    }
+}
 
 /** A user-defined exercise outside the reviewed catalog; muscle and equipment are the user's own labels. */
 @Serializable

@@ -157,6 +157,8 @@ internal fun CircularProgressRing(
     strokeWidth: Dp = 9.dp,
     color: Color = MaterialTheme.colorScheme.primary,
     trackColor: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+    /** Shown in the centre instead of [valueText] when the number is already printed next to the ring. */
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
     val reduceMotion = rememberReduceMotion()
     val animated by animateFloatAsState(
@@ -198,7 +200,9 @@ internal fun CircularProgressRing(
                 )
             }
         }
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 10.dp)) {
+        if (icon != null) {
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(size * 0.36f))
+        } else Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(horizontal = 10.dp)) {
             Text(
                 valueText,
                 style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),

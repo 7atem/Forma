@@ -20,23 +20,62 @@ enum ExerciseVideoLibrary {
 /// Silent looping demo video. Working muscles come from the catalog overlay, never from the video.
 struct ExerciseVideoView: View {
     let exercise: Exercise
-    var playing: Bool = true
+    @Binding var playing: Bool
     var showMuscleHighlights: Bool = true
     @Environment(\.locale) private var locale
+    @State private var slow = false
+    @State private var progress: Double = 0
 
-    /// `playing` is already resolved by the caller: autoplay is off under Reduce Motion, but an explicit tap may start it.
+    /// `playing` is resolved by the caller: autoplay is off under Reduce Motion, but a tap on the video can start it.
     var body: some View {
         if let url = ExerciseVideoLibrary.url(exercise) {
             let play = playing
             ZStack(alignment: .topTrailing) {
-                LoopingVideoPlayer(url: url, playing: play)
+                LoopingVideoPlayer(url: url, playing: play, slow: slow, progress: $progress)
                     .id(url)
+                    .contentShape(Rectangle())
+                    .onTapGesture { playing.toggle() }
                 if showMuscleHighlights {
                     PulsingVideoMuscleOverlay(exercise: exercise, play: play, showMuscleHighlights: showMuscleHighlights)
                         .padding(8)
                         .allowsHitTesting(false)
                 }
+                if !play {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 72, height: 72)
+                        .background(.black.opacity(0.55), in: Circle())
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .allowsHitTesting(false)
+                        .transition(.opacity)
+                }
+                VStack {
+                    Spacer()
+                    HStack(spacing: 8) {
+                        Button { playing.toggle() } label: {
+                            Image(systemName: play ? "pause.fill" : "play.fill")
+                                .frame(width: 44, height: 44)
+                        }
+                        .accessibilityLabel(Text(play ? "pause_video" : "play_video"))
+                        .accessibilityIdentifier("exercise_video_play_toggle")
+                        ProgressView(value: progress)
+                            .tint(.white)
+                            .accessibilityHidden(true)
+                        Button { slow.toggle() } label: {
+                            Text(slow ? "0.5×" : "1×")
+                                .font(.subheadline.weight(.bold))
+                                .frame(minWidth: 44, minHeight: 44)
+                        }
+                        .accessibilityLabel(Text(slow ? "video_speed_normal" : "video_speed_slow"))
+                        .accessibilityIdentifier("exercise_video_speed")
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .background(LinearGradient(colors: [.clear, .black.opacity(0.55)], startPoint: .top, endPoint: .bottom))
+                }
             }
+            .animation(.easeInOut(duration: 0.2), value: play)
             .aspectRatio(1, contentMode: .fit)
             .background(FormaTheme.surface)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
@@ -76,14 +115,20 @@ private struct PulsingVideoMuscleOverlay: View {
 private struct LoopingVideoPlayer: UIViewRepresentable {
     let url: URL
     let playing: Bool
+    let slow: Bool
+    @Binding var progress: Double
 
     func makeUIView(context: Context) -> LoopingPlayerView {
         let view = LoopingPlayerView(url: url)
+        let binding = $progress
+        view.onProgress = { binding.wrappedValue = $0 }
+        view.setSlow(slow)
         view.setPlaying(playing)
         return view
     }
 
     func updateUIView(_ view: LoopingPlayerView, context: Context) {
+        view.setSlow(slow)
         view.setPlaying(playing)
     }
 
@@ -100,6 +145,9 @@ final class LoopingPlayerView: UIView {
     private var endObserver: NSObjectProtocol?
     private var foregroundToken: NSObjectProtocol?
     private var desiredPlaying = false
+    private var rate: Float = 1
+    private var timeObserver: Any?
+    var onProgress: ((Double) -> Void)?
 
     init(url: URL) {
         let asset = AVURLAsset(url: url)
@@ -145,7 +193,17 @@ final class LoopingPlayerView: UIView {
         ) { [weak self] _ in
             self?.resumeIfNeeded()
         }
+        timeObserver = player.addPeriodicTimeObserver(forInterval: CMTime(value: 1, timescale: 10), queue: .main) { [weak self] time in
+            guard let self, let duration = self.playerItem.duration.seconds.nonZeroFinite else { return }
+            self.onProgress?(min(max(time.seconds / duration, 0), 1))
+        }
         isAccessibilityElement = false
+    }
+
+    /// Slow motion is a viewing speed for studying the movement; the clip itself is unchanged.
+    func setSlow(_ slow: Bool) {
+        rate = slow ? 0.5 : 1
+        if player.timeControlStatus == .playing { player.rate = rate }
     }
 
     required init?(coder: NSCoder) { nil }
@@ -166,7 +224,7 @@ final class LoopingPlayerView: UIView {
     private func resumeIfNeeded() {
         guard desiredPlaying, window != nil else { return }
         if player.timeControlStatus != .playing {
-            player.play()
+            player.playImmediately(atRate: rate)
         }
     }
 
@@ -181,6 +239,10 @@ final class LoopingPlayerView: UIView {
 
     func stop() {
         desiredPlaying = false
+        if let observer = timeObserver {
+            player.removeTimeObserver(observer)
+            timeObserver = nil
+        }
         statusObserver?.invalidate()
         statusObserver = nil
         if let token = endObserver {
@@ -194,4 +256,8 @@ final class LoopingPlayerView: UIView {
         player.pause()
         player.replaceCurrentItem(with: nil)
     }
+}
+
+private extension Double {
+    var nonZeroFinite: Double? { isFinite && self > 0 ? self : nil }
 }

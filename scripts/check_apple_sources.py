@@ -74,15 +74,14 @@ for required in [
     'Toggle("muscle_highlights", isOn: $isOn)',
     'MuscleHighlightControl(isOn: $showMuscleHighlights)',
     'ExerciseVideoView(exercise: exercise, playing: videoPlaying, showMuscleHighlights: showMuscleHighlights)',
-    'let videoPlaying = reduceMotion ? videoStartedByUser : animating',
-    'exercise_video_play_toggle',
+    'get: { reduceMotion ? videoStartedByUser : animating }',
     'ExerciseMotion3DView(exercise: exercise, playing: animating, showMuscleHighlights: showMuscleHighlights)',
     'if showMuscleHighlights',
     'MuscleDemoLegend(exercise: exercise)',
 ]:
     assert required in detail, ('Exercise highlight wiring', required)
 video = (root / 'apple/iPhone/ExerciseVideoView.swift').read_text(encoding='utf-8')
-assert 'var showMuscleHighlights: Bool = true' in video
+assert 'var showMuscleHighlights: Bool = true' in video and 'exercise_video_play_toggle' in video and 'exercise_video_speed' in video
 assert 'if showMuscleHighlights' in video and 'guard play && showMuscleHighlights' in video
 motion = (root / 'apple/AppShared/ExerciseMotion3DView.swift').read_text(encoding='utf-8')
 assert 'showMuscleHighlights ? MotionEngine.highlights(exercise) : [:]' in motion
@@ -120,18 +119,21 @@ assert 'primary ? Color.green' not in diagram
 # Discomfort choices are direct-target library preferences only; they do not prescribe treatment or rewrite training data.
 discomfort = (root / 'apple/Sources/FormaCore/ExerciseDiscomfort.swift').read_text(encoding='utf-8')
 for required in [
-    'case neckUpperBack = "NECK_UPPER_BACK"',
+    'case neck = "NECK"',
+    'case upperBack = "UPPER_BACK"',
     'case shoulders = "SHOULDERS"',
     'case lowerBack = "LOWER_BACK"',
-    'case .neckUpperBack: return [.upper_back]',
+    'case .neck: return [.upper_traps]',
+    'case .upperBack: return [.mid_back]',
     'case .shoulders: return [.front_delts, .rear_delts]',
     'case .lowerBack: return [.erectors]',
-    'Set(activation.primary + activation.secondary).isDisjoint(with: excludedMuscles)',
+    'if token == "NECK_UPPER_BACK" { return [.neck, .upperBack] }',
     'public static let storageKey = "forma_discomfort_exclusions"',
+    'public static let focusKey = "forma_focus_muscles"',
 ]:
     assert required in discomfort, ('Discomfort preference model', required)
 phone = (root / 'apple/iPhone/FormaPhoneApp.swift').read_text(encoding='utf-8')
-assert 'ExerciseDiscomfortRegion.includes(exercise, excluding: discomfortRegions)' in phone
+assert 'ExerciseDiscomfortSelection.visible(exercise, discomfortRegions, mode: discomfortMode)' in phone
 assert 'ExerciseDiscomfortFilterButton()' in phone
 filter_view = (root / 'apple/iPhone/ExerciseDiscomfortFilter.swift').read_text(encoding='utf-8')
 for required in ['@AppStorage(ExerciseDiscomfortSelection.storageKey)', 'discomfort_filter_limits',

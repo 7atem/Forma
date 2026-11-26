@@ -108,6 +108,34 @@ class FitnessFlowTest {
         rule.onNodeWithTag("confirm_destructive").performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithText("UI cable pullover").fetchSemanticsNodes().isEmpty()}
     }
+    @Test fun cardioEntryAcceptsArabicDigitsPersistsAndRemovalNeedsConfirmation() {
+        ensureProfile();rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_0").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("log_cardio").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("log_cardio").performScrollTo().performClick()
+        rule.onNodeWithTag("save_cardio").assertIsNotEnabled()
+        rule.onNodeWithTag("cardio_activity_ROW").performClick()
+        rule.onNodeWithTag("cardio_minutes").performTextInput("٢٠")
+        rule.onNodeWithTag("cardio_seconds").performTextInput("75")
+        rule.onNodeWithTag("save_cardio").assertIsNotEnabled()
+        rule.onNodeWithTag("cardio_seconds").performTextReplacement("30")
+        rule.onNodeWithTag("cardio_note").performTextInput("UI erg piece")
+        rule.onNodeWithTag("save_cardio").assertIsEnabled().performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithTag("save_cardio").fetchSemanticsNodes().isEmpty()}
+        rule.activityRule.scenario.recreate()
+        rule.waitUntil(20_000) {rule.onAllNodesWithTag("tab_1").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithTag("tab_1").performClick();rule.onNodeWithTag("training_section_0").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodesWithText("UI erg piece").fetchSemanticsNodes().isNotEmpty()}
+        rule.onNodeWithText("Row · 20 min 30 s",substring=true).assertExists()
+        rule.onNodeWithTag("cardio_week_summary").assertExists()
+        val removeMatcher=SemanticsMatcher("cardio remove") {node ->
+            val key=androidx.compose.ui.semantics.SemanticsProperties.TestTag
+            node.config.contains(key)&&node.config[key].startsWith("remove_cardio_")
+        }
+        val before=rule.onAllNodes(removeMatcher).fetchSemanticsNodes().size
+        rule.onAllNodes(removeMatcher)[0].performScrollTo().performClick()
+        rule.onNodeWithTag("confirm_destructive").performClick()
+        rule.waitUntil(10_000) {rule.onAllNodes(removeMatcher).fetchSemanticsNodes().size==before-1}
+    }
     @Test fun remindersAreOffByDefaultAndSwitchOnAndOff() {
         val instrumentation=androidx.test.platform.app.InstrumentationRegistry.getInstrumentation()
         if(android.os.Build.VERSION.SDK_INT>=33) instrumentation.uiAutomation.grantRuntimePermission(rule.activity.packageName,android.Manifest.permission.POST_NOTIFICATIONS)
@@ -140,6 +168,7 @@ class FitnessFlowTest {
     @Test fun heightInProfileShowsBmiFromLoggedWeight() {
         ensureProfile()
         rule.onNodeWithTag("tab_3").performClick()
+        rule.onNodeWithTag("log_measurement").performScrollTo().performClick()
         rule.onNodeWithTag("body_weight").performScrollTo().performTextReplacement("80")
         rule.onNodeWithTag("save_measurement").performScrollTo().performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithTag("bmi_card").fetchSemanticsNodes().isNotEmpty()}
@@ -237,6 +266,7 @@ class FitnessFlowTest {
         rule.onNodeWithTag("save_meal").performScrollTo().performClick()
         rule.waitUntil(10_000) {rule.onAllNodesWithText("Test portion").fetchSemanticsNodes().isNotEmpty()}
         rule.onNodeWithTag("tab_3").performClick()
+        rule.onNodeWithTag("log_measurement").performScrollTo().performClick()
         rule.onNodeWithTag("body_weight").performScrollTo().performTextClearance()
         rule.onNodeWithTag("body_weight").performTextInput("٨٢٫٥")
         rule.onNodeWithTag("waist").performScrollTo().performTextClearance()

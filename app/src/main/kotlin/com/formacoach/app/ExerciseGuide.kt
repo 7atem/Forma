@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
@@ -173,7 +175,9 @@ internal fun ExerciseGuideSheet(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else if (mode == 1) {
-                    ExerciseVideo(exercise, playing = animating, showMuscleHighlights = showMuscleHighlights)
+                    // Autoplay follows Reduce Motion; an explicit tap on the video can always start it.
+                    var videoPlaying by rememberSaveable(exercise) { mutableStateOf(!reduceMotion) }
+                    ExerciseVideo(exercise, playing = videoPlaying, onPlayingChange = { videoPlaying = it }, showMuscleHighlights = showMuscleHighlights)
                     Text(
                         stringResource(R.string.motion_video_note),
                         style = MaterialTheme.typography.bodySmall,
@@ -184,7 +188,7 @@ internal fun ExerciseGuideSheet(
                 } else {
                     ExerciseIllustration(exercise, onOpen = { enlarged = true }, showMuscleHighlights = showMuscleHighlights)
                 }
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                if (mode != 1) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                     if ((!animating || reduceMotion) && !showMotion) {
                         Box(Modifier.weight(1f)) { PhaseLabels() }
                     } else {
@@ -345,14 +349,27 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     var recentOnly by rememberSaveable {mutableStateOf(false)}
     var discomfortEncoded by rememberSaveable {mutableStateOf(prefs.getString(ExerciseDiscomfortSelection.STORAGE_KEY,"")?:"")}
     val discomfortExcluded=remember(discomfortEncoded) {ExerciseDiscomfortSelection.decode(discomfortEncoded)}
+    var discomfortModeName by rememberSaveable {mutableStateOf(ExerciseDiscomfortSelection.decodeMode(prefs.getString(ExerciseDiscomfortSelection.MODE_KEY,null),discomfortExcluded.isNotEmpty()).name)}
+    val discomfortMode=DiscomfortMode.valueOf(discomfortModeName)
+    var focusEncoded by rememberSaveable {mutableStateOf(prefs.getString(ExerciseDiscomfortSelection.FOCUS_KEY,"")?:"")}
+    val focusMuscles=remember(focusEncoded) {ExerciseDiscomfortSelection.decodeFocus(focusEncoded)}
     var showDiscomfortDialog by rememberSaveable {mutableStateOf(false)}
     fun saveDiscomfort(regions:Set<ExerciseDiscomfortRegion>) {
         val encoded=ExerciseDiscomfortSelection.encode(regions)
         discomfortEncoded=encoded
-        prefs.edit().putString(ExerciseDiscomfortSelection.STORAGE_KEY,encoded).apply()
+        prefs.edit().putString(ExerciseDiscomfortSelection.STORAGE_KEY,encoded).putString(ExerciseDiscomfortSelection.MODE_KEY,discomfortModeName).apply()
+    }
+    fun saveDiscomfortMode(value:DiscomfortMode) {
+        discomfortModeName=value.name
+        prefs.edit().putString(ExerciseDiscomfortSelection.MODE_KEY,value.name).apply()
+    }
+    fun saveFocus(muscles:Set<Muscle>) {
+        val encoded=ExerciseDiscomfortSelection.encodeFocus(muscles)
+        focusEncoded=encoded
+        prefs.edit().putString(ExerciseDiscomfortSelection.FOCUS_KEY,encoded).apply()
     }
     var limit by rememberSaveable {mutableIntStateOf(12)}
-    LaunchedEffect(search,equipment,muscle,homeOnly,favoritesOnly,recentOnly,discomfortEncoded) {limit=12}
+    LaunchedEffect(search,equipment,muscle,homeOnly,favoritesOnly,recentOnly,discomfortEncoded,discomfortModeName,focusEncoded) {limit=12}
     Input(R.string.search_exercises,search,{search=it},"exercise_search",numeric=false)
     Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         Box(Modifier.weight(1f)) {
@@ -372,91 +389,30 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
             }
         }
     }
-    val hasActiveFilter=search.isNotBlank()||equipment!=null||muscle!=null||homeOnly||favoritesOnly||recentOnly||discomfortExcluded.isNotEmpty()
+    val hasActiveFilter=search.isNotBlank()||equipment!=null||muscle!=null||homeOnly||favoritesOnly||recentOnly||discomfortExcluded.isNotEmpty()||focusMuscles.isNotEmpty()
     Row(Modifier.fillMaxWidth().bleedToPageEdges().horizontalScroll(rememberScrollState()).padding(horizontal=PageGutter),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
         FilterChip(homeOnly,{homeOnly=!homeOnly;if(homeOnly) equipment=null},label={Text(stringResource(R.string.preset_home_filter))},modifier=Modifier.testTag("home_filter"))
         FilterChip(!homeOnly && equipment==null,{homeOnly=false;equipment=null},label={Text(stringResource(R.string.preset_gym_filter))},modifier=Modifier.testTag("gym_filter"))
         FilterChip(favoritesOnly,{favoritesOnly=!favoritesOnly},label={Text(stringResource(R.string.favorites))},modifier=Modifier.testTag("favorites_filter"))
         FilterChip(recentOnly,{recentOnly=!recentOnly},label={Text(stringResource(R.string.recent_exercises))},modifier=Modifier.testTag("recent_filter"))
         FilterChip(
-            selected=discomfortExcluded.isNotEmpty(),
+            selected=discomfortExcluded.isNotEmpty()||focusMuscles.isNotEmpty(),
             onClick={showDiscomfortDialog=true},
+            leadingIcon={Icon(Icons.Default.FilterList,contentDescription=null,modifier=Modifier.size(16.dp))},
             label={
                 val base=stringResource(R.string.discomfort_filters)
-                Text(if(discomfortExcluded.isEmpty()) base else "$base (${number(discomfortExcluded.size.toDouble(),0)})")
+                val chosen=discomfortExcluded.size+focusMuscles.size
+                Text(if(chosen==0) base else "$base (${number(chosen.toDouble(),0)})")
             },
             modifier=Modifier.testTag("discomfort_filter_chip"),
         )
-        if(hasActiveFilter) TextButton(onClick={search="";equipment=null;muscle=null;homeOnly=false;favoritesOnly=false;recentOnly=false;saveDiscomfort(emptySet())},modifier=Modifier.testTag("clear_exercise_filters")) {Text(stringResource(R.string.clear_filters))}
+        if(hasActiveFilter) TextButton(onClick={search="";equipment=null;muscle=null;homeOnly=false;favoritesOnly=false;recentOnly=false;saveDiscomfort(emptySet());saveFocus(emptySet())},modifier=Modifier.testTag("clear_exercise_filters")) {Text(stringResource(R.string.clear_filters))}
     }
     if(showDiscomfortDialog) {
-        AlertDialog(
-            onDismissRequest={showDiscomfortDialog=false},
-            title={Text(stringResource(R.string.discomfort_filters),fontWeight=FontWeight.Bold)},
-            text={
-                Column(Modifier.verticalScroll(rememberScrollState()),verticalArrangement=Arrangement.spacedBy(12.dp)) {
-                    Text(stringResource(R.string.discomfort_filter_explainer),style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-                    ExerciseDiscomfortRegion.entries.forEach {region ->
-                        val checked=region in discomfortExcluded
-                        val labelRes=when(region) {
-                            ExerciseDiscomfortRegion.NECK_UPPER_BACK -> R.string.discomfort_region_neck_upper_back
-                            ExerciseDiscomfortRegion.SHOULDERS -> R.string.discomfort_region_shoulders
-                            ExerciseDiscomfortRegion.LOWER_BACK -> R.string.discomfort_region_lower_back
-                        }
-                        val hiddenCount=remember(region) {Exercise.entries.count {!ExerciseDiscomfortSelection.includes(it,setOf(region))}}
-                        val muscleText=region.directlyTargetedMuscles.map {stringResource(muscleLabel(it))}.sorted().joinToString(" · ")
-                        Surface(
-                            shape=RoundedCornerShape(14.dp),
-                            color=if(checked) MaterialTheme.colorScheme.secondaryContainer.copy(alpha=0.55f) else MaterialTheme.colorScheme.surfaceContainerHigh,
-                            border=BorderStroke(if(checked) 1.5.dp else 1.dp, if(checked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outlineVariant),
-                            modifier=Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
-                                .toggleable(value=checked,role=androidx.compose.ui.semantics.Role.Checkbox) {
-                                    saveDiscomfort(if(it) discomfortExcluded+region else discomfortExcluded-region)
-                                }
-                                .testTag("discomfort_region_${region.name.lowercase()}"),
-                        ) {
-                            Row(
-                                Modifier.fillMaxWidth().padding(horizontal=12.dp,vertical=10.dp),
-                                verticalAlignment=Alignment.CenterVertically,
-                                horizontalArrangement=Arrangement.spacedBy(10.dp),
-                            ) {
-                                Checkbox(checked=checked,onCheckedChange=null)
-                                Column(Modifier.weight(1f),verticalArrangement=Arrangement.spacedBy(2.dp)) {
-                                    Text(stringResource(labelRes),style=MaterialTheme.typography.titleSmall,fontWeight=FontWeight.Bold)
-                                    Text(muscleText,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                                PillBadge(
-                                    text="-${number(hiddenCount.toDouble(),0)}",
-                                    containerColor=if(checked) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface,
-                                    contentColor=if(checked) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                    Surface(
-                        shape=RoundedCornerShape(12.dp),
-                        color=MaterialTheme.colorScheme.surfaceContainerLow,
-                        border=BorderStroke(1.dp,MaterialTheme.colorScheme.outlineVariant.copy(alpha=0.6f)),
-                    ) {
-                        Text(
-                            stringResource(R.string.discomfort_filter_limits),
-                            Modifier.padding(10.dp),
-                            style=MaterialTheme.typography.bodySmall,
-                            color=MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            },
-            confirmButton={TextButton(onClick={showDiscomfortDialog=false}) {Text(stringResource(R.string.close))}},
-            dismissButton={
-                if(discomfortExcluded.isNotEmpty()) {
-                    TextButton(onClick={saveDiscomfort(emptySet())},modifier=Modifier.testTag("clear_discomfort_filters")) {
-                        Text(stringResource(R.string.clear_discomfort_filters))
-                    }
-                }
-            },
+        DiscomfortFocusSheet(
+            regions=discomfortExcluded,mode=discomfortMode,focus=focusMuscles,
+            onRegions={saveDiscomfort(it)},onMode={saveDiscomfortMode(it)},onFocus={saveFocus(it)},
+            onDismiss={showDiscomfortDialog=false},
         )
     }
     // Muscle filtering lives in the dropdown above; a second chip row for the same filter was removed.
@@ -465,7 +421,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
     val recent=state.snapshot.sets.filter {it.sessionId in completed}.map {it.exercise}.toSet()
     val names=Exercise.entries.associateWith {stringResource(exerciseLabel(it))+" "+stringResource(guideResources(it).variant)+" "+ExerciseMuscles.of(it).primary.map {m ->stringResource(muscleLabel(m))}.joinToString()+" "+ExerciseMuscles.of(it).primaryDetail.map {d ->stringResource(muscleDetailLabel(d))}.joinToString()+" "+ExerciseCatalog.of(it).equipment.map {e->stringResource(equipmentLabel(e))}.joinToString()}
     val homeEquipment = remember { setOf(Equipment.BODYWEIGHT, Equipment.DUMBBELLS, Equipment.BENCH, Equipment.BOX, Equipment.PULL_UP_BAR) }
-    val matches=Exercise.entries.filter {ExerciseDiscomfortSelection.includes(it,discomfortExcluded)&&(!homeOnly||ExerciseCatalog.of(it).equipment.all {eq -> eq in homeEquipment})&&(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
+    val matches=ExerciseDiscomfortSelection.focusFirst(Exercise.entries,focusMuscles).filter {ExerciseDiscomfortSelection.visible(it,discomfortExcluded,discomfortMode)&&(!homeOnly||ExerciseCatalog.of(it).equipment.all {eq -> eq in homeEquipment})&&(!favoritesOnly||it in favorites)&&(!recentOnly||it in recent)&&(equipment==null||equipment in ExerciseCatalog.of(it).equipment)&&(muscle==null||muscle in ExerciseMuscles.of(it).primary)&&com.formacoach.coach.ExerciseSearch.matches(search,names.getValue(it)+" "+ExerciseCatalog.searchText(it))}
     CustomExercisesSection(state,vm,today)
     Text(stringResource(R.string.exercise_results,number(matches.size.toDouble(),0),number(Exercise.entries.size.toDouble(),0)),style=MaterialTheme.typography.labelLarge,color=MaterialTheme.colorScheme.primary)
     if(matches.isEmpty()) {
@@ -473,7 +429,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
             EmptyState(R.string.no_matching_exercises,R.string.exercise_search_hint)
             if(hasActiveFilter) {
                 OutlinedButton(
-                    onClick={search="";equipment=null;muscle=null;homeOnly=false;favoritesOnly=false;recentOnly=false;saveDiscomfort(emptySet())},
+                    onClick={search="";equipment=null;muscle=null;homeOnly=false;favoritesOnly=false;recentOnly=false;saveDiscomfort(emptySet());saveFocus(emptySet())},
                     modifier=Modifier.heightIn(min=48.dp).testTag("empty_clear_exercise_filters"),
                 ) {Text(stringResource(R.string.clear_filters))}
             }
@@ -485,6 +441,7 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
         Row(Modifier.fillMaxWidth().padding(top=4.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(8.dp)) {
             Surface(color=MaterialTheme.colorScheme.primary,shape=RoundedCornerShape(4.dp),modifier=Modifier.width(4.dp).height(18.dp)) {}
             Text(stringResource(muscleLabel(groupMuscle)),Modifier.weight(1f),style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
+            if(groupMuscle in focusMuscles) PillBadge(stringResource(R.string.focus_badge),containerColor=MaterialTheme.colorScheme.primaryContainer,contentColor=MaterialTheme.colorScheme.onPrimaryContainer)
             PillBadge(number(groupItems.size.toDouble(),0))
         }
         groupItems.chunked(columns).forEach {row -> Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)) {
@@ -544,6 +501,21 @@ internal fun ExerciseLibrary(state:AppState,vm:FitnessViewModel,today:LocalDate=
                         overflow=TextOverflow.Ellipsis,
                     )
                     PillBadge(stringResource(muscleDetailLabel(ExerciseMuscles.of(exercise).primaryDetail.first())))
+                    val loaded=ExerciseDiscomfortSelection.matches(exercise,discomfortExcluded)
+                    if(loaded.isNotEmpty()) {
+                        Surface(shape=RoundedCornerShape(8.dp),color=MaterialTheme.colorScheme.tertiaryContainer,modifier=Modifier.testTag("discomfort_tag_${exercise.name}")) {
+                            Row(Modifier.padding(horizontal=8.dp,vertical=4.dp),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.spacedBy(4.dp)) {
+                                Icon(Icons.Outlined.Info,contentDescription=null,tint=MaterialTheme.colorScheme.onTertiaryContainer,modifier=Modifier.size(14.dp))
+                                Text(
+                                    stringResource(R.string.discomfort_tag,loaded.map {stringResource(discomfortRegionLabelShort(it))}.joinToString(", ")),
+                                    style=MaterialTheme.typography.labelSmall,
+                                    color=MaterialTheme.colorScheme.onTertiaryContainer,
+                                    maxLines=2,
+                                    overflow=TextOverflow.Ellipsis,
+                                )
+                            }
+                        }
+                    }
                     Text(
                         ExerciseCatalog.of(exercise).equipment.map {stringResource(equipmentLabel(it))}.joinToString(" · "),
                         style=MaterialTheme.typography.labelSmall,

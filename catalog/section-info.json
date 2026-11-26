@@ -389,6 +389,25 @@
       }
     },
     {
+      "id": "cardio",
+      "title": {
+        "en": "Cardio and timed activity",
+        "ar": "الكارديو والنشاط المؤقّت"
+      },
+      "what": {
+        "en": "Activities you time yourself, such as a run, a ride, rowing or a plank hold.",
+        "ar": "أنشطة توقّتها بنفسك، مثل الجري أو الدراجة أو التجديف أو ثبات البلانك."
+      },
+      "how": {
+        "en": "Pick the activity, enter the time and, if you like, the distance. The 7-day line adds up only what you logged; pace for walks and runs is your time divided by your distance.",
+        "ar": "اختر النشاط وأدخل المدة والمسافة إن أردت. سطر آخر 7 أيام يجمع ما سجّلته فقط؛ والإيقاع للمشي والجري هو مدتك مقسومة على مسافتك."
+      },
+      "note": {
+        "en": "Distance uses km or miles to match your weight unit. Forma does not estimate calories, heart rate or intensity, and days without an entry are unknown.",
+        "ar": "تُعرض المسافة بالكيلومتر أو الميل حسب وحدة الوزن لديك. لا تقدّر فورمة السعرات أو النبض أو الشدة، والأيام بلا تسجيل غير معروفة."
+      }
+    },
+    {
       "id": "workout_calendar",
       "title": {
         "en": "Workout calendar",
@@ -405,6 +424,25 @@
       "note": {
         "en": "An empty day only means nothing was recorded; it does not prove you did not train.",
         "ar": "اليوم الفارغ يعني فقط أنه لم يُسجّل شيء، ولا يثبت أنك لم تتمرن."
+      }
+    },
+    {
+      "id": "progress_highlights",
+      "title": {
+        "en": "Your last 7 days",
+        "ar": "آخر 7 أيام"
+      },
+      "what": {
+        "en": "A summary of what you logged in the last 7 days: workouts, cardio time, food and weight.",
+        "ar": "ملخص ما سجّلته في آخر 7 أيام: التمارين ووقت الكارديو والأكل والوزن."
+      },
+      "how": {
+        "en": "Workouts are completed sessions next to the weekly plan you set. Calories are averaged over days that have a food entry. Weight change compares your earliest and latest weigh-ins within 30 days. A new best is a working set heavier than any before it, logged this week.",
+        "ar": "التمارين هي الحصص المكتملة بجانب خطتك الأسبوعية. السعرات متوسط الأيام التي فيها تسجيل أكل. تغير الوزن يقارن أول وآخر وزن خلال 30 يومًا. الرقم الجديد مجموعة أساسية أثقل من أي مجموعة قبلها سُجّلت هذا الأسبوع."
+      },
+      "note": {
+        "en": "Days with no entry are unknown and are not counted as zero. These numbers describe your log; they are not advice to change what you eat or how you train.",
+        "ar": "الأيام بلا تسجيل غير معروفة ولا تُحسب صفرًا. هذه الأرقام تصف سجلك، وليست نصيحة لتغيير أكلك أو تمرينك."
       }
     },
     {

@@ -71,6 +71,42 @@ struct PhoneCustomSet: Codable, Identifiable, Equatable {
     var warmUp: Bool = false
 }
 
+/// Activity labels for user-timed entries; nothing is estimated from them.
+enum PhoneCardioActivity: String, Codable, CaseIterable, Identifiable {
+    case walk = "WALK", run = "RUN", cycle = "CYCLE", row = "ROW", swim = "SWIM"
+    case elliptical = "ELLIPTICAL", stairs = "STAIRS", jumpRope = "JUMP_ROPE", hold = "HOLD", other = "OTHER"
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .walk: String(localized: "cardio_walk")
+        case .run: String(localized: "cardio_run")
+        case .cycle: String(localized: "cardio_cycle")
+        case .row: String(localized: "cardio_row")
+        case .swim: String(localized: "cardio_swim")
+        case .elliptical: String(localized: "cardio_elliptical")
+        case .stairs: String(localized: "cardio_stairs")
+        case .jumpRope: String(localized: "cardio_jump_rope")
+        case .hold: String(localized: "cardio_hold")
+        case .other: String(localized: "cardio_other")
+        }
+    }
+}
+
+/// One user-entered timed activity on a local calendar date (yyyy-MM-dd). Distance is optional, in metres.
+struct PhoneCardioEntry: Codable, Identifiable, Equatable {
+    var id = UUID().uuidString
+    var date: String
+    var activity: PhoneCardioActivity
+    var durationSeconds: Int
+    var distanceMeters: Double?
+    var note: String = ""
+
+    var isValid: Bool {
+        !id.isEmpty && id.count <= 64 && (1...86_400).contains(durationSeconds) && note.count <= 60
+            && (distanceMeters.map { $0.isFinite && $0 > 0 && $0 <= 1_000_000 } ?? true)
+    }
+}
+
 struct SavedState: Codable {
     var programs: [WatchProgram] = [
         .init(id: "starter-A", name: "A", exercises: [.squat, .chest_press, .row]),
@@ -89,6 +125,7 @@ struct SavedState: Codable {
     var supplementLogs: [String: [String]] = [:]
     var customExercises: [PhoneCustomExercise] = []
     var customSets: [PhoneCustomSet] = []
+    var cardio: [PhoneCardioEntry] = []
     var calorieTarget: Int?
     var proteinTarget: Double?
     var carbsTarget: Double?
@@ -123,6 +160,7 @@ struct SavedState: Codable {
         supplementLogs = try c.decodeIfPresent([String: [String]].self, forKey: .supplementLogs) ?? [:]
         customExercises = try c.decodeIfPresent([PhoneCustomExercise].self, forKey: .customExercises) ?? []
         customSets = try c.decodeIfPresent([PhoneCustomSet].self, forKey: .customSets) ?? []
+        cardio = try c.decodeIfPresent([PhoneCardioEntry].self, forKey: .cardio) ?? []
         calorieTarget = try c.decodeIfPresent(Int.self, forKey: .calorieTarget)
         proteinTarget = try c.decodeIfPresent(Double.self, forKey: .proteinTarget)
         carbsTarget = try c.decodeIfPresent(Double.self, forKey: .carbsTarget)
@@ -175,7 +213,9 @@ struct SavedState: Codable {
               state.healthSleep.count <= SleepNights.maximumNights,
               Set(state.healthSleep.map(\.date)).count == state.healthSleep.count,
               state.healthSleep.allSatisfy({ $0.asleepMinutes.isFinite && (0...1440).contains($0.asleepMinutes) }),
-              state.heightCm.map({ $0.isFinite && (50...272).contains($0) }) ?? true else { throw TransferError.invalid }
+              state.heightCm.map({ $0.isFinite && (50...272).contains($0) }) ?? true,
+              state.cardio.count <= 5000, Set(state.cardio.map(\.id)).count == state.cardio.count,
+              state.cardio.allSatisfy(\.isValid) else { throw TransferError.invalid }
         try state.healthWorkouts.forEach { try $0.validate() }
         try state.healthWeights.forEach { try $0.validate() }
         try state.programs.forEach { try $0.validate() }
@@ -512,6 +552,38 @@ struct SavedState: Codable {
                 state.supplementLogs = state.supplementLogs.filter { keep.contains($0.key) }
             }
         }
+    }
+
+    /// Copies exactly the reviewed meals onto another day as new entries. Rejects the copy if the source day
+    /// changed since review, the target is the source or in the future, so nothing is written partially.
+    func copyMeals(_ reviewed: [PhoneMeal], from source: String, to target: String) throws {
+        guard (1...200).contains(reviewed.count), source != target, target <= LocalStore.todayString(),
+              reviewed.allSatisfy({ $0.date == source }) else { throw TransferError.invalid }
+        try commit { state in
+            let current = state.meals.filter { $0.date == source }
+            guard current == reviewed else { throw TransferError.invalid }
+            guard state.meals.count + reviewed.count <= 5000 else { throw TransferError.capacity }
+            state.meals += reviewed.map { meal in
+                var copy = meal
+                copy.id = UUID().uuidString
+                copy.date = target
+                return copy
+            }
+        }
+    }
+
+    func logCardio(activity: PhoneCardioActivity, durationSeconds: Int, distanceMeters: Double?, note: String, date: String = LocalStore.todayString()) throws {
+        let clean = String(note.trimmingCharacters(in: .whitespacesAndNewlines).prefix(60))
+        let entry = PhoneCardioEntry(date: date, activity: activity, durationSeconds: durationSeconds, distanceMeters: activity == .hold ? nil : distanceMeters, note: clean)
+        guard entry.isValid, date <= LocalStore.todayString() else { throw TransferError.invalid }
+        try commit { state in
+            guard state.cardio.count < 5000 else { throw TransferError.capacity }
+            state.cardio.append(entry)
+        }
+    }
+
+    func deleteCardio(_ id: String) throws {
+        try commit { $0.cardio.removeAll { $0.id == id } }
     }
 
     func attempt(_ action: () throws -> Void) {

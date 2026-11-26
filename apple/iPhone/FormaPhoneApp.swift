@@ -270,6 +270,8 @@ private struct MealSlotOption: Identifiable {
                             }
                         }
 
+                        PhoneReminderOfferCard(store: store)
+
                         Button {
                             FormaHaptics.success()
                             store.attempt { try store.startFreestyle(label: String(localized: "freestyle_workout_name")) }
@@ -284,6 +286,8 @@ private struct MealSlotOption: Identifiable {
                             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(FormaTheme.secondary.opacity(0.45), lineWidth: 1))
                             .foregroundStyle(FormaTheme.secondary)
                         }
+
+                        PhoneCardioCard(store: store, useLb: useLb)
 
                         HStack {
                             Text("programs")
@@ -1102,6 +1106,8 @@ private struct MealSlotOption: Identifiable {
     @AppStorage("forma_use_lb") private var useLb = false
     @AppStorage("forma_favorite_exercises") private var favoriteExercisesRaw = ""
     @AppStorage(ExerciseDiscomfortSelection.storageKey) private var storedDiscomfortRegions = ""
+    @AppStorage(ExerciseDiscomfortSelection.modeKey) private var storedDiscomfortMode = ""
+    @AppStorage(ExerciseDiscomfortSelection.focusKey) private var storedFocusMuscles = ""
     @Environment(\.locale) private var locale
     private var arabic: Bool { locale.language.languageCode?.identifier == "ar" }
     private let columns = [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)]
@@ -1126,15 +1132,18 @@ private struct MealSlotOption: Identifiable {
     var body: some View {
         let favs = favoriteSet
         let discomfortRegions = ExerciseDiscomfortSelection.decode(storedDiscomfortRegions)
-        let filtered = Exercise.allCases.filter { exercise in
-            ExerciseDiscomfortRegion.includes(exercise, excluding: discomfortRegions) &&
+        let discomfortMode = ExerciseDiscomfortSelection.decodeMode(storedDiscomfortMode, hasLegacySelection: !discomfortRegions.isEmpty)
+        let focusMuscles = ExerciseDiscomfortSelection.decodeFocus(storedFocusMuscles)
+        let filtered = ExerciseDiscomfortSelection.focusFirst(Exercise.allCases, focusMuscles).filter { exercise in
+            ExerciseDiscomfortSelection.visible(exercise, discomfortRegions, mode: discomfortMode) &&
                 (!favoritesOnly || favs.contains(exercise.rawValue)) &&
                 (!homeOnly || ExerciseCatalog.of(exercise).equipment.allSatisfy { homeEquipment.contains($0) }) &&
                 (selectedMuscle == nil || ExerciseMuscles.of(exercise).primary.first == selectedMuscle) &&
                 (equipment == nil || ExerciseCatalog.of(exercise).equipment.contains(equipment!)) &&
                 (exerciseSearch.isEmpty || (exercise.label(arabic: false) + " " + exercise.label(arabic: true)).localizedStandardContains(exerciseSearch))
         }
-        let groupedMuscles = mainMuscles.filter { m in
+        // Muscles the person chose to train more lead the list.
+        let groupedMuscles = (mainMuscles.filter { focusMuscles.contains($0) } + mainMuscles.filter { !focusMuscles.contains($0) }).filter { m in
             filtered.contains { ExerciseMuscles.of($0).primary.first == m }
         }
         NavigationStack {
@@ -1332,6 +1341,16 @@ private struct MealSlotOption: Identifiable {
                                                 .font(.caption2)
                                                 .foregroundStyle(FormaTheme.textMuted)
                                                 .lineLimit(1)
+                                            let loaded = ExerciseDiscomfortSelection.matches(exercise, discomfortRegions)
+                                            if !loaded.isEmpty {
+                                                Label(String(format: String(localized: "discomfort_tag"), loaded.map(discomfortShortLabel).joined(separator: ", ")), systemImage: "info.circle")
+                                                    .font(.caption2.weight(.semibold))
+                                                    .padding(.horizontal, 6)
+                                                    .padding(.vertical, 3)
+                                                    .background(FormaTheme.tertiary.opacity(0.18), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                                                    .foregroundStyle(FormaTheme.textPrimary)
+                                                    .lineLimit(2)
+                                            }
                                         }
                                     }
                                     Button {
@@ -1563,6 +1582,10 @@ private struct MealSlotOption: Identifiable {
                                 .background(FormaTheme.surface, in: Circle())
                                 .foregroundStyle(FormaTheme.textPrimary)
                         }
+                    }
+                    HStack {
+                        Spacer()
+                        PhoneCopyMealDayButton(store: store, targetDate: selectedDate)
                     }
 
                     // Compact Macro Summary Card (explicit user goals, no silent defaults)
@@ -2119,6 +2142,7 @@ private struct MealSlotOption: Identifiable {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
+                    PhoneProgressHighlightsCard(store: store, useLb: useLb)
                     PhoneHealthCard(store: store, importer: health)
                     PhoneHealthActivityCard(records: store.state.healthWorkouts)
 

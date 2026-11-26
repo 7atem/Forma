@@ -6,19 +6,20 @@ Forma provides **user-controlled library exclusions**, not diagnosis, treatment,
 
 The app does not label exercises or machines as “recommended for pain.” A general exercise association is not enough evidence to recommend a movement for an individual's symptoms. Any future encouragement or rehabilitation rules require qualified clinical review, explicit boundaries, and regression cases before implementation.
 
-## Current rules
+## Current rules (alpha07)
 
-A selected region hides exercises where any mapped muscle is either primary or supporting:
+The person chooses **areas to go easy on** and, separately, **muscles they want to train more**. Forma never connects the two: it does not suggest muscles for an area or a condition.
 
-| User selection | Catalogued muscles used by the filter |
+| Area | Catalogued muscles used |
 | --- | --- |
-| Neck / upper back | `UPPER_BACK` |
-| Shoulders | `FRONT_DELTS`, `REAR_DELTS` |
-| Lower back | `ERECTORS` |
+| Neck | `UPPER_TRAPS` detail (shrugs, overhead presses, raises, deadlifts) |
+| Upper back | `MID_BACK` detail (rows and similar) |
+| Shoulders | `FRONT_DELTS`, `REAR_DELTS` groups |
+| Lower back | `ERECTORS` group |
 
-These are intentionally simple, deterministic direct-target preferences. The catalog has no distinct neck muscle, so the neck/upper-back choice uses only the existing upper-back association. It is not a claim that upper-back work causes or treats neck pain.
+An exercise matches when a listed muscle is primary or supporting. **Mark** (default for new selections) keeps every exercise visible with a "Works: …" note; **Hide** removes matches from the library list only. Muscles chosen to train more are listed first and their groups are labelled "Focus".
 
-The predicate and stable preference encoding live in `apple/Sources/FormaCore/ExerciseDiscomfort.swift` (iPhone presentation in `apple/iPhone/ExerciseDiscomfortFilter.swift`) and `core/model/src/main/kotlin/com/formacoach/model/ExerciseDiscomfort.kt` (Android presentation in `app/src/main/kotlin/com/formacoach/app/ExerciseGuide.kt`). Selections are stored locally under `forma_discomfort_exclusions`; unknown stored values are ignored.
+Earlier builds combined neck and upper back into one `NECK_UPPER_BACK` area that hid every upper-back exercise, including rows that some people want to keep. That stored value now decodes to both new areas, and a stored selection without a saved mode keeps hiding, so nothing changes silently for existing users; they can clear either area or switch to marking.
 
 ## Important limitations
 
@@ -29,6 +30,9 @@ The predicate and stable preference encoding live in `apple/Sources/FormaCore/Ex
 - English and Arabic explain these limits in the filter sheet.
 
 ## Evidence considered
+
+Reviews of exercise for chronic neck pain report moderate-quality evidence that combined cervical, shoulder-blade and upper-body strengthening reduces pain in the short term, with uncertain dosing and no high-quality evidence overall ([Cochrane CD004250](https://www.cochrane.org/CD004250/BACK_exercise-therapy-neck-pain); [Gross et al. 2012](https://pubmed.ncbi.nlm.nih.gov/22895940/); [scapular dysfunction commentary](https://pubmed.ncbi.nlm.nih.gov/24816504/)). Regional NHS physiotherapy leaflets advise staying active within tolerance and stopping exercises that worsen pain ([Berkshire Healthcare](https://www.berkshirehealthcare.nhs.uk/advice/neck-pain); [Wrightington, Wigan and Leigh](https://wwl.nhs.uk/msk-neck-and-upper-back-pain)). This is why neck no longer hides mid-back work and why "train more" is a choice the person makes, not a rule Forma applies to symptoms.
+
 
 NHS resources support a diagnosis-dependent, individualized approach rather than universal avoidance or universal exercise prescriptions:
 

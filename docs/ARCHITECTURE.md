@@ -12,7 +12,7 @@ Android first: Kotlin + Compose + Hilt, using lessons from the existing project.
 |---|---|
 | `app` | Compose onboarding, Today, Train, Eat, Progress, Coach; saved programs, foods/recipes, SAF backup UI; Hilt wiring |
 | `core:model` | Typed fitness records, bounded numeric validation, Arabic/Persian digit parsing |
-| `core:data` | Room schema v9 with encrypted 1→2→3→4→5→6→7→8→9 migrations (v9: optional profile height, read-only sleep copies) (custom exercises, supplements and hydration are typed tables included in `FORMABK1` backup; read-only Health Connect copies are separate tables excluded from backup), transactional snapshots, SQLCipher/Keystore, repository |
+| `core:data` | Room schema v10 with encrypted 1→2→3→4→5→6→7→8→9→10 migrations (v9: optional profile height, read-only sleep copies; v10: cardio/timed entries) (cardio entries, custom exercises, supplements and hydration are typed tables included in `FORMABK1` backup; read-only Health Connect copies are separate tables excluded from backup), transactional snapshots, SQLCipher/Keystore, repository |
 | `core:coach` | JVM-only review/history/timer/coach tools, strict local-model fact-ID verification |
 
 | `core:wearables` | Bounded v2 workout transfer with v1 reader support; validated plan/workout records, no networking |
